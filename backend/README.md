@@ -31,6 +31,21 @@ curl http://localhost:3001/api/v1/health/live
 The response includes `status: "ok"` and an ISO 8601 UTC timestamp. Stop the
 database with `yarn db:down`.
 
+## Authentication API
+
+T01 provides the real cookie-authenticated endpoints below:
+
+```text
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/logout
+GET  /api/v1/auth/me
+```
+
+Registration requires `email`, `password`, `nickname`, and `termsAgreed: true`.
+The access JWT is returned only in the `tg_access` httpOnly cookie. It is never
+included in JSON or browser storage.
+
 ## Quality commands
 
 ```bash
@@ -44,8 +59,8 @@ yarn verify
 ```
 
 `yarn verify` runs all backend quality checks, Prisma schema validation, and the
-production build. Integration tests boot a real Nest HTTP server. Product-level
-database integration tests will use PostgreSQL once models are introduced.
+production build. Integration tests migrate and use the isolated PostgreSQL URL
+from `TEST_DATABASE_URL`, then boot a real Nest HTTP server.
 
 ## Database commands
 
@@ -66,9 +81,16 @@ later tasks.
 ## Environment
 
 Copy `.env.example` to `.env`. Startup fails immediately when `DATABASE_URL`,
-`API_PORT`, or `WEB_ORIGIN` is invalid. Do not commit `.env` or real secrets.
-JWT and storage variables are documented now but become runtime requirements only
-when those features are implemented.
+`API_PORT`, `WEB_ORIGIN`, `JWT_SECRET`, or `JWT_EXPIRES_IN` is invalid. Do not
+commit `.env` or real secrets. Production rejects the example JWT secret.
+
+`TEST_DATABASE_URL` must point to a database separate from `DATABASE_URL`. A clean
+Docker volume creates `travelguide_test` automatically. For a volume created
+before T01, create it once with:
+
+```bash
+docker compose exec postgres createdb -U travelguide travelguide_test
+```
 
 ## Troubleshooting
 
@@ -80,5 +102,7 @@ when those features are implemented.
   `docker compose logs postgres`.
 - If Prisma cannot connect, confirm the container is healthy and `.env` uses
   `localhost` when commands run on the host.
+- Prisma 5.22 is validated on the required Node 20 runtime. Newer unsupported Node
+  majors can fail in the schema engine even when application TypeScript succeeds.
 - Delete `node_modules` only as a last resort; first rerun `yarn install --immutable`
   so the committed lockfile remains the source of truth.

@@ -5,6 +5,8 @@ export interface Environment {
   DATABASE_URL: string;
   API_PORT: number;
   WEB_ORIGIN: string;
+  JWT_SECRET: string;
+  JWT_EXPIRES_IN_SECONDS: number;
 }
 
 const nodeEnvironments: readonly NodeEnvironment[] = [
@@ -49,6 +51,38 @@ function parsePort(value: unknown): number {
   return port;
 }
 
+function parseJwtExpiresIn(value: unknown): number {
+  if (typeof value !== 'string') {
+    throw new Error('JWT_EXPIRES_IN is required');
+  }
+
+  const match = /^(\d+)(s|m|h|d)$/.exec(value.trim());
+  if (match === null) {
+    throw new Error('JWT_EXPIRES_IN must use s, m, h, or d notation');
+  }
+
+  const amountText = match[1];
+  const unit = match[2];
+  if (amountText === undefined || unit === undefined) {
+    throw new Error('JWT_EXPIRES_IN is invalid');
+  }
+
+  const amount = Number(amountText);
+  const multipliers: Record<string, number> = {
+    s: 1,
+    m: 60,
+    h: 60 * 60,
+    d: 24 * 60 * 60,
+  };
+  const seconds = amount * (multipliers[unit] ?? 0);
+
+  if (!Number.isSafeInteger(seconds) || seconds < 60 || seconds > 30 * 86_400) {
+    throw new Error('JWT_EXPIRES_IN must be between 60 seconds and 30 days');
+  }
+
+  return seconds;
+}
+
 function parseUrl(
   value: unknown,
   key: string,
@@ -76,10 +110,16 @@ export function validateEnvironment(
   config: Record<string, unknown>,
 ): Environment & Record<string, unknown> {
   const databaseUrl = readRequiredString(config, 'DATABASE_URL');
+  const nodeEnvironment = parseNodeEnvironment(config.NODE_ENV);
+  const jwtSecret = readRequiredString(config, 'JWT_SECRET');
+
+  if (nodeEnvironment === 'production' && jwtSecret === 'change-me') {
+    throw new Error('JWT_SECRET must be changed in production');
+  }
 
   return {
     ...config,
-    NODE_ENV: parseNodeEnvironment(config.NODE_ENV),
+    NODE_ENV: nodeEnvironment,
     DATABASE_URL: parseUrl(databaseUrl, 'DATABASE_URL', [
       'postgres:',
       'postgresql:',
@@ -90,5 +130,7 @@ export function validateEnvironment(
       'WEB_ORIGIN',
       ['http:', 'https:'],
     ),
+    JWT_SECRET: jwtSecret,
+    JWT_EXPIRES_IN_SECONDS: parseJwtExpiresIn(config.JWT_EXPIRES_IN),
   };
 }
