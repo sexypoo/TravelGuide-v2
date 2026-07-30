@@ -27,8 +27,8 @@ describe('ApiConnectionStatus', () => {
 
     render(<ApiConnectionStatus />);
 
-    expect(screen.getByText('연결 확인 중')).toBeInTheDocument();
-    expect(await screen.findByText('API 연결됨')).toBeInTheDocument();
+    expect(screen.getByText('서비스 연결 확인 중')).toBeInTheDocument();
+    expect(await screen.findByText('서비스 정상 연결')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/v1/health/live',
       expect.objectContaining({ credentials: 'include' }),
@@ -42,10 +42,10 @@ describe('ApiConnectionStatus', () => {
 
     render(<ApiConnectionStatus />);
 
-    const retry = await screen.findByRole('button', { name: '다시 연결' });
+    const retry = await screen.findByRole('button', { name: '다시 확인' });
     fireEvent.click(retry);
 
-    expect(await screen.findByText('API 연결됨')).toBeInTheDocument();
+    expect(await screen.findByText('서비스 정상 연결')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

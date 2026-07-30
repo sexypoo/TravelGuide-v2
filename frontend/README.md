@@ -1,7 +1,8 @@
 # TravelGuide frontend
 
-Next.js frontend scaffold for TravelGuide v2. T00 contains only the product
-premise and a real backend connectivity diagnostic.
+Next.js frontend for TravelGuide v2. T01 includes the product landing page,
+real cookie-based registration/login/logout, and server-validated user/admin
+shells.
 
 ## Prerequisites
 
@@ -20,8 +21,21 @@ yarn install
 yarn dev
 ```
 
-Open `http://localhost:3000`. The page requests the relative endpoint
-`/api/v1/health/live`; Next.js proxies it to `API_INTERNAL_URL`.
+Open `http://localhost:3000`. Browser requests use relative `/api/v1/*` paths;
+Next.js proxies them to `API_INTERNAL_URL` so the httpOnly auth cookie stays
+same-origin.
+
+## Routes
+
+- `/`: landing page and live API diagnostic
+- `/auth/register`: account creation with automatic login
+- `/auth/login`: login with safe protected-route return
+- `/app`: authenticated user shell
+- `/admin`: authenticated admin-only shell
+
+`/app` and `/admin` validate the incoming cookie against the backend. A missing
+or expired session redirects to login. Tokens are never stored in browser
+storage or returned to frontend JavaScript.
 
 ## Quality commands
 

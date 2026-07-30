@@ -5,11 +5,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: '#17131D',
-        paper: '#F7F5FA',
-        signal: '#D81B72',
-        jeju: '#6D3CE7',
-        mist: '#DDEEEB',
+        ink: '#191F28',
+        canvas: '#F7F8FA',
+        surface: '#FFFFFF',
+        muted: '#6B7684',
+        magenta: '#E93CAC',
+        purple: '#7C3AED',
       },
     },
   },
