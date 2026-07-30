@@ -1,0 +1,49 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: travelguide_test
+          POSTGRES_PASSWORD: travelguide
+          POSTGRES_USER: travelguide
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U travelguide -d travelguide_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://travelguide:travelguide@localhost:5432/travelguide_test
+      API_PORT: 3001
+      WEB_ORIGIN: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: backend/yarn.lock
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn db:deploy
+      - run: yarn verify

@@ -1,0 +1,16 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Infrastructure-only record used to prove the initial Prisma migration and
+// connection without introducing any product-domain model in T00.
+model SystemMetadata {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
