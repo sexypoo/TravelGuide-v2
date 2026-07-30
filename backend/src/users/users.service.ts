@@ -2,6 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma, type UserRole } from '@prisma/client';
 import { ProblemException } from '../common/http/problem.exception';
 import { PrismaService } from '../prisma/prisma.service';
+import type { UpdateProfileDto } from './dto/update-profile.dto';
 
 export interface CreateUserInput {
   email: string;
@@ -19,6 +20,21 @@ export interface AuthUserRecord {
 }
 
 export type UserIdentityRecord = Omit<AuthUserRecord, 'passwordHash'>;
+
+export interface OwnProfileRecord {
+  id: string;
+  email: string;
+  nickname: string;
+  bio: string | null;
+  role: UserRole;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PublicProfileRecord {
+  id: string;
+  nickname: string;
+}
 
 function duplicateUserProblem(field: 'email' | 'nickname'): ProblemException {
   return field === 'email'
@@ -125,5 +141,110 @@ export class UsersService {
         createdAt: true,
       },
     });
+  }
+
+  async getOwnProfile(id: string): Promise<OwnProfileRecord> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        nickname: true,
+        bio: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (user === null) {
+      throw new ProblemException(
+        'USER_NOT_FOUND',
+        '사용자를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return user;
+  }
+
+  async getPublicProfile(id: string): Promise<PublicProfileRecord> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        nickname: true,
+      },
+    });
+
+    if (user === null) {
+      throw new ProblemException(
+        'USER_NOT_FOUND',
+        '사용자를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return user;
+  }
+
+  async updateProfile(
+    id: string,
+    input: UpdateProfileDto,
+  ): Promise<OwnProfileRecord> {
+    if (input.nickname !== undefined) {
+      const nicknameOwner = await this.prisma.user.findFirst({
+        where: {
+          nickname: input.nickname,
+          NOT: { id },
+        },
+        select: { id: true },
+      });
+
+      if (nicknameOwner !== null) {
+        throw duplicateUserProblem('nickname');
+      }
+    }
+
+    try {
+      return await this.prisma.user.update({
+        where: { id },
+        data: {
+          ...(input.nickname === undefined ? {} : { nickname: input.nickname }),
+          ...(input.bio === undefined
+            ? {}
+            : { bio: input.bio === '' ? null : input.bio }),
+        },
+        select: {
+          id: true,
+          email: true,
+          nickname: true,
+          bio: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw duplicateUserProblem('nickname');
+      }
+
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new ProblemException(
+          'USER_NOT_FOUND',
+          '사용자를 찾을 수 없습니다.',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      throw error;
+    }
   }
 }

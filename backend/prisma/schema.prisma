@@ -17,9 +17,34 @@ model User {
   email        String   @unique @db.VarChar(320)
   passwordHash String
   nickname     String   @unique @db.VarChar(20)
+  bio          String?  @db.VarChar(300)
   role         UserRole @default(USER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model Destination {
+  id              String           @id @default(cuid())
+  slug            String           @unique @db.VarChar(64)
+  nameKo          String           @db.VarChar(100)
+  countryCode     String           @db.Char(2)
+  timezone        String           @db.VarChar(64)
+  centerLatitude  Decimal          @db.Decimal(9, 6)
+  centerLongitude Decimal          @db.Decimal(9, 6)
+  radiusKm        Decimal          @db.Decimal(6, 2)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  room            DestinationRoom?
+}
+
+model DestinationRoom {
+  id            String      @id @default(cuid())
+  slug          String      @unique @db.VarChar(64)
+  destinationId String      @unique
+  title         String      @db.VarChar(120)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
 }
 
 // Infrastructure-only record used to prove the initial Prisma migration and

@@ -14,22 +14,24 @@ const prismaCli = join(
   'build',
   'index.js',
 );
-const migration = spawnSync(
-  process.execPath,
-  [prismaCli, 'migrate', 'deploy'],
-  {
+function runPrisma(arguments_: string[], label: string): void {
+  const result = spawnSync(process.execPath, [prismaCli, ...arguments_], {
     env: {
       ...process.env,
       DATABASE_URL: testDatabaseUrl,
     },
     stdio: 'inherit',
-  },
-);
+  });
 
-if (migration.error !== undefined) {
-  throw migration.error;
+  if (result.error !== undefined) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(`${label} exited ${result.status}`);
+  }
 }
 
-if (migration.status !== 0) {
-  throw new Error(`Integration database migration exited ${migration.status}`);
-}
+runPrisma(['migrate', 'deploy'], 'Integration database migration');
+runPrisma(['db', 'seed'], 'First integration seed');
+runPrisma(['db', 'seed'], 'Second integration seed');

@@ -46,6 +46,23 @@ Registration requires `email`, `password`, `nickname`, and `termsAgreed: true`.
 The access JWT is returned only in the `tg_access` httpOnly cookie. It is never
 included in JSON or browser storage.
 
+## Profile and room-shell API
+
+T02 adds authenticated profile and room metadata endpoints:
+
+```text
+GET   /api/v1/users/me
+PATCH /api/v1/users/me
+GET   /api/v1/users/:userId/public
+GET   /api/v1/rooms
+GET   /api/v1/rooms/:slug
+GET   /api/v1/rooms/:slug/content-access
+```
+
+Regular users can view the Jeju room metadata but receive
+`ROOM_ACCESS_DENIED` from `content-access` until real verification is introduced.
+The endpoint is an authorization probe, not a placeholder question feed.
+
 ## Quality commands
 
 ```bash
@@ -75,8 +92,9 @@ yarn db:down
 ```
 
 T00 contains only an infrastructure `SystemMetadata` model so Prisma generation,
-connection, and migrations can be proven end to end. Product models begin in
-later tasks.
+connection, and migrations can be proven end to end. T01 adds users and T02 adds
+the Jeju destination/room. `yarn db:seed` safely upserts the fixed Jeju metadata
+and can be rerun without duplicate rows.
 
 ## Environment
 
