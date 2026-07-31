@@ -14,6 +14,7 @@ const question = {
   content: '<script>alert(1)</script> 제주 실내 장소를 알려주세요.',
   contentFormat: 'PLAIN_TEXT',
   areaText: '제주시',
+  sourceMessageId: null,
   status: 'OPEN',
   safetyNotice: null,
   answerCount: 1,

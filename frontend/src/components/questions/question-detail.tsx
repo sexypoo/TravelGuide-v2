@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { AnswerCard } from '@/components/answers/answer-card';
 import { AnswerForm } from '@/components/answers/answer-form';
 import { useRoomRealtime } from '@/components/providers/realtime-provider';
+import { participantBadgeLabel } from '@/lib/api/participants';
 import type { Room } from '@/lib/api/rooms';
 import {
   categoryLabels,
@@ -29,7 +30,7 @@ export function QuestionDetailView({
     return (
       <div
         className="questionDetailSkeleton"
-        aria-label="질문 상세를 불러오는 중"
+        aria-label="토픽 상세를 불러오는 중"
       >
         <span />
         <span />
@@ -45,8 +46,8 @@ export function QuestionDetailView({
         </Link>
         <div className="roomQueryState roomQueryState--error" role="alert">
           <span aria-hidden="true">!</span>
-          <h1>질문을 불러오지 못했어요</h1>
-          <p>질문이 삭제되었거나 연결이 잠시 불안정할 수 있어요.</p>
+          <h1>토픽을 불러오지 못했어요</h1>
+          <p>토픽이 삭제되었거나 연결이 잠시 불안정할 수 있어요.</p>
           <button type="button" onClick={() => void query.refetch()}>
             다시 불러오기
           </button>
@@ -61,6 +62,12 @@ export function QuestionDetailView({
     question.author.id !== currentUserId &&
     question.status === 'OPEN' &&
     new Date(question.expiresAt).getTime() > Date.now();
+  const badgeKind =
+    question.author.badge === 'VERIFIED_LOCAL'
+      ? 'local'
+      : question.author.badge === 'VERIFIED_BOTH'
+        ? 'both'
+        : 'traveler';
 
   return (
     <div className="questionDetailPage">
@@ -69,7 +76,7 @@ export function QuestionDetailView({
       </Link>
       {connectionState !== 'connected' && (
         <div className="connectionNotice" role="status">
-          실시간 연결을 복구 중입니다. 연결 후 이 질문을 자동으로 다시
+          실시간 연결을 복구 중입니다. 연결 후 이 토픽을 자동으로 다시
           확인합니다.
         </div>
       )}
@@ -100,12 +107,13 @@ export function QuestionDetailView({
           </div>
         )}
         <footer>
-          <span className="publicBadge publicBadge--traveler">
+          <span className={`publicBadge publicBadge--${badgeKind}`}>
             <span aria-hidden="true">↗</span>
-            {question.author.nickname} · 인증 여행자
+            {question.author.nickname} ·{' '}
+            {participantBadgeLabel(question.author.badge)}
           </span>
           <span>
-            {formatDateTime(question.createdAt)} 질문 ·{' '}
+            {formatDateTime(question.createdAt)} 토픽 ·{' '}
             {formatDateTime(question.expiresAt)} 마감
           </span>
         </footer>

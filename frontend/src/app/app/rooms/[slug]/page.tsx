@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { AccessIcon } from '@/components/app/access-icon';
 import { RoomExperience } from '@/components/rooms/room-experience';
 import { getRoom } from '@/lib/api/rooms.server';
+import { requireUser } from '@/lib/auth/session';
 
 interface RoomPageProps {
   params: Promise<{ slug: string }>;
@@ -11,11 +12,14 @@ export default async function RoomPage({
   params,
 }: RoomPageProps): Promise<React.JSX.Element> {
   const { slug } = await params;
-  const room = await getRoom(slug);
+  const [room, user] = await Promise.all([
+    getRoom(slug),
+    requireUser(`/app/rooms/${slug}`),
+  ]);
   const locked = !room.access.canViewContent;
 
   if (!locked) {
-    return <RoomExperience room={room} />;
+    return <RoomExperience room={room} currentUserId={user.id} />;
   }
 
   return (
@@ -47,7 +51,7 @@ export default async function RoomPage({
         </div>
         <div>
           <p>도움 지역</p>
-          <h2 id="room-context-title">제주 전역의 지금을 물어보세요</h2>
+          <h2 id="room-context-title">제주 전역의 지금을 나눠보세요</h2>
           <dl>
             <div>
               <dt>기준 위치</dt>
@@ -69,7 +73,7 @@ export default async function RoomPage({
           <AccessIcon locked />
         </span>
         <div>
-          <p>질문 피드 잠김</p>
+          <p>대화방 잠김</p>
           <h2 id="room-lock-title">인증 후 제주 도움방이 열려요</h2>
           <span>
             현재는 방 소개만 볼 수 있습니다. 여행자 또는 현지인 인증 방법을 먼저

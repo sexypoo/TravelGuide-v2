@@ -5,11 +5,17 @@ import { RoomExperience } from './room-experience';
 jest.mock('../providers/realtime-provider', () => ({
   useRoomRealtime: () => 'connected',
 }));
+jest.mock('../messages/message-timeline', () => ({
+  MessageTimeline: () => <div>실제 대화 타임라인</div>,
+}));
+jest.mock('../messages/message-composer', () => ({
+  MessageComposer: () => <div>메시지 작성 폼</div>,
+}));
 jest.mock('../questions/question-feed', () => ({
-  QuestionFeed: () => <div>실제 질문 피드</div>,
+  QuestionFeed: () => <div>실시간 토픽 목록</div>,
 }));
 jest.mock('../questions/question-composer', () => ({
-  QuestionComposer: () => <div>질문 작성 폼</div>,
+  QuestionComposer: () => <div>토픽 작성 폼</div>,
 }));
 
 const room: Room = {
@@ -29,31 +35,41 @@ const room: Room = {
     status: 'AVAILABLE',
     labelKo: '입장 가능',
     canViewContent: true,
+    canChat: true,
+    canCreateTopic: true,
     canAskQuestion: true,
     canAnswer: false,
+    participantKind: 'TRAVELER',
   },
 };
 
-describe('RoomExperience capabilities', () => {
-  it('shows the traveler composer only after the traveler asks to open it', () => {
-    render(<RoomExperience room={room} />);
-    expect(screen.queryByText('질문 작성 폼')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '지금 질문하기' }));
-    expect(screen.getByText('질문 작성 폼')).toBeInTheDocument();
+describe('RoomExperience conversation and topics', () => {
+  it('makes conversation primary and opens direct topic creation', () => {
+    render(<RoomExperience room={room} currentUserId="traveler-1" />);
+    expect(screen.getByText('실제 대화 타임라인')).toBeInTheDocument();
+    expect(screen.getByText('메시지 작성 폼')).toBeInTheDocument();
+    expect(screen.queryByText('토픽 작성 폼')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '+ 새 토픽' }));
+    expect(screen.getByText('토픽 작성 폼')).toBeInTheDocument();
   });
 
-  it('shows answer guidance but no question action to a local', () => {
+  it('gives a verified local the same chat and topic actions', () => {
     render(
       <RoomExperience
         room={{
           ...room,
-          access: { ...room.access, canAskQuestion: false, canAnswer: true },
+          access: {
+            ...room.access,
+            canAnswer: true,
+            participantKind: 'LOCAL',
+          },
         }}
+        currentUserId="local-1"
       />,
     );
-    expect(
-      screen.queryByRole('button', { name: '지금 질문하기' }),
-    ).not.toBeInTheDocument();
-    expect(screen.getByText(/답변 가능한 질문을 확인/)).toBeInTheDocument();
+    expect(screen.getByText('인증 현지인')).toBeInTheDocument();
+    expect(screen.getByText('메시지 작성 폼')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '+ 새 토픽' })).toBeEnabled();
   });
 });

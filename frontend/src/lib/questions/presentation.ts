@@ -43,6 +43,23 @@ export function formatDateTime(value: string): string {
   }).format(new Date(value));
 }
 
+export function formatChatTime(value: string): string {
+  return new Intl.DateTimeFormat('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Seoul',
+  }).format(new Date(value));
+}
+
+export function formatChatDate(value: string): string {
+  return new Intl.DateTimeFormat('ko-KR', {
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+    timeZone: 'Asia/Seoul',
+  }).format(new Date(value));
+}
+
 export function formatVerifiedDate(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', {
     year: 'numeric',

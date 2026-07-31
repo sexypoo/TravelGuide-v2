@@ -15,7 +15,7 @@ export function QuestionFeed({
 
   if (query.isPending) {
     return (
-      <div className="questionFeedSkeleton" aria-label="질문을 불러오는 중">
+      <div className="questionFeedSkeleton" aria-label="토픽을 불러오는 중">
         <span />
         <span />
         <span />
@@ -26,7 +26,7 @@ export function QuestionFeed({
     return (
       <div className="roomQueryState roomQueryState--error" role="alert">
         <span aria-hidden="true">!</span>
-        <h2>질문을 불러오지 못했어요</h2>
+        <h2>토픽을 불러오지 못했어요</h2>
         <p>연결을 확인한 뒤 다시 시도해 주세요.</p>
         <button type="button" onClick={() => void query.refetch()}>
           다시 불러오기
@@ -42,13 +42,13 @@ export function QuestionFeed({
         <span aria-hidden="true">⌁</span>
         <h2>
           {status === 'OPEN'
-            ? '첫 질문을 기다리고 있어요'
-            : '아직 해결된 질문이 없어요'}
+            ? '아직 진행 중인 토픽이 없어요'
+            : '아직 해결된 토픽이 없어요'}
         </h2>
         <p>
           {status === 'OPEN'
-            ? '여행 중 판단이 필요한 순간을 구체적으로 남겨 주세요.'
-            : '답변을 통해 해결된 질문이 이곳에 모입니다.'}
+            ? '대화에서 중요한 상황을 토픽으로 이어가 보세요.'
+            : '답변을 통해 해결된 토픽이 이곳에 모입니다.'}
         </p>
       </div>
     );
@@ -67,7 +67,7 @@ export function QuestionFeed({
           disabled={query.isFetchingNextPage}
           onClick={() => void query.fetchNextPage()}
         >
-          {query.isFetchingNextPage ? '불러오는 중' : '질문 더 보기'}
+          {query.isFetchingNextPage ? '불러오는 중' : '토픽 더 보기'}
         </button>
       )}
     </div>

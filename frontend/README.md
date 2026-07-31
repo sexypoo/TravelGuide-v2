@@ -2,7 +2,7 @@
 
 Next.js frontend for TravelGuide v2. It includes cookie-based authentication,
 verification and profile flows, administrator review, and the authenticated
-Jeju question room.
+Jeju live room for conversation and durable topics.
 
 ## Prerequisites
 
@@ -31,9 +31,9 @@ same-origin.
 - `/auth/register`: account creation with automatic login
 - `/auth/login`: login with safe protected-route return
 - `/app`: authenticated user shell
-- `/app/rooms/jeju`: role-aware Jeju question feed with open/resolved tabs,
-  pagination, traveler question composer, and live updates
-- `/app/questions/:id`: question detail, public answers, and an eligible local
+- `/app/rooms/jeju`: verified traveler/local conversation with paginated chat,
+  open/resolved topic rail, message-to-topic promotion, and live updates
+- `/app/questions/:id`: topic detail, public answers, and an eligible local
   user's answer form
 - `/app/verifications`: own traveler/local verification status and reapplication
 - `/app/verifications/traveler`: traveler dates and private proof application
@@ -45,9 +45,11 @@ same-origin.
 or expired session redirects to login. Tokens are never stored in browser
 storage or returned to frontend JavaScript.
 
-Room data uses TanStack Query for cache and pagination. One authenticated
-Socket.IO client is shared by the app shell; it rejoins active rooms after a
-reconnect, deduplicates events, and refetches cached room data when necessary.
+Room data uses TanStack Query for cache and pagination. Chat messages can be
+promoted once into structured topics without copying or rewriting their source
+content. One authenticated Socket.IO client is shared by the app shell; it
+rejoins active rooms after a reconnect, deduplicates message/topic events, and
+refetches cached room data when necessary.
 The same-origin `/socket.io/*` path is proxied to the backend alongside the REST
 API, so browser code does not need a separate public backend origin.
 

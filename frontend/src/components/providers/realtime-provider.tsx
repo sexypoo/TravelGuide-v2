@@ -11,6 +11,7 @@ import {
   useState,
 } from 'react';
 import { io, type Socket } from 'socket.io-client';
+import { parseMessage, type MessagePage } from '@/lib/api/messages';
 import {
   parseAnswer,
   parseQuestion,
@@ -20,7 +21,9 @@ import {
 import { queryKeys } from '@/lib/query/keys';
 import {
   incrementFeedAnswerCount,
+  markMessagePromoted,
   mergeAnswerIntoDetail,
+  mergeMessageIntoTimeline,
   mergeQuestionIntoFeed,
 } from '@/lib/query/realtime-cache';
 
@@ -40,6 +43,7 @@ interface EventEnvelope {
 }
 
 interface ServerEvents {
+  'room.message.created': (event: unknown) => void;
   'room.question.created': (event: unknown) => void;
   'room.answer.created': (event: unknown) => void;
 }
@@ -109,6 +113,9 @@ export function RealtimeProvider({
           void queryClient.invalidateQueries({
             queryKey: queryKeys.roomQuestionsRoot(roomSlug),
           });
+          void queryClient.invalidateQueries({
+            queryKey: queryKeys.roomMessages(roomSlug),
+          });
         }
       }
       if (refetch) {
@@ -127,6 +134,25 @@ export function RealtimeProvider({
     socket.io.on('reconnect_attempt', () => setConnectionState('reconnecting'));
     socket.on('disconnect', () => setConnectionState('reconnecting'));
     socket.on('connect_error', () => setConnectionState('offline'));
+    socket.on('room.message.created', (value) => {
+      try {
+        const event = parseEnvelope(value);
+        if (seenEvents.current.has(event.eventId)) return;
+        seenEvents.current.add(event.eventId);
+        const message = parseMessage(event.payload);
+        queryClient.setQueryData<InfiniteData<MessagePage>>(
+          queryKeys.roomMessages(event.roomSlug),
+          (current) => mergeMessageIntoTimeline(current, message),
+        );
+        setAnnouncement(
+          `${message.author.nickname}님의 새 메시지가 도착했습니다.`,
+        );
+      } catch {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.roomRoot,
+        });
+      }
+    });
     socket.on('room.question.created', (value) => {
       try {
         const event = parseEnvelope(value);
@@ -137,6 +163,14 @@ export function RealtimeProvider({
           queryKeys.roomQuestions(event.roomSlug, 'OPEN'),
           (current) => mergeQuestionIntoFeed(current, question),
         );
+        const sourceMessageId = question.sourceMessageId;
+        if (sourceMessageId !== null) {
+          queryClient.setQueryData<InfiniteData<MessagePage>>(
+            queryKeys.roomMessages(event.roomSlug),
+            (current) =>
+              markMessagePromoted(current, sourceMessageId, question.id),
+          );
+        }
       } catch {
         void queryClient.invalidateQueries({
           queryKey: queryKeys.questionRoot,

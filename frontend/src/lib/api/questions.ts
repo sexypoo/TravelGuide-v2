@@ -1,4 +1,5 @@
 import { problemFromResponse } from './problem-details';
+import { isParticipantBadge, type PublicParticipant } from './participants';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -28,11 +29,7 @@ export type AnswerSourceType =
   | 'OFFICIAL_SOURCE'
   | 'PERSONAL_OPINION';
 
-export interface QuestionAuthor {
-  id: string;
-  nickname: string;
-  badge: 'VERIFIED_TRAVELER';
-}
+export type QuestionAuthor = PublicParticipant;
 
 export interface AnswerAuthor {
   id: string;
@@ -62,6 +59,7 @@ export interface Question {
   content: string;
   contentFormat: 'PLAIN_TEXT';
   areaText: string | null;
+  sourceMessageId: string | null;
   status: QuestionStatus;
   safetyNotice: string | null;
   answerCount: number;
@@ -83,8 +81,9 @@ export interface QuestionPage {
 export interface CreateQuestionInput {
   category: QuestionCategory;
   urgency: QuestionUrgency;
-  content: string;
+  content?: string;
   areaText?: string;
+  sourceMessageId?: string;
 }
 
 export interface CreateAnswerInput {
@@ -98,7 +97,7 @@ function parseQuestionAuthor(value: unknown): QuestionAuthor {
     !isRecord(value) ||
     typeof value.id !== 'string' ||
     typeof value.nickname !== 'string' ||
-    value.badge !== 'VERIFIED_TRAVELER'
+    !isParticipantBadge(value.badge)
   ) {
     throw new Error('질문 작성자 응답 형식이 올바르지 않습니다.');
   }
@@ -176,6 +175,8 @@ export function parseQuestion(value: unknown): Question {
     typeof value.content !== 'string' ||
     value.contentFormat !== 'PLAIN_TEXT' ||
     (value.areaText !== null && typeof value.areaText !== 'string') ||
+    (value.sourceMessageId !== null &&
+      typeof value.sourceMessageId !== 'string') ||
     !['OPEN', 'RESOLVED', 'REMOVED', 'EXPIRED'].includes(
       String(value.status),
     ) ||
@@ -199,6 +200,7 @@ export function parseQuestion(value: unknown): Question {
     content: value.content,
     contentFormat: value.contentFormat,
     areaText: value.areaText,
+    sourceMessageId: value.sourceMessageId,
     status: value.status as QuestionStatus,
     safetyNotice: value.safetyNotice,
     answerCount: value.answerCount,

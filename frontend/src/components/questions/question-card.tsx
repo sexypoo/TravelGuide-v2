@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { participantBadgeLabel } from '@/lib/api/participants';
 import type { Question } from '@/lib/api/questions';
 import {
   categoryLabels,
@@ -12,6 +13,12 @@ export function QuestionCard({
 }: {
   question: Question;
 }): React.JSX.Element {
+  const badgeKind =
+    question.author.badge === 'VERIFIED_LOCAL'
+      ? 'local'
+      : question.author.badge === 'VERIFIED_BOTH'
+        ? 'both'
+        : 'traveler';
   return (
     <article
       className={`signalQuestionCard${question.urgency === 'URGENT' ? ' signalQuestionCard--urgent' : ''}`}
@@ -38,9 +45,10 @@ export function QuestionCard({
           <span className="questionArea">⌖ {question.areaText}</span>
         )}
         <footer className="questionCardFooter">
-          <span className="publicBadge publicBadge--traveler">
+          <span className={`publicBadge publicBadge--${badgeKind}`}>
             <span aria-hidden="true">↗</span>
-            {question.author.nickname} · 인증 여행자
+            {question.author.nickname} ·{' '}
+            {participantBadgeLabel(question.author.badge)}
           </span>
           <span>
             답변 {question.answerCount} · {formatDateTime(question.createdAt)}

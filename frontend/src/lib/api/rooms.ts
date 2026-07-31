@@ -16,8 +16,11 @@ export interface RoomAccess {
   status: RoomAccessStatus;
   labelKo: '입장 가능' | '여행자 심사 중' | '현지인 심사 중' | '인증 필요';
   canViewContent: boolean;
+  canChat: boolean;
+  canCreateTopic: boolean;
   canAskQuestion: boolean;
   canAnswer: boolean;
+  participantKind: ParticipantKind | null;
 }
 
 export interface Destination {
@@ -54,8 +57,13 @@ function parseAccess(value: unknown): RoomAccess {
       String(value.labelKo),
     ) ||
     typeof value.canViewContent !== 'boolean' ||
+    typeof value.canChat !== 'boolean' ||
+    typeof value.canCreateTopic !== 'boolean' ||
     typeof value.canAskQuestion !== 'boolean' ||
-    typeof value.canAnswer !== 'boolean'
+    typeof value.canAnswer !== 'boolean' ||
+    ![null, 'TRAVELER', 'LOCAL', 'BOTH'].includes(
+      value.participantKind as null | string,
+    )
   ) {
     throw new Error('방 접근 정보 형식이 올바르지 않습니다.');
   }
@@ -70,7 +78,14 @@ function parseAccess(value: unknown): RoomAccess {
   if (
     value.canViewContent !== (status === 'AVAILABLE') ||
     value.labelKo !== expectedLabels[status] ||
-    (status !== 'AVAILABLE' && (value.canAskQuestion || value.canAnswer))
+    (status !== 'AVAILABLE' &&
+      (value.canChat ||
+        value.canCreateTopic ||
+        value.canAskQuestion ||
+        value.canAnswer ||
+        value.participantKind !== null)) ||
+    (value.canChat && value.participantKind === null) ||
+    value.canCreateTopic !== value.canChat
   ) {
     throw new Error('방 접근 상태 값이 일치하지 않습니다.');
   }
@@ -79,8 +94,11 @@ function parseAccess(value: unknown): RoomAccess {
     status,
     labelKo: value.labelKo as RoomAccess['labelKo'],
     canViewContent: value.canViewContent,
+    canChat: value.canChat,
+    canCreateTopic: value.canCreateTopic,
     canAskQuestion: value.canAskQuestion,
     canAnswer: value.canAnswer,
+    participantKind: value.participantKind as ParticipantKind | null,
   };
 }
 
@@ -140,3 +158,4 @@ export function parseRooms(value: unknown): Room[] {
 
   return value.map(parseRoom);
 }
+import type { ParticipantKind } from './participants';

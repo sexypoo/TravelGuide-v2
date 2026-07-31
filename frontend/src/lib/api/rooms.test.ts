@@ -22,8 +22,11 @@ describe('room contracts', () => {
         status: 'VERIFICATION_REQUIRED',
         labelKo: '인증 필요',
         canViewContent: false,
+        canChat: false,
+        canCreateTopic: false,
         canAskQuestion: false,
         canAnswer: false,
+        participantKind: null,
       },
     });
     expect(JSON.stringify(room)).not.toContain('privateFeed');
