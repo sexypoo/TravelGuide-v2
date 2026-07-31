@@ -85,6 +85,28 @@ static public path. Only an authenticated administrator can stream it through
 the evidence endpoint. Production requires `STORAGE_DRIVER=s3` and fails closed
 until a private S3 adapter and deployment credentials are configured.
 
+## Room question API
+
+T05 adds the authenticated room feed and traveler question endpoints:
+
+```text
+GET  /api/v1/rooms/:slug/questions?status=OPEN&cursor=&limit=20
+POST /api/v1/rooms/:slug/questions
+GET  /api/v1/questions/:questionId
+```
+
+Room reads require a valid traveler or local verification. Creating a question
+requires a valid traveler verification and accepts `category`, `urgency`,
+20–1000 character plain-text `content`, and optional `areaText` up to 60
+characters. A traveler can have at most three non-expired open questions in one
+room. Questions expire after 24 hours; an expired open record is returned with
+the derived public status `EXPIRED`.
+
+The feed defaults to 20 items and accepts limits from 1 through 50. Pass the
+opaque `nextCursor` from one response as `cursor` for the next page. Feed
+responses expose only the author's public id, nickname, and verified-traveler
+badge. Safety questions include the 112/119 emergency notice.
+
 ## Quality commands
 
 ```bash
@@ -115,9 +137,9 @@ yarn db:down
 
 T00 contains only an infrastructure `SystemMetadata` model so Prisma generation,
 connection, and migrations can be proven end to end. T01 adds users, T02 adds
-the Jeju destination/room, and T03 adds verification/review records. `yarn
-db:seed` safely upserts the fixed Jeju metadata and can be rerun without
-duplicate rows.
+the Jeju destination/room, T03 adds verification/review records, and T05 adds
+room questions. `yarn db:seed` safely upserts the fixed Jeju metadata and can be
+rerun without duplicate rows.
 
 ## Environment
 

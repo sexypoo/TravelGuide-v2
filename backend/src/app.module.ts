@@ -4,6 +4,7 @@ import { AdminVerificationsModule } from './admin/verifications/admin-verificati
 import { AuthModule } from './auth/auth.module';
 import { validateEnvironment } from './config/environment';
 import { HealthModule } from './health/health.module';
+import { QuestionsModule } from './questions/questions.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { UsersModule } from './users/users.module';
 import { VerificationsModule } from './verifications/verifications.module';
@@ -17,6 +18,7 @@ import { VerificationsModule } from './verifications/verifications.module';
     AdminVerificationsModule,
     AuthModule,
     HealthModule,
+    QuestionsModule,
     UsersModule,
     RoomsModule,
     VerificationsModule,

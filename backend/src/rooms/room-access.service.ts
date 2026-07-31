@@ -105,4 +105,17 @@ export class RoomAccessService {
       );
     }
   }
+
+  async assertCanAskQuestion(
+    user: AuthenticatedUser,
+    destinationId: string,
+  ): Promise<void> {
+    if (!(await this.getAccess(user, destinationId)).canAskQuestion) {
+      throw new ProblemException(
+        'TRAVELER_VERIFICATION_REQUIRED',
+        '현재 유효한 여행자 인증이 필요합니다.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+  }
 }

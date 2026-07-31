@@ -96,6 +96,17 @@
 - 영향: 운영 배포 전 private bucket, 최소 IAM 권한, AWS SDK 기반 put/presign/delete 구현이 필요하다. API DTO에는 object key, 다운로드 URL, 파일 경로, 정확한 GPS를 포함하지 않는다.
 - 되돌리는 조건: 운영 private S3 bucket과 자격 증명 주입 방식이 확정될 때 S3 adapter 내부 구현만 교체한다.
 
+### ADR-014 T05 질문 커서와 동시 생성 제한
+
+- 날짜: 2026-07-31
+- 상태: accepted
+- 문제: 질문 목록이 같은 생성 시각에서도 중복·누락 없이 페이지되어야 하고, 동시에 들어온 네 번째 질문이 열린 질문 3개 제한을 우회하면 안 된다.
+- 선택지: id 단일 cursor와 사전 count, serializable transaction 재시도, 또는 복합 cursor와 사용자·방 단위 PostgreSQL advisory lock.
+- 결정: `createdAt DESC, id DESC` 복합 Base64URL cursor를 사용하고, 생성 transaction 안에서 `pg_advisory_xact_lock(hashtext(userId || ':' || roomId))` 후 활성 OPEN 질문을 count/create한다.
+- 이유: 고정 PostgreSQL 스택에서 추가 dependency나 전역 잠금 없이 페이지 안정성과 동일 사용자·방의 생성 경쟁을 작게 직렬화할 수 있다.
+- 영향: cursor는 내부 구현으로 취급하고 클라이언트가 해석하지 않는다. 다른 DB로 전환하면 advisory lock 구현을 교체해야 한다.
+- 되돌리는 조건: 데이터 저장소 변경 또는 범용 idempotency/분산 잠금 계층 도입 시.
+
 ---
 
 ## 신규 결정 템플릿

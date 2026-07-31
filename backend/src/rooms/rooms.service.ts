@@ -47,6 +47,14 @@ export class RoomsService {
     await this.roomAccess.assertCanViewContent(user, room.destinationId);
   }
 
+  async getIdentity(slug: string): Promise<{
+    id: string;
+    destinationId: string;
+  }> {
+    const room = await this.findBySlug(slug);
+    return { id: room.id, destinationId: room.destinationId };
+  }
+
   private async findBySlug(slug: string): Promise<RoomWithDestination> {
     const room = await this.prisma.destinationRoom.findUnique({
       where: { slug },

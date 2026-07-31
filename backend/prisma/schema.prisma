@@ -32,17 +32,39 @@ enum LocalProofType {
   OTHER
 }
 
+enum QuestionCategory {
+  WEATHER
+  TRANSPORT
+  FOOD
+  PLACE
+  SAFETY
+  OTHER
+}
+
+enum QuestionUrgency {
+  NORMAL
+  URGENT
+}
+
+enum QuestionStatus {
+  OPEN
+  RESOLVED
+  REMOVED
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique @db.VarChar(320)
-  passwordHash String
-  nickname     String   @unique @db.VarChar(20)
-  bio          String?  @db.VarChar(300)
-  role         UserRole @default(USER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  verifications Verification[] @relation("VerificationApplicant")
+  id                    String         @id @default(cuid())
+  email                 String         @unique @db.VarChar(320)
+  passwordHash          String
+  nickname              String         @unique @db.VarChar(20)
+  bio                   String?        @db.VarChar(300)
+  role                  UserRole       @default(USER)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  verifications         Verification[] @relation("VerificationApplicant")
   reviewedVerifications Verification[] @relation("VerificationReviewer")
+  questions             Question[]     @relation("QuestionAuthor")
+  removedQuestions      Question[]     @relation("QuestionRemover")
 }
 
 model Destination {
@@ -68,6 +90,32 @@ model DestinationRoom {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  questions     Question[]
+}
+
+model Question {
+  id               String           @id @default(cuid())
+  roomId           String
+  authorId         String
+  category         QuestionCategory
+  urgency          QuestionUrgency
+  content          String           @db.VarChar(1000)
+  areaText         String?          @db.VarChar(60)
+  status           QuestionStatus   @default(OPEN)
+  acceptedAnswerId String?          @unique
+  expiresAt        DateTime
+  resolvedAt       DateTime?
+  removedAt        DateTime?
+  removedById      String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  room             DestinationRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  author           User             @relation("QuestionAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  removedBy        User?            @relation("QuestionRemover", fields: [removedById], references: [id], onDelete: SetNull)
+
+  @@index([roomId, status, createdAt, id])
+  @@index([authorId, status])
+  @@index([expiresAt])
 }
 
 model Verification {

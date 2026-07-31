@@ -104,6 +104,29 @@ describe('RoomAccessService', () => {
     });
   });
 
+  it('requires an approved traveler specifically when asking a question', async () => {
+    jest
+      .spyOn(prisma.verification, 'findFirst')
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(verification('LOCAL'))
+      .mockResolvedValueOnce(null);
+
+    await expect(
+      service.assertCanAskQuestion(user('USER'), 'jeju-id'),
+    ).rejects.toMatchObject({
+      code: 'TRAVELER_VERIFICATION_REQUIRED',
+    });
+
+    jest
+      .spyOn(prisma.verification, 'findFirst')
+      .mockResolvedValueOnce(verification('TRAVELER'))
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+    await expect(
+      service.assertCanAskQuestion(user('USER'), 'jeju-id'),
+    ).resolves.toBeUndefined();
+  });
+
   it('uses inclusive traveler grace boundaries and exclusive local expiry', async () => {
     const now = new Date('2026-07-31T12:00:00.000Z');
     const findFirst = jest
