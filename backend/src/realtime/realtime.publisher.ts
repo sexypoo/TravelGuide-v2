@@ -6,6 +6,7 @@ import type { MessageResponse } from '../messages/dto/message.response';
 import type { QuestionResponse } from '../questions/dto/question.response';
 import type {
   ClientToServerEvents,
+  ContentRemovedPayload,
   RealtimeEnvelope,
   ServerToClientEvents,
   SocketData,
@@ -61,6 +62,28 @@ export class RealtimePublisher {
     this.server
       ?.to(realtimeRoomKey(roomId))
       .emit('room.answer.created', this.envelope(roomSlug, payload, now));
+  }
+
+  publishQuestionUpdated(
+    roomId: string,
+    roomSlug: string,
+    payload: QuestionResponse,
+    now = new Date(),
+  ): void {
+    this.server
+      ?.to(realtimeRoomKey(roomId))
+      .emit('room.question.updated', this.envelope(roomSlug, payload, now));
+  }
+
+  publishContentRemoved(
+    roomId: string,
+    roomSlug: string,
+    payload: ContentRemovedPayload,
+    now = new Date(),
+  ): void {
+    this.server
+      ?.to(realtimeRoomKey(roomId))
+      .emit('room.content.removed', this.envelope(roomSlug, payload, now));
   }
 
   private envelope<T>(

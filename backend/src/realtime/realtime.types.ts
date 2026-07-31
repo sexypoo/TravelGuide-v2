@@ -10,6 +10,12 @@ export interface RealtimeEnvelope<T> {
   payload: T;
 }
 
+export interface ContentRemovedPayload {
+  targetType: 'QUESTION' | 'ANSWER';
+  targetId: string;
+  questionId: string;
+}
+
 export interface ClientToServerEvents {
   'room.join': (
     input: unknown,
@@ -25,6 +31,10 @@ export interface ServerToClientEvents {
   'room.message.created': (event: RealtimeEnvelope<MessageResponse>) => void;
   'room.question.created': (event: RealtimeEnvelope<QuestionResponse>) => void;
   'room.answer.created': (event: RealtimeEnvelope<AnswerResponse>) => void;
+  'room.question.updated': (event: RealtimeEnvelope<QuestionResponse>) => void;
+  'room.content.removed': (
+    event: RealtimeEnvelope<ContentRemovedPayload>,
+  ) => void;
 }
 
 export interface SocketData {

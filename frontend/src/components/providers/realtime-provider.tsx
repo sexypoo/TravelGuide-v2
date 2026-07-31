@@ -22,9 +22,12 @@ import { queryKeys } from '@/lib/query/keys';
 import {
   incrementFeedAnswerCount,
   markMessagePromoted,
+  markRemovedContent,
   mergeAnswerIntoDetail,
   mergeMessageIntoTimeline,
   mergeQuestionIntoFeed,
+  mergeQuestionUpdateIntoDetail,
+  removeQuestionFromFeed,
 } from '@/lib/query/realtime-cache';
 
 type ConnectionState = 'connecting' | 'connected' | 'reconnecting' | 'offline';
@@ -46,6 +49,8 @@ interface ServerEvents {
   'room.message.created': (event: unknown) => void;
   'room.question.created': (event: unknown) => void;
   'room.answer.created': (event: unknown) => void;
+  'room.question.updated': (event: unknown) => void;
+  'room.content.removed': (event: unknown) => void;
 }
 
 interface MembershipResult {
@@ -82,6 +87,30 @@ function parseEnvelope(value: unknown): EventEnvelope {
     roomSlug: value.roomSlug,
     occurredAt: value.occurredAt,
     payload: value.payload,
+  };
+}
+
+function parseRemovedTarget(value: unknown): {
+  targetType: 'QUESTION' | 'ANSWER';
+  targetId: string;
+  questionId: string;
+} {
+  if (
+    typeof value !== 'object' ||
+    value === null ||
+    !('targetType' in value) ||
+    !('targetId' in value) ||
+    !('questionId' in value) ||
+    (value.targetType !== 'QUESTION' && value.targetType !== 'ANSWER') ||
+    typeof value.targetId !== 'string' ||
+    typeof value.questionId !== 'string'
+  ) {
+    throw new Error('콘텐츠 제거 이벤트 형식이 올바르지 않습니다.');
+  }
+  return {
+    targetType: value.targetType,
+    targetId: value.targetId,
+    questionId: value.questionId,
   };
 }
 
@@ -198,6 +227,57 @@ export function RealtimeProvider({
             `${answer.author.nickname}님의 새 답변이 도착했습니다.`,
           );
         }
+      } catch {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.questionRoot,
+        });
+      }
+    });
+    socket.on('room.question.updated', (value) => {
+      try {
+        const event = parseEnvelope(value);
+        if (seenEvents.current.has(event.eventId)) return;
+        seenEvents.current.add(event.eventId);
+        const question = parseQuestion(event.payload);
+        queryClient.setQueryData<QuestionDetail>(
+          queryKeys.question(question.id),
+          (current) => mergeQuestionUpdateIntoDetail(current, question),
+        );
+        queryClient.setQueryData<InfiniteData<QuestionPage>>(
+          queryKeys.roomQuestions(event.roomSlug, 'OPEN'),
+          (current) => removeQuestionFromFeed(current, question.id),
+        );
+        queryClient.setQueryData<InfiniteData<QuestionPage>>(
+          queryKeys.roomQuestions(event.roomSlug, 'RESOLVED'),
+          (current) => mergeQuestionIntoFeed(current, question),
+        );
+        setAnnouncement('토픽이 해결됨으로 변경되었습니다.');
+      } catch {
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.questionRoot,
+        });
+      }
+    });
+    socket.on('room.content.removed', (value) => {
+      try {
+        const event = parseEnvelope(value);
+        if (seenEvents.current.has(event.eventId)) return;
+        seenEvents.current.add(event.eventId);
+        const target = parseRemovedTarget(event.payload);
+        queryClient.setQueryData<QuestionDetail>(
+          queryKeys.question(target.questionId),
+          (current) => markRemovedContent(current, target),
+        );
+        if (target.targetType === 'QUESTION') {
+          queryClient.setQueriesData<InfiniteData<QuestionPage>>(
+            { queryKey: queryKeys.roomQuestionsRoot(event.roomSlug) },
+            (current) => removeQuestionFromFeed(current, target.questionId),
+          );
+        }
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.question(target.questionId),
+        });
+        setAnnouncement('운영 정책에 따라 콘텐츠가 숨김 처리되었습니다.');
       } catch {
         void queryClient.invalidateQueries({
           queryKey: queryKeys.questionRoot,

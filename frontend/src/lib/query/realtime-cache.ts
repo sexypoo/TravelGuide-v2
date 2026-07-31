@@ -109,3 +109,58 @@ export function incrementFeedAnswerCount(
     })),
   };
 }
+
+export function removeQuestionFromFeed(
+  current: InfiniteData<QuestionPage> | undefined,
+  questionId: string,
+): InfiniteData<QuestionPage> | undefined {
+  if (current === undefined) return current;
+  return {
+    ...current,
+    pages: current.pages.map((page) => ({
+      ...page,
+      items: page.items.filter((question) => question.id !== questionId),
+    })),
+  };
+}
+
+export function mergeQuestionUpdateIntoDetail(
+  current: QuestionDetail | undefined,
+  question: Question,
+): QuestionDetail | undefined {
+  if (current === undefined || current.id !== question.id) return current;
+  return { ...current, ...question, answers: current.answers };
+}
+
+export function markRemovedContent(
+  current: QuestionDetail | undefined,
+  target: {
+    targetType: 'QUESTION' | 'ANSWER';
+    targetId: string;
+    questionId: string;
+  },
+): QuestionDetail | undefined {
+  if (current === undefined || current.id !== target.questionId) return current;
+  if (target.targetType === 'QUESTION') {
+    return {
+      ...current,
+      status: 'REMOVED',
+      content: '운영 정책에 따라 숨김 처리된 질문입니다.',
+      areaText: null,
+      safetyNotice: null,
+    };
+  }
+  return {
+    ...current,
+    answers: current.answers.map((answer) =>
+      answer.id === target.targetId
+        ? {
+            ...answer,
+            content: '운영 정책에 따라 숨김 처리된 답변입니다.',
+            sourceUrl: null,
+            removed: true,
+          }
+        : answer,
+    ),
+  };
+}

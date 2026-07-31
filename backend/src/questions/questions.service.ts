@@ -210,7 +210,7 @@ export class QuestionsService {
       question.room.destinationId,
     );
     const answers = await this.prisma.answer.findMany({
-      where: { questionId, removedAt: null },
+      where: { questionId },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
       include: {
         author: {
@@ -244,6 +244,125 @@ export class QuestionsService {
       answerCount: answerResponses.length,
       answers: answerResponses,
     };
+  }
+
+  async acceptAnswer(
+    questionId: string,
+    user: AuthenticatedUser,
+    answerId: string,
+    now = new Date(),
+  ): Promise<QuestionDetailResponse> {
+    return this.completeQuestion(questionId, user, answerId, now);
+  }
+
+  async resolve(
+    questionId: string,
+    user: AuthenticatedUser,
+    now = new Date(),
+  ): Promise<QuestionDetailResponse> {
+    return this.completeQuestion(questionId, user, null, now);
+  }
+
+  private async completeQuestion(
+    questionId: string,
+    user: AuthenticatedUser,
+    answerId: string | null,
+    now: Date,
+  ): Promise<QuestionDetailResponse> {
+    const identity = await this.prisma.question.findUnique({
+      where: { id: questionId },
+      select: {
+        room: { select: { id: true, slug: true, destinationId: true } },
+      },
+    });
+    if (identity === null) throw this.notFoundProblem();
+    await this.roomAccess.assertCanViewContent(
+      user,
+      identity.room.destinationId,
+    );
+
+    const question = await this.prisma.$transaction(async (transaction) => {
+      const lockKey = `resolve-question:${questionId}`;
+      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+      const current = await transaction.question.findUnique({
+        where: { id: questionId },
+        select: {
+          authorId: true,
+          status: true,
+          expiresAt: true,
+          removedAt: true,
+        },
+      });
+      if (current === null) throw this.notFoundProblem();
+      if (current.authorId !== user.id) {
+        throw new ProblemException(
+          'NOT_QUESTION_OWNER',
+          '토픽 작성자만 해결 상태를 결정할 수 있습니다.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      if (current.removedAt !== null || current.status !== 'OPEN') {
+        throw new ProblemException(
+          'QUESTION_NOT_OPEN',
+          '진행 중인 토픽만 해결할 수 있습니다.',
+          HttpStatus.CONFLICT,
+        );
+      }
+      if (current.expiresAt <= now) {
+        throw new ProblemException(
+          'QUESTION_EXPIRED',
+          '만료된 토픽은 해결 상태를 변경할 수 없습니다.',
+          HttpStatus.CONFLICT,
+        );
+      }
+      if (answerId !== null) {
+        const answer = await transaction.answer.findUnique({
+          where: { id: answerId },
+          select: { questionId: true, removedAt: true },
+        });
+        if (
+          answer === null ||
+          answer.questionId !== questionId ||
+          answer.removedAt !== null
+        ) {
+          throw new ProblemException(
+            'ANSWER_NOT_AVAILABLE',
+            '이 토픽에서 채택할 수 있는 답변이 아닙니다.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+      }
+      return transaction.question.update({
+        where: { id: questionId },
+        data: {
+          acceptedAnswerId: answerId,
+          status: 'RESOLVED',
+          resolvedAt: now,
+        },
+        include: questionInclude,
+      });
+    });
+    const response = toQuestionResponse(question, now);
+    try {
+      this.publisher.publishQuestionUpdated(
+        identity.room.id,
+        identity.room.slug,
+        response,
+        now,
+      );
+    } catch (error: unknown) {
+      const name = error instanceof Error ? error.name : 'UnknownError';
+      this.logger.warn(`Question update event publication failed: ${name}`);
+    }
+    return this.get(questionId, user, now);
+  }
+
+  private notFoundProblem(): ProblemException {
+    return new ProblemException(
+      'QUESTION_NOT_FOUND',
+      '질문을 찾을 수 없습니다.',
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   private parseCursor(value: string | undefined): QuestionCursor | null {

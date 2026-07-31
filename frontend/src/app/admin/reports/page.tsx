@@ -1,21 +1,20 @@
 import Link from 'next/link';
-import { VerificationReviewPanel } from '@/components/admin/verification-review-panel';
+import { ReportReviewPanel } from '@/components/admin/report-review-panel';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { Wordmark } from '@/components/brand/wordmark';
 import {
-  getAdminVerification,
-  getAdminVerifications,
-} from '@/lib/api/admin-verifications.server';
+  getAdminReport,
+  getAdminReports,
+} from '@/lib/api/admin-reports.server';
 import { requireAdmin } from '@/lib/auth/session';
 
-interface AdminPageProps {
+interface Props {
   searchParams: Promise<{
     status?: string | string[];
-    type?: string | string[];
+    targetType?: string | string[];
     selected?: string | string[];
   }>;
 }
-
 function value(input: string | string[] | undefined): string {
   return typeof input === 'string' ? input : '';
 }
@@ -26,26 +25,26 @@ function shortDate(input: string): string {
   }).format(new Date(input));
 }
 
-export default async function AdminPage({
+export default async function AdminReportsPage({
   searchParams,
-}: AdminPageProps): Promise<React.JSX.Element> {
+}: Props): Promise<React.JSX.Element> {
   const [admin, query] = await Promise.all([requireAdmin(), searchParams]);
-  const filters = { status: value(query.status), type: value(query.type) };
+  const filters = {
+    status: value(query.status),
+    targetType: value(query.targetType),
+  };
   const selectedId = value(query.selected);
   const [items, selected] = await Promise.all([
-    getAdminVerifications(filters),
-    selectedId === ''
-      ? Promise.resolve(null)
-      : getAdminVerification(selectedId),
+    getAdminReports(filters),
+    selectedId === '' ? Promise.resolve(null) : getAdminReport(selectedId),
   ]);
-  const linkFor = (id: string): string => {
+  function linkFor(id: string): string {
     const params = new URLSearchParams();
-    if (filters.status !== '') params.set('status', filters.status);
-    if (filters.type !== '') params.set('type', filters.type);
+    if (filters.status) params.set('status', filters.status);
+    if (filters.targetType) params.set('targetType', filters.targetType);
     params.set('selected', id);
-    return `/admin?${params.toString()}`;
-  };
-
+    return `/admin/reports?${params.toString()}`;
+  }
   return (
     <main className="adminShell">
       <header className="adminHeader">
@@ -59,43 +58,48 @@ export default async function AdminPage({
       <div className="adminWorkspace">
         <header className="adminWorkspace__heading">
           <p>TRUST DESK</p>
-          <h1>인증 심사</h1>
+          <h1>신고 관리</h1>
           <span>
-            신청 내용과 비공개 증빙을 확인한 뒤 참여 자격을 결정하세요.
+            신고 대상과 원문을 확인하고 필요한 최소 조치만 선택하세요.
           </span>
         </header>
         <nav className="adminTabs" aria-label="관리자 메뉴">
-          <span aria-current="page">인증 심사</span>
-          <Link href="/admin/reports">신고 관리</Link>
+          <Link href="/admin">인증 심사</Link>
+          <span aria-current="page">신고 관리</span>
         </nav>
         <form className="adminFilters" method="get">
           <label>
             상태
             <select name="status" defaultValue={filters.status}>
               <option value="">전체 상태</option>
-              <option value="PENDING">심사 중</option>
-              <option value="APPROVED">승인</option>
-              <option value="REJECTED">반려</option>
+              <option value="PENDING">대기</option>
+              <option value="REVIEWED">유지</option>
+              <option value="RESOLVED">숨김 완료</option>
+              <option value="DISMISSED">기각</option>
             </select>
           </label>
           <label>
-            유형
-            <select name="type" defaultValue={filters.type}>
-              <option value="">전체 유형</option>
-              <option value="TRAVELER">여행자</option>
-              <option value="LOCAL">현지인</option>
+            대상
+            <select name="targetType" defaultValue={filters.targetType}>
+              <option value="">전체 대상</option>
+              <option value="QUESTION">토픽</option>
+              <option value="ANSWER">답변</option>
+              <option value="USER">사용자</option>
             </select>
           </label>
           <button>필터 적용</button>
         </form>
         <div className="adminReviewGrid">
-          <section className="applicationList" aria-label="인증 신청 목록">
+          <section
+            className="applicationList reportList"
+            aria-label="신고 목록"
+          >
             <div className="applicationList__count">
               <strong>{items.length}건</strong>
-              <span>최신 제출순</span>
+              <span>최신 접수순</span>
             </div>
             {items.length === 0 ? (
-              <div className="adminEmpty">조건에 맞는 신청이 없습니다.</div>
+              <div className="adminEmpty">조건에 맞는 신고가 없습니다.</div>
             ) : (
               items.map((item) => (
                 <Link
@@ -108,12 +112,11 @@ export default async function AdminPage({
                   >
                     {item.status}
                   </span>
-                  <strong>{item.applicant.nickname}</strong>
+                  <strong>{item.target.author.nickname}</strong>
                   <p>
-                    {item.destination.nameKo} ·{' '}
-                    {item.type === 'TRAVELER' ? '여행자' : '현지인'}
+                    {item.targetType} · {item.reason}
                   </p>
-                  <small>{shortDate(item.createdAt)} 제출</small>
+                  <small>{shortDate(item.createdAt)} 접수</small>
                 </Link>
               ))
             )}
@@ -121,11 +124,11 @@ export default async function AdminPage({
           {selected === null ? (
             <section className="reviewPlaceholder">
               <span>↖</span>
-              <h2>검토할 신청을 선택하세요</h2>
-              <p>증빙은 선택 후 명시적으로 열 때만 불러옵니다.</p>
+              <h2>검토할 신고를 선택하세요</h2>
+              <p>신고만으로 콘텐츠를 자동 숨기지 않습니다.</p>
             </section>
           ) : (
-            <VerificationReviewPanel verification={selected} />
+            <ReportReviewPanel report={selected} />
           )}
         </div>
       </div>

@@ -65,6 +65,29 @@ enum RoomParticipantKind {
   BOTH
 }
 
+enum ReportTargetType {
+  QUESTION
+  ANSWER
+  USER
+}
+
+enum ReportReason {
+  SPAM
+  ABUSE
+  FALSE_INFORMATION
+  ADVERTISEMENT
+  PRIVACY
+  SAFETY
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
 model User {
   id                    String         @id @default(cuid())
   email                 String         @unique @db.VarChar(320)
@@ -81,6 +104,8 @@ model User {
   answers               Answer[]       @relation("AnswerAuthor")
   removedAnswers        Answer[]       @relation("AnswerRemover")
   chatMessages          ChatMessage[]
+  reports               Report[]       @relation("ReportReporter")
+  reviewedReports       Report[]       @relation("ReportReviewer")
 }
 
 model Destination {
@@ -207,6 +232,28 @@ model Verification {
   @@index([userId, destinationId, type, status])
   @@index([status, createdAt])
   @@index([destinationId, type, status])
+}
+
+model Report {
+  id             String           @id @default(cuid())
+  reporterId     String
+  targetType     ReportTargetType
+  targetId       String
+  reason         ReportReason
+  detail         String?          @db.VarChar(300)
+  status         ReportStatus     @default(PENDING)
+  reviewedById   String?
+  reviewedAt     DateTime?
+  resolutionNote String?          @db.VarChar(300)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  reporter       User             @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewedBy     User?            @relation("ReportReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@unique([reporterId, targetType, targetId])
+  @@index([status, createdAt])
+  @@index([targetType, status, createdAt])
+  @@index([targetId])
 }
 
 // Infrastructure-only record used to prove the initial Prisma migration and

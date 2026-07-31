@@ -15,13 +15,20 @@ const answer: Answer = {
   contentFormat: 'PLAIN_TEXT',
   sourceType: 'OFFICIAL_SOURCE',
   sourceUrl: 'https://example.com/notice',
+  removed: false,
   createdAt: '2026-08-01T00:10:00.000Z',
   updatedAt: '2026-08-01T00:10:00.000Z',
 };
 
 describe('AnswerCard', () => {
   it('renders content as text and protects the official source tab', () => {
-    const { container } = render(<AnswerCard answer={answer} />);
+    const { container } = render(
+      <AnswerCard
+        answer={answer}
+        accepted={false}
+        currentUserId="traveler-1"
+      />,
+    );
     expect(screen.getByText(answer.content)).toBeInTheDocument();
     expect(container.querySelector('script')).toBeNull();
     expect(
@@ -30,5 +37,11 @@ describe('AnswerCard', () => {
     expect(
       screen.getByRole('link', { name: /공식 출처 열기/ }),
     ).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('marks an accepted answer and offers reporting only to another user', () => {
+    render(<AnswerCard answer={answer} accepted currentUserId="traveler-1" />);
+    expect(screen.getByText('채택된 답변')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '신고' })).toBeInTheDocument();
   });
 });

@@ -33,13 +33,14 @@ same-origin.
 - `/app`: authenticated user shell
 - `/app/rooms/jeju`: verified traveler/local conversation with paginated chat,
   open/resolved topic rail, message-to-topic promotion, and live updates
-- `/app/questions/:id`: topic detail, public answers, and an eligible local
-  user's answer form
+- `/app/questions/:id`: topic detail, public answers, owner acceptance/resolve,
+  and authenticated reporting
 - `/app/verifications`: own traveler/local verification status and reapplication
 - `/app/verifications/traveler`: traveler dates and private proof application
 - `/app/verifications/local`: geolocation, relationship, and private proof application
 - `/app/profile`: own profile view and update
 - `/admin`: authenticated admin verification list, private evidence, and review
+- `/admin/reports`: report filters, original-content review, and audited moderation
 
 `/app` and `/admin` validate the incoming cookie against the backend. A missing
 or expired session redirects to login. Tokens are never stored in browser
@@ -49,7 +50,9 @@ Room data uses TanStack Query for cache and pagination. Chat messages can be
 promoted once into structured topics without copying or rewriting their source
 content. One authenticated Socket.IO client is shared by the app shell; it
 rejoins active rooms after a reconnect, deduplicates message/topic events, and
-refetches cached room data when necessary.
+refetches cached room data when necessary. Resolution and moderation events
+update active topics immediately; removed content renders only as a fixed
+public placeholder.
 The same-origin `/socket.io/*` path is proxied to the backend alongside the REST
 API, so browser code does not need a separate public backend origin.
 

@@ -97,6 +97,12 @@ POST /api/v1/rooms/:slug/messages
 GET  /api/v1/rooms/:slug/questions?status=OPEN&cursor=&limit=20
 POST /api/v1/rooms/:slug/questions
 GET  /api/v1/questions/:questionId
+PATCH /api/v1/questions/:questionId/accept-answer
+PATCH /api/v1/questions/:questionId/resolve
+POST /api/v1/reports
+GET  /api/v1/admin/reports?status=PENDING&targetType=ANSWER
+GET  /api/v1/admin/reports/:id
+PATCH /api/v1/admin/reports/:id/review
 ```
 
 Room reads and participant writes require a valid traveler or local
@@ -110,6 +116,8 @@ and optional `areaText` up to 60 characters. Alternatively,
 content. One message can become only one topic. Each participant can have at
 most three non-expired open topics in one room. Topics expire after 24 hours;
 an expired open record is returned with the derived public status `EXPIRED`.
+The topic owner can atomically accept one same-topic, non-removed answer or
+resolve without an answer. Both transitions are final and reject later answers.
 
 The feed defaults to 20 items and accepts limits from 1 through 50. Pass the
 opaque `nextCursor` from one response as `cursor` for the next page. Feed
@@ -139,11 +147,19 @@ room.leave { roomSlug }
 ```
 
 After server-authorized join, committed REST writes broadcast
-`room.message.created`, `room.question.created`, and `room.answer.created`.
+`room.message.created`, `room.question.created`, `room.answer.created`,
+`room.question.updated`, and `room.content.removed`.
 Every event contains an
 `eventId`, `roomSlug`, `occurredAt`, and the same public DTO used by REST. Events
 are an immediate update signal; after reconnect clients must rejoin and refetch
 the feed/detail REST endpoints.
+
+Signed-in users can report a question, answer, or user once. Own-content
+reports are rejected, and `OTHER` requires a 10–300 character detail. Reports
+never hide content automatically. Administrators can keep, dismiss, or
+explicitly soft-delete question/answer content; reviewer, timestamp, and note
+are retained. Public DTOs replace removed original text with a fixed notice and
+remove source URLs, while administrator report detail retains the audit copy.
 
 ## Quality commands
 

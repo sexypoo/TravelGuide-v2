@@ -46,6 +46,7 @@ export interface Answer {
   contentFormat: 'PLAIN_TEXT';
   sourceType: AnswerSourceType;
   sourceUrl: string | null;
+  removed: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -63,6 +64,7 @@ export interface Question {
   status: QuestionStatus;
   safetyNotice: string | null;
   answerCount: number;
+  acceptedAnswerId: string | null;
   expiresAt: string;
   resolvedAt: string | null;
   createdAt: string;
@@ -136,6 +138,7 @@ export function parseAnswer(value: unknown): Answer {
       'PERSONAL_OPINION',
     ].includes(String(value.sourceType)) ||
     (value.sourceUrl !== null && typeof value.sourceUrl !== 'string') ||
+    typeof value.removed !== 'boolean' ||
     !isIsoDate(value.createdAt) ||
     !isIsoDate(value.updatedAt)
   ) {
@@ -160,6 +163,7 @@ export function parseAnswer(value: unknown): Answer {
     contentFormat: value.contentFormat,
     sourceType: value.sourceType as AnswerSourceType,
     sourceUrl: value.sourceUrl,
+    removed: value.removed,
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
   };
@@ -184,6 +188,8 @@ export function parseQuestion(value: unknown): Question {
     typeof value.answerCount !== 'number' ||
     !Number.isInteger(value.answerCount) ||
     value.answerCount < 0 ||
+    (value.acceptedAnswerId !== null &&
+      typeof value.acceptedAnswerId !== 'string') ||
     !isIsoDate(value.expiresAt) ||
     (value.resolvedAt !== null && !isIsoDate(value.resolvedAt)) ||
     !isIsoDate(value.createdAt) ||
@@ -204,6 +210,7 @@ export function parseQuestion(value: unknown): Question {
     status: value.status as QuestionStatus,
     safetyNotice: value.safetyNotice,
     answerCount: value.answerCount,
+    acceptedAnswerId: value.acceptedAnswerId,
     expiresAt: value.expiresAt,
     resolvedAt: value.resolvedAt,
     createdAt: value.createdAt,
@@ -288,6 +295,29 @@ export async function createAnswer(
     await apiJson(
       `/api/v1/questions/${encodeURIComponent(questionId)}/answers`,
       { method: 'POST', body: JSON.stringify(input) },
+    ),
+  );
+}
+
+export async function acceptAnswer(
+  questionId: string,
+  answerId: string,
+): Promise<QuestionDetail> {
+  return parseQuestionDetail(
+    await apiJson(
+      `/api/v1/questions/${encodeURIComponent(questionId)}/accept-answer`,
+      { method: 'PATCH', body: JSON.stringify({ answerId }) },
+    ),
+  );
+}
+
+export async function resolveQuestion(
+  questionId: string,
+): Promise<QuestionDetail> {
+  return parseQuestionDetail(
+    await apiJson(
+      `/api/v1/questions/${encodeURIComponent(questionId)}/resolve`,
+      { method: 'PATCH', body: JSON.stringify({}) },
     ),
   );
 }

@@ -29,4 +29,25 @@ describe('answer response', () => {
     });
     expect(JSON.stringify(response)).not.toMatch(/email|role|gps|proof/);
   });
+
+  it('redacts removed content and its source URL', () => {
+    const response = toAnswerResponse(
+      {
+        id: 'removed-answer',
+        questionId: 'question-id',
+        content: '공개되면 안 되는 원문',
+        sourceType: 'OFFICIAL_SOURCE',
+        sourceUrl: 'https://example.com/private-source',
+        removedAt: new Date('2026-08-01T00:00:00.000Z'),
+        createdAt: new Date('2026-07-31T12:00:00.000Z'),
+        updatedAt: new Date('2026-08-01T00:00:00.000Z'),
+        author: { id: 'local-id', nickname: '제주현지인' },
+      },
+      new Date('2026-07-01T00:00:00.000Z'),
+    );
+    expect(response.removed).toBe(true);
+    expect(response.content).toBe('운영 정책에 따라 숨김 처리된 답변입니다.');
+    expect(response.sourceUrl).toBeNull();
+    expect(JSON.stringify(response)).not.toContain('공개되면 안 되는 원문');
+  });
 });

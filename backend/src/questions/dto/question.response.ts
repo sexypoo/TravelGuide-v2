@@ -25,6 +25,7 @@ export interface QuestionResponse {
   status: PublicQuestionStatus;
   safetyNotice: string | null;
   answerCount: number;
+  acceptedAnswerId: string | null;
   expiresAt: string;
   resolvedAt: string | null;
   createdAt: string;
@@ -52,6 +53,7 @@ export interface QuestionForResponse {
   status: QuestionStatus;
   expiresAt: Date;
   resolvedAt: Date | null;
+  acceptedAnswerId: string | null;
   removedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -100,6 +102,7 @@ export function toQuestionResponse(
     safetyNotice:
       !removed && question.category === 'SAFETY' ? SAFETY_NOTICE : null,
     answerCount: question._count.answers,
+    acceptedAnswerId: question.acceptedAnswerId,
     expiresAt: question.expiresAt.toISOString(),
     resolvedAt: question.resolvedAt?.toISOString() ?? null,
     createdAt: question.createdAt.toISOString(),

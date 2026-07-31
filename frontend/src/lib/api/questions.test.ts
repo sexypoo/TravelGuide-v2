@@ -18,6 +18,7 @@ const question = {
   status: 'OPEN',
   safetyNotice: null,
   answerCount: 1,
+  acceptedAnswerId: null,
   expiresAt: '2026-08-02T12:00:00.000Z',
   resolvedAt: null,
   createdAt: '2026-08-01T12:00:00.000Z',
@@ -39,6 +40,7 @@ const answer = {
   contentFormat: 'PLAIN_TEXT',
   sourceType: 'OFFICIAL_SOURCE',
   sourceUrl: 'https://example.com/notice',
+  removed: false,
   createdAt: '2026-08-01T12:10:00.000Z',
   updatedAt: '2026-08-01T12:10:00.000Z',
 };

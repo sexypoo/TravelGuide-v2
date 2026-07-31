@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { AnswerCard } from '@/components/answers/answer-card';
 import { AnswerForm } from '@/components/answers/answer-form';
 import { useRoomRealtime } from '@/components/providers/realtime-provider';
+import { ReportMenu } from '@/components/reports/report-menu';
+import { TopicResolutionActions } from '@/components/questions/topic-resolution-actions';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import type { Room } from '@/lib/api/rooms';
 import {
@@ -68,6 +70,11 @@ export function QuestionDetailView({
       : question.author.badge === 'VERIFIED_BOTH'
         ? 'both'
         : 'traveler';
+  const isOwner = question.author.id === currentUserId;
+  const canResolve =
+    isOwner &&
+    question.status === 'OPEN' &&
+    new Date(question.expiresAt).getTime() > Date.now();
 
   return (
     <div className="questionDetailPage">
@@ -116,8 +123,42 @@ export function QuestionDetailView({
             {formatDateTime(question.createdAt)} 토픽 ·{' '}
             {formatDateTime(question.expiresAt)} 마감
           </span>
+          {!isOwner && question.status !== 'REMOVED' && (
+            <ReportMenu
+              targets={[
+                { type: 'QUESTION', id: question.id, label: '이 토픽' },
+                {
+                  type: 'USER',
+                  id: question.author.id,
+                  label: `${question.author.nickname} 사용자`,
+                },
+              ]}
+            />
+          )}
         </footer>
       </article>
+
+      {question.status === 'RESOLVED' && (
+        <div className="resolutionSummary" role="status">
+          <span aria-hidden="true">✓</span>
+          <div>
+            <strong>
+              {question.acceptedAnswerId === null
+                ? '작성자가 해결된 상황으로 확인했어요'
+                : '작성자가 도움이 된 답변을 채택했어요'}
+            </strong>
+            <p>
+              {question.resolvedAt === null
+                ? '이 토픽은 해결됨으로 마무리되었습니다.'
+                : `${formatDateTime(question.resolvedAt)}에 해결되었습니다.`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {canResolve && (
+        <TopicResolutionActions question={question} roomSlug={room.slug} />
+      )}
 
       <section className="answerThread" aria-labelledby="answer-thread-title">
         <div className="answerThread__heading">
@@ -142,7 +183,12 @@ export function QuestionDetailView({
           <div className="answerSignalList">
             <div className="answerSignalRail" aria-hidden="true" />
             {question.answers.map((answer) => (
-              <AnswerCard key={answer.id} answer={answer} />
+              <AnswerCard
+                key={answer.id}
+                answer={answer}
+                accepted={question.acceptedAnswerId === answer.id}
+                currentUserId={currentUserId}
+              />
             ))}
           </div>
         )}
