@@ -11,3 +11,5 @@ process.env.API_PORT ??= '3001';
 process.env.WEB_ORIGIN ??= 'http://localhost:3000';
 process.env.JWT_SECRET ??= 'integration-test-secret-not-for-production';
 process.env.JWT_EXPIRES_IN ??= '24h';
+process.env.STORAGE_DRIVER = 'local';
+process.env.LOCAL_STORAGE_DIR ??= '.data/test-private-uploads';

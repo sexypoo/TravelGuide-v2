@@ -59,9 +59,31 @@ GET   /api/v1/rooms/:slug
 GET   /api/v1/rooms/:slug/content-access
 ```
 
-Regular users can view the Jeju room metadata but receive
-`ROOM_ACCESS_DENIED` from `content-access` until real verification is introduced.
-The endpoint is an authorization probe, not a placeholder question feed.
+Regular users can view the Jeju room metadata. `content-access` allows an
+approved traveler from 24 hours before through 24 hours after the trip, an
+unexpired approved local, and administrators; all others receive
+`ROOM_ACCESS_DENIED`. The endpoint is an authorization probe, not a placeholder
+question feed.
+
+## Verification and administrator API
+
+T03 adds private multipart verification and review endpoints:
+
+```text
+GET    /api/v1/verifications/me
+POST   /api/v1/verifications/traveler
+POST   /api/v1/verifications/local
+GET    /api/v1/admin/verifications
+GET    /api/v1/admin/verifications/:id
+GET    /api/v1/admin/verifications/:id/evidence
+PATCH  /api/v1/admin/verifications/:id/review
+```
+
+Use multipart field `proofFile` for one JPEG, PNG, or PDF up to 5 MiB. Evidence
+is stored below `LOCAL_STORAGE_DIR` in development/test and is never served as a
+static public path. Only an authenticated administrator can stream it through
+the evidence endpoint. Production requires `STORAGE_DRIVER=s3` and fails closed
+until a private S3 adapter and deployment credentials are configured.
 
 ## Quality commands
 
@@ -92,15 +114,17 @@ yarn db:down
 ```
 
 T00 contains only an infrastructure `SystemMetadata` model so Prisma generation,
-connection, and migrations can be proven end to end. T01 adds users and T02 adds
-the Jeju destination/room. `yarn db:seed` safely upserts the fixed Jeju metadata
-and can be rerun without duplicate rows.
+connection, and migrations can be proven end to end. T01 adds users, T02 adds
+the Jeju destination/room, and T03 adds verification/review records. `yarn
+db:seed` safely upserts the fixed Jeju metadata and can be rerun without
+duplicate rows.
 
 ## Environment
 
 Copy `.env.example` to `.env`. Startup fails immediately when `DATABASE_URL`,
 `API_PORT`, `WEB_ORIGIN`, `JWT_SECRET`, or `JWT_EXPIRES_IN` is invalid. Do not
-commit `.env` or real secrets. Production rejects the example JWT secret.
+commit `.env` or real secrets. Production rejects the example JWT secret and
+local evidence storage.
 
 `TEST_DATABASE_URL` must point to a database separate from `DATABASE_URL`. A clean
 Docker volume creates `travelguide_test` automatically. For a volume created

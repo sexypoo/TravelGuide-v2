@@ -64,15 +64,30 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const request = context.getRequest<Request>();
     const response = context.getResponse<Response>();
-    const isHttpException = exception instanceof HttpException;
+    const isUploadTooLarge =
+      (typeof exception === 'object' &&
+        exception !== null &&
+        'code' in exception &&
+        exception.code === 'LIMIT_FILE_SIZE') ||
+      (exception instanceof HttpException && exception.getStatus() === 413);
+    const normalizedException = isUploadTooLarge
+      ? new ProblemException(
+          'UPLOAD_TOO_LARGE',
+          '증빙 파일은 5MB 이하여야 합니다.',
+          HttpStatus.BAD_REQUEST,
+        )
+      : exception;
+    const isHttpException = normalizedException instanceof HttpException;
     const status = isHttpException
-      ? exception.getStatus()
+      ? normalizedException.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
     const requestId = request.requestId ?? 'unknown';
 
     if (!isHttpException) {
       const exceptionName =
-        exception instanceof Error ? exception.name : 'UnknownException';
+        normalizedException instanceof Error
+          ? normalizedException.name
+          : 'UnknownException';
       this.logger.error(`Unhandled ${exceptionName} for request ${requestId}`);
     }
 
@@ -81,14 +96,14 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       title: titles[status] ?? 'Error',
       status,
       code:
-        exception instanceof ProblemException
-          ? exception.code
+        normalizedException instanceof ProblemException
+          ? normalizedException.code
           : (defaultCodes[status] ?? 'HTTP_ERROR'),
       detail:
         status === 500
           ? '서버에서 요청을 처리하지 못했습니다.'
           : isHttpException
-            ? getHttpDetail(exception)
+            ? getHttpDetail(normalizedException)
             : '서버에서 요청을 처리하지 못했습니다.',
       requestId,
     };

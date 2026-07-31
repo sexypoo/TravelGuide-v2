@@ -34,6 +34,10 @@ export interface OwnProfileRecord {
 export interface PublicProfileRecord {
   id: string;
   nickname: string;
+  verifications: Array<{
+    reviewedAt: Date | null;
+    destination: { id: string; slug: string; nameKo: string };
+  }>;
 }
 
 function duplicateUserProblem(field: 'email' | 'nickname'): ProblemException {
@@ -174,6 +178,19 @@ export class UsersService {
       select: {
         id: true,
         nickname: true,
+        verifications: {
+          where: {
+            type: 'LOCAL',
+            status: 'APPROVED',
+            expiresAt: { gt: new Date() },
+          },
+          orderBy: { reviewedAt: 'desc' },
+          take: 1,
+          select: {
+            reviewedAt: true,
+            destination: { select: { id: true, slug: true, nameKo: true } },
+          },
+        },
       },
     });
 

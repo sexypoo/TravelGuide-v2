@@ -21,21 +21,30 @@ export class RoomsService {
       include: { destination: true },
       orderBy: { destination: { nameKo: 'asc' } },
     });
-    const access = this.roomAccess.getAccess(user);
-    return rooms.map((room) => toRoomResponse(room, access));
+    return Promise.all(
+      rooms.map(async (room) =>
+        toRoomResponse(
+          room,
+          await this.roomAccess.getAccess(user, room.destinationId),
+        ),
+      ),
+    );
   }
 
   async get(slug: string, user: AuthenticatedUser): Promise<RoomResponse> {
     const room = await this.findBySlug(slug);
-    return toRoomResponse(room, this.roomAccess.getAccess(user));
+    return toRoomResponse(
+      room,
+      await this.roomAccess.getAccess(user, room.destinationId),
+    );
   }
 
   async assertContentAccess(
     slug: string,
     user: AuthenticatedUser,
   ): Promise<void> {
-    await this.findBySlug(slug);
-    this.roomAccess.assertCanViewContent(user);
+    const room = await this.findBySlug(slug);
+    await this.roomAccess.assertCanViewContent(user, room.destinationId);
   }
 
   private async findBySlug(slug: string): Promise<RoomWithDestination> {

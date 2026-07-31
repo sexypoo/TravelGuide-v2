@@ -85,6 +85,17 @@
 - 영향: T05에서 실제 질문 목록 API가 같은 `RoomAccessService`를 호출하도록 교체한다.
 - 되돌리는 조건: T05 질문 API 계약이 확정될 때.
 
+### ADR-013 T03 비공개 증빙 검증과 저장소 fail-closed
+
+- 날짜: 2026-07-31
+- 상태: accepted
+- 문제: 로컬 개발용 증빙 저장과 운영 S3 저장의 경계를 지키면서 MIME 위조, 공개 URL 노출, 파일/DB 불일치를 막아야 한다. 현재 운영 S3 자격 증명과 SDK는 제공되지 않았다.
+- 선택지: 선언 MIME만 확인해 로컬 저장소를 모든 환경에서 사용, 즉시 S3 SDK를 추가, 또는 파일 시그니처를 검증하고 운영 환경은 S3 구현 전까지 명확히 실패.
+- 결정: JPEG/PNG/PDF 선언 MIME과 magic bytes가 일치할 때만 무작위 키로 저장한다. 개발·테스트는 정적 경로에 연결되지 않은 로컬 디렉터리와 관리자 스트리밍 endpoint를 사용한다. 운영은 `STORAGE_DRIVER=s3`만 허용하며, 현재 S3 adapter는 시작 시 명시적으로 실패한다. DB insert 실패 시 저장 파일 삭제를 시도한다.
+- 이유: 제공되지 않은 배포 자격 증명이나 불필요한 production dependency를 가정하지 않으면서 비공개 저장 요구를 fail-closed로 지키기 위해서다.
+- 영향: 운영 배포 전 private bucket, 최소 IAM 권한, AWS SDK 기반 put/presign/delete 구현이 필요하다. API DTO에는 object key, 다운로드 URL, 파일 경로, 정확한 GPS를 포함하지 않는다.
+- 되돌리는 조건: 운영 private S3 bucket과 자격 증명 주입 방식이 확정될 때 S3 adapter 내부 구현만 교체한다.
+
 ---
 
 ## 신규 결정 템플릿

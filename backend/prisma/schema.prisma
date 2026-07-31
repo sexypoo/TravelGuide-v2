@@ -12,6 +12,26 @@ enum UserRole {
   ADMIN
 }
 
+enum VerificationType {
+  TRAVELER
+  LOCAL
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVOKED
+  EXPIRED
+}
+
+enum LocalProofType {
+  RESIDENCE
+  WORK
+  STUDY
+  OTHER
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique @db.VarChar(320)
@@ -21,6 +41,8 @@ model User {
   role         UserRole @default(USER)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  verifications Verification[] @relation("VerificationApplicant")
+  reviewedVerifications Verification[] @relation("VerificationReviewer")
 }
 
 model Destination {
@@ -35,6 +57,7 @@ model Destination {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   room            DestinationRoom?
+  verifications   Verification[]
 }
 
 model DestinationRoom {
@@ -45,6 +68,39 @@ model DestinationRoom {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id                String             @id @default(cuid())
+  userId            String
+  destinationId     String
+  type              VerificationType
+  status            VerificationStatus @default(PENDING)
+  startsAt          DateTime?
+  endsAt            DateTime?
+  localProofType    LocalProofType?
+  proofObjectKey    String             @db.VarChar(255)
+  proofOriginalName String             @db.VarChar(255)
+  proofMimeType     String             @db.VarChar(64)
+  proofSizeBytes    Int
+  gpsLat            Decimal?           @db.Decimal(9, 6)
+  gpsLng            Decimal?           @db.Decimal(9, 6)
+  gpsAccuracyMeters Int?
+  gpsCapturedAt     DateTime?
+  submittedNote     String?            @db.VarChar(300)
+  reviewedById      String?
+  reviewedAt        DateTime?
+  rejectionReason   String?            @db.VarChar(300)
+  expiresAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  user              User               @relation("VerificationApplicant", fields: [userId], references: [id], onDelete: Cascade)
+  destination       Destination        @relation(fields: [destinationId], references: [id], onDelete: Restrict)
+  reviewedBy        User?              @relation("VerificationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([userId, destinationId, type, status])
+  @@index([status, createdAt])
+  @@index([destinationId, type, status])
 }
 
 // Infrastructure-only record used to prove the initial Prisma migration and

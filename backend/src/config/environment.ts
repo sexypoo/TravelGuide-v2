@@ -7,6 +7,8 @@ export interface Environment {
   WEB_ORIGIN: string;
   JWT_SECRET: string;
   JWT_EXPIRES_IN_SECONDS: number;
+  STORAGE_DRIVER: 'local' | 's3';
+  LOCAL_STORAGE_DIR: string;
 }
 
 const nodeEnvironments: readonly NodeEnvironment[] = [
@@ -112,9 +114,18 @@ export function validateEnvironment(
   const databaseUrl = readRequiredString(config, 'DATABASE_URL');
   const nodeEnvironment = parseNodeEnvironment(config.NODE_ENV);
   const jwtSecret = readRequiredString(config, 'JWT_SECRET');
+  const storageDriver = config.STORAGE_DRIVER ?? 'local';
+
+  if (storageDriver !== 'local' && storageDriver !== 's3') {
+    throw new Error('STORAGE_DRIVER must be local or s3');
+  }
 
   if (nodeEnvironment === 'production' && jwtSecret === 'change-me') {
     throw new Error('JWT_SECRET must be changed in production');
+  }
+
+  if (nodeEnvironment === 'production' && storageDriver !== 's3') {
+    throw new Error('Production requires STORAGE_DRIVER=s3');
   }
 
   return {
@@ -132,5 +143,11 @@ export function validateEnvironment(
     ),
     JWT_SECRET: jwtSecret,
     JWT_EXPIRES_IN_SECONDS: parseJwtExpiresIn(config.JWT_EXPIRES_IN),
+    STORAGE_DRIVER: storageDriver,
+    LOCAL_STORAGE_DIR:
+      typeof config.LOCAL_STORAGE_DIR === 'string' &&
+      config.LOCAL_STORAGE_DIR.trim().length > 0
+        ? config.LOCAL_STORAGE_DIR.trim()
+        : '.data/private-uploads',
   };
 }

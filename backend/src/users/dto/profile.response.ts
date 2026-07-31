@@ -15,9 +15,13 @@ export interface OwnProfileResponse {
 export interface PublicProfileResponse {
   id: string;
   nickname: string;
-  isVerifiedLocal: false;
-  verifiedDestination: null;
-  verifiedAt: null;
+  isVerifiedLocal: boolean;
+  verifiedDestination: {
+    id: string;
+    slug: string;
+    nameKo: string;
+  } | null;
+  verifiedAt: string | null;
 }
 
 export function toOwnProfileResponse(
@@ -38,11 +42,12 @@ export function toOwnProfileResponse(
 export function toPublicProfileResponse(
   user: PublicProfileRecord,
 ): PublicProfileResponse {
+  const localVerification = user.verifications[0];
   return {
     id: user.id,
     nickname: user.nickname,
-    isVerifiedLocal: false,
-    verifiedDestination: null,
-    verifiedAt: null,
+    isVerifiedLocal: localVerification !== undefined,
+    verifiedDestination: localVerification?.destination ?? null,
+    verifiedAt: localVerification?.reviewedAt?.toISOString() ?? null,
   };
 }
