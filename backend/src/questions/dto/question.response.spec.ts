@@ -11,6 +11,8 @@ function question(
     urgency: 'NORMAL',
     content: '<script>alert(1)</script> 제주 질문 본문입니다.',
     areaText: '서귀포',
+    authorKind: 'TRAVELER',
+    sourceMessageId: null,
     status: 'OPEN',
     expiresAt: new Date('2026-08-01T12:00:00.000Z'),
     resolvedAt: null,
@@ -49,5 +51,14 @@ describe('question response', () => {
     );
     expect(response.content).toBe('운영 정책에 따라 숨김 처리된 질문입니다.');
     expect(response.areaText).toBeNull();
+  });
+
+  it('uses the participant kind stored when the topic was created', () => {
+    expect(
+      toQuestionResponse(question({ authorKind: 'LOCAL' })).author.badge,
+    ).toBe('VERIFIED_LOCAL');
+    expect(
+      toQuestionResponse(question({ authorKind: 'BOTH' })).author.badge,
+    ).toBe('VERIFIED_BOTH');
   });
 });

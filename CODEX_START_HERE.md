@@ -130,7 +130,7 @@ viewports and routes checked.
 - 1:1 매칭: 제외
 - 인증: 여행자·현지인 모두 증빙 + 관리자 승인
 - 현지인 GPS: 보조 신호
-- 채팅: 질문 카드 + 답변 스레드
+- 채팅: 인증 참여자 실시간 메시지 + 구조화 토픽과 답변 스레드
 - 쓰기: REST
 - 실시간: Socket broadcast
 - 언어: 한국어
@@ -161,4 +161,3 @@ viewports and routes checked.
 - private 증빙·GPS가 response나 로그에 없는가
 - 기존에 통과하던 테스트가 깨지지 않았는가
 - 다음 Task 전에 working tree가 이해 가능한 상태인가
-

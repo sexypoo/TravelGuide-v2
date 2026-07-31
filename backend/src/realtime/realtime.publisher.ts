@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { Server } from 'socket.io';
 import type { AnswerResponse } from '../answers/dto/answer.response';
+import type { MessageResponse } from '../messages/dto/message.response';
 import type { QuestionResponse } from '../questions/dto/question.response';
 import type {
   ClientToServerEvents,
@@ -38,6 +39,17 @@ export class RealtimePublisher {
     this.server
       ?.to(realtimeRoomKey(roomId))
       .emit('room.question.created', this.envelope(roomSlug, payload, now));
+  }
+
+  publishMessageCreated(
+    roomId: string,
+    roomSlug: string,
+    payload: MessageResponse,
+    now = new Date(),
+  ): void {
+    this.server
+      ?.to(realtimeRoomKey(roomId))
+      .emit('room.message.created', this.envelope(roomSlug, payload, now));
   }
 
   publishAnswerCreated(

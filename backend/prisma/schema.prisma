@@ -59,6 +59,12 @@ enum AnswerSourceType {
   PERSONAL_OPINION
 }
 
+enum RoomParticipantKind {
+  TRAVELER
+  LOCAL
+  BOTH
+}
+
 model User {
   id                    String         @id @default(cuid())
   email                 String         @unique @db.VarChar(320)
@@ -74,6 +80,7 @@ model User {
   removedQuestions      Question[]     @relation("QuestionRemover")
   answers               Answer[]       @relation("AnswerAuthor")
   removedAnswers        Answer[]       @relation("AnswerRemover")
+  chatMessages          ChatMessage[]
 }
 
 model Destination {
@@ -100,12 +107,15 @@ model DestinationRoom {
   updatedAt     DateTime    @updatedAt
   destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
   questions     Question[]
+  messages      ChatMessage[]
 }
 
 model Question {
   id               String           @id @default(cuid())
   roomId           String
   authorId         String
+  authorKind       RoomParticipantKind @default(TRAVELER)
+  sourceMessageId  String?             @unique
   category         QuestionCategory
   urgency          QuestionUrgency
   content          String           @db.VarChar(1000)
@@ -123,10 +133,27 @@ model Question {
   removedBy        User?            @relation("QuestionRemover", fields: [removedById], references: [id], onDelete: SetNull)
   answers          Answer[]         @relation("QuestionAnswers")
   acceptedAnswer   Answer?          @relation("AcceptedAnswer", fields: [acceptedAnswerId], references: [id], onDelete: SetNull)
+  sourceMessage    ChatMessage?     @relation("SourceMessage", fields: [sourceMessageId], references: [id], onDelete: SetNull)
 
   @@index([roomId, status, createdAt, id])
   @@index([authorId, status])
   @@index([expiresAt])
+}
+
+model ChatMessage {
+  id         String              @id @default(cuid())
+  roomId     String
+  authorId   String
+  authorKind RoomParticipantKind
+  content    String              @db.VarChar(500)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  room       DestinationRoom     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  author     User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  topic      Question?           @relation("SourceMessage")
+
+  @@index([roomId, createdAt, id])
+  @@index([authorId, createdAt])
 }
 
 model Answer {

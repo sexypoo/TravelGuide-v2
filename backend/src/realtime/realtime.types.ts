@@ -1,5 +1,6 @@
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import type { AnswerResponse } from '../answers/dto/answer.response';
+import type { MessageResponse } from '../messages/dto/message.response';
 import type { QuestionResponse } from '../questions/dto/question.response';
 
 export interface RealtimeEnvelope<T> {
@@ -21,6 +22,7 @@ export interface ClientToServerEvents {
 }
 
 export interface ServerToClientEvents {
+  'room.message.created': (event: RealtimeEnvelope<MessageResponse>) => void;
   'room.question.created': (event: RealtimeEnvelope<QuestionResponse>) => void;
   'room.answer.created': (event: RealtimeEnvelope<AnswerResponse>) => void;
 }

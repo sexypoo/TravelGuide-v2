@@ -62,8 +62,11 @@ describe('RoomAccessService', () => {
       status: 'VERIFICATION_REQUIRED',
       labelKo: '인증 필요',
       canViewContent: false,
+      canChat: false,
+      canCreateTopic: false,
       canAskQuestion: false,
       canAnswer: false,
+      participantKind: null,
     });
 
     jest
@@ -86,8 +89,11 @@ describe('RoomAccessService', () => {
       status: 'AVAILABLE',
       labelKo: '입장 가능',
       canViewContent: true,
+      canChat: true,
+      canCreateTopic: true,
       canAskQuestion: true,
       canAnswer: false,
+      participantKind: 'TRAVELER',
     });
 
     jest
@@ -99,12 +105,15 @@ describe('RoomAccessService', () => {
       status: 'AVAILABLE',
       labelKo: '입장 가능',
       canViewContent: true,
-      canAskQuestion: false,
+      canChat: true,
+      canCreateTopic: true,
+      canAskQuestion: true,
       canAnswer: true,
+      participantKind: 'LOCAL',
     });
   });
 
-  it('requires an approved traveler specifically when asking a question', async () => {
+  it('allows either verified participant to create a topic', async () => {
     jest
       .spyOn(prisma.verification, 'findFirst')
       .mockResolvedValueOnce(null)
@@ -113,9 +122,7 @@ describe('RoomAccessService', () => {
 
     await expect(
       service.assertCanAskQuestion(user('USER'), 'jeju-id'),
-    ).rejects.toMatchObject({
-      code: 'TRAVELER_VERIFICATION_REQUIRED',
-    });
+    ).resolves.toBeUndefined();
 
     jest
       .spyOn(prisma.verification, 'findFirst')
@@ -125,6 +132,23 @@ describe('RoomAccessService', () => {
     await expect(
       service.assertCanAskQuestion(user('USER'), 'jeju-id'),
     ).resolves.toBeUndefined();
+  });
+
+  it('preserves both participant capabilities for dual verification', async () => {
+    jest
+      .spyOn(prisma.verification, 'findFirst')
+      .mockResolvedValueOnce(verification('TRAVELER'))
+      .mockResolvedValueOnce(verification('LOCAL'))
+      .mockResolvedValueOnce(null);
+
+    await expect(
+      service.getAccess(user('USER'), 'jeju-id'),
+    ).resolves.toMatchObject({
+      canChat: true,
+      canCreateTopic: true,
+      canAnswer: true,
+      participantKind: 'BOTH',
+    });
   });
 
   it('returns the approved local date when answering and rejects a traveler', async () => {
@@ -170,8 +194,11 @@ describe('RoomAccessService', () => {
       status: 'AVAILABLE',
       labelKo: '입장 가능',
       canViewContent: true,
+      canChat: false,
+      canCreateTopic: false,
       canAskQuestion: false,
       canAnswer: false,
+      participantKind: null,
     });
     expect(findFirst).not.toHaveBeenCalled();
     await expect(

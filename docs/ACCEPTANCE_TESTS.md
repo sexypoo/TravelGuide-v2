@@ -241,6 +241,34 @@ And REST refetch 후 누락된 답변이 표시된다
 And 중복 답변이 없다
 ```
 
+### E2E-018A 인증 참여자 방 메시지
+
+```gherkin
+Given 유효한 여행자와 현지인이 제주 방에 입장했다
+When 여행자가 일반 메시지를 작성한다
+Then 메시지가 DB에 plain text로 저장된다
+And 두 사용자 화면에 room.message.created 이벤트가 한 번 전달된다
+
+When 현지인이 일반 메시지를 작성한다
+Then 메시지에는 인증 현지인 공개 배지만 포함된다
+And 이메일, 증빙, GPS는 응답과 이벤트에 포함되지 않는다
+```
+
+### E2E-018B 메시지를 토픽으로 전환
+
+```gherkin
+Given 유효한 참여자가 자신의 제주 방 메시지를 작성했다
+When category와 urgency를 지정해 메시지를 토픽으로 전환한다
+Then 원문을 본문으로 가진 OPEN 토픽이 하나 생성된다
+And room.question.created 이벤트가 전달된다
+
+When 같은 메시지를 다시 전환한다
+Then 409와 MESSAGE_ALREADY_PROMOTED를 반환한다
+
+When 다른 사용자 또는 다른 방 메시지를 전환한다
+Then 토픽이 생성되지 않는다
+```
+
 ### E2E-019 답변 채택과 해결
 
 ```gherkin
@@ -405,4 +433,3 @@ Not run:
 Risks / follow-ups:
 - ...
 ```
-

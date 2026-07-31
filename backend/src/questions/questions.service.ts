@@ -83,10 +83,64 @@ export class QuestionsService {
     now = new Date(),
   ): Promise<QuestionResponse> {
     const room = await this.rooms.getIdentity(roomSlug);
-    await this.roomAccess.assertCanAskQuestion(user, room.destinationId);
+    const capability = await this.roomAccess.assertCanParticipate(
+      user,
+      room.destinationId,
+    );
     const question = await this.prisma.$transaction(async (transaction) => {
       const lockKey = `${user.id}:${room.id}`;
       await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+      let content = input.content;
+      const sourceMessageId =
+        typeof input.sourceMessageId === 'string'
+          ? input.sourceMessageId
+          : undefined;
+      if (sourceMessageId !== undefined) {
+        const messageLockKey = `topic-message:${sourceMessageId}`;
+        await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${messageLockKey}))`;
+        const message = await transaction.chatMessage.findUnique({
+          where: { id: sourceMessageId },
+          select: {
+            roomId: true,
+            authorId: true,
+            content: true,
+            topic: { select: { id: true } },
+          },
+        });
+        if (
+          message === null ||
+          message.roomId !== room.id ||
+          message.authorId !== user.id
+        ) {
+          throw new ProblemException(
+            'MESSAGE_NOT_AVAILABLE_FOR_PROMOTION',
+            '본인이 이 방에 작성한 메시지만 토픽으로 만들 수 있습니다.',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        if (message.topic !== null) {
+          throw new ProblemException(
+            'MESSAGE_ALREADY_PROMOTED',
+            '이미 토픽으로 만든 메시지입니다.',
+            HttpStatus.CONFLICT,
+          );
+        }
+        if (message.content.length < 20) {
+          throw new ProblemException(
+            'MESSAGE_TOO_SHORT_FOR_TOPIC',
+            '토픽으로 만들 메시지는 20자 이상이어야 합니다.',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        content = message.content;
+      }
+      if (typeof content !== 'string') {
+        throw new ProblemException(
+          'TOPIC_CONTENT_REQUIRED',
+          '토픽 본문 또는 원본 메시지가 필요합니다.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
       const activeCount = await transaction.question.count({
         where: {
           roomId: room.id,
@@ -107,9 +161,11 @@ export class QuestionsService {
         data: {
           roomId: room.id,
           authorId: user.id,
+          authorKind: capability.kind,
+          sourceMessageId,
           category: input.category,
           urgency: input.urgency,
-          content: input.content,
+          content,
           areaText:
             input.areaText === undefined || input.areaText === ''
               ? null

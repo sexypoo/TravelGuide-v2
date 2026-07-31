@@ -5,6 +5,7 @@ import { AnswersModule } from './answers/answers.module';
 import { AuthModule } from './auth/auth.module';
 import { validateEnvironment } from './config/environment';
 import { HealthModule } from './health/health.module';
+import { MessagesModule } from './messages/messages.module';
 import { QuestionsModule } from './questions/questions.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { UsersModule } from './users/users.module';
@@ -20,6 +21,7 @@ import { VerificationsModule } from './verifications/verifications.module';
     AnswersModule,
     AuthModule,
     HealthModule,
+    MessagesModule,
     QuestionsModule,
     UsersModule,
     RoomsModule,

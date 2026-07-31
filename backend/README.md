@@ -85,27 +85,36 @@ static public path. Only an authenticated administrator can stream it through
 the evidence endpoint. Production requires `STORAGE_DRIVER=s3` and fails closed
 until a private S3 adapter and deployment credentials are configured.
 
-## Room question API
+## Room chat and topic API
 
-T05 adds the authenticated room feed and traveler question endpoints:
+T05 and T07A provide persistent chat plus structured topic endpoints. The
+existing `questions` path remains for API compatibility while the product UI
+calls these records topics.
 
 ```text
+GET  /api/v1/rooms/:slug/messages?cursor=&limit=50
+POST /api/v1/rooms/:slug/messages
 GET  /api/v1/rooms/:slug/questions?status=OPEN&cursor=&limit=20
 POST /api/v1/rooms/:slug/questions
 GET  /api/v1/questions/:questionId
 ```
 
-Room reads require a valid traveler or local verification. Creating a question
-requires a valid traveler verification and accepts `category`, `urgency`,
-20–1000 character plain-text `content`, and optional `areaText` up to 60
-characters. A traveler can have at most three non-expired open questions in one
-room. Questions expire after 24 hours; an expired open record is returned with
-the derived public status `EXPIRED`.
+Room reads and participant writes require a valid traveler or local
+verification; administrators remain read-only. Messages accept 1–500 characters
+of plain text and load the latest 50 in chronological display order with an
+opaque cursor for older history.
+
+A topic accepts `category`, `urgency`, 20–1000 character plain-text `content`,
+and optional `areaText` up to 60 characters. Alternatively,
+`sourceMessageId` promotes the current user's same-room message and uses its
+content. One message can become only one topic. Each participant can have at
+most three non-expired open topics in one room. Topics expire after 24 hours;
+an expired open record is returned with the derived public status `EXPIRED`.
 
 The feed defaults to 20 items and accepts limits from 1 through 50. Pass the
 opaque `nextCursor` from one response as `cursor` for the next page. Feed
-responses expose only the author's public id, nickname, and verified-traveler
-badge. Safety questions include the 112/119 emergency notice.
+responses expose only the author's public id, nickname, and creation-time
+participant badge. Safety topics include the 112/119 emergency notice.
 
 ## Answer and realtime API
 
@@ -130,7 +139,8 @@ room.leave { roomSlug }
 ```
 
 After server-authorized join, committed REST writes broadcast
-`room.question.created` and `room.answer.created`. Every event contains an
+`room.message.created`, `room.question.created`, and `room.answer.created`.
+Every event contains an
 `eventId`, `roomSlug`, `occurredAt`, and the same public DTO used by REST. Events
 are an immediate update signal; after reconnect clients must rejoin and refetch
 the feed/detail REST endpoints.

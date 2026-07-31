@@ -77,6 +77,7 @@ travelguide-v2/
 │       │   ├── destinations/
 │       │   ├── verifications/
 │       │   ├── rooms/
+│       │   ├── messages/
 │       │   ├── questions/
 │       │   ├── reports/
 │       │   ├── admin/
@@ -147,11 +148,18 @@ travelguide-v2/
 
 - 방 목록·상세
 - `RoomAccessService`
-- 방의 질문 목록
+- 방의 메시지·토픽 접근 권한
+
+### messages
+
+- 최신 메시지와 이전 cursor 페이지 조회
+- 인증 참여자 메시지 생성
+- 작성 시점 참여자 배지 보존
 
 ### questions
 
-- 질문 생성·조회
+- 구조화 토픽 생성·조회
+- 본인 메시지의 1회 토픽 전환
 - 답변 생성
 - 채택·해결
 - 상태·만료 판정
@@ -303,6 +311,7 @@ destination-room:{destinationRoomId}
 ### 8.2 이벤트 발행 위치
 
 - 질문 생성 서비스
+- 메시지 생성 서비스
 - 답변 생성 서비스
 - 질문 채택·해결 서비스
 - 관리자 콘텐츠 숨김 서비스
@@ -534,4 +543,3 @@ Codex는 명령을 실제 실행하고 성공 여부를 보고한다. 실행하�
 - CQRS, DDD aggregate를 형식적으로 도입하지 않음
 
 이 선택은 기술 부채가 아니라 2.5주 MVP의 의도적 단순화다.
-

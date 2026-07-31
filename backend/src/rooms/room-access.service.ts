@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import type { RoomParticipantKind } from '@prisma/client';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import { ProblemException } from '../common/http/problem.exception';
 import { PrismaService } from '../prisma/prisma.service';
@@ -8,6 +9,10 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface LocalAnswerCapability {
   verifiedAt: Date;
+}
+
+export interface RoomParticipantCapability {
+  kind: RoomParticipantKind;
 }
 
 @Injectable()
@@ -24,8 +29,11 @@ export class RoomAccessService {
         status: 'AVAILABLE',
         labelKo: '입장 가능',
         canViewContent: true,
+        canChat: false,
+        canCreateTopic: false,
         canAskQuestion: false,
         canAnswer: false,
+        participantKind: null,
       };
     }
 
@@ -59,12 +67,21 @@ export class RoomAccessService {
     ]);
 
     if (traveler !== null || local !== null) {
+      const participantKind: RoomParticipantKind =
+        traveler !== null && local !== null
+          ? 'BOTH'
+          : traveler !== null
+            ? 'TRAVELER'
+            : 'LOCAL';
       return {
         status: 'AVAILABLE',
         labelKo: '입장 가능',
         canViewContent: true,
-        canAskQuestion: traveler !== null,
+        canChat: true,
+        canCreateTopic: true,
+        canAskQuestion: true,
         canAnswer: local !== null,
+        participantKind,
       };
     }
 
@@ -73,8 +90,11 @@ export class RoomAccessService {
         status: 'TRAVELER_PENDING',
         labelKo: '여행자 심사 중',
         canViewContent: false,
+        canChat: false,
+        canCreateTopic: false,
         canAskQuestion: false,
         canAnswer: false,
+        participantKind: null,
       };
     }
 
@@ -83,8 +103,11 @@ export class RoomAccessService {
         status: 'LOCAL_PENDING',
         labelKo: '현지인 심사 중',
         canViewContent: false,
+        canChat: false,
+        canCreateTopic: false,
         canAskQuestion: false,
         canAnswer: false,
+        participantKind: null,
       };
     }
 
@@ -92,8 +115,11 @@ export class RoomAccessService {
       status: 'VERIFICATION_REQUIRED',
       labelKo: '인증 필요',
       canViewContent: false,
+      canChat: false,
+      canCreateTopic: false,
       canAskQuestion: false,
       canAnswer: false,
+      participantKind: null,
     };
   }
 
@@ -114,13 +140,22 @@ export class RoomAccessService {
     user: AuthenticatedUser,
     destinationId: string,
   ): Promise<void> {
-    if (!(await this.getAccess(user, destinationId)).canAskQuestion) {
+    await this.assertCanParticipate(user, destinationId);
+  }
+
+  async assertCanParticipate(
+    user: AuthenticatedUser,
+    destinationId: string,
+  ): Promise<RoomParticipantCapability> {
+    const access = await this.getAccess(user, destinationId);
+    if (!access.canChat || access.participantKind === null) {
       throw new ProblemException(
-        'TRAVELER_VERIFICATION_REQUIRED',
-        '현재 유효한 여행자 인증이 필요합니다.',
+        'ROOM_PARTICIPANT_VERIFICATION_REQUIRED',
+        '현재 유효한 여행자 또는 현지인 인증이 필요합니다.',
         HttpStatus.FORBIDDEN,
       );
     }
+    return { kind: access.participantKind };
   }
 
   async assertCanAnswer(

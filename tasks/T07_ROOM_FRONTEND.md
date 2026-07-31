@@ -1,5 +1,9 @@
 # T07 — Core room, question, answer frontend
 
+> Superseded for the room surface by ADR-016 and the follow-up T07A/T07B
+> chat-topic slices. The query/detail implementation remains reusable as the
+> structured topic layer.
+
 ## Goal
 
 Deliver the presentation's central user experience with real REST data and real Socket updates.
@@ -41,4 +45,3 @@ Deliver the presentation's central user experience with real REST data and real 
 - Long Korean text wraps without layout break.
 - 390x844 and 1440x900 pass visual inspection.
 - No duplicate socket event rendering after navigation back and forth.
-

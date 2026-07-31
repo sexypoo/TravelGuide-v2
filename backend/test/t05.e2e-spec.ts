@@ -188,15 +188,15 @@ describe('T05 room questions', () => {
     expect(detail.body).toMatchObject(body);
   });
 
-  it('rejects local-only and expired traveler identities when creating', async () => {
+  it('allows a verified local topic and rejects expired identities', async () => {
     const local = await createUser('local');
     await approve(local.id, VerificationType.LOCAL);
     const localResponse = await local.agent
       .post('/api/v1/rooms/jeju/questions')
       .send(validQuestion)
-      .expect(403);
-    expect(record(localResponse.body as unknown).code).toBe(
-      'TRAVELER_VERIFICATION_REQUIRED',
+      .expect(201);
+    expect(record(record(localResponse.body as unknown).author).badge).toBe(
+      'VERIFIED_LOCAL',
     );
 
     const expired = await createUser('expired');
@@ -206,7 +206,7 @@ describe('T05 room questions', () => {
       .send(validQuestion)
       .expect(403);
     expect(record(expiredResponse.body as unknown).code).toBe(
-      'TRAVELER_VERIFICATION_REQUIRED',
+      'ROOM_PARTICIPANT_VERIFICATION_REQUIRED',
     );
   });
 

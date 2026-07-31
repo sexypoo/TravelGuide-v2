@@ -2,6 +2,7 @@ import type {
   QuestionCategory,
   QuestionStatus,
   QuestionUrgency,
+  RoomParticipantKind,
 } from '@prisma/client';
 import type { AnswerResponse } from '../../answers/dto/answer.response';
 
@@ -13,13 +14,14 @@ export interface QuestionResponse {
   author: {
     id: string;
     nickname: string;
-    badge: 'VERIFIED_TRAVELER';
+    badge: 'VERIFIED_TRAVELER' | 'VERIFIED_LOCAL' | 'VERIFIED_BOTH';
   };
   category: QuestionCategory;
   urgency: QuestionUrgency;
   content: string;
   contentFormat: 'PLAIN_TEXT';
   areaText: string | null;
+  sourceMessageId: string | null;
   status: PublicQuestionStatus;
   safetyNotice: string | null;
   answerCount: number;
@@ -45,6 +47,8 @@ export interface QuestionForResponse {
   urgency: QuestionUrgency;
   content: string;
   areaText: string | null;
+  authorKind: RoomParticipantKind;
+  sourceMessageId: string | null;
   status: QuestionStatus;
   expiresAt: Date;
   resolvedAt: Date | null;
@@ -79,13 +83,19 @@ export function toQuestionResponse(
     author: {
       id: question.author.id,
       nickname: question.author.nickname,
-      badge: 'VERIFIED_TRAVELER',
+      badge:
+        question.authorKind === 'TRAVELER'
+          ? 'VERIFIED_TRAVELER'
+          : question.authorKind === 'LOCAL'
+            ? 'VERIFIED_LOCAL'
+            : 'VERIFIED_BOTH',
     },
     category: question.category,
     urgency: question.urgency,
     content: removed ? REMOVED_CONTENT : question.content,
     contentFormat: 'PLAIN_TEXT',
     areaText: removed ? null : question.areaText,
+    sourceMessageId: question.sourceMessageId,
     status: deriveQuestionStatus(question, now),
     safetyNotice:
       !removed && question.category === 'SAFETY' ? SAFETY_NOTICE : null,

@@ -20,14 +20,22 @@ export class CreateQuestionDto {
   urgency!: QuestionUrgency;
 
   @Transform(({ value }): unknown => trim(value))
+  @IsOptional()
   @IsString()
   @MinLength(20)
   @MaxLength(1000)
-  content!: string;
+  content?: string;
 
   @Transform(({ value }): unknown => trim(value))
   @IsOptional()
   @IsString()
   @MaxLength(60)
   areaText?: string;
+
+  @Transform(({ value }): unknown => trim(value))
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(64)
+  sourceMessageId?: string;
 }
