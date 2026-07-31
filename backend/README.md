@@ -107,6 +107,34 @@ opaque `nextCursor` from one response as `cursor` for the next page. Feed
 responses expose only the author's public id, nickname, and verified-traveler
 badge. Safety questions include the 112/119 emergency notice.
 
+## Answer and realtime API
+
+T06 adds verified-local answers and Socket.io broadcasts:
+
+```text
+POST /api/v1/questions/:questionId/answers
+```
+
+Answers require a valid local verification, 10–1000 character plain-text
+`content`, and one of `ON_SITE_NOW`, `RECENT_EXPERIENCE`, `OFFICIAL_SOURCE`, or
+`PERSONAL_OPINION`. An official source requires a valid HTTPS `sourceUrl`. A
+local cannot answer their own question and can post at most three answers per
+question. The question must remain OPEN and unexpired.
+
+Socket.io uses the default namespace and `/socket.io` path. It authenticates the
+same `tg_access` cookie and accepts only these client events:
+
+```text
+room.join  { roomSlug }
+room.leave { roomSlug }
+```
+
+After server-authorized join, committed REST writes broadcast
+`room.question.created` and `room.answer.created`. Every event contains an
+`eventId`, `roomSlug`, `occurredAt`, and the same public DTO used by REST. Events
+are an immediate update signal; after reconnect clients must rejoin and refetch
+the feed/detail REST endpoints.
+
 ## Quality commands
 
 ```bash

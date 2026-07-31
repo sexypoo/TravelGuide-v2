@@ -18,6 +18,7 @@ function question(
     createdAt: new Date('2026-07-31T12:00:00.000Z'),
     updatedAt: new Date('2026-07-31T12:00:00.000Z'),
     author: { id: 'user-id', nickname: '여행자' },
+    _count: { answers: 0 },
     ...overrides,
   };
 }

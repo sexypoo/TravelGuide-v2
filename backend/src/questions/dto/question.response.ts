@@ -3,6 +3,7 @@ import type {
   QuestionStatus,
   QuestionUrgency,
 } from '@prisma/client';
+import type { AnswerResponse } from '../../answers/dto/answer.response';
 
 export type PublicQuestionStatus = QuestionStatus | 'EXPIRED';
 
@@ -21,11 +22,15 @@ export interface QuestionResponse {
   areaText: string | null;
   status: PublicQuestionStatus;
   safetyNotice: string | null;
-  answerCount: 0;
+  answerCount: number;
   expiresAt: string;
   resolvedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface QuestionDetailResponse extends QuestionResponse {
+  answers: AnswerResponse[];
 }
 
 export interface QuestionListResponse {
@@ -47,6 +52,7 @@ export interface QuestionForResponse {
   createdAt: Date;
   updatedAt: Date;
   author: { id: string; nickname: string };
+  _count: { answers: number };
 }
 
 const SAFETY_NOTICE =
@@ -83,7 +89,7 @@ export function toQuestionResponse(
     status: deriveQuestionStatus(question, now),
     safetyNotice:
       !removed && question.category === 'SAFETY' ? SAFETY_NOTICE : null,
-    answerCount: 0,
+    answerCount: question._count.answers,
     expiresAt: question.expiresAt.toISOString(),
     resolvedAt: question.resolvedAt?.toISOString() ?? null,
     createdAt: question.createdAt.toISOString(),

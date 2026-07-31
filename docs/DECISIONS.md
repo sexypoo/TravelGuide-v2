@@ -107,6 +107,17 @@
 - 영향: cursor는 내부 구현으로 취급하고 클라이언트가 해석하지 않는다. 다른 DB로 전환하면 advisory lock 구현을 교체해야 한다.
 - 되돌리는 조건: 데이터 저장소 변경 또는 범용 idempotency/분산 잠금 계층 도입 시.
 
+### ADR-015 T06 실시간 전송과 복구 계약
+
+- 날짜: 2026-07-31
+- 상태: accepted
+- 문제: REST 쓰기와 Socket 이벤트 사이에 원자적 브로커가 없고, 연결 중단 동안 이벤트가 유실될 수 있다.
+- 선택지: Socket에서 쓰기 수행, DB 트랜잭션 안에서 emit, outbox/event log, 또는 커밋 후 best-effort emit과 REST 재조회.
+- 결정: 모든 쓰기는 REST에서 커밋한 뒤 `RealtimePublisher`로 한 번 emit한다. 기본 namespace와 `/socket.io` path만 사용하고, 재연결 시 클라이언트가 다시 join한 후 REST 목록·상세를 재조회한다.
+- 이유: 작은 MVP에서 DB를 최종 진실로 유지하고 커밋 전 유령 이벤트를 막으며, 별도 메시지 브로커 없이 연결 유실을 복구할 수 있다.
+- 영향: 이벤트 발행 실패는 커밋을 롤백하지 않고 로그로 남긴다. 이벤트 `eventId`와 entity id는 UI 중복 제거에 사용하지만 이벤트 replay를 보장하지 않는다.
+- 되돌리는 조건: 이벤트 전달 보장이나 다중 API 인스턴스가 필요해지면 transactional outbox와 공유 Socket adapter를 도입한다.
+
 ---
 
 ## 신규 결정 템플릿

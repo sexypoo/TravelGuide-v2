@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AdminVerificationsModule } from './admin/verifications/admin-verifications.module';
+import { AnswersModule } from './answers/answers.module';
 import { AuthModule } from './auth/auth.module';
 import { validateEnvironment } from './config/environment';
 import { HealthModule } from './health/health.module';
@@ -16,6 +17,7 @@ import { VerificationsModule } from './verifications/verifications.module';
       validate: validateEnvironment,
     }),
     AdminVerificationsModule,
+    AnswersModule,
     AuthModule,
     HealthModule,
     QuestionsModule,

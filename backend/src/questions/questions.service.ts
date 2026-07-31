@@ -1,8 +1,10 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { toAnswerResponse } from '../answers/dto/answer.response';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import { ProblemException } from '../common/http/problem.exception';
 import { PrismaService } from '../prisma/prisma.service';
+import { RealtimePublisher } from '../realtime/realtime.publisher';
 import { RoomAccessService } from '../rooms/room-access.service';
 import { RoomsService } from '../rooms/rooms.service';
 import type { CreateQuestionDto } from './dto/create-question.dto';
@@ -10,6 +12,7 @@ import type { ListQuestionsDto } from './dto/list-questions.dto';
 import {
   toQuestionResponse,
   type QuestionListResponse,
+  type QuestionDetailResponse,
   type QuestionResponse,
 } from './dto/question.response';
 import {
@@ -21,14 +24,18 @@ import {
 const DAY_MS = 24 * 60 * 60 * 1000;
 const questionInclude = {
   author: { select: { id: true, nickname: true } },
+  _count: { select: { answers: { where: { removedAt: null } } } },
 } satisfies Prisma.QuestionInclude;
 
 @Injectable()
 export class QuestionsService {
+  private readonly logger = new Logger(QuestionsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly rooms: RoomsService,
     private readonly roomAccess: RoomAccessService,
+    private readonly publisher: RealtimePublisher,
   ) {}
 
   async list(
@@ -113,14 +120,21 @@ export class QuestionsService {
         include: questionInclude,
       });
     });
-    return toQuestionResponse(question, now);
+    const response = toQuestionResponse(question, now);
+    try {
+      this.publisher.publishQuestionCreated(room.id, roomSlug, response, now);
+    } catch (error: unknown) {
+      const name = error instanceof Error ? error.name : 'UnknownError';
+      this.logger.warn(`Question event publication failed: ${name}`);
+    }
+    return response;
   }
 
   async get(
     questionId: string,
     user: AuthenticatedUser,
     now = new Date(),
-  ): Promise<QuestionResponse> {
+  ): Promise<QuestionDetailResponse> {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
       include: {
@@ -139,7 +153,41 @@ export class QuestionsService {
       user,
       question.room.destinationId,
     );
-    return toQuestionResponse(question, now);
+    const answers = await this.prisma.answer.findMany({
+      where: { questionId, removedAt: null },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      include: {
+        author: {
+          select: {
+            id: true,
+            nickname: true,
+            verifications: {
+              where: {
+                destinationId: question.room.destinationId,
+                type: 'LOCAL',
+                status: 'APPROVED',
+                reviewedAt: { not: null },
+              },
+              orderBy: { reviewedAt: 'desc' },
+              take: 1,
+              select: { reviewedAt: true },
+            },
+          },
+        },
+      },
+    });
+    const answerResponses = answers.map((answer) => {
+      const verifiedAt = answer.author.verifications[0]?.reviewedAt;
+      if (verifiedAt === undefined || verifiedAt === null) {
+        throw new Error('Answer author local verification is missing');
+      }
+      return toAnswerResponse(answer, verifiedAt);
+    });
+    return {
+      ...toQuestionResponse(question, now),
+      answerCount: answerResponses.length,
+      answers: answerResponses,
+    };
   }
 
   private parseCursor(value: string | undefined): QuestionCursor | null {

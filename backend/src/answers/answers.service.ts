@@ -1,0 +1,162 @@
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import type { AuthenticatedUser } from '../auth/authenticated-user';
+import { ProblemException } from '../common/http/problem.exception';
+import { PrismaService } from '../prisma/prisma.service';
+import { RealtimePublisher } from '../realtime/realtime.publisher';
+import { RoomAccessService } from '../rooms/room-access.service';
+import type { CreateAnswerDto } from './dto/create-answer.dto';
+import { toAnswerResponse, type AnswerResponse } from './dto/answer.response';
+
+const answerInclude = {
+  author: { select: { id: true, nickname: true } },
+} satisfies Prisma.AnswerInclude;
+
+export function normalizeSourceUrl(input: CreateAnswerDto): string | null {
+  const value = input.sourceUrl;
+  if (
+    input.sourceType === 'OFFICIAL_SOURCE' &&
+    (value === undefined || value === null || value === '')
+  ) {
+    throw new ProblemException(
+      'SOURCE_URL_REQUIRED',
+      '공식 정보 출처에는 HTTPS URL이 필요합니다.',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+  try {
+    const parsed = new URL(value);
+    if (
+      parsed.protocol !== 'https:' ||
+      parsed.username.length > 0 ||
+      parsed.password.length > 0
+    ) {
+      throw new Error('HTTPS is required');
+    }
+    return parsed.toString();
+  } catch {
+    throw new ProblemException(
+      'INVALID_SOURCE_URL',
+      '출처 URL은 유효한 HTTPS 주소여야 합니다.',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
+
+@Injectable()
+export class AnswersService {
+  private readonly logger = new Logger(AnswersService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly roomAccess: RoomAccessService,
+    private readonly publisher: RealtimePublisher,
+  ) {}
+
+  async create(
+    questionId: string,
+    user: AuthenticatedUser,
+    input: CreateAnswerDto,
+    now = new Date(),
+  ): Promise<AnswerResponse> {
+    const initialQuestion = await this.prisma.question.findUnique({
+      where: { id: questionId },
+      select: {
+        id: true,
+        room: { select: { id: true, slug: true, destinationId: true } },
+      },
+    });
+    if (initialQuestion === null) {
+      throw this.questionNotFound();
+    }
+    const capability = await this.roomAccess.assertCanAnswer(
+      user,
+      initialQuestion.room.destinationId,
+      now,
+    );
+    const normalizedSourceUrl = normalizeSourceUrl(input);
+
+    const answer = await this.prisma.$transaction(async (transaction) => {
+      const lockKey = `answer:${user.id}:${questionId}`;
+      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+      const question = await transaction.question.findUnique({
+        where: { id: questionId },
+        select: {
+          authorId: true,
+          status: true,
+          expiresAt: true,
+          removedAt: true,
+        },
+      });
+      if (question === null) {
+        throw this.questionNotFound();
+      }
+      if (question.authorId === user.id) {
+        throw new ProblemException(
+          'CANNOT_ANSWER_OWN_QUESTION',
+          '자신이 작성한 질문에는 답변할 수 없습니다.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+      if (question.removedAt !== null || question.status !== 'OPEN') {
+        throw new ProblemException(
+          'QUESTION_NOT_OPEN',
+          '열린 질문에만 답변할 수 있습니다.',
+          HttpStatus.CONFLICT,
+        );
+      }
+      if (question.expiresAt <= now) {
+        throw new ProblemException(
+          'QUESTION_EXPIRED',
+          '만료된 질문에는 답변할 수 없습니다.',
+          HttpStatus.CONFLICT,
+        );
+      }
+      const answerCount = await transaction.answer.count({
+        where: { questionId, authorId: user.id, removedAt: null },
+      });
+      if (answerCount >= 3) {
+        throw new ProblemException(
+          'ANSWER_LIMIT_REACHED',
+          '한 질문에 작성할 수 있는 답변은 최대 3개입니다.',
+          HttpStatus.CONFLICT,
+        );
+      }
+      return transaction.answer.create({
+        data: {
+          questionId,
+          authorId: user.id,
+          content: input.content,
+          sourceType: input.sourceType,
+          sourceUrl: normalizedSourceUrl,
+          createdAt: now,
+        },
+        include: answerInclude,
+      });
+    });
+    const response = toAnswerResponse(answer, capability.verifiedAt);
+    try {
+      this.publisher.publishAnswerCreated(
+        initialQuestion.room.id,
+        initialQuestion.room.slug,
+        response,
+        now,
+      );
+    } catch (error: unknown) {
+      const name = error instanceof Error ? error.name : 'UnknownError';
+      this.logger.warn(`Answer event publication failed: ${name}`);
+    }
+    return response;
+  }
+
+  private questionNotFound(): ProblemException {
+    return new ProblemException(
+      'QUESTION_NOT_FOUND',
+      '질문을 찾을 수 없습니다.',
+      HttpStatus.NOT_FOUND,
+    );
+  }
+}

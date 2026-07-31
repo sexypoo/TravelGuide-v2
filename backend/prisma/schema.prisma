@@ -52,6 +52,13 @@ enum QuestionStatus {
   REMOVED
 }
 
+enum AnswerSourceType {
+  ON_SITE_NOW
+  RECENT_EXPERIENCE
+  OFFICIAL_SOURCE
+  PERSONAL_OPINION
+}
+
 model User {
   id                    String         @id @default(cuid())
   email                 String         @unique @db.VarChar(320)
@@ -65,6 +72,8 @@ model User {
   reviewedVerifications Verification[] @relation("VerificationReviewer")
   questions             Question[]     @relation("QuestionAuthor")
   removedQuestions      Question[]     @relation("QuestionRemover")
+  answers               Answer[]       @relation("AnswerAuthor")
+  removedAnswers        Answer[]       @relation("AnswerRemover")
 }
 
 model Destination {
@@ -112,10 +121,32 @@ model Question {
   room             DestinationRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
   author           User             @relation("QuestionAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   removedBy        User?            @relation("QuestionRemover", fields: [removedById], references: [id], onDelete: SetNull)
+  answers          Answer[]         @relation("QuestionAnswers")
+  acceptedAnswer   Answer?          @relation("AcceptedAnswer", fields: [acceptedAnswerId], references: [id], onDelete: SetNull)
 
   @@index([roomId, status, createdAt, id])
   @@index([authorId, status])
   @@index([expiresAt])
+}
+
+model Answer {
+  id                  String           @id @default(cuid())
+  questionId          String
+  authorId            String
+  content             String           @db.VarChar(1000)
+  sourceType          AnswerSourceType
+  sourceUrl           String?          @db.VarChar(2048)
+  removedAt           DateTime?
+  removedById         String?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  question            Question         @relation("QuestionAnswers", fields: [questionId], references: [id], onDelete: Cascade)
+  author              User             @relation("AnswerAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  removedBy           User?            @relation("AnswerRemover", fields: [removedById], references: [id], onDelete: SetNull)
+  acceptedForQuestion Question?        @relation("AcceptedAnswer")
+
+  @@index([questionId, createdAt, id])
+  @@index([authorId, createdAt])
 }
 
 model Verification {

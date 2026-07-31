@@ -127,6 +127,25 @@ describe('RoomAccessService', () => {
     ).resolves.toBeUndefined();
   });
 
+  it('returns the approved local date when answering and rejects a traveler', async () => {
+    const reviewedAt = new Date('2026-07-01T00:00:00.000Z');
+    jest
+      .spyOn(prisma.verification, 'findFirst')
+      .mockResolvedValueOnce({ ...verification('LOCAL'), reviewedAt });
+    await expect(
+      service.assertCanAnswer(
+        user('USER'),
+        'jeju-id',
+        new Date('2026-07-31T00:00:00.000Z'),
+      ),
+    ).resolves.toEqual({ verifiedAt: reviewedAt });
+
+    jest.spyOn(prisma.verification, 'findFirst').mockResolvedValueOnce(null);
+    await expect(
+      service.assertCanAnswer(user('USER'), 'jeju-id'),
+    ).rejects.toMatchObject({ code: 'LOCAL_VERIFICATION_REQUIRED' });
+  });
+
   it('uses inclusive traveler grace boundaries and exclusive local expiry', async () => {
     const now = new Date('2026-07-31T12:00:00.000Z');
     const findFirst = jest

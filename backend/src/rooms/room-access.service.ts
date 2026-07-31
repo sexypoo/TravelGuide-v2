@@ -6,6 +6,10 @@ import type { RoomAccessResponse } from './room-access.types';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+export interface LocalAnswerCapability {
+  verifiedAt: Date;
+}
+
 @Injectable()
 export class RoomAccessService {
   constructor(private readonly prisma: PrismaService) {}
@@ -117,5 +121,39 @@ export class RoomAccessService {
         HttpStatus.FORBIDDEN,
       );
     }
+  }
+
+  async assertCanAnswer(
+    user: AuthenticatedUser,
+    destinationId: string,
+    now = new Date(),
+  ): Promise<LocalAnswerCapability> {
+    if (user.role === 'ADMIN') {
+      throw new ProblemException(
+        'LOCAL_VERIFICATION_REQUIRED',
+        '현재 유효한 현지인 인증이 필요합니다.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    const local = await this.prisma.verification.findFirst({
+      where: {
+        userId: user.id,
+        destinationId,
+        type: 'LOCAL',
+        status: 'APPROVED',
+        reviewedAt: { not: null },
+        expiresAt: { gt: now },
+      },
+      orderBy: { reviewedAt: 'desc' },
+      select: { reviewedAt: true },
+    });
+    if (local === null || local.reviewedAt === null) {
+      throw new ProblemException(
+        'LOCAL_VERIFICATION_REQUIRED',
+        '현재 유효한 현지인 인증이 필요합니다.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    return { verifiedAt: local.reviewedAt };
   }
 }
