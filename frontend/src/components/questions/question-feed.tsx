@@ -1,0 +1,75 @@
+'use client';
+
+import type { QuestionListStatus } from '@/lib/api/questions';
+import { useQuestions } from '@/lib/query/use-questions';
+import { QuestionCard } from './question-card';
+
+export function QuestionFeed({
+  roomSlug,
+  status,
+}: {
+  roomSlug: string;
+  status: QuestionListStatus;
+}): React.JSX.Element {
+  const query = useQuestions(roomSlug, status);
+
+  if (query.isPending) {
+    return (
+      <div className="questionFeedSkeleton" aria-label="질문을 불러오는 중">
+        <span />
+        <span />
+        <span />
+      </div>
+    );
+  }
+  if (query.isError) {
+    return (
+      <div className="roomQueryState roomQueryState--error" role="alert">
+        <span aria-hidden="true">!</span>
+        <h2>질문을 불러오지 못했어요</h2>
+        <p>연결을 확인한 뒤 다시 시도해 주세요.</p>
+        <button type="button" onClick={() => void query.refetch()}>
+          다시 불러오기
+        </button>
+      </div>
+    );
+  }
+
+  const questions = query.data.questions;
+  if (questions.length === 0) {
+    return (
+      <div className="roomQueryState">
+        <span aria-hidden="true">⌁</span>
+        <h2>
+          {status === 'OPEN'
+            ? '첫 질문을 기다리고 있어요'
+            : '아직 해결된 질문이 없어요'}
+        </h2>
+        <p>
+          {status === 'OPEN'
+            ? '여행 중 판단이 필요한 순간을 구체적으로 남겨 주세요.'
+            : '답변을 통해 해결된 질문이 이곳에 모입니다.'}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="questionFeed">
+      <div className="questionSignalRail" aria-hidden="true" />
+      {questions.map((question) => (
+        <QuestionCard key={question.id} question={question} />
+      ))}
+      {query.hasNextPage && (
+        <button
+          className="loadMoreButton"
+          type="button"
+          disabled={query.isFetchingNextPage}
+          onClick={() => void query.fetchNextPage()}
+        >
+          {query.isFetchingNextPage ? '불러오는 중' : '질문 더 보기'}
+        </button>
+      )}
+    </div>
+  );
+}

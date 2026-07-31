@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         source: '/api/v1/:path*',
         destination: `${environment.apiInternalUrl}/api/v1/:path*`,
       },
+      {
+        source: '/socket.io',
+        destination: `${environment.apiInternalUrl}/socket.io/`,
+      },
     ];
   },
 };

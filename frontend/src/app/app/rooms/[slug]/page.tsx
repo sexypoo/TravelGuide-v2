@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { AccessIcon } from '@/components/app/access-icon';
+import { RoomExperience } from '@/components/rooms/room-experience';
 import { getRoom } from '@/lib/api/rooms.server';
 
 interface RoomPageProps {
@@ -12,6 +13,10 @@ export default async function RoomPage({
   const { slug } = await params;
   const room = await getRoom(slug);
   const locked = !room.access.canViewContent;
+
+  if (!locked) {
+    return <RoomExperience room={room} />;
+  }
 
   return (
     <div className="lockedRoomPage">
@@ -59,27 +64,20 @@ export default async function RoomPage({
         </div>
       </section>
 
-      {locked ? (
-        <section className="roomLockPanel" aria-labelledby="room-lock-title">
-          <span className="roomLockPanel__icon">
-            <AccessIcon locked />
+      <section className="roomLockPanel" aria-labelledby="room-lock-title">
+        <span className="roomLockPanel__icon">
+          <AccessIcon locked />
+        </span>
+        <div>
+          <p>질문 피드 잠김</p>
+          <h2 id="room-lock-title">인증 후 제주 도움방이 열려요</h2>
+          <span>
+            현재는 방 소개만 볼 수 있습니다. 여행자 또는 현지인 인증 방법을 먼저
+            확인해 주세요.
           </span>
-          <div>
-            <p>질문 피드 잠김</p>
-            <h2 id="room-lock-title">인증 후 제주 도움방이 열려요</h2>
-            <span>
-              현재는 방 소개만 볼 수 있습니다. 여행자 또는 현지인 인증 방법을
-              먼저 확인해 주세요.
-            </span>
-          </div>
-          <Link href="/app/verifications">인증 방법 확인하기</Link>
-        </section>
-      ) : (
-        <section className="roomAvailableNotice">
-          <strong>방 입장 자격이 확인되었습니다.</strong>
-          <p>질문 피드는 아직 열리지 않았습니다.</p>
-        </section>
-      )}
+        </div>
+        <Link href="/app/verifications">인증 방법 확인하기</Link>
+      </section>
     </div>
   );
 }

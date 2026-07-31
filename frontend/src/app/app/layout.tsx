@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { AppNavigation } from '@/components/app/app-navigation';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { Wordmark } from '@/components/brand/wordmark';
+import { AppProviders } from '@/components/providers/app-providers';
 import { requireUser } from '@/lib/auth/session';
 
 export default async function AppLayout({
@@ -28,7 +29,9 @@ export default async function AppLayout({
         </div>
       </header>
       <AppNavigation />
-      <main className="appContent">{children}</main>
+      <main className="appContent">
+        <AppProviders>{children}</AppProviders>
+      </main>
     </div>
   );
 }

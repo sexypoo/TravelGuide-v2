@@ -1,8 +1,8 @@
 # TravelGuide frontend
 
-Next.js frontend for TravelGuide v2. T01 includes the product landing page,
-real cookie-based registration/login/logout, and server-validated user/admin
-shells.
+Next.js frontend for TravelGuide v2. It includes cookie-based authentication,
+verification and profile flows, administrator review, and the authenticated
+Jeju question room.
 
 ## Prerequisites
 
@@ -31,7 +31,10 @@ same-origin.
 - `/auth/register`: account creation with automatic login
 - `/auth/login`: login with safe protected-route return
 - `/app`: authenticated user shell
-- `/app/rooms/jeju`: real Jeju room metadata and truthful access lock
+- `/app/rooms/jeju`: role-aware Jeju question feed with open/resolved tabs,
+  pagination, traveler question composer, and live updates
+- `/app/questions/:id`: question detail, public answers, and an eligible local
+  user's answer form
 - `/app/verifications`: own traveler/local verification status and reapplication
 - `/app/verifications/traveler`: traveler dates and private proof application
 - `/app/verifications/local`: geolocation, relationship, and private proof application
@@ -41,6 +44,12 @@ same-origin.
 `/app` and `/admin` validate the incoming cookie against the backend. A missing
 or expired session redirects to login. Tokens are never stored in browser
 storage or returned to frontend JavaScript.
+
+Room data uses TanStack Query for cache and pagination. One authenticated
+Socket.IO client is shared by the app shell; it rejoins active rooms after a
+reconnect, deduplicates events, and refetches cached room data when necessary.
+The same-origin `/socket.io/*` path is proxied to the backend alongside the REST
+API, so browser code does not need a separate public backend origin.
 
 Verification uploads use `FormData` and accept one JPEG, PNG, or PDF up to 5MB.
 Exact GPS coordinates are never rendered. Administrator evidence is loaded only
