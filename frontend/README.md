@@ -31,11 +31,21 @@ same-origin.
 - `/auth/register`: account creation with automatic login
 - `/auth/login`: login with safe protected-route return
 - `/app`: authenticated user shell
-- `/admin`: authenticated admin-only shell
+- `/app/rooms/jeju`: real Jeju room metadata and truthful access lock
+- `/app/verifications`: own traveler/local verification status and reapplication
+- `/app/verifications/traveler`: traveler dates and private proof application
+- `/app/verifications/local`: geolocation, relationship, and private proof application
+- `/app/profile`: own profile view and update
+- `/admin`: authenticated admin verification list, private evidence, and review
 
 `/app` and `/admin` validate the incoming cookie against the backend. A missing
 or expired session redirects to login. Tokens are never stored in browser
 storage or returned to frontend JavaScript.
+
+Verification uploads use `FormData` and accept one JPEG, PNG, or PDF up to 5MB.
+Exact GPS coordinates are never rendered. Administrator evidence is loaded only
+after an explicit click, opened through a short-lived object URL, and not kept in
+the client cache.
 
 ## Quality commands
 
