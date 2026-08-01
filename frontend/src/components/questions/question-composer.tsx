@@ -64,6 +64,9 @@ export function QuestionComposer({
         queryKeys.roomQuestions(roomSlug, 'OPEN'),
         (current) => mergeQuestionIntoFeed(current, question),
       );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.roomQuestionsRoot(roomSlug),
+      });
       if (sourceMessage !== undefined) {
         queryClient.setQueryData<InfiniteData<MessagePage>>(
           queryKeys.roomMessages(roomSlug),

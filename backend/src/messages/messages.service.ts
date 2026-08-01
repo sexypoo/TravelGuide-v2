@@ -241,6 +241,7 @@ export class MessagesService {
       where: { id: messageId },
       select: {
         type: true,
+        removedAt: true,
         imageObjectKey: true,
         imageOriginalName: true,
         imageMimeType: true,
@@ -250,6 +251,7 @@ export class MessagesService {
     if (
       message === null ||
       message.type !== 'IMAGE' ||
+      message.removedAt !== null ||
       message.imageObjectKey === null ||
       message.imageOriginalName === null ||
       message.imageMimeType === null

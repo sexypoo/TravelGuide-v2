@@ -10,11 +10,13 @@ export interface RealtimeEnvelope<T> {
   payload: T;
 }
 
-export interface ContentRemovedPayload {
-  targetType: 'QUESTION' | 'ANSWER';
-  targetId: string;
-  questionId: string;
-}
+export type ContentRemovedPayload =
+  | { targetType: 'MESSAGE'; targetId: string; questionId: null }
+  | {
+      targetType: 'QUESTION' | 'ANSWER';
+      targetId: string;
+      questionId: string;
+    };
 
 export interface ClientToServerEvents {
   'room.join': (

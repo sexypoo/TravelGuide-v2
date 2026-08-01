@@ -52,6 +52,7 @@ export class QuestionsService {
       where: {
         roomId: room.id,
         status: query.status,
+        ...(query.category === undefined ? {} : { category: query.category }),
         ...(cursor === null
           ? {}
           : {
@@ -246,7 +247,7 @@ export class QuestionsService {
       ...toQuestionResponse(question, now),
       answerCount: answerResponses.length,
       answers: answerResponses,
-      liveSummary: buildLiveSummary(question.category, answerResponses),
+      liveSummary: buildLiveSummary(question.category, answerResponses, now),
     };
   }
 
@@ -395,15 +396,26 @@ function mode<T extends string>(values: T[]): T | null {
   );
 }
 
-function buildLiveSummary(
+export function buildLiveSummary(
   category: string,
   answers: ReturnType<typeof toAnswerResponse>[],
+  now = new Date(),
 ): LiveStatusSummary | null {
   if (category !== 'WAITING' && category !== 'CROWD') return null;
-  const observations = answers
+  const allObservations = answers
     .filter((answer) => !answer.removed && answer.observation !== null)
-    .map((answer) => answer.observation)
-    .filter((observation) => observation !== null);
+    .map((answer) => ({ authorId: answer.author.id, ...answer.observation! }))
+    .sort(
+      (left, right) =>
+        new Date(right.observedAt).getTime() -
+        new Date(left.observedAt).getTime(),
+    );
+  const seenAuthors = new Set<string>();
+  const observations = allObservations.filter((observation) => {
+    if (seenAuthors.has(observation.authorId)) return false;
+    seenAuthors.add(observation.authorId);
+    return true;
+  });
   if (observations.length === 0) return null;
   const waits = observations
     .map((observation) => observation.waitMinutes)
@@ -439,6 +451,10 @@ function buildLiveSummary(
       ? `현장 답변 ${observations.length}건을 기준으로 현재 상태를 정리했습니다.`
       : `현장 답변 기준 현재 대기는 약 ${waitRange.min}~${waitRange.max}분 수준입니다.`;
   return {
+    freshness:
+      now.getTime() - lastObserved.getTime() > 30 * 60 * 1000
+        ? 'STALE'
+        : 'LIVE',
     responseCount: observations.length,
     agreementCount,
     waitMinutes: waitRange,
@@ -456,6 +472,7 @@ function buildLiveSummary(
     recommendedRecheckAt: new Date(
       lastObserved.getTime() + 10 * 60 * 1000,
     ).toISOString(),
+    staleAfter: new Date(lastObserved.getTime() + 30 * 60 * 1000).toISOString(),
     description,
   };
 }

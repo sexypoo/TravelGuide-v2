@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsEnum,
   IsIn,
   IsInt,
   IsOptional,
@@ -8,6 +9,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
+import { QuestionCategory } from '@prisma/client';
 
 export type QuestionListStatus = 'OPEN' | 'RESOLVED';
 
@@ -15,6 +17,10 @@ export class ListQuestionsDto {
   @IsOptional()
   @IsIn(['OPEN', 'RESOLVED'])
   status: QuestionListStatus = 'OPEN';
+
+  @IsOptional()
+  @IsEnum(QuestionCategory)
+  category?: QuestionCategory;
 
   @IsOptional()
   @IsString()

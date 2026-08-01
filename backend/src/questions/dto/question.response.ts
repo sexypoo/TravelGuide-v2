@@ -40,6 +40,7 @@ export interface QuestionDetailResponse extends QuestionResponse {
 }
 
 export interface LiveStatusSummary {
+  freshness: 'LIVE' | 'STALE';
   responseCount: number;
   agreementCount: number;
   waitMinutes: { min: number; max: number } | null;
@@ -47,6 +48,7 @@ export interface LiveStatusSummary {
   entryStatus: EntryStatus | null;
   lastObservedAt: string;
   recommendedRecheckAt: string;
+  staleAfter: string;
   description: string;
 }
 

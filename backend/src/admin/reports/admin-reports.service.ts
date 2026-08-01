@@ -20,7 +20,12 @@ type ReportRecord = Prisma.ReportGetPayload<{ include: typeof reportInclude }>;
 interface RemovalEvent {
   roomId: string | null;
   roomSlug: string | null;
-  targetType: 'QUESTION' | 'ANSWER' | 'COMMUNITY_POST' | 'COMMUNITY_COMMENT';
+  targetType:
+    | 'MESSAGE'
+    | 'QUESTION'
+    | 'ANSWER'
+    | 'COMMUNITY_POST'
+    | 'COMMUNITY_COMMENT';
   targetId: string;
   questionId: string | null;
 }
@@ -113,18 +118,25 @@ export class AdminReportsService {
       removal !== null &&
       removal.roomId !== null &&
       removal.roomSlug !== null &&
-      removal.questionId !== null &&
-      (removal.targetType === 'QUESTION' || removal.targetType === 'ANSWER')
+      (removal.targetType === 'MESSAGE' ||
+        removal.targetType === 'QUESTION' ||
+        removal.targetType === 'ANSWER')
     ) {
       try {
         this.publisher.publishContentRemoved(
           removal.roomId,
           removal.roomSlug,
-          {
-            targetType: removal.targetType,
-            targetId: removal.targetId,
-            questionId: removal.questionId,
-          },
+          removal.targetType === 'MESSAGE'
+            ? {
+                targetType: 'MESSAGE',
+                targetId: removal.targetId,
+                questionId: null,
+              }
+            : {
+                targetType: removal.targetType,
+                targetId: removal.targetId,
+                questionId: removal.questionId!,
+              },
           now,
         );
       } catch (error: unknown) {
@@ -141,6 +153,24 @@ export class AdminReportsService {
     reviewerId: string,
     now: Date,
   ): Promise<RemovalEvent> {
+    if (report.targetType === ReportTargetType.MESSAGE) {
+      const message = await transaction.chatMessage.findUnique({
+        where: { id: report.targetId },
+        select: { id: true, room: { select: { id: true, slug: true } } },
+      });
+      if (message === null) throw this.targetNotFound();
+      await transaction.chatMessage.update({
+        where: { id: message.id },
+        data: { removedAt: now, removedById: reviewerId },
+      });
+      return {
+        roomId: message.room.id,
+        roomSlug: message.room.slug,
+        targetType: 'MESSAGE',
+        targetId: message.id,
+        questionId: null,
+      };
+    }
     if (report.targetType === ReportTargetType.QUESTION) {
       const question = await transaction.question.findUnique({
         where: { id: report.targetId },
@@ -226,30 +256,35 @@ export class AdminReportsService {
     report: { targetType: ReportTargetType; targetId: string },
   ): Promise<void> {
     const exists =
-      report.targetType === ReportTargetType.QUESTION
-        ? await transaction.question.findUnique({
+      report.targetType === ReportTargetType.MESSAGE
+        ? await transaction.chatMessage.findUnique({
             where: { id: report.targetId },
             select: { id: true },
           })
-        : report.targetType === ReportTargetType.ANSWER
-          ? await transaction.answer.findUnique({
+        : report.targetType === ReportTargetType.QUESTION
+          ? await transaction.question.findUnique({
               where: { id: report.targetId },
               select: { id: true },
             })
-          : report.targetType === ReportTargetType.COMMUNITY_POST
-            ? await transaction.communityPost.findUnique({
+          : report.targetType === ReportTargetType.ANSWER
+            ? await transaction.answer.findUnique({
                 where: { id: report.targetId },
                 select: { id: true },
               })
-            : report.targetType === ReportTargetType.COMMUNITY_COMMENT
-              ? await transaction.communityComment.findUnique({
+            : report.targetType === ReportTargetType.COMMUNITY_POST
+              ? await transaction.communityPost.findUnique({
                   where: { id: report.targetId },
                   select: { id: true },
                 })
-              : await transaction.user.findUnique({
-                  where: { id: report.targetId },
-                  select: { id: true },
-                });
+              : report.targetType === ReportTargetType.COMMUNITY_COMMENT
+                ? await transaction.communityComment.findUnique({
+                    where: { id: report.targetId },
+                    select: { id: true },
+                  })
+                : await transaction.user.findUnique({
+                    where: { id: report.targetId },
+                    select: { id: true },
+                  });
     if (exists === null) throw this.targetNotFound();
   }
 
@@ -276,6 +311,25 @@ export class AdminReportsService {
     type: ReportTargetType,
     id: string,
   ): Promise<AdminReportResponse['target']> {
+    if (type === ReportTargetType.MESSAGE) {
+      const item = await this.prisma.chatMessage.findUnique({
+        where: { id },
+        select: {
+          content: true,
+          removedAt: true,
+          author: { select: { id: true, nickname: true } },
+          room: { select: { slug: true } },
+        },
+      });
+      if (item === null) throw this.targetNotFound();
+      return {
+        author: item.author,
+        content: item.content,
+        removed: item.removedAt !== null,
+        roomSlug: item.room.slug,
+        questionId: null,
+      };
+    }
     if (type === ReportTargetType.QUESTION) {
       const item = await this.prisma.question.findUnique({
         where: { id },

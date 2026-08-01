@@ -22,7 +22,7 @@ const config = [
       '@typescript-eslint/no-floating-promises': 'error',
     },
   },
-  globalIgnores(['.next/**', 'coverage/**', 'next-env.d.ts']),
+  globalIgnores(['.next/**', '.next-dev/**', 'coverage/**', 'next-env.d.ts']),
 ];
 
 export default config;

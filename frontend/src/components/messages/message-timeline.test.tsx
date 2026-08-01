@@ -20,6 +20,7 @@ function message(id: string, minute: number): ChatMessage {
     type: 'TEXT',
     content: `${id} 번째 실시간 메시지입니다.`,
     contentFormat: 'PLAIN_TEXT',
+    removed: false,
     topicId: null,
     image: null,
     place: null,

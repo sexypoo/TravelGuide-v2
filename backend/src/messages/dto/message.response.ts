@@ -34,6 +34,7 @@ export interface MessageResponse {
   };
   content: string;
   contentFormat: 'PLAIN_TEXT';
+  removed: boolean;
   topicId: string | null;
   image: {
     url: string;
@@ -71,6 +72,7 @@ export interface MessageForResponse {
   placeLongitude?: { toNumber(): number } | null;
   createdAt: Date;
   updatedAt: Date;
+  removedAt?: Date | null;
   author: { id: string; nickname: string };
   topic: { id: string } | null;
   sharedQuestion?: {
@@ -100,6 +102,7 @@ export function toMessageResponse(
   now = new Date(),
 ): MessageResponse {
   const type = message.type ?? 'TEXT';
+  const removed = message.removedAt != null;
   const shared = message.sharedQuestion ?? null;
   const sharedStatus: PublicQuestionStatus | null =
     shared === null
@@ -116,10 +119,14 @@ export function toMessageResponse(
       nickname: message.author.nickname,
       badge: toParticipantBadge(message.authorKind),
     },
-    content: message.content,
+    content: removed
+      ? '운영 정책에 따라 숨김 처리된 메시지입니다.'
+      : message.content,
     contentFormat: 'PLAIN_TEXT',
+    removed,
     topicId: message.topic?.id ?? null,
     image:
+      !removed &&
       type === 'IMAGE' &&
       message.imageObjectKey != null &&
       message.imageOriginalName != null &&
@@ -131,6 +138,7 @@ export function toMessageResponse(
           }
         : null,
     place:
+      !removed &&
       type === 'PLACE' &&
       message.placeName != null &&
       message.placeLatitude != null &&
@@ -143,7 +151,10 @@ export function toMessageResponse(
           }
         : null,
     sharedTopic:
-      shared === null || sharedStatus === null || shared.removedAt !== null
+      removed ||
+      shared === null ||
+      sharedStatus === null ||
+      shared.removedAt !== null
         ? null
         : {
             id: shared.id,

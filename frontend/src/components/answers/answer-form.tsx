@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
   createAnswer,
+  createAnswerWithImage,
   type AnswerSourceType,
   type CrowdLevel,
   type EntryStatus,
@@ -55,13 +56,14 @@ export function AnswerForm({
   const [sourceType, setSourceType] = useState<AnswerSourceType>('ON_SITE_NOW');
   const [sourceUrl, setSourceUrl] = useState('');
   const [content, setContent] = useState('');
+  const [image, setImage] = useState<File>();
   const [waitMinutes, setWaitMinutes] = useState('');
   const [crowdLevel, setCrowdLevel] = useState<CrowdLevel>();
   const [entryStatus, setEntryStatus] = useState<EntryStatus>();
   const [clientError, setClientError] = useState('');
   const mutation = useMutation({
-    mutationFn: () =>
-      createAnswer(questionId, {
+    mutationFn: () => {
+      const input = {
         content: content.trim(),
         sourceType,
         sourceUrl: sourceType === 'OFFICIAL_SOURCE' ? sourceUrl.trim() : null,
@@ -71,7 +73,11 @@ export function AnswerForm({
         ...(['WAITING', 'CROWD'].includes(category)
           ? { observedAt: new Date().toISOString() }
           : {}),
-      }),
+      };
+      return image
+        ? createAnswerWithImage(questionId, input, image)
+        : createAnswer(questionId, input);
+    },
     onSuccess: (answer) => {
       queryClient.setQueryData<QuestionDetail>(
         queryKeys.question(questionId),
@@ -84,6 +90,7 @@ export function AnswerForm({
         queryKey: queryKeys.roomQuestionsRoot(roomSlug),
       });
       setContent('');
+      setImage(undefined);
       setSourceUrl('');
       setWaitMinutes('');
       setCrowdLevel(undefined);
@@ -228,6 +235,17 @@ export function AnswerForm({
           aria-invalid={message.length > 0}
           onChange={(event) => setContent(event.target.value)}
         />
+      </label>
+      <label className="answerImageField">
+        <span>
+          현장 사진 <small>선택 · 최대 10MB</small>
+        </span>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={(event) => setImage(event.target.files?.[0])}
+        />
+        {image && <strong>{image.name}</strong>}
       </label>
       {message.length > 0 && (
         <p className="composerError" role="alert">

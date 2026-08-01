@@ -8,6 +8,7 @@ import type {
 } from '../api/questions';
 import {
   incrementFeedAnswerCount,
+  markMessageRemoved,
   markRemovedContent,
   markMessagePromoted,
   mergeAnswerIntoDetail,
@@ -50,6 +51,7 @@ const answer: Answer = {
   sourceType: 'ON_SITE_NOW',
   sourceUrl: null,
   removed: false,
+  image: null,
   observation: null,
   createdAt: '2026-08-01T00:10:00.000Z',
   updatedAt: '2026-08-01T00:10:00.000Z',
@@ -61,6 +63,7 @@ const message: ChatMessage = {
   type: 'TEXT',
   content: '제주 공항 버스 운행 정보를 공유합니다.',
   contentFormat: 'PLAIN_TEXT',
+  removed: false,
   topicId: null,
   image: null,
   place: null,
@@ -109,6 +112,32 @@ describe('realtime cache merge', () => {
       markMessagePromoted(merged, message.id, question.id)?.pages[0]?.items[0]
         ?.topicId,
     ).toBe(question.id);
+  });
+
+  it('redacts every rich payload when a message is removed', () => {
+    const richMessage: ChatMessage = {
+      ...message,
+      type: 'PLACE',
+      place: {
+        name: '제주공항',
+        address: '제주특별자치도 제주시 공항로 2',
+        latitude: 33.5104,
+        longitude: 126.4914,
+      },
+    };
+    const timeline: InfiniteData<MessagePage> = {
+      pages: [{ items: [richMessage], nextCursor: null }],
+      pageParams: [null],
+    };
+    expect(
+      markMessageRemoved(timeline, richMessage.id)?.pages[0]?.items[0],
+    ).toMatchObject({
+      removed: true,
+      content: '운영 정책에 따라 숨김 처리된 메시지입니다.',
+      image: null,
+      place: null,
+      sharedTopic: null,
+    });
   });
 
   it('moves resolved topics and redacts removed answers in detail', () => {

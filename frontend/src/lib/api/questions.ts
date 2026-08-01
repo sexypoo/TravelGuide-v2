@@ -60,6 +60,7 @@ export interface Answer {
   sourceType: AnswerSourceType;
   sourceUrl: string | null;
   removed: boolean;
+  image: { url: string; originalName: string; mimeType: string } | null;
   observation: FieldObservation | null;
   createdAt: string;
   updatedAt: string;
@@ -88,6 +89,7 @@ export interface Question {
 export interface QuestionDetail extends Question {
   answers: Answer[];
   liveSummary: {
+    freshness: 'LIVE' | 'STALE';
     responseCount: number;
     agreementCount: number;
     waitMinutes: { min: number; max: number } | null;
@@ -95,6 +97,7 @@ export interface QuestionDetail extends Question {
     entryStatus: EntryStatus | null;
     lastObservedAt: string;
     recommendedRecheckAt: string;
+    staleAfter: string;
     description: string;
   } | null;
 }
@@ -173,6 +176,16 @@ export function parseAnswer(value: unknown): Answer {
     throw new Error('답변 응답 형식이 올바르지 않습니다.');
   }
   const observation = value.observation;
+  const image = value.image;
+  if (
+    image !== undefined &&
+    image !== null &&
+    (!isRecord(image) ||
+      typeof image.url !== 'string' ||
+      typeof image.originalName !== 'string' ||
+      typeof image.mimeType !== 'string')
+  )
+    throw new Error('답변 이미지 응답 형식이 올바르지 않습니다.');
   if (
     observation !== undefined &&
     observation !== null &&
@@ -213,6 +226,7 @@ export function parseAnswer(value: unknown): Answer {
     sourceUrl: value.sourceUrl,
     removed: value.removed,
     observation: (observation ?? null) as FieldObservation | null,
+    image: (image ?? null) as Answer['image'],
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
   };
@@ -276,6 +290,7 @@ export function parseQuestionDetail(value: unknown): QuestionDetail {
     summary !== undefined &&
     summary !== null &&
     (!isRecord(summary) ||
+      !['LIVE', 'STALE'].includes(String(summary.freshness)) ||
       !Number.isInteger(summary.responseCount) ||
       !Number.isInteger(summary.agreementCount) ||
       (summary.waitMinutes !== null &&
@@ -292,6 +307,7 @@ export function parseQuestionDetail(value: unknown): QuestionDetail {
         )) ||
       !isIsoDate(summary.lastObservedAt) ||
       !isIsoDate(summary.recommendedRecheckAt) ||
+      !isIsoDate(summary.staleAfter) ||
       typeof summary.description !== 'string')
   )
     throw new Error('현장 현황 응답 형식이 올바르지 않습니다.');
@@ -335,9 +351,11 @@ async function apiJson(path: string, init?: RequestInit): Promise<unknown> {
 export async function getQuestionPage(
   roomSlug: string,
   status: QuestionListStatus,
+  category?: QuestionCategory,
   cursor?: string,
 ): Promise<QuestionPage> {
   const query = new URLSearchParams({ status, limit: '20' });
+  if (category !== undefined) query.set('category', category);
   if (cursor !== undefined) query.set('cursor', cursor);
   return parseQuestionPage(
     await apiJson(
@@ -374,6 +392,34 @@ export async function createAnswer(
       { method: 'POST', body: JSON.stringify(input) },
     ),
   );
+}
+
+export async function createAnswerWithImage(
+  questionId: string,
+  input: CreateAnswerInput,
+  image: File,
+): Promise<Answer> {
+  const body = new FormData();
+  body.set('image', image);
+  body.set('content', input.content);
+  body.set('sourceType', input.sourceType);
+  if (input.sourceUrl) body.set('sourceUrl', input.sourceUrl);
+  if (input.waitMinutes !== undefined)
+    body.set('waitMinutes', String(input.waitMinutes));
+  if (input.crowdLevel) body.set('crowdLevel', input.crowdLevel);
+  if (input.entryStatus) body.set('entryStatus', input.entryStatus);
+  if (input.observedAt) body.set('observedAt', input.observedAt);
+  const response = await fetch(
+    `/api/v1/questions/${encodeURIComponent(questionId)}/answers/images`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+      body,
+    },
+  );
+  if (!response.ok) throw await problemFromResponse(response);
+  return parseAnswer(await response.json());
 }
 
 export async function acceptAnswer(

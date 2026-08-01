@@ -24,6 +24,7 @@ export interface ChatMessage {
   type: 'TEXT' | 'IMAGE' | 'PLACE' | 'TOPIC_SHARE';
   content: string;
   contentFormat: 'PLAIN_TEXT';
+  removed: boolean;
   topicId: string | null;
   image: {
     url: string;
@@ -77,6 +78,7 @@ export function parseMessage(value: unknown): ChatMessage {
     !['TEXT', 'IMAGE', 'PLACE', 'TOPIC_SHARE'].includes(type) ||
     typeof value.content !== 'string' ||
     value.contentFormat !== 'PLAIN_TEXT' ||
+    (value.removed !== undefined && typeof value.removed !== 'boolean') ||
     (value.topicId !== null && typeof value.topicId !== 'string') ||
     !isIsoDate(value.createdAt) ||
     !isIsoDate(value.updatedAt)
@@ -129,6 +131,7 @@ export function parseMessage(value: unknown): ChatMessage {
     type: type as ChatMessage['type'],
     content: value.content,
     contentFormat: value.contentFormat,
+    removed: value.removed ?? false,
     topicId: value.topicId,
     image: (image ?? null) as ChatMessage['image'],
     place: (place ?? null) as ChatMessage['place'],

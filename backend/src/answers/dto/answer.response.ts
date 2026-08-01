@@ -24,6 +24,7 @@ export interface AnswerResponse {
   sourceType: AnswerSourceType;
   sourceUrl: string | null;
   removed: boolean;
+  image: { url: string; originalName: string; mimeType: string } | null;
   observation: {
     waitMinutes: number | null;
     crowdLevel: CrowdLevel | null;
@@ -45,6 +46,9 @@ export interface AnswerForResponse {
   crowdLevel?: CrowdLevel | null;
   entryStatus?: EntryStatus | null;
   observedAt?: Date | null;
+  imageObjectKey?: string | null;
+  imageOriginalName?: string | null;
+  imageMimeType?: string | null;
   createdAt: Date;
   updatedAt: Date;
   author: { id: string; nickname: string };
@@ -78,6 +82,17 @@ export function toAnswerResponse(
     sourceType: answer.sourceType,
     sourceUrl: removed ? null : answer.sourceUrl,
     removed,
+    image:
+      !removed &&
+      answer.imageObjectKey != null &&
+      answer.imageOriginalName != null &&
+      answer.imageMimeType != null
+        ? {
+            url: `/api/v1/answers/${encodeURIComponent(answer.id)}/image`,
+            originalName: answer.imageOriginalName,
+            mimeType: answer.imageMimeType,
+          }
+        : null,
     observation:
       !removed && answer.observedAt != null
         ? {

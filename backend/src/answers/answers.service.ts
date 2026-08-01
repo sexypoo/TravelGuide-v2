@@ -1,10 +1,20 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
+import { basename } from 'node:path';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import { ProblemException } from '../common/http/problem.exception';
 import { PrismaService } from '../prisma/prisma.service';
 import { RealtimePublisher } from '../realtime/realtime.publisher';
 import { RoomAccessService } from '../rooms/room-access.service';
+import {
+  type MessageImageFile,
+  validateMessageImage,
+} from '../messages/message-image-file';
+import {
+  STORAGE_SERVICE,
+  type StorageService,
+} from '../storage/storage.service';
 import type { CreateAnswerDto } from './dto/create-answer.dto';
 import { toAnswerResponse, type AnswerResponse } from './dto/answer.response';
 
@@ -54,6 +64,7 @@ export class AnswersService {
     private readonly prisma: PrismaService,
     private readonly roomAccess: RoomAccessService,
     private readonly publisher: RealtimePublisher,
+    @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
 
   async create(
@@ -61,6 +72,7 @@ export class AnswersService {
     user: AuthenticatedUser,
     input: CreateAnswerDto,
     now = new Date(),
+    image?: MessageImageFile,
   ): Promise<AnswerResponse> {
     const initialQuestion = await this.prisma.question.findUnique({
       where: { id: questionId },
@@ -113,69 +125,93 @@ export class AnswersService {
       );
     }
 
-    const answer = await this.prisma.$transaction(async (transaction) => {
-      const lockKey = `answer:${user.id}:${questionId}`;
-      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
-      const question = await transaction.question.findUnique({
-        where: { id: questionId },
-        select: {
-          authorId: true,
-          status: true,
-          expiresAt: true,
-          removedAt: true,
-        },
+    let imageObjectKey: string | null = null;
+    if (image !== undefined) {
+      validateMessageImage(image);
+      imageObjectKey = `answer-media/${initialQuestion.room.id}/${randomUUID()}`;
+      await this.storage.putPrivate({
+        objectKey: imageObjectKey,
+        contents: image.buffer,
       });
-      if (question === null) {
-        throw this.questionNotFound();
-      }
-      if (question.authorId === user.id) {
-        throw new ProblemException(
-          'CANNOT_ANSWER_OWN_QUESTION',
-          '자신이 작성한 질문에는 답변할 수 없습니다.',
-          HttpStatus.FORBIDDEN,
-        );
-      }
-      if (question.removedAt !== null || question.status !== 'OPEN') {
-        throw new ProblemException(
-          'QUESTION_NOT_OPEN',
-          '열린 질문에만 답변할 수 있습니다.',
-          HttpStatus.CONFLICT,
-        );
-      }
-      if (question.expiresAt <= now) {
-        throw new ProblemException(
-          'QUESTION_EXPIRED',
-          '만료된 질문에는 답변할 수 없습니다.',
-          HttpStatus.CONFLICT,
-        );
-      }
-      const answerCount = await transaction.answer.count({
-        where: { questionId, authorId: user.id, removedAt: null },
+    }
+    let answer;
+    try {
+      answer = await this.prisma.$transaction(async (transaction) => {
+        const lockKey = `answer:${user.id}:${questionId}`;
+        await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+        const question = await transaction.question.findUnique({
+          where: { id: questionId },
+          select: {
+            authorId: true,
+            status: true,
+            expiresAt: true,
+            removedAt: true,
+          },
+        });
+        if (question === null) {
+          throw this.questionNotFound();
+        }
+        if (question.authorId === user.id) {
+          throw new ProblemException(
+            'CANNOT_ANSWER_OWN_QUESTION',
+            '자신이 작성한 질문에는 답변할 수 없습니다.',
+            HttpStatus.FORBIDDEN,
+          );
+        }
+        if (question.removedAt !== null || question.status !== 'OPEN') {
+          throw new ProblemException(
+            'QUESTION_NOT_OPEN',
+            '열린 질문에만 답변할 수 있습니다.',
+            HttpStatus.CONFLICT,
+          );
+        }
+        if (question.expiresAt <= now) {
+          throw new ProblemException(
+            'QUESTION_EXPIRED',
+            '만료된 질문에는 답변할 수 없습니다.',
+            HttpStatus.CONFLICT,
+          );
+        }
+        const answerCount = await transaction.answer.count({
+          where: { questionId, authorId: user.id, removedAt: null },
+        });
+        if (answerCount >= 3) {
+          throw new ProblemException(
+            'ANSWER_LIMIT_REACHED',
+            '한 질문에 작성할 수 있는 답변은 최대 3개입니다.',
+            HttpStatus.CONFLICT,
+          );
+        }
+        return transaction.answer.create({
+          data: {
+            questionId,
+            authorId: user.id,
+            authorKind: capability.kind,
+            content: input.content,
+            sourceType: input.sourceType,
+            sourceUrl: normalizedSourceUrl,
+            waitMinutes: input.waitMinutes,
+            crowdLevel: input.crowdLevel,
+            entryStatus: input.entryStatus,
+            observedAt,
+            imageObjectKey,
+            imageOriginalName:
+              image === undefined
+                ? null
+                : basename(image.originalname).slice(0, 255),
+            imageMimeType: image?.mimetype,
+            imageSizeBytes: image?.size,
+            createdAt: now,
+          },
+          include: answerInclude,
+        });
       });
-      if (answerCount >= 3) {
-        throw new ProblemException(
-          'ANSWER_LIMIT_REACHED',
-          '한 질문에 작성할 수 있는 답변은 최대 3개입니다.',
-          HttpStatus.CONFLICT,
-        );
+    } catch (error: unknown) {
+      if (imageObjectKey !== null) {
+        await this.storage.delete(imageObjectKey).catch(() => undefined);
       }
-      return transaction.answer.create({
-        data: {
-          questionId,
-          authorId: user.id,
-          authorKind: capability.kind,
-          content: input.content,
-          sourceType: input.sourceType,
-          sourceUrl: normalizedSourceUrl,
-          waitMinutes: input.waitMinutes,
-          crowdLevel: input.crowdLevel,
-          entryStatus: input.entryStatus,
-          observedAt,
-          createdAt: now,
-        },
-        include: answerInclude,
-      });
-    });
+      throw error;
+    }
     const response = toAnswerResponse(answer, capability.verifiedAt);
     try {
       this.publisher.publishAnswerCreated(
@@ -189,6 +225,46 @@ export class AnswersService {
       this.logger.warn(`Answer event publication failed: ${name}`);
     }
     return response;
+  }
+
+  async getImage(
+    answerId: string,
+    user: AuthenticatedUser,
+  ): Promise<{ path: string; mimeType: string; originalName: string }> {
+    const answer = await this.prisma.answer.findUnique({
+      where: { id: answerId },
+      select: {
+        removedAt: true,
+        imageObjectKey: true,
+        imageMimeType: true,
+        imageOriginalName: true,
+        question: {
+          select: { room: { select: { destinationId: true } } },
+        },
+      },
+    });
+    if (
+      answer === null ||
+      answer.removedAt !== null ||
+      answer.imageObjectKey === null ||
+      answer.imageMimeType === null ||
+      answer.imageOriginalName === null
+    ) {
+      throw new ProblemException(
+        'ANSWER_IMAGE_NOT_FOUND',
+        '답변 이미지를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.roomAccess.assertCanViewContent(
+      user,
+      answer.question.room.destinationId,
+    );
+    return {
+      path: await this.storage.getPrivateDownload(answer.imageObjectKey, 60),
+      mimeType: answer.imageMimeType,
+      originalName: answer.imageOriginalName,
+    };
   }
 
   private questionNotFound(): ProblemException {

@@ -16,15 +16,23 @@ export function LiveStatusBoard({
   const headline = wait
     ? `대기 ${wait.min}~${wait.max}분`
     : '현장 상태 업데이트';
+  const stale = summary.freshness === 'STALE';
 
   return (
-    <section className="liveStatusBoard" aria-labelledby="live-status-title">
+    <section
+      className={`liveStatusBoard${stale ? ' liveStatusBoard--stale' : ''}`}
+      aria-labelledby="live-status-title"
+    >
       <header>
         <span className="liveStatusClock" aria-hidden="true">
           ◷
         </span>
         <div>
-          <p>현장 답변을 종합한 최신 정보</p>
+          <p>
+            {stale
+              ? '마지막 현장 정보 · 업데이트 필요'
+              : '현장 답변을 종합한 최신 정보'}
+          </p>
           <h2 id="live-status-title">{headline}</h2>
           <span>
             현장 확인 {summary.responseCount}명 중{' '}
@@ -34,6 +42,12 @@ export function LiveStatusBoard({
         </div>
       </header>
       <p className="liveStatusDescription">{summary.description}</p>
+      {stale && (
+        <div className="liveStatusStaleNotice" role="status">
+          <strong>30분 이상 새 확인이 없어요</strong>
+          <span>아래 답변에서 지금 상태를 새로 알려주세요.</span>
+        </div>
+      )}
       <div className="liveStatusMetrics">
         <div>
           <span aria-hidden="true">♟</span>
@@ -61,9 +75,9 @@ export function LiveStatusBoard({
         </div>
       </div>
       <footer>
-        <span>⌁ 실시간</span>
+        <span>{stale ? '◷ 지난 정보' : '⌁ 실시간'}</span>
         <span>✓ 현장 답변 기반</span>
-        <span>사진 답변은 채팅에서 공유할 수 있어요</span>
+        <span>답변에 현장 사진을 바로 첨부할 수 있어요</span>
       </footer>
     </section>
   );

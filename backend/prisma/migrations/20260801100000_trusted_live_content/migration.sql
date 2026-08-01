@@ -1,0 +1,15 @@
+ALTER TYPE "ReportTargetType" ADD VALUE 'MESSAGE' BEFORE 'QUESTION';
+
+ALTER TABLE "ChatMessage"
+ADD COLUMN "removedAt" TIMESTAMP(3),
+ADD COLUMN "removedById" TEXT;
+
+ALTER TABLE "Answer"
+ADD COLUMN "imageObjectKey" VARCHAR(255),
+ADD COLUMN "imageOriginalName" VARCHAR(255),
+ADD COLUMN "imageMimeType" VARCHAR(64),
+ADD COLUMN "imageSizeBytes" INTEGER;
+
+ALTER TABLE "ChatMessage"
+ADD CONSTRAINT "ChatMessage_removedById_fkey"
+FOREIGN KEY ("removedById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

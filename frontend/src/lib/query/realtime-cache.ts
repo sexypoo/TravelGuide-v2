@@ -73,6 +73,31 @@ export function markMessagePromoted(
   return changed ? { ...current, pages } : current;
 }
 
+export function markMessageRemoved(
+  current: InfiniteData<MessagePage> | undefined,
+  messageId: string,
+): InfiniteData<MessagePage> | undefined {
+  if (current === undefined) return current;
+  return {
+    ...current,
+    pages: current.pages.map((page) => ({
+      ...page,
+      items: page.items.map((message) =>
+        message.id === messageId
+          ? {
+              ...message,
+              removed: true,
+              content: '운영 정책에 따라 숨김 처리된 메시지입니다.',
+              image: null,
+              place: null,
+              sharedTopic: null,
+            }
+          : message,
+      ),
+    })),
+  };
+}
+
 export function mergeAnswerIntoDetail(
   current: QuestionDetail | undefined,
   answer: Answer,

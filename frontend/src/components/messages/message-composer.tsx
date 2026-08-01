@@ -43,12 +43,32 @@ export function MessageComposer({
   const [image, setImage] = useState<File>();
   const [placeName, setPlaceName] = useState('');
   const [address, setAddress] = useState('');
+  const [placeMode, setPlaceMode] = useState<'device' | 'manual'>('device');
+  const [manualLatitude, setManualLatitude] = useState('');
+  const [manualLongitude, setManualLongitude] = useState('');
   const [coordinates, setCoordinates] = useState<{
     latitude: number;
     longitude: number;
   }>();
   const [locating, setLocating] = useState(false);
   const [clientError, setClientError] = useState('');
+  const manualCoordinates = {
+    latitude: Number(manualLatitude),
+    longitude: Number(manualLongitude),
+  };
+  const validManualCoordinates =
+    manualLatitude.trim() !== '' &&
+    manualLongitude.trim() !== '' &&
+    manualCoordinates.latitude >= -90 &&
+    manualCoordinates.latitude <= 90 &&
+    manualCoordinates.longitude >= -180 &&
+    manualCoordinates.longitude <= 180;
+  const selectedCoordinates =
+    placeMode === 'device'
+      ? coordinates
+      : validManualCoordinates
+        ? manualCoordinates
+        : undefined;
 
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -80,12 +100,12 @@ export function MessageComposer({
     mutationFn: async (): Promise<ChatMessage> => {
       if (attachment === 'image' && image)
         return createImageMessage(roomSlug, image, content);
-      if (attachment === 'place' && coordinates) {
+      if (attachment === 'place' && selectedCoordinates) {
         return createPlaceMessage(roomSlug, {
           placeName: placeName.trim(),
           address: address.trim() || undefined,
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude,
+          latitude: selectedCoordinates.latitude,
+          longitude: selectedCoordinates.longitude,
           note: content.trim() || undefined,
         });
       }
@@ -102,6 +122,8 @@ export function MessageComposer({
       setPlaceName('');
       setAddress('');
       setCoordinates(undefined);
+      setManualLatitude('');
+      setManualLongitude('');
       setClientError('');
     },
   });
@@ -111,8 +133,12 @@ export function MessageComposer({
       return setClientError('보낼 사진을 선택해 주세요.');
     if (attachment === 'place' && !placeName.trim())
       return setClientError('장소 이름을 입력해 주세요.');
-    if (attachment === 'place' && !coordinates)
-      return setClientError('현재 위치 공유를 먼저 허용해 주세요.');
+    if (attachment === 'place' && !selectedCoordinates)
+      return setClientError(
+        placeMode === 'device'
+          ? '현재 위치 공유를 먼저 허용해 주세요.'
+          : '유효한 위도와 경도를 입력해 주세요.',
+      );
     if (attachment === null && content.trim().length === 0)
       return setClientError('공유할 내용을 입력해 주세요.');
     setClientError('');
@@ -191,7 +217,27 @@ export function MessageComposer({
           ) : (
             <>
               <strong>장소 보내기</strong>
-              <p>이 방의 인증된 참여자에게 현재 좌표가 공유됩니다.</p>
+              <p>이 방의 인증된 참여자에게 선택한 좌표가 공유됩니다.</p>
+              <div
+                className="placeModeSwitch"
+                role="group"
+                aria-label="장소 좌표 선택 방식"
+              >
+                <button
+                  type="button"
+                  aria-pressed={placeMode === 'device'}
+                  onClick={() => setPlaceMode('device')}
+                >
+                  현재 위치
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={placeMode === 'manual'}
+                  onClick={() => setPlaceMode('manual')}
+                >
+                  다른 장소 지정
+                </button>
+              </div>
               <div className="placeAttachmentFields">
                 <input
                   value={placeName}
@@ -208,19 +254,55 @@ export function MessageComposer({
                   onChange={(event) => setAddress(event.target.value)}
                 />
               </div>
-              <button
-                className={`locationConsentButton${coordinates ? ' locationConsentButton--ready' : ''}`}
-                type="button"
-                onClick={requestLocation}
-                disabled={locating}
-              >
-                <span aria-hidden="true">⌖</span>{' '}
-                {locating
-                  ? '현재 위치 확인 중…'
-                  : coordinates
-                    ? '현재 위치 확인됨'
-                    : '현재 위치 공유하기'}
-              </button>
+              {placeMode === 'device' ? (
+                <button
+                  className={`locationConsentButton${coordinates ? ' locationConsentButton--ready' : ''}`}
+                  type="button"
+                  onClick={requestLocation}
+                  disabled={locating}
+                >
+                  <span aria-hidden="true">⌖</span>{' '}
+                  {locating
+                    ? '현재 위치 확인 중…'
+                    : coordinates
+                      ? '현재 위치 확인됨'
+                      : '현재 위치 공유하기'}
+                </button>
+              ) : (
+                <div className="manualCoordinateFields">
+                  <label>
+                    위도
+                    <input
+                      type="number"
+                      min="-90"
+                      max="90"
+                      step="0.000001"
+                      value={manualLatitude}
+                      onChange={(event) =>
+                        setManualLatitude(event.target.value)
+                      }
+                      placeholder="33.4589"
+                    />
+                  </label>
+                  <label>
+                    경도
+                    <input
+                      type="number"
+                      min="-180"
+                      max="180"
+                      step="0.000001"
+                      value={manualLongitude}
+                      onChange={(event) =>
+                        setManualLongitude(event.target.value)
+                      }
+                      placeholder="126.9425"
+                    />
+                  </label>
+                  <small>
+                    지도에서 확인한 좌표를 입력해 다른 장소를 지정할 수 있어요.
+                  </small>
+                </div>
+              )}
             </>
           )}
         </section>

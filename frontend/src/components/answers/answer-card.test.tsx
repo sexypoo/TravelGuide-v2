@@ -16,6 +16,7 @@ const answer: Answer = {
   sourceType: 'OFFICIAL_SOURCE',
   sourceUrl: 'https://example.com/notice',
   removed: false,
+  image: null,
   observation: null,
   createdAt: '2026-08-01T00:10:00.000Z',
   updatedAt: '2026-08-01T00:10:00.000Z',

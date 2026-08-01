@@ -63,6 +63,14 @@ export class ReportsService {
     targetType: ReportTargetType,
     targetId: string,
   ): Promise<string> {
+    if (targetType === ReportTargetType.MESSAGE) {
+      const target = await this.prisma.chatMessage.findUnique({
+        where: { id: targetId },
+        select: { authorId: true, removedAt: true },
+      });
+      if (target === null || target.removedAt !== null) throw this.notFound();
+      return target.authorId;
+    }
     if (targetType === ReportTargetType.QUESTION) {
       const target = await this.prisma.question.findUnique({
         where: { id: targetId },

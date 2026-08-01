@@ -38,6 +38,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  distDir: development ? '.next-dev' : '.next',
   output: 'standalone',
   poweredByHeader: false,
   async headers() {

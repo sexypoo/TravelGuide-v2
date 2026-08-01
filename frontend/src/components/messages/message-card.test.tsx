@@ -13,6 +13,7 @@ const message: ChatMessage = {
   type: 'TEXT',
   content: '공항에서 서귀포로 가는 버스가 지금 많이 지연되고 있나요?',
   contentFormat: 'PLAIN_TEXT',
+  removed: false,
   topicId: null,
   image: null,
   place: null,

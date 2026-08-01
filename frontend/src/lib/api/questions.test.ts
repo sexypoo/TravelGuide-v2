@@ -83,6 +83,7 @@ describe('question API contracts', () => {
         },
       ],
       liveSummary: {
+        freshness: 'LIVE',
         responseCount: 3,
         agreementCount: 2,
         waitMinutes: { min: 30, max: 40 },
@@ -90,6 +91,7 @@ describe('question API contracts', () => {
         entryStatus: 'OPEN',
         lastObservedAt: '2026-08-01T12:08:00.000Z',
         recommendedRecheckAt: '2026-08-01T12:18:00.000Z',
+        staleAfter: '2026-08-01T12:38:00.000Z',
         description: '현장 답변 기준 약 30~40분입니다.',
       },
     });

@@ -3,6 +3,7 @@ import type { ChatMessage } from '@/lib/api/messages';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import { formatChatTime } from '@/lib/questions/presentation';
 import { categoryLabels, statusLabels } from '@/lib/questions/presentation';
+import { ReportMenu } from '@/components/reports/report-menu';
 
 export function MessageCard({
   message,
@@ -42,7 +43,11 @@ export function MessageCard({
             {formatChatTime(message.createdAt)}
           </time>
         </header>
-        {message.type === 'IMAGE' && message.image !== null ? (
+        {message.removed ? (
+          <div className="chatBubble chatBubble--removed">
+            <p>{message.content}</p>
+          </div>
+        ) : message.type === 'IMAGE' && message.image !== null ? (
           <div className="chatBubble chatBubble--image">
             {/* Protected room media is intentionally loaded from the authenticated API route. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -112,6 +117,18 @@ export function MessageCard({
             이 메시지를 토픽으로 만들기
           </button>
         ) : null}
+        {!own && !message.removed && (
+          <ReportMenu
+            targets={[
+              { type: 'MESSAGE', id: message.id, label: '이 메시지' },
+              {
+                type: 'USER',
+                id: message.author.id,
+                label: `${message.author.nickname} 사용자`,
+              },
+            ]}
+          />
+        )}
       </div>
     </article>
   );

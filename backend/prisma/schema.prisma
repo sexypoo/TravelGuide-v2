@@ -92,6 +92,7 @@ enum RoomParticipantKind {
 }
 
 enum ReportTargetType {
+  MESSAGE
   QUESTION
   ANSWER
   COMMUNITY_POST
@@ -141,6 +142,7 @@ model User {
   answers               Answer[]       @relation("AnswerAuthor")
   removedAnswers        Answer[]       @relation("AnswerRemover")
   chatMessages          ChatMessage[]
+  removedChatMessages   ChatMessage[] @relation("ChatMessageRemover")
   reports               Report[]       @relation("ReportReporter")
   reviewedReports       Report[]       @relation("ReportReviewer")
   communityPosts        CommunityPost[] @relation("CommunityPostAuthor")
@@ -223,10 +225,13 @@ model ChatMessage {
   placeLatitude     Decimal?            @db.Decimal(9, 6)
   placeLongitude    Decimal?            @db.Decimal(9, 6)
   sharedQuestionId  String?
+  removedAt          DateTime?
+  removedById        String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   room              DestinationRoom     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   author            User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  removedBy         User?               @relation("ChatMessageRemover", fields: [removedById], references: [id], onDelete: SetNull)
   topic             Question?           @relation("SourceMessage")
   sharedQuestion    Question?           @relation("SharedQuestion", fields: [sharedQuestionId], references: [id], onDelete: SetNull)
 
@@ -247,6 +252,10 @@ model Answer {
   crowdLevel          CrowdLevel?
   entryStatus         EntryStatus?
   observedAt          DateTime?
+  imageObjectKey      String?          @db.VarChar(255)
+  imageOriginalName   String?          @db.VarChar(255)
+  imageMimeType       String?          @db.VarChar(64)
+  imageSizeBytes      Int?
   removedAt           DateTime?
   removedById         String?
   createdAt           DateTime         @default(now())

@@ -23,4 +23,12 @@ describe('LocalStorageAdapter', () => {
       adapter.getPrivateDownload('verification/user-id/../../secret-file'),
     ).rejects.toThrow('Unsafe private storage object key');
   });
+
+  it('accepts generated answer media keys inside private storage', async () => {
+    await expect(
+      adapter.getPrivateDownload(
+        'answer-media/room-id/123e4567-e89b-12d3-a456-426614174000',
+      ),
+    ).resolves.toContain('/answer-media/room-id/');
+  });
 });

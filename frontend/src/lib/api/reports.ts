@@ -11,6 +11,7 @@ export const reportReasons = [
 ] as const;
 export type ReportReason = (typeof reportReasons)[number];
 export type ReportTargetType =
+  | 'MESSAGE'
   | 'QUESTION'
   | 'ANSWER'
   | 'COMMUNITY_POST'

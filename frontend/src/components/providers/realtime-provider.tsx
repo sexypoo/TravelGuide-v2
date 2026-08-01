@@ -22,6 +22,7 @@ import { queryKeys } from '@/lib/query/keys';
 import {
   incrementFeedAnswerCount,
   markMessagePromoted,
+  markMessageRemoved,
   markRemovedContent,
   mergeAnswerIntoDetail,
   mergeMessageIntoTimeline,
@@ -91,9 +92,9 @@ function parseEnvelope(value: unknown): EventEnvelope {
 }
 
 function parseRemovedTarget(value: unknown): {
-  targetType: 'QUESTION' | 'ANSWER';
+  targetType: 'MESSAGE' | 'QUESTION' | 'ANSWER';
   targetId: string;
-  questionId: string;
+  questionId: string | null;
 } {
   if (
     typeof value !== 'object' ||
@@ -101,14 +102,14 @@ function parseRemovedTarget(value: unknown): {
     !('targetType' in value) ||
     !('targetId' in value) ||
     !('questionId' in value) ||
-    (value.targetType !== 'QUESTION' && value.targetType !== 'ANSWER') ||
+    !['MESSAGE', 'QUESTION', 'ANSWER'].includes(String(value.targetType)) ||
     typeof value.targetId !== 'string' ||
-    typeof value.questionId !== 'string'
+    (value.questionId !== null && typeof value.questionId !== 'string')
   ) {
     throw new Error('콘텐츠 제거 이벤트 형식이 올바르지 않습니다.');
   }
   return {
-    targetType: value.targetType,
+    targetType: value.targetType as 'MESSAGE' | 'QUESTION' | 'ANSWER',
     targetId: value.targetId,
     questionId: value.questionId,
   };
@@ -192,6 +193,9 @@ export function RealtimeProvider({
           queryKeys.roomQuestions(event.roomSlug, 'OPEN'),
           (current) => mergeQuestionIntoFeed(current, question),
         );
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.roomQuestionsRoot(event.roomSlug),
+        });
         const sourceMessageId = question.sourceMessageId;
         if (sourceMessageId !== null) {
           queryClient.setQueryData<InfiniteData<MessagePage>>(
@@ -254,6 +258,9 @@ export function RealtimeProvider({
           queryKeys.roomQuestions(event.roomSlug, 'RESOLVED'),
           (current) => mergeQuestionIntoFeed(current, question),
         );
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.roomQuestionsRoot(event.roomSlug),
+        });
         setAnnouncement('토픽이 해결됨으로 변경되었습니다.');
       } catch {
         void queryClient.invalidateQueries({
@@ -267,14 +274,29 @@ export function RealtimeProvider({
         if (seenEvents.current.has(event.eventId)) return;
         seenEvents.current.add(event.eventId);
         const target = parseRemovedTarget(event.payload);
+        if (target.targetType === 'MESSAGE') {
+          queryClient.setQueryData<InfiniteData<MessagePage>>(
+            queryKeys.roomMessages(event.roomSlug),
+            (current) => markMessageRemoved(current, target.targetId),
+          );
+          setAnnouncement('운영 정책에 따라 메시지가 숨김 처리되었습니다.');
+          return;
+        }
+        if (target.questionId === null) throw new Error('Question id missing');
+        const questionTarget = {
+          targetType: target.targetType as 'QUESTION' | 'ANSWER',
+          targetId: target.targetId,
+          questionId: target.questionId,
+        };
         queryClient.setQueryData<QuestionDetail>(
           queryKeys.question(target.questionId),
-          (current) => markRemovedContent(current, target),
+          (current) => markRemovedContent(current, questionTarget),
         );
         if (target.targetType === 'QUESTION') {
           queryClient.setQueriesData<InfiniteData<QuestionPage>>(
             { queryKey: queryKeys.roomQuestionsRoot(event.roomSlug) },
-            (current) => removeQuestionFromFeed(current, target.questionId),
+            (current) =>
+              removeQuestionFromFeed(current, questionTarget.questionId),
           );
         }
         void queryClient.invalidateQueries({

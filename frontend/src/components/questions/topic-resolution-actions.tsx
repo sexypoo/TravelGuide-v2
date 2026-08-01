@@ -45,6 +45,9 @@ export function TopicResolutionActions({
         queryKeys.roomQuestions(roomSlug, 'RESOLVED'),
         (current) => mergeQuestionIntoFeed(current, updated),
       );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.roomQuestionsRoot(roomSlug),
+      });
       setDecision(undefined);
     },
   });

@@ -47,6 +47,13 @@ export function AnswerCard({
         </time>
       </header>
       <p>{answer.content}</p>
+      {answer.image && (
+        <div className="answerEvidenceImage">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={answer.image.url} alt={answer.image.originalName} />
+          <span>현장 확인 사진</span>
+        </div>
+      )}
       {answer.observation && (
         <div className="answerObservation" aria-label="현장 관찰 정보">
           {answer.observation.waitMinutes !== null && (

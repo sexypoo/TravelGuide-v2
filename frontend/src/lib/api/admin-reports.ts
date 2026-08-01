@@ -46,6 +46,7 @@ export function parseAdminReport(value: unknown): AdminReport {
     typeof value.id !== 'string' ||
     !person(value.reporter) ||
     ![
+      'MESSAGE',
       'QUESTION',
       'ANSWER',
       'COMMUNITY_POST',
