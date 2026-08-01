@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-type NavIconName = 'home' | 'verify' | 'room' | 'profile';
+type NavIconName = 'home' | 'community' | 'verify' | 'room' | 'profile';
 
 interface NavItem {
   href: string;
@@ -13,6 +13,12 @@ interface NavItem {
 }
 
 const items: readonly NavItem[] = [
+  {
+    href: '/app/community',
+    label: '커뮤니티',
+    icon: 'community',
+    matches: (pathname) => pathname.startsWith('/app/community'),
+  },
   {
     href: '/app',
     label: '홈',
@@ -27,7 +33,7 @@ const items: readonly NavItem[] = [
   },
   {
     href: '/app/rooms/jeju',
-    label: '제주방',
+    label: '실시간방',
     icon: 'room',
     matches: (pathname) => pathname.startsWith('/app/rooms'),
   },
@@ -42,6 +48,12 @@ const items: readonly NavItem[] = [
 function NavIcon({ name }: { name: NavIconName }): React.JSX.Element {
   const paths: Readonly<Record<NavIconName, React.ReactNode>> = {
     home: <path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3V10.5Z" />,
+    community: (
+      <>
+        <path d="M4 5.5h16v11H8l-4 3v-14Z" />
+        <path d="M8 9.5h8M8 12.5h5" />
+      </>
+    ),
     verify: (
       <>
         <path d="M12 3 5 6v5c0 4.7 2.9 8.4 7 10 4.1-1.6 7-5.3 7-10V6l-7-3Z" />
@@ -50,8 +62,8 @@ function NavIcon({ name }: { name: NavIconName }): React.JSX.Element {
     ),
     room: (
       <>
-        <path d="M4 5.5h16v11H8l-4 3v-14Z" />
-        <path d="M8 10h8M8 13h5" />
+        <path d="M5 18.5a9.5 9.5 0 0 1 14 0M8 15a5.5 5.5 0 0 1 8 0" />
+        <circle cx="12" cy="11" r="1" />
       </>
     ),
     profile: (

@@ -21,23 +21,23 @@ export default async function AppHome(): Promise<React.JSX.Element> {
     approved !== undefined
       ? {
           title: `${approved.destination.nameKo} ${approved.type === 'TRAVELER' ? '여행자' : '현지인'} 인증 완료`,
-          body: '현재 자격으로 제주 도움방에 참여할 수 있어요.',
+          body: `${approved.destination.nameKo} 실시간 도움방에 참여할 수 있어요.`,
         }
       : pending !== undefined
         ? {
             title: `${pending.type === 'TRAVELER' ? '여행자' : '현지인'} 인증 심사 중`,
-            body: '관리자가 확인하면 인증 화면과 방 상태에 반영됩니다.',
+            body: '커뮤니티는 지금 이용할 수 있고, 승인 후 실시간방도 열려요.',
           }
         : {
             title: '아직 인증 전이에요',
-            body: '방 소개는 볼 수 있고, 질문과 답변은 인증 후 열립니다.',
+            body: '커뮤니티는 바로 이용할 수 있고, 실시간방은 인증 후 열려요.',
           };
 
   return (
     <div className="appHome">
       <section className="homeGreeting" aria-labelledby="welcome-title">
         <div>
-          <p>제주 도움방</p>
+          <p>TRAVEL NETWORK</p>
           <h1 id="welcome-title">{user.nickname}님, 무엇이 궁금하세요?</h1>
         </div>
         <div className="qualificationSummary">
@@ -49,11 +49,26 @@ export default async function AppHome(): Promise<React.JSX.Element> {
         </div>
       </section>
 
+      <Link className="communityLane" href="/app/community">
+        <span className="communityLane__stamp" aria-hidden="true">
+          OPEN
+        </span>
+        <div>
+          <p>인증 없이 바로 참여</p>
+          <h2>여행자 커뮤니티</h2>
+          <span>
+            목적지에 상관없이 궁금한 것을 묻고, 알고 있는 여행 정보를
+            나눠보세요.
+          </span>
+        </div>
+        <strong>정보 둘러보기 →</strong>
+      </Link>
+
       <section className="homeSection" aria-labelledby="room-section-title">
         <div className="homeSection__heading">
           <div>
-            <p>지금 연결할 수 있는 지역</p>
-            <h2 id="room-section-title">여행 도움방</h2>
+            <p>현재 열려 있는 지역</p>
+            <h2 id="room-section-title">인증 실시간 도움방</h2>
           </div>
           <span>{rooms.length}개 지역</span>
         </div>

@@ -84,6 +84,8 @@ export default async function AdminReportsPage({
               <option value="">전체 대상</option>
               <option value="QUESTION">토픽</option>
               <option value="ANSWER">답변</option>
+              <option value="COMMUNITY_POST">커뮤니티 글</option>
+              <option value="COMMUNITY_COMMENT">커뮤니티 댓글</option>
               <option value="USER">사용자</option>
             </select>
           </label>

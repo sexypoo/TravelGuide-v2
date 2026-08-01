@@ -44,7 +44,7 @@ export function QuestionDetailView({
     return (
       <div className="questionDetailPage">
         <Link className="appBackLink" href={`/app/rooms/${room.slug}`}>
-          ← 제주 도움방
+          ← {room.destination.nameKo} 도움방
         </Link>
         <div className="roomQueryState roomQueryState--error" role="alert">
           <span aria-hidden="true">!</span>
@@ -79,7 +79,7 @@ export function QuestionDetailView({
   return (
     <div className="questionDetailPage">
       <Link className="appBackLink" href={`/app/rooms/${room.slug}`}>
-        ← 제주 도움방
+        ← {room.destination.nameKo} 도움방
       </Link>
       {connectionState !== 'connected' && (
         <div className="connectionNotice" role="status" aria-live="polite">

@@ -8,7 +8,7 @@ const steps = [
     label: '인증',
     title: '서로의 자격을 먼저 확인해요',
     description:
-      '여행 일정이나 제주 현지 거주를 확인한 사용자만 방에 참여합니다.',
+      '여행 일정이나 지역 생활을 확인한 사용자만 실시간 도움방에 참여합니다.',
   },
   {
     label: '질문',
@@ -42,7 +42,7 @@ export default function Home(): React.JSX.Element {
       <section className="landingHero" aria-labelledby="landing-title">
         <div className="landingHero__copy">
           <p className="heroEyebrow">
-            <span aria-hidden="true" /> 제주 실시간 여행 도움방
+            <span aria-hidden="true" /> 여행지별 실시간 여행 도움방
           </p>
           <h1 id="landing-title">
             여행이 틀어지는 순간,
@@ -50,7 +50,7 @@ export default function Home(): React.JSX.Element {
             <em>지금 그곳을 아는 사람</em>에게 묻다.
           </h1>
           <p className="landingHero__description">
-            검색 결과보다 지금의 제주가 필요할 때,
+            검색 결과보다 지금의 여행지가 필요할 때,
             <br /> 인증된 여행자와 현지인이 한 방에서 답을 나눕니다.
           </p>
           <div className="heroActions">
@@ -115,7 +115,7 @@ export default function Home(): React.JSX.Element {
 
       <footer className="landingFooter">
         <Wordmark />
-        <p>제주의 변수에, 현지의 답.</p>
+        <p>여행의 변수에, 사람들의 답.</p>
         <span>© 2026 TravelGuide</span>
       </footer>
     </main>

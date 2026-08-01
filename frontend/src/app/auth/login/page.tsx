@@ -21,7 +21,7 @@ export default async function LoginPage({
     <AuthShell
       eyebrow="다시 만나서 반가워요"
       title="로그인"
-      description="제주에서 필요한 답을 이어서 확인하세요."
+      description="여행지에서 필요한 정보와 대화를 이어서 확인하세요."
       alternateHref="/auth/register"
       alternatePrompt="아직 계정이 없나요?"
       alternateLabel="계정 만들기"

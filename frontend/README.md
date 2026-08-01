@@ -31,6 +31,8 @@ same-origin.
 - `/auth/register`: account creation with automatic login
 - `/auth/login`: login with safe protected-route return
 - `/app`: authenticated user shell
+- `/app/community`: account-based travel community available without evidence verification
+- `/app/community/:id`: community post detail, comments, and reporting
 - `/app/rooms/jeju`: verified traveler/local conversation with paginated chat,
   open/resolved topic rail, message-to-topic promotion, and live updates
 - `/app/questions/:id`: topic detail, public answers, owner acceptance/resolve,

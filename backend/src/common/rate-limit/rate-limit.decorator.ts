@@ -1,7 +1,13 @@
 import { SetMetadata } from '@nestjs/common';
 
 export const RATE_LIMIT_CATEGORY = 'travelguide:rate-limit-category';
-export type RateLimitCategory = 'LOGIN' | 'TOPIC' | 'ANSWER' | 'REPORT';
+export type RateLimitCategory =
+  | 'LOGIN'
+  | 'TOPIC'
+  | 'ANSWER'
+  | 'REPORT'
+  | 'COMMUNITY_POST'
+  | 'COMMUNITY_COMMENT';
 
 export function RateLimit(
   category: RateLimitCategory,

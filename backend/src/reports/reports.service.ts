@@ -79,6 +79,22 @@ export class ReportsService {
       if (target === null || target.removedAt !== null) throw this.notFound();
       return target.authorId;
     }
+    if (targetType === ReportTargetType.COMMUNITY_POST) {
+      const target = await this.prisma.communityPost.findUnique({
+        where: { id: targetId },
+        select: { authorId: true, removedAt: true },
+      });
+      if (target === null || target.removedAt !== null) throw this.notFound();
+      return target.authorId;
+    }
+    if (targetType === ReportTargetType.COMMUNITY_COMMENT) {
+      const target = await this.prisma.communityComment.findUnique({
+        where: { id: targetId },
+        select: { authorId: true, removedAt: true },
+      });
+      if (target === null || target.removedAt !== null) throw this.notFound();
+      return target.authorId;
+    }
     const target = await this.prisma.user.findUnique({
       where: { id: targetId },
       select: { id: true },

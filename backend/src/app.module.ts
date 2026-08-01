@@ -6,6 +6,7 @@ import { AdminReportsModule } from './admin/reports/admin-reports.module';
 import { AnswersModule } from './answers/answers.module';
 import { AuthModule } from './auth/auth.module';
 import { validateEnvironment } from './config/environment';
+import { CommunityModule } from './community/community.module';
 import { HealthModule } from './health/health.module';
 import { MessagesModule } from './messages/messages.module';
 import { QuestionsModule } from './questions/questions.module';
@@ -25,6 +26,7 @@ import { VerificationsModule } from './verifications/verifications.module';
     AdminReportsModule,
     AnswersModule,
     AuthModule,
+    CommunityModule,
     HealthModule,
     MessagesModule,
     QuestionsModule,

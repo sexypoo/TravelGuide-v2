@@ -74,7 +74,9 @@ export default async function RoomPage({
         </span>
         <div>
           <p>대화방 잠김</p>
-          <h2 id="room-lock-title">인증 후 제주 도움방이 열려요</h2>
+          <h2 id="room-lock-title">
+            인증 후 {room.destination.nameKo} 도움방이 열려요
+          </h2>
           <span>
             현재는 방 소개만 볼 수 있습니다. 여행자 또는 현지인 인증 방법을 먼저
             확인해 주세요.

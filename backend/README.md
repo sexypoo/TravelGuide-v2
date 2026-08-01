@@ -109,6 +109,24 @@ GET  /api/v1/admin/reports/:id
 PATCH /api/v1/admin/reports/:id/review
 ```
 
+## Open community API
+
+The community requires a signed-in account but does not require traveler or
+local evidence verification. Regular users can publish destination-neutral
+tips and questions, and comment on other posts. Administrator accounts can
+read and moderate but cannot publish.
+
+```text
+GET  /api/v1/community/posts?category=TRAVEL_TIP&cursor=&limit=20
+POST /api/v1/community/posts
+GET  /api/v1/community/posts/:postId
+POST /api/v1/community/posts/:postId/comments
+```
+
+Posts accept a category, optional free-text area, title, and plain-text body.
+Community posts/comments use the existing report and audited soft-removal
+workflow. Creation is rate-limited to 10 posts and 30 comments per 10 minutes.
+
 Room reads and participant writes require a valid traveler or local
 verification; administrators remain read-only. Messages accept 1–500 characters
 of plain text and load the latest 50 in chronological display order with an
@@ -158,10 +176,10 @@ Every event contains an
 are an immediate update signal; after reconnect clients must rejoin and refetch
 the feed/detail REST endpoints.
 
-Signed-in users can report a question, answer, or user once. Own-content
+Signed-in users can report a question, answer, community post/comment, or user once. Own-content
 reports are rejected, and `OTHER` requires a 10–300 character detail. Reports
 never hide content automatically. Administrators can keep, dismiss, or
-explicitly soft-delete question/answer content; reviewer, timestamp, and note
+explicitly soft-delete question/answer/community content; reviewer, timestamp, and note
 are retained. Public DTOs replace removed original text with a fixed notice and
 remove source URLs, while administrator report detail retains the audit copy.
 
@@ -208,6 +226,7 @@ yarn db:validate
 yarn db:generate
 yarn db:migrate
 yarn db:seed
+yarn db:seed:demo
 yarn db:deploy
 yarn db:down
 ```
@@ -217,6 +236,26 @@ connection, and migrations can be proven end to end. T01 adds users, T02 adds
 the Jeju destination/room, T03 adds verification/review records, and T05 adds
 room questions. `yarn db:seed` safely upserts the fixed Jeju metadata and can be
 rerun without duplicate rows.
+
+### Local demo accounts
+
+`db:seed:demo` idempotently prepares one administrator, two approved travelers,
+and two approved locals. It is separate from the normal seed and refuses to run
+without an explicit switch. Passwords are never committed.
+
+```bash
+DEMO_SEED_ENABLED=true \
+DEMO_USER_PASSWORD='<local demo password>' \
+DEMO_ADMIN_PASSWORD='<local admin password>' \
+yarn db:seed:demo
+```
+
+The managed identities are `admin@travelguide.local`,
+`demo@travelguide.local`, `traveler2@travelguide.local`,
+`local1@travelguide.local`, and `local2@travelguide.local`. For this workspace,
+the actual credentials are recorded only in the Git-ignored
+`.data/DEMO_ACCOUNTS.md` file. Running the command again resets the managed
+passwords and refreshes their demo verification validity.
 
 ## Environment
 

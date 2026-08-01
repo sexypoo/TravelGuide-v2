@@ -11,9 +11,9 @@ export default async function RegisterPage(): Promise<React.JSX.Element> {
 
   return (
     <AuthShell
-      eyebrow="제주에서 답을 나누는 첫 단계"
+      eyebrow="여행 정보를 나누는 첫 단계"
       title="계정 만들기"
-      description="안전한 도움방을 위해 기본 정보를 확인할게요."
+      description="커뮤니티는 가입 후 바로 이용할 수 있어요."
       alternateHref="/auth/login"
       alternatePrompt="이미 계정이 있나요?"
       alternateLabel="로그인"

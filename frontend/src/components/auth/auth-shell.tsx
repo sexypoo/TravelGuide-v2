@@ -26,17 +26,17 @@ export function AuthShell({
       <section className="authStory" aria-label="서비스 소개">
         <div className="authStory__top">
           <Wordmark />
-          <p>JEJU · REAL-TIME HELP</p>
+          <p>TRAVEL NETWORK · LIVE HELP</p>
         </div>
         <div className="authStory__body">
           <SignalHalo />
-          <p className="authStory__eyebrow">제주에서 이어지는 현지의 답</p>
+          <p className="authStory__eyebrow">여행지에서 이어지는 사람들의 답</p>
           <h2>
             낯선 순간에도,
             <br />
             혼자 판단하지 않도록.
           </h2>
-          <p>인증된 여행자와 현지인이 제주 한 방에서 만납니다.</p>
+          <p>커뮤니티에서 나누고, 인증 도움방에서 지금을 확인합니다.</p>
         </div>
       </section>
 

@@ -16,6 +16,8 @@ const limits: Readonly<Record<RateLimitCategory, LimitDefinition>> = {
   TOPIC: { limit: 5, windowMs: 10 * 60 * 1000 },
   ANSWER: { limit: 20, windowMs: 10 * 60 * 1000 },
   REPORT: { limit: 10, windowMs: 60 * 60 * 1000 },
+  COMMUNITY_POST: { limit: 10, windowMs: 10 * 60 * 1000 },
+  COMMUNITY_COMMENT: { limit: 30, windowMs: 10 * 60 * 1000 },
 };
 
 export type RateLimitResult =

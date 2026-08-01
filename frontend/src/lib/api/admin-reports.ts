@@ -45,7 +45,13 @@ export function parseAdminReport(value: unknown): AdminReport {
     !record(value) ||
     typeof value.id !== 'string' ||
     !person(value.reporter) ||
-    !['QUESTION', 'ANSWER', 'USER'].includes(String(value.targetType)) ||
+    ![
+      'QUESTION',
+      'ANSWER',
+      'COMMUNITY_POST',
+      'COMMUNITY_COMMENT',
+      'USER',
+    ].includes(String(value.targetType)) ||
     typeof value.targetId !== 'string' ||
     !record(value.target) ||
     !person(value.target.author) ||

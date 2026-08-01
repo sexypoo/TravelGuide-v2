@@ -18,11 +18,11 @@ const reportInclude = {
 type ReportRecord = Prisma.ReportGetPayload<{ include: typeof reportInclude }>;
 
 interface RemovalEvent {
-  roomId: string;
-  roomSlug: string;
-  targetType: 'QUESTION' | 'ANSWER';
+  roomId: string | null;
+  roomSlug: string | null;
+  targetType: 'QUESTION' | 'ANSWER' | 'COMMUNITY_POST' | 'COMMUNITY_COMMENT';
   targetId: string;
-  questionId: string;
+  questionId: string | null;
 }
 
 @Injectable()
@@ -109,7 +109,13 @@ export class AdminReportsService {
       });
       return removalEvent;
     });
-    if (removal !== null) {
+    if (
+      removal !== null &&
+      removal.roomId !== null &&
+      removal.roomSlug !== null &&
+      removal.questionId !== null &&
+      (removal.targetType === 'QUESTION' || removal.targetType === 'ANSWER')
+    ) {
       try {
         this.publisher.publishContentRemoved(
           removal.roomId,
@@ -157,6 +163,42 @@ export class AdminReportsService {
         questionId: question.id,
       };
     }
+    if (report.targetType === ReportTargetType.COMMUNITY_POST) {
+      const post = await transaction.communityPost.findUnique({
+        where: { id: report.targetId },
+        select: { id: true },
+      });
+      if (post === null) throw this.targetNotFound();
+      await transaction.communityPost.update({
+        where: { id: post.id },
+        data: { removedAt: now, removedById: reviewerId },
+      });
+      return {
+        roomId: null,
+        roomSlug: null,
+        targetType: 'COMMUNITY_POST',
+        targetId: post.id,
+        questionId: null,
+      };
+    }
+    if (report.targetType === ReportTargetType.COMMUNITY_COMMENT) {
+      const comment = await transaction.communityComment.findUnique({
+        where: { id: report.targetId },
+        select: { id: true },
+      });
+      if (comment === null) throw this.targetNotFound();
+      await transaction.communityComment.update({
+        where: { id: comment.id },
+        data: { removedAt: now, removedById: reviewerId },
+      });
+      return {
+        roomId: null,
+        roomSlug: null,
+        targetType: 'COMMUNITY_COMMENT',
+        targetId: comment.id,
+        questionId: null,
+      };
+    }
     const answer = await transaction.answer.findUnique({
       where: { id: report.targetId },
       select: {
@@ -194,10 +236,20 @@ export class AdminReportsService {
               where: { id: report.targetId },
               select: { id: true },
             })
-          : await transaction.user.findUnique({
-              where: { id: report.targetId },
-              select: { id: true },
-            });
+          : report.targetType === ReportTargetType.COMMUNITY_POST
+            ? await transaction.communityPost.findUnique({
+                where: { id: report.targetId },
+                select: { id: true },
+              })
+            : report.targetType === ReportTargetType.COMMUNITY_COMMENT
+              ? await transaction.communityComment.findUnique({
+                  where: { id: report.targetId },
+                  select: { id: true },
+                })
+              : await transaction.user.findUnique({
+                  where: { id: report.targetId },
+                  select: { id: true },
+                });
     if (exists === null) throw this.targetNotFound();
   }
 
@@ -261,6 +313,43 @@ export class AdminReportsService {
         removed: item.removedAt !== null,
         roomSlug: item.question.room.slug,
         questionId: item.questionId,
+      };
+    }
+    if (type === ReportTargetType.COMMUNITY_POST) {
+      const item = await this.prisma.communityPost.findUnique({
+        where: { id },
+        select: {
+          title: true,
+          content: true,
+          removedAt: true,
+          author: { select: { id: true, nickname: true } },
+        },
+      });
+      if (item === null) throw this.targetNotFound();
+      return {
+        author: item.author,
+        content: `${item.title}\n${item.content}`,
+        removed: item.removedAt !== null,
+        roomSlug: null,
+        questionId: null,
+      };
+    }
+    if (type === ReportTargetType.COMMUNITY_COMMENT) {
+      const item = await this.prisma.communityComment.findUnique({
+        where: { id },
+        select: {
+          content: true,
+          removedAt: true,
+          author: { select: { id: true, nickname: true } },
+        },
+      });
+      if (item === null) throw this.targetNotFound();
+      return {
+        author: item.author,
+        content: item.content,
+        removed: item.removedAt !== null,
+        roomSlug: null,
+        questionId: null,
       };
     }
     const item = await this.prisma.user.findUnique({

@@ -10,7 +10,12 @@ export const reportReasons = [
   'OTHER',
 ] as const;
 export type ReportReason = (typeof reportReasons)[number];
-export type ReportTargetType = 'QUESTION' | 'ANSWER' | 'USER';
+export type ReportTargetType =
+  | 'QUESTION'
+  | 'ANSWER'
+  | 'COMMUNITY_POST'
+  | 'COMMUNITY_COMMENT'
+  | 'USER';
 
 export interface CreateReportInput {
   targetType: ReportTargetType;

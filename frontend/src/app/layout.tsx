@@ -3,16 +3,16 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'TravelGuide — 제주 실시간 여행 도움방',
+    default: 'TravelGuide — 여행지의 지금을 나누는 커뮤니티',
     template: '%s | TravelGuide',
   },
   description:
-    '여행이 틀어지는 순간, 인증된 현지인에게 판단을 묻는 제주 도움방',
+    '여행 정보를 편하게 나누고, 인증된 참여자와 여행지의 지금을 확인하는 커뮤니티',
 };
 
 export const viewport: Viewport = {
   colorScheme: 'light',
-  themeColor: '#F7F8FA',
+  themeColor: '#fff9fb',
 };
 
 export default function RootLayout({

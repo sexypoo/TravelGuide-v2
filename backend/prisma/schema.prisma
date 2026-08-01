@@ -68,7 +68,18 @@ enum RoomParticipantKind {
 enum ReportTargetType {
   QUESTION
   ANSWER
+  COMMUNITY_POST
+  COMMUNITY_COMMENT
   USER
+}
+
+enum CommunityPostCategory {
+  TRAVEL_TIP
+  TRANSPORT
+  FOOD
+  PLACE
+  QUESTION
+  OTHER
 }
 
 enum ReportReason {
@@ -106,6 +117,10 @@ model User {
   chatMessages          ChatMessage[]
   reports               Report[]       @relation("ReportReporter")
   reviewedReports       Report[]       @relation("ReportReviewer")
+  communityPosts        CommunityPost[] @relation("CommunityPostAuthor")
+  communityComments     CommunityComment[] @relation("CommunityCommentAuthor")
+  removedCommunityPosts CommunityPost[] @relation("CommunityPostRemover")
+  removedCommunityComments CommunityComment[] @relation("CommunityCommentRemover")
 }
 
 model Destination {
@@ -254,6 +269,43 @@ model Report {
   @@index([status, createdAt])
   @@index([targetType, status, createdAt])
   @@index([targetId])
+}
+
+model CommunityPost {
+  id         String                @id @default(cuid())
+  authorId   String
+  category   CommunityPostCategory
+  areaText   String?               @db.VarChar(60)
+  title      String                @db.VarChar(100)
+  content    String                @db.VarChar(2000)
+  removedAt  DateTime?
+  removedById String?
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  author     User                  @relation("CommunityPostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  removedBy  User?                 @relation("CommunityPostRemover", fields: [removedById], references: [id], onDelete: SetNull)
+  comments   CommunityComment[]
+
+  @@index([category, createdAt, id])
+  @@index([createdAt, id])
+  @@index([authorId, createdAt])
+}
+
+model CommunityComment {
+  id          String        @id @default(cuid())
+  postId      String
+  authorId    String
+  content     String        @db.VarChar(500)
+  removedAt   DateTime?
+  removedById String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  post        CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author      User          @relation("CommunityCommentAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  removedBy   User?         @relation("CommunityCommentRemover", fields: [removedById], references: [id], onDelete: SetNull)
+
+  @@index([postId, createdAt, id])
+  @@index([authorId, createdAt])
 }
 
 // Infrastructure-only record used to prove the initial Prisma migration and
