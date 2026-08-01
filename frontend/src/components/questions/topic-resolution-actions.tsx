@@ -12,7 +12,7 @@ import {
   type QuestionDetail,
   type QuestionPage,
 } from '@/lib/api/questions';
-import { ApiProblem } from '@/lib/api/problem-details';
+import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import {
   mergeQuestionIntoFeed,
@@ -53,9 +53,10 @@ export function TopicResolutionActions({
       ? question.answers.find((answer) => answer.id === decision.answerId)
       : undefined;
   const error = mutation.isError
-    ? mutation.error instanceof ApiProblem
-      ? mutation.error.message
-      : '해결 상태를 저장하지 못했습니다. 연결을 확인해 주세요.'
+    ? actionableErrorMessage(
+        mutation.error,
+        '해결 상태를 저장하지 못했습니다. 연결을 확인해 주세요.',
+      )
     : undefined;
 
   return (

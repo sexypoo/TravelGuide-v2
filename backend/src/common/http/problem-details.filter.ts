@@ -15,6 +15,8 @@ const titles: Readonly<Record<number, string>> = {
   [HttpStatus.FORBIDDEN]: 'Forbidden',
   [HttpStatus.NOT_FOUND]: 'Not Found',
   [HttpStatus.CONFLICT]: 'Conflict',
+  [HttpStatus.TOO_MANY_REQUESTS]: 'Too Many Requests',
+  [HttpStatus.SERVICE_UNAVAILABLE]: 'Service Unavailable',
   [HttpStatus.INTERNAL_SERVER_ERROR]: 'Internal Server Error',
 };
 
@@ -24,6 +26,8 @@ const defaultCodes: Readonly<Record<number, string>> = {
   [HttpStatus.FORBIDDEN]: 'FORBIDDEN',
   [HttpStatus.NOT_FOUND]: 'NOT_FOUND',
   [HttpStatus.CONFLICT]: 'CONFLICT',
+  [HttpStatus.TOO_MANY_REQUESTS]: 'RATE_LIMIT_EXCEEDED',
+  [HttpStatus.SERVICE_UNAVAILABLE]: 'SERVICE_UNAVAILABLE',
   [HttpStatus.INTERNAL_SERVER_ERROR]: 'INTERNAL_SERVER_ERROR',
 };
 

@@ -108,6 +108,24 @@ function parseUrl(
   return value;
 }
 
+function parseWebOrigin(value: unknown, environment: NodeEnvironment): string {
+  const parsedValue = parseUrl(value, 'WEB_ORIGIN', ['http:', 'https:']);
+  const url = new URL(parsedValue);
+  if (
+    url.username.length > 0 ||
+    url.password.length > 0 ||
+    url.pathname !== '/' ||
+    url.search.length > 0 ||
+    url.hash.length > 0
+  ) {
+    throw new Error('WEB_ORIGIN must be an origin without credentials or path');
+  }
+  if (environment === 'production' && url.protocol !== 'https:') {
+    throw new Error('Production WEB_ORIGIN must use HTTPS');
+  }
+  return url.origin;
+}
+
 export function validateEnvironment(
   config: Record<string, unknown>,
 ): Environment & Record<string, unknown> {
@@ -124,6 +142,10 @@ export function validateEnvironment(
     throw new Error('JWT_SECRET must be changed in production');
   }
 
+  if (nodeEnvironment === 'production' && jwtSecret.length < 32) {
+    throw new Error('Production JWT_SECRET must be at least 32 characters');
+  }
+
   if (nodeEnvironment === 'production' && storageDriver !== 's3') {
     throw new Error('Production requires STORAGE_DRIVER=s3');
   }
@@ -136,10 +158,9 @@ export function validateEnvironment(
       'postgresql:',
     ]),
     API_PORT: parsePort(config.API_PORT),
-    WEB_ORIGIN: parseUrl(
+    WEB_ORIGIN: parseWebOrigin(
       config.WEB_ORIGIN ?? 'http://localhost:3000',
-      'WEB_ORIGIN',
-      ['http:', 'https:'],
+      nodeEnvironment,
     ),
     JWT_SECRET: jwtSecret,
     JWT_EXPIRES_IN_SECONDS: parseJwtExpiresIn(config.JWT_EXPIRES_IN),

@@ -35,4 +35,21 @@ describe('ReportMenu', () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(await screen.findByText('신고가 접수됐어요')).toBeInTheDocument();
   });
+
+  it('moves focus into the dialog and closes it with Escape', async () => {
+    render(
+      <ReportMenu
+        targets={[{ type: 'QUESTION', id: 'question-1', label: '이 토픽' }]}
+      />,
+    );
+    const trigger = screen.getByRole('button', { name: '신고' });
+    fireEvent.click(trigger);
+
+    const closeButton = screen.getByRole('button', { name: '신고 창 닫기' });
+    await waitFor(() => expect(closeButton).toHaveFocus());
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
 });

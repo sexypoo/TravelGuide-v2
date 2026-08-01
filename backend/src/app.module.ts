@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { RateLimitModule } from './common/rate-limit/rate-limit.module';
 import { AdminVerificationsModule } from './admin/verifications/admin-verifications.module';
 import { AdminReportsModule } from './admin/reports/admin-reports.module';
 import { AnswersModule } from './answers/answers.module';
@@ -19,6 +20,7 @@ import { VerificationsModule } from './verifications/verifications.module';
       isGlobal: true,
       validate: validateEnvironment,
     }),
+    RateLimitModule,
     AdminVerificationsModule,
     AdminReportsModule,
     AnswersModule,

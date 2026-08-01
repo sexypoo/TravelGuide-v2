@@ -31,6 +31,10 @@ curl http://localhost:3001/api/v1/health/live
 The response includes `status: "ok"` and an ISO 8601 UTC timestamp. Stop the
 database with `yarn db:down`.
 
+Use `/api/v1/health/ready` for deployment readiness checks. It returns success
+only after a live PostgreSQL query; `/health/live` deliberately checks the API
+process only.
+
 ## Authentication API
 
 T01 provides the real cookie-authenticated endpoints below:
@@ -161,6 +165,25 @@ explicitly soft-delete question/answer content; reviewer, timestamp, and note
 are retained. Public DTOs replace removed original text with a fixed notice and
 remove source URLs, while administrator report detail retains the audit copy.
 
+## Security and operations
+
+The API emits restrictive security headers, allows credentialed CORS only from
+the exact `WEB_ORIGIN`, and writes JSON request logs with request ID, method,
+path, status, duration, and authenticated user ID when available. Request
+bodies, cookies, credentials, evidence metadata, and coordinates are excluded.
+
+Fixed-window limits apply per IP to login (5/minute), and per user to topic
+creation (5/10 minutes), answers (20/10 minutes), and reports (10/hour). A
+rejected request returns `429`, `Retry-After`, and Korean retry guidance. This
+in-memory limiter is intended for the single API presentation deployment; use a
+shared store before horizontally scaling.
+
+Private verification evidence is retained only while a pilot is active and is
+scheduled for deletion no later than 30 days after that pilot ends. Until
+automated retention exists, an administrator must delete both the private
+object and its database record during the post-pilot checklist. Legal holds or
+active disputes pause deletion and must be recorded outside the public API.
+
 ## Quality commands
 
 ```bash
@@ -200,7 +223,8 @@ rerun without duplicate rows.
 Copy `.env.example` to `.env`. Startup fails immediately when `DATABASE_URL`,
 `API_PORT`, `WEB_ORIGIN`, `JWT_SECRET`, or `JWT_EXPIRES_IN` is invalid. Do not
 commit `.env` or real secrets. Production rejects the example JWT secret and
-local evidence storage.
+local evidence storage, requires a JWT secret of at least 32 characters, and
+requires an HTTPS `WEB_ORIGIN` with no credentials, path, query, or fragment.
 
 `TEST_DATABASE_URL` must point to a database separate from `DATABASE_URL`. A clean
 Docker volume creates `travelguide_test` automatically. For a volume created

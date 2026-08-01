@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { ApiProblem } from '@/lib/api/problem-details';
+import { useEffect, useRef, useState } from 'react';
+import { actionableErrorMessage } from '@/lib/api/problem-details';
 import {
   createReport,
   reportReasons,
@@ -37,6 +37,13 @@ export function ReportMenu({
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string>();
   const [complete, setComplete] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (open) closeRef.current?.focus();
+  }, [open]);
+
   if (targets.length === 0) return null;
   const target = targets[targetIndex] ?? targets[0]!;
 
@@ -61,9 +68,10 @@ export function ReportMenu({
       setComplete(true);
     } catch (error: unknown) {
       setMessage(
-        error instanceof ApiProblem
-          ? error.message
-          : '신고를 접수하지 못했습니다. 연결을 확인해 주세요.',
+        actionableErrorMessage(
+          error,
+          '신고를 접수하지 못했습니다. 연결을 확인해 주세요.',
+        ),
       );
     } finally {
       setPending(false);
@@ -75,11 +83,12 @@ export function ReportMenu({
     setMessage(undefined);
     setComplete(false);
     setDetail('');
+    triggerRef.current?.focus();
   }
 
   return (
     <div className="reportMenu">
-      <button type="button" onClick={() => setOpen(true)}>
+      <button ref={triggerRef} type="button" onClick={() => setOpen(true)}>
         신고
       </button>
       {open && (
@@ -88,8 +97,12 @@ export function ReportMenu({
           role="dialog"
           aria-modal="true"
           aria-label="신고하기"
+          onKeyDown={(event) => {
+            if (event.key === 'Escape') close();
+          }}
         >
           <button
+            ref={closeRef}
             className="reportSheet__close"
             type="button"
             onClick={close}
@@ -156,10 +169,14 @@ export function ReportMenu({
                   value={detail}
                   onChange={(event) => setDetail(event.target.value)}
                   placeholder="운영자가 확인할 상황을 적어 주세요."
+                  aria-invalid={message !== undefined}
+                  aria-describedby={
+                    message === undefined ? undefined : 'report-error'
+                  }
                 />
               </label>
               {message !== undefined && (
-                <p className="composerError" role="alert">
+                <p id="report-error" className="composerError" role="alert">
                   {message}
                 </p>
               )}

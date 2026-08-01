@@ -7,7 +7,7 @@ import {
   type AdminReport,
   type ReportReviewDecision,
 } from '@/lib/api/admin-reports';
-import { ApiProblem } from '@/lib/api/problem-details';
+import { actionableErrorMessage } from '@/lib/api/problem-details';
 
 const decisionLabels: Record<ReportReviewDecision, string> = {
   KEEP: '콘텐츠 유지',
@@ -39,9 +39,7 @@ export function ReportReviewPanel({
       router.refresh();
     } catch (error: unknown) {
       setMessage(
-        error instanceof ApiProblem
-          ? error.message
-          : '신고 처리 결과를 저장하지 못했습니다.',
+        actionableErrorMessage(error, '신고 처리 결과를 저장하지 못했습니다.'),
       );
       setPending(false);
     }

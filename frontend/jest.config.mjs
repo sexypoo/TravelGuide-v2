@@ -6,6 +6,7 @@ const createJestConfig = nextJest({ dir: './' });
 
 const config = {
   clearMocks: true,
+  watchman: false,
   modulePathIgnorePatterns: ['<rootDir>/.next/'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'jest-environment-jsdom',

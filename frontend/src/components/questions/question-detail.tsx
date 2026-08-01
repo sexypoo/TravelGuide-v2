@@ -82,9 +82,10 @@ export function QuestionDetailView({
         ← 제주 도움방
       </Link>
       {connectionState !== 'connected' && (
-        <div className="connectionNotice" role="status">
-          실시간 연결을 복구 중입니다. 연결 후 이 토픽을 자동으로 다시
-          확인합니다.
+        <div className="connectionNotice" role="status" aria-live="polite">
+          {connectionState === 'offline'
+            ? '인터넷 연결을 확인해 주세요. 연결되면 이 토픽을 자동으로 다시 불러옵니다.'
+            : '실시간 연결을 복구 중입니다. 연결되면 이 토픽을 자동으로 다시 불러옵니다.'}
         </div>
       )}
       <article className="fullQuestionCard">

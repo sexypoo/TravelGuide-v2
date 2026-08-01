@@ -7,7 +7,7 @@ import {
   type AnswerSourceType,
   type QuestionDetail,
 } from '@/lib/api/questions';
-import { ApiProblem } from '@/lib/api/problem-details';
+import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import { sourceLabels } from '@/lib/questions/presentation';
 import { queryKeys } from '@/lib/query/keys';
 import { mergeAnswerIntoDetail } from '@/lib/query/realtime-cache';
@@ -21,7 +21,13 @@ function answerError(error: unknown): string {
       SOURCE_URL_REQUIRED: '공식 정보의 HTTPS 주소를 입력해 주세요.',
       INVALID_SOURCE_URL: '출처 주소는 https://로 시작해야 합니다.',
     };
-    return messages[error.code] ?? error.message;
+    return (
+      messages[error.code] ??
+      actionableErrorMessage(
+        error,
+        '답변을 보내지 못했습니다. 연결을 확인하고 다시 시도해 주세요.',
+      )
+    );
   }
   return '답변을 보내지 못했습니다. 연결을 확인하고 다시 시도해 주세요.';
 }

@@ -7,13 +7,15 @@ import {
 } from '@tanstack/react-query';
 import { useState } from 'react';
 import { createMessage, type MessagePage } from '@/lib/api/messages';
-import { ApiProblem } from '@/lib/api/problem-details';
+import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { mergeMessageIntoTimeline } from '@/lib/query/realtime-cache';
 
 function messageError(error: unknown): string {
-  if (error instanceof ApiProblem) return error.message;
-  return '메시지를 보내지 못했습니다. 연결을 확인하고 다시 시도해 주세요.';
+  return actionableErrorMessage(
+    error,
+    '메시지를 보내지 못했습니다. 연결을 확인하고 다시 시도해 주세요.',
+  );
 }
 
 export function MessageComposer({

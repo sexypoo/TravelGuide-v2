@@ -163,10 +163,13 @@ describe('T03 verification and private storage', () => {
     await user
       .get(`/api/v1/admin/verifications/${verificationId}/evidence`)
       .expect(403);
-    await admin
+    const evidence = await admin
       .get(`/api/v1/admin/verifications/${verificationId}/evidence`)
       .expect(200)
-      .expect('Content-Type', 'image/jpeg');
+      .expect('Content-Type', 'image/jpeg')
+      .expect('Cache-Control', 'private, no-store')
+      .expect('X-Content-Type-Options', 'nosniff');
+    expect(evidence.headers['content-disposition']).toContain('inline;');
 
     const reviewed = await admin
       .patch(`/api/v1/admin/verifications/${verificationId}/review`)

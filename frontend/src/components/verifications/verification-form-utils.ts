@@ -1,4 +1,4 @@
-import { ApiProblem } from '@/lib/api/problem-details';
+import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 
 export const MAX_PROOF_BYTES = 5 * 1024 * 1024;
 const allowedTypes = new Set(['image/jpeg', 'image/png', 'application/pdf']);
@@ -23,7 +23,13 @@ export function applicationError(error: unknown): string {
         '위치 정확도가 낮아요. 열린 장소에서 다시 확인해 주세요.',
       OUTSIDE_DESTINATION_AREA: '현재 위치가 제주 인증 범위 밖이에요.',
     };
-    return messages[error.code] ?? error.message;
+    return (
+      messages[error.code] ??
+      actionableErrorMessage(
+        error,
+        '신청을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.',
+      )
+    );
   }
   return '신청을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.';
 }

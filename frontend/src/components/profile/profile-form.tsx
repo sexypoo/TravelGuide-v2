@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { ApiProblem } from '@/lib/api/problem-details';
+import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import {
   updateOwnProfile,
   type OwnProfile,
@@ -33,10 +33,10 @@ function saveError(error: unknown): string {
   if (error instanceof ApiProblem && error.code === 'NICKNAME_ALREADY_EXISTS') {
     return '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해 주세요.';
   }
-  if (error instanceof ApiProblem && error.status === 401) {
-    return '로그인이 만료되었습니다. 다시 로그인해 주세요.';
-  }
-  return '프로필을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+  return actionableErrorMessage(
+    error,
+    '프로필을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  );
 }
 
 export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {

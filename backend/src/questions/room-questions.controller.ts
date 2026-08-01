@@ -10,6 +10,8 @@ import {
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RateLimit } from '../common/rate-limit/rate-limit.decorator';
+import { RateLimitGuard } from '../common/rate-limit/rate-limit.guard';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { ListQuestionsDto } from './dto/list-questions.dto';
 import type {
@@ -33,6 +35,8 @@ export class RoomQuestionsController {
   }
 
   @Post()
+  @RateLimit('TOPIC')
+  @UseGuards(RateLimitGuard)
   create(
     @Param('slug') slug: string,
     @CurrentUser() user: AuthenticatedUser,

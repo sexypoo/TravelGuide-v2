@@ -22,6 +22,18 @@ export function validateServerEnvironment(
     throw new Error('API_INTERNAL_URL must use HTTP or HTTPS');
   }
 
+  if (
+    url.username.length > 0 ||
+    url.password.length > 0 ||
+    url.pathname !== '/' ||
+    url.search.length > 0 ||
+    url.hash.length > 0
+  ) {
+    throw new Error(
+      'API_INTERNAL_URL must be an origin without credentials or path',
+    );
+  }
+
   return {
     apiInternalUrl: url.origin,
   };

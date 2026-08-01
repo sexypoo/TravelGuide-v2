@@ -14,7 +14,7 @@ import {
   type QuestionPage,
   type QuestionUrgency,
 } from '@/lib/api/questions';
-import { ApiProblem } from '@/lib/api/problem-details';
+import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import { categoryLabels, urgencyLabels } from '@/lib/questions/presentation';
 import { queryKeys } from '@/lib/query/keys';
 import {
@@ -33,7 +33,10 @@ function questionError(error: unknown): string {
     if (error.code === 'MESSAGE_ALREADY_PROMOTED') {
       return '이미 토픽으로 만든 메시지입니다.';
     }
-    return error.message;
+    return actionableErrorMessage(
+      error,
+      '토픽을 만들지 못했습니다. 연결을 확인하고 다시 시도해 주세요.',
+    );
   }
   return '토픽을 만들지 못했습니다. 연결을 확인하고 다시 시도해 주세요.';
 }

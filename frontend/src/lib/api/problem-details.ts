@@ -58,6 +58,21 @@ export class ApiProblem extends Error {
   }
 }
 
+export function actionableErrorMessage(
+  error: unknown,
+  fallback: string,
+): string {
+  if (!(error instanceof ApiProblem)) return fallback;
+  if (error.code === 'RATE_LIMIT_EXCEEDED') return error.message;
+  if (error.status === 401) {
+    return '로그인이 만료되었습니다. 다시 로그인해 주세요.';
+  }
+  if (error.status >= 500) {
+    return '서버 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.';
+  }
+  return error.message;
+}
+
 export async function problemFromResponse(
   response: Response,
 ): Promise<ApiProblem> {

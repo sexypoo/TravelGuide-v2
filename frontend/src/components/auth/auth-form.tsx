@@ -9,7 +9,7 @@ import {
   type LoginInput,
   type RegisterInput,
 } from '@/lib/api/auth-client';
-import { ApiProblem } from '@/lib/api/problem-details';
+import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import {
   validateLogin,
   validateRegistration,
@@ -39,7 +39,11 @@ function errorMessage(error: unknown): string {
   };
 
   return (
-    messages[error.code] ?? '요청을 처리하지 못했습니다. 다시 시도해 주세요.'
+    messages[error.code] ??
+    actionableErrorMessage(
+      error,
+      '요청을 처리하지 못했습니다. 다시 시도해 주세요.',
+    )
   );
 }
 

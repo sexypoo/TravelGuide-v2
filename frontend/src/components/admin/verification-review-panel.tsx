@@ -7,7 +7,7 @@ import {
   reviewVerification,
   type AdminVerification,
 } from '@/lib/api/admin-verifications';
-import { ApiProblem } from '@/lib/api/problem-details';
+import { actionableErrorMessage } from '@/lib/api/problem-details';
 
 function formatDate(value: string | null): string {
   return value === null
@@ -34,9 +34,7 @@ export function VerificationReviewPanel({
     try {
       await openVerificationEvidence(verification.id);
     } catch (error: unknown) {
-      setMessage(
-        error instanceof ApiProblem ? error.message : '증빙을 열지 못했습니다.',
-      );
+      setMessage(actionableErrorMessage(error, '증빙을 열지 못했습니다.'));
     }
   }
 
@@ -57,9 +55,7 @@ export function VerificationReviewPanel({
       router.refresh();
     } catch (error: unknown) {
       setMessage(
-        error instanceof ApiProblem
-          ? error.message
-          : '심사 결과를 저장하지 못했습니다.',
+        actionableErrorMessage(error, '심사 결과를 저장하지 못했습니다.'),
       );
       setPending(false);
     }

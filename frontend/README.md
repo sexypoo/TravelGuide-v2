@@ -61,6 +61,11 @@ Exact GPS coordinates are never rendered. Administrator evidence is loaded only
 after an explicit click, opened through a short-lived object URL, and not kept in
 the client cache.
 
+The frontend adds a restrictive Content Security Policy and anti-framing,
+content-type, referrer, and permissions headers. Recoverable API failures show
+Korean retry or re-login guidance, and disconnected room views explain that
+REST data is reloaded automatically after reconnection.
+
 ## Quality commands
 
 ```bash
@@ -76,7 +81,8 @@ yarn verify
 
 `API_INTERNAL_URL` is a server-only absolute HTTP(S) origin. It is validated as
 Next.js loads its configuration and is never exposed as a hardcoded browser API
-origin. Browser requests stay relative to preserve same-origin cookies.
+origin. Credentials, paths, queries, and fragments are rejected. Browser
+requests stay relative to preserve same-origin cookies.
 
 ## Docker
 

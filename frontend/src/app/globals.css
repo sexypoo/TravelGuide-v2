@@ -440,7 +440,9 @@ body {
 
 a,
 button,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -454,13 +456,17 @@ button {
 
 button,
 a,
-input {
+input,
+select,
+textarea {
   -webkit-tap-highlight-color: transparent;
 }
 
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 3px solid rgba(124, 58, 237, 0.35);
   outline-offset: 3px;
 }

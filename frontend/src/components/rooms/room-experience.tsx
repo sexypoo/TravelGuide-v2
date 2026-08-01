@@ -120,9 +120,10 @@ export function RoomExperience({
             <span className="conversationStage__hint">짧은 정보도 좋아요</span>
           </header>
           {connectionState !== 'connected' && (
-            <div className="connectionNotice" role="status">
-              실시간 연결을 복구하고 있어요. 연결되면 놓친 대화를 다시
-              확인합니다.
+            <div className="connectionNotice" role="status" aria-live="polite">
+              {connectionState === 'offline'
+                ? '인터넷 연결을 확인해 주세요. 연결되면 놓친 대화를 자동으로 다시 불러옵니다.'
+                : '실시간 연결을 복구하고 있어요. 연결되면 놓친 대화를 자동으로 다시 불러옵니다.'}
             </div>
           )}
           <MessageTimeline

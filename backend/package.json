@@ -31,14 +31,14 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@nestjs/common": "11.1.6",
-    "@nestjs/config": "4.0.2",
-    "@nestjs/core": "11.1.6",
+    "@nestjs/common": "11.1.28",
+    "@nestjs/config": "4.0.4",
+    "@nestjs/core": "11.1.28",
     "@nestjs/jwt": "11.0.1",
     "@nestjs/passport": "11.0.5",
-    "@nestjs/platform-express": "11.1.6",
-    "@nestjs/platform-socket.io": "11.1.6",
-    "@nestjs/websockets": "11.1.6",
+    "@nestjs/platform-express": "11.1.28",
+    "@nestjs/platform-socket.io": "11.1.28",
+    "@nestjs/websockets": "11.1.28",
     "@prisma/client": "5.22.0",
     "bcrypt": "6.0.0",
     "class-transformer": "0.5.1",
@@ -52,9 +52,9 @@
     "socket.io": "4.8.1"
   },
   "devDependencies": {
-    "@nestjs/cli": "11.0.10",
-    "@nestjs/schematics": "11.0.7",
-    "@nestjs/testing": "11.1.6",
+    "@nestjs/cli": "11.0.24",
+    "@nestjs/schematics": "11.1.0",
+    "@nestjs/testing": "11.1.28",
     "@types/bcrypt": "5.0.2",
     "@types/cookie-parser": "1.4.9",
     "@types/express": "5.0.3",
