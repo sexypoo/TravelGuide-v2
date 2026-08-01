@@ -6,6 +6,8 @@ import { AnswerForm } from '@/components/answers/answer-form';
 import { useRoomRealtime } from '@/components/providers/realtime-provider';
 import { ReportMenu } from '@/components/reports/report-menu';
 import { TopicResolutionActions } from '@/components/questions/topic-resolution-actions';
+import { TopicShareButton } from '@/components/questions/topic-share-button';
+import { LiveStatusBoard } from '@/components/questions/live-status-board';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import type { Room } from '@/lib/api/rooms';
 import {
@@ -139,6 +141,12 @@ export function QuestionDetailView({
         </footer>
       </article>
 
+      {room.access.canChat && question.status !== 'REMOVED' && (
+        <TopicShareButton roomSlug={room.slug} questionId={question.id} />
+      )}
+
+      <LiveStatusBoard question={question} />
+
       {question.status === 'RESOLVED' && (
         <div className="resolutionSummary" role="status">
           <span aria-hidden="true">✓</span>
@@ -166,7 +174,7 @@ export function QuestionDetailView({
           <div>
             <p>LOCAL SIGNALS</p>
             <h2 id="answer-thread-title">
-              현지인 답변 {question.answers.length}
+              참여자 답변 {question.answers.length}
             </h2>
           </div>
           <span>먼저 도착한 순서</span>
@@ -176,7 +184,7 @@ export function QuestionDetailView({
             <span aria-hidden="true">⌁</span>
             <h3>아직 도착한 답변이 없어요</h3>
             <p>
-              실시간 연결을 유지하고 있어요. 현지인의 첫 답변이 오면 바로
+              실시간 연결을 유지하고 있어요. 참여자의 첫 답변이 오면 바로
               알려드릴게요.
             </p>
           </div>
@@ -196,7 +204,11 @@ export function QuestionDetailView({
       </section>
 
       {canAnswer && (
-        <AnswerForm questionId={question.id} roomSlug={room.slug} />
+        <AnswerForm
+          questionId={question.id}
+          roomSlug={room.slug}
+          category={question.category}
+        />
       )}
     </div>
   );

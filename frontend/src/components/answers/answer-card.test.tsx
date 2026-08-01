@@ -16,6 +16,7 @@ const answer: Answer = {
   sourceType: 'OFFICIAL_SOURCE',
   sourceUrl: 'https://example.com/notice',
   removed: false,
+  observation: null,
   createdAt: '2026-08-01T00:10:00.000Z',
   updatedAt: '2026-08-01T00:10:00.000Z',
 };
@@ -43,5 +44,19 @@ describe('AnswerCard', () => {
     render(<AnswerCard answer={answer} accepted currentUserId="traveler-1" />);
     expect(screen.getByText('채택된 답변')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '신고' })).toBeInTheDocument();
+  });
+
+  it('labels a verified traveler answer distinctly', () => {
+    render(
+      <AnswerCard
+        answer={{
+          ...answer,
+          author: { ...answer.author, badge: 'VERIFIED_TRAVELER' },
+        }}
+        accepted={false}
+        currentUserId="local-1"
+      />,
+    );
+    expect(screen.getByText(/인증 여행자/)).toBeInTheDocument();
   });
 });

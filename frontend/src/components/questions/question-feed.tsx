@@ -7,9 +7,11 @@ import { QuestionCard } from './question-card';
 export function QuestionFeed({
   roomSlug,
   status,
+  canShare = false,
 }: {
   roomSlug: string;
   status: QuestionListStatus;
+  canShare?: boolean;
 }): React.JSX.Element {
   const query = useQuestions(roomSlug, status);
 
@@ -58,7 +60,12 @@ export function QuestionFeed({
     <div className="questionFeed">
       <div className="questionSignalRail" aria-hidden="true" />
       {questions.map((question) => (
-        <QuestionCard key={question.id} question={question} />
+        <QuestionCard
+          key={question.id}
+          question={question}
+          roomSlug={roomSlug}
+          canShare={canShare}
+        />
       ))}
       {query.hasNextPage && (
         <button

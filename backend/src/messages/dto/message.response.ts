@@ -1,13 +1,32 @@
-import type { RoomParticipantKind } from '@prisma/client';
+import type {
+  ChatMessageType,
+  QuestionCategory,
+  QuestionStatus,
+  QuestionUrgency,
+  RoomParticipantKind,
+} from '@prisma/client';
+import type { PublicQuestionStatus } from '../../questions/dto/question.response';
 
 export type ParticipantBadge =
   | 'VERIFIED_TRAVELER'
   | 'VERIFIED_LOCAL'
   | 'VERIFIED_BOTH';
 
+export interface SharedTopicResponse {
+  id: string;
+  authorNickname: string;
+  category: QuestionCategory;
+  urgency: QuestionUrgency;
+  content: string;
+  areaText: string | null;
+  status: PublicQuestionStatus;
+  answerCount: number;
+}
+
 export interface MessageResponse {
   id: string;
   roomId: string;
+  type: ChatMessageType;
   author: {
     id: string;
     nickname: string;
@@ -16,6 +35,18 @@ export interface MessageResponse {
   content: string;
   contentFormat: 'PLAIN_TEXT';
   topicId: string | null;
+  image: {
+    url: string;
+    originalName: string;
+    mimeType: string;
+  } | null;
+  place: {
+    name: string;
+    address: string | null;
+    latitude: number;
+    longitude: number;
+  } | null;
+  sharedTopic: SharedTopicResponse | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,12 +59,32 @@ export interface MessageListResponse {
 export interface MessageForResponse {
   id: string;
   roomId: string;
+  type?: ChatMessageType;
   authorKind: RoomParticipantKind;
   content: string;
+  imageObjectKey?: string | null;
+  imageOriginalName?: string | null;
+  imageMimeType?: string | null;
+  placeName?: string | null;
+  placeAddress?: string | null;
+  placeLatitude?: { toNumber(): number } | null;
+  placeLongitude?: { toNumber(): number } | null;
   createdAt: Date;
   updatedAt: Date;
   author: { id: string; nickname: string };
   topic: { id: string } | null;
+  sharedQuestion?: {
+    id: string;
+    category: QuestionCategory;
+    urgency: QuestionUrgency;
+    content: string;
+    areaText: string | null;
+    status: QuestionStatus;
+    expiresAt: Date;
+    removedAt: Date | null;
+    author: { nickname: string };
+    _count: { answers: number };
+  } | null;
 }
 
 export function toParticipantBadge(
@@ -46,10 +97,20 @@ export function toParticipantBadge(
 
 export function toMessageResponse(
   message: MessageForResponse,
+  now = new Date(),
 ): MessageResponse {
+  const type = message.type ?? 'TEXT';
+  const shared = message.sharedQuestion ?? null;
+  const sharedStatus: PublicQuestionStatus | null =
+    shared === null
+      ? null
+      : shared.status === 'OPEN' && shared.expiresAt <= now
+        ? 'EXPIRED'
+        : shared.status;
   return {
     id: message.id,
     roomId: message.roomId,
+    type,
     author: {
       id: message.author.id,
       nickname: message.author.nickname,
@@ -58,6 +119,42 @@ export function toMessageResponse(
     content: message.content,
     contentFormat: 'PLAIN_TEXT',
     topicId: message.topic?.id ?? null,
+    image:
+      type === 'IMAGE' &&
+      message.imageObjectKey != null &&
+      message.imageOriginalName != null &&
+      message.imageMimeType != null
+        ? {
+            url: `/api/v1/messages/${encodeURIComponent(message.id)}/image`,
+            originalName: message.imageOriginalName,
+            mimeType: message.imageMimeType,
+          }
+        : null,
+    place:
+      type === 'PLACE' &&
+      message.placeName != null &&
+      message.placeLatitude != null &&
+      message.placeLongitude != null
+        ? {
+            name: message.placeName,
+            address: message.placeAddress ?? null,
+            latitude: message.placeLatitude.toNumber(),
+            longitude: message.placeLongitude.toNumber(),
+          }
+        : null,
+    sharedTopic:
+      shared === null || sharedStatus === null || shared.removedAt !== null
+        ? null
+        : {
+            id: shared.id,
+            authorNickname: shared.author.nickname,
+            category: shared.category,
+            urgency: shared.urgency,
+            content: shared.content,
+            areaText: shared.areaText,
+            status: sharedStatus,
+            answerCount: shared._count.answers,
+          },
     createdAt: message.createdAt.toISOString(),
     updatedAt: message.updatedAt.toISOString(),
   };

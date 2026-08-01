@@ -15,6 +15,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:seed:demo": "tsx prisma/seed-demo.ts",
+    "db:seed:demo-content": "tsx prisma/seed-demo-content.ts",
     "db:up": "docker compose up -d --wait",
     "db:validate": "prisma validate",
     "dev": "nest start --watch",

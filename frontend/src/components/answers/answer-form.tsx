@@ -5,6 +5,9 @@ import { useState } from 'react';
 import {
   createAnswer,
   type AnswerSourceType,
+  type CrowdLevel,
+  type EntryStatus,
+  type QuestionCategory,
   type QuestionDetail,
 } from '@/lib/api/questions';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
@@ -42,14 +45,19 @@ const sourceTypes: AnswerSourceType[] = [
 export function AnswerForm({
   questionId,
   roomSlug,
+  category,
 }: {
   questionId: string;
   roomSlug: string;
+  category: QuestionCategory;
 }): React.JSX.Element {
   const queryClient = useQueryClient();
   const [sourceType, setSourceType] = useState<AnswerSourceType>('ON_SITE_NOW');
   const [sourceUrl, setSourceUrl] = useState('');
   const [content, setContent] = useState('');
+  const [waitMinutes, setWaitMinutes] = useState('');
+  const [crowdLevel, setCrowdLevel] = useState<CrowdLevel>();
+  const [entryStatus, setEntryStatus] = useState<EntryStatus>();
   const [clientError, setClientError] = useState('');
   const mutation = useMutation({
     mutationFn: () =>
@@ -57,6 +65,12 @@ export function AnswerForm({
         content: content.trim(),
         sourceType,
         sourceUrl: sourceType === 'OFFICIAL_SOURCE' ? sourceUrl.trim() : null,
+        ...(waitMinutes ? { waitMinutes: Number(waitMinutes) } : {}),
+        ...(crowdLevel ? { crowdLevel } : {}),
+        ...(entryStatus ? { entryStatus } : {}),
+        ...(['WAITING', 'CROWD'].includes(category)
+          ? { observedAt: new Date().toISOString() }
+          : {}),
       }),
     onSuccess: (answer) => {
       queryClient.setQueryData<QuestionDetail>(
@@ -64,10 +78,16 @@ export function AnswerForm({
         (current) => mergeAnswerIntoDetail(current, answer),
       );
       void queryClient.invalidateQueries({
+        queryKey: queryKeys.question(questionId),
+      });
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.roomQuestionsRoot(roomSlug),
       });
       setContent('');
       setSourceUrl('');
+      setWaitMinutes('');
+      setCrowdLevel(undefined);
+      setEntryStatus(undefined);
       setClientError('');
     },
   });
@@ -82,6 +102,15 @@ export function AnswerForm({
       setClientError('공식 정보의 HTTPS 주소를 함께 입력해 주세요.');
       return;
     }
+    if (
+      ['WAITING', 'CROWD'].includes(category) &&
+      !waitMinutes &&
+      !crowdLevel &&
+      !entryStatus
+    ) {
+      setClientError('대기 시간, 혼잡도, 입장 상태 중 하나 이상 알려주세요.');
+      return;
+    }
     setClientError('');
     mutation.mutate();
   }
@@ -92,7 +121,7 @@ export function AnswerForm({
   return (
     <form className="answerComposer" onSubmit={submit} noValidate>
       <header>
-        <span>LOCAL REPLY</span>
+        <span>FIELD REPLY</span>
         <h2>이 질문에 근거 있는 답을 남겨주세요</h2>
         <p>
           직접 확인한 범위와 정보의 시점을 분명하게 적으면 여행자가 판단하기
@@ -126,6 +155,65 @@ export function AnswerForm({
             onChange={(event) => setSourceUrl(event.target.value)}
           />
         </label>
+      )}
+      {['WAITING', 'CROWD'].includes(category) && (
+        <fieldset className="fieldObservationFields">
+          <legend>지금 직접 본 현장 상태</legend>
+          <label>
+            <span>예상 대기 시간</span>
+            <div>
+              <input
+                type="number"
+                min="0"
+                max="1440"
+                value={waitMinutes}
+                onChange={(event) => setWaitMinutes(event.target.value)}
+                placeholder="30"
+              />
+              <small>분</small>
+            </div>
+          </label>
+          <label>
+            <span>혼잡도</span>
+            <select
+              value={crowdLevel ?? ''}
+              onChange={(event) =>
+                setCrowdLevel(
+                  event.target.value
+                    ? (event.target.value as CrowdLevel)
+                    : undefined,
+                )
+              }
+            >
+              <option value="">선택</option>
+              <option value="QUIET">여유</option>
+              <option value="MODERATE">보통</option>
+              <option value="BUSY">많음</option>
+              <option value="VERY_BUSY">매우 많음</option>
+            </select>
+          </label>
+          <label>
+            <span>입장 상태</span>
+            <select
+              value={entryStatus ?? ''}
+              onChange={(event) =>
+                setEntryStatus(
+                  event.target.value
+                    ? (event.target.value as EntryStatus)
+                    : undefined,
+                )
+              }
+            >
+              <option value="">선택</option>
+              <option value="OPEN">입장 가능</option>
+              <option value="LIMITED">제한 입장</option>
+              <option value="PAUSED">일시 중단</option>
+              <option value="CLOSED">입장 마감</option>
+              <option value="UNKNOWN">확인 필요</option>
+            </select>
+          </label>
+          <p>답변을 보내는 시각이 현장 확인 시각으로 함께 기록됩니다.</p>
+        </fieldset>
       )}
       <label className="composerField">
         <span>

@@ -10,9 +10,13 @@ const message: ChatMessage = {
     nickname: '제주여행자',
     badge: 'VERIFIED_TRAVELER',
   },
+  type: 'TEXT',
   content: '공항에서 서귀포로 가는 버스가 지금 많이 지연되고 있나요?',
   contentFormat: 'PLAIN_TEXT',
   topicId: null,
+  image: null,
+  place: null,
+  sharedTopic: null,
   createdAt: '2026-08-01T12:00:00.000Z',
   updatedAt: '2026-08-01T12:00:00.000Z',
 };

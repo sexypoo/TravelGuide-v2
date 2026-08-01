@@ -218,6 +218,9 @@ export function RealtimeProvider({
           queryKeys.question(answer.questionId),
           (current) => mergeAnswerIntoDetail(current, answer),
         );
+        void queryClient.invalidateQueries({
+          queryKey: queryKeys.question(answer.questionId),
+        });
         if (!alreadySeen) {
           queryClient.setQueriesData<InfiniteData<QuestionPage>>(
             { queryKey: queryKeys.roomQuestionsRoot(event.roomSlug) },

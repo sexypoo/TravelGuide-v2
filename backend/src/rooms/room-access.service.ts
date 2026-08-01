@@ -7,7 +7,8 @@ import type { RoomAccessResponse } from './room-access.types';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export interface LocalAnswerCapability {
+export interface ParticipantAnswerCapability {
+  kind: RoomParticipantKind;
   verifiedAt: Date;
 }
 
@@ -80,7 +81,7 @@ export class RoomAccessService {
         canChat: true,
         canCreateTopic: true,
         canAskQuestion: true,
-        canAnswer: local !== null,
+        canAnswer: true,
         participantKind,
       };
     }
@@ -146,8 +147,9 @@ export class RoomAccessService {
   async assertCanParticipate(
     user: AuthenticatedUser,
     destinationId: string,
+    now = new Date(),
   ): Promise<RoomParticipantCapability> {
-    const access = await this.getAccess(user, destinationId);
+    const access = await this.getAccess(user, destinationId, now);
     if (!access.canChat || access.participantKind === null) {
       throw new ProblemException(
         'ROOM_PARTICIPANT_VERIFICATION_REQUIRED',
@@ -162,33 +164,43 @@ export class RoomAccessService {
     user: AuthenticatedUser,
     destinationId: string,
     now = new Date(),
-  ): Promise<LocalAnswerCapability> {
-    if (user.role === 'ADMIN') {
+  ): Promise<ParticipantAnswerCapability> {
+    const access = await this.getAccess(user, destinationId, now);
+    if (!access.canAnswer || access.participantKind === null) {
       throw new ProblemException(
-        'LOCAL_VERIFICATION_REQUIRED',
-        '현재 유효한 현지인 인증이 필요합니다.',
+        'PARTICIPANT_VERIFICATION_REQUIRED',
+        '현재 유효한 여행자 또는 현지인 인증이 필요합니다.',
         HttpStatus.FORBIDDEN,
       );
     }
-    const local = await this.prisma.verification.findFirst({
+    const verification = await this.prisma.verification.findFirst({
       where: {
         userId: user.id,
         destinationId,
-        type: 'LOCAL',
         status: 'APPROVED',
         reviewedAt: { not: null },
-        expiresAt: { gt: now },
+        OR: [
+          {
+            type: 'TRAVELER',
+            startsAt: { lte: new Date(now.getTime() + DAY_MS) },
+            endsAt: { gte: new Date(now.getTime() - DAY_MS) },
+          },
+          { type: 'LOCAL', expiresAt: { gt: now } },
+        ],
       },
       orderBy: { reviewedAt: 'desc' },
       select: { reviewedAt: true },
     });
-    if (local === null || local.reviewedAt === null) {
+    if (verification === null || verification.reviewedAt === null) {
       throw new ProblemException(
-        'LOCAL_VERIFICATION_REQUIRED',
-        '현재 유효한 현지인 인증이 필요합니다.',
+        'PARTICIPANT_VERIFICATION_REQUIRED',
+        '현재 유효한 여행자 또는 현지인 인증이 필요합니다.',
         HttpStatus.FORBIDDEN,
       );
     }
-    return { verifiedAt: local.reviewedAt };
+    return {
+      kind: access.participantKind,
+      verifiedAt: verification.reviewedAt,
+    };
   }
 }

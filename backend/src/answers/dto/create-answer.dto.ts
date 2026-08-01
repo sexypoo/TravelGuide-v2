@@ -1,10 +1,14 @@
-import { AnswerSourceType } from '@prisma/client';
-import { Transform } from 'class-transformer';
+import { AnswerSourceType, CrowdLevel, EntryStatus } from '@prisma/client';
+import { Transform, Type } from 'class-transformer';
 import {
+  IsDateString,
   IsEnum,
+  IsInt,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
+  Min,
   MinLength,
 } from 'class-validator';
 
@@ -27,4 +31,23 @@ export class CreateAnswerDto {
   @IsString()
   @MaxLength(2048)
   sourceUrl?: string | null;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(1440)
+  waitMinutes?: number;
+
+  @IsOptional()
+  @IsEnum(CrowdLevel)
+  crowdLevel?: CrowdLevel;
+
+  @IsOptional()
+  @IsEnum(EntryStatus)
+  entryStatus?: EntryStatus;
+
+  @IsOptional()
+  @IsDateString()
+  observedAt?: string;
 }

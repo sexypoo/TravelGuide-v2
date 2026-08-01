@@ -11,6 +11,7 @@ import type { CreateQuestionDto } from './dto/create-question.dto';
 import type { ListQuestionsDto } from './dto/list-questions.dto';
 import {
   toQuestionResponse,
+  type LiveStatusSummary,
   type QuestionListResponse,
   type QuestionDetailResponse,
   type QuestionResponse,
@@ -220,22 +221,24 @@ export class QuestionsService {
             verifications: {
               where: {
                 destinationId: question.room.destinationId,
-                type: 'LOCAL',
                 status: 'APPROVED',
                 reviewedAt: { not: null },
               },
               orderBy: { reviewedAt: 'desc' },
-              take: 1,
-              select: { reviewedAt: true },
+              select: { type: true, reviewedAt: true },
             },
           },
         },
       },
     });
     const answerResponses = answers.map((answer) => {
-      const verifiedAt = answer.author.verifications[0]?.reviewedAt;
+      const verifiedAt = answer.author.verifications.find(
+        (verification) =>
+          answer.authorKind === 'BOTH' ||
+          verification.type === answer.authorKind,
+      )?.reviewedAt;
       if (verifiedAt === undefined || verifiedAt === null) {
-        throw new Error('Answer author local verification is missing');
+        throw new Error('Answer author participant verification is missing');
       }
       return toAnswerResponse(answer, verifiedAt);
     });
@@ -243,6 +246,7 @@ export class QuestionsService {
       ...toQuestionResponse(question, now),
       answerCount: answerResponses.length,
       answers: answerResponses,
+      liveSummary: buildLiveSummary(question.category, answerResponses),
     };
   }
 
@@ -379,4 +383,79 @@ export class QuestionsService {
     }
     return cursor;
   }
+}
+
+function mode<T extends string>(values: T[]): T | null {
+  if (values.length === 0) return null;
+  const counts = new Map<T, number>();
+  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
+  return (
+    [...counts.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ??
+    null
+  );
+}
+
+function buildLiveSummary(
+  category: string,
+  answers: ReturnType<typeof toAnswerResponse>[],
+): LiveStatusSummary | null {
+  if (category !== 'WAITING' && category !== 'CROWD') return null;
+  const observations = answers
+    .filter((answer) => !answer.removed && answer.observation !== null)
+    .map((answer) => answer.observation)
+    .filter((observation) => observation !== null);
+  if (observations.length === 0) return null;
+  const waits = observations
+    .map((observation) => observation.waitMinutes)
+    .filter((value): value is number => value !== null)
+    .sort((left, right) => left - right);
+  const median =
+    waits.length === 0
+      ? null
+      : (waits[Math.floor((waits.length - 1) / 2)] ?? null);
+  const waitRange =
+    median === null
+      ? null
+      : {
+          min: Math.max(0, Math.floor(median / 10) * 10),
+          max: Math.max(10, Math.ceil(median / 10) * 10),
+        };
+  if (waitRange !== null && waitRange.min === waitRange.max) {
+    waitRange.max += 10;
+  }
+  const agreementCount =
+    median === null
+      ? observations.length
+      : waits.filter((value) => Math.abs(value - median) <= 10).length;
+  const lastObserved = new Date(
+    Math.max(
+      ...observations.map((observation) =>
+        new Date(observation.observedAt).getTime(),
+      ),
+    ),
+  );
+  const description =
+    waitRange === null
+      ? `현장 답변 ${observations.length}건을 기준으로 현재 상태를 정리했습니다.`
+      : `현장 답변 기준 현재 대기는 약 ${waitRange.min}~${waitRange.max}분 수준입니다.`;
+  return {
+    responseCount: observations.length,
+    agreementCount,
+    waitMinutes: waitRange,
+    crowdLevel: mode(
+      observations
+        .map((observation) => observation.crowdLevel)
+        .filter((value): value is NonNullable<typeof value> => value !== null),
+    ),
+    entryStatus: mode(
+      observations
+        .map((observation) => observation.entryStatus)
+        .filter((value): value is NonNullable<typeof value> => value !== null),
+    ),
+    lastObservedAt: lastObserved.toISOString(),
+    recommendedRecheckAt: new Date(
+      lastObserved.getTime() + 10 * 60 * 1000,
+    ).toISOString(),
+    description,
+  };
 }

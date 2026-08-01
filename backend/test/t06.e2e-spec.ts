@@ -347,7 +347,7 @@ describe('T06 answers and realtime', () => {
       .expect(201);
   });
 
-  it('enforces local, ownership, question-state, and concurrent limits', async () => {
+  it('allows verified participants and enforces ownership, state, and limits', async () => {
     const dual = await createUser('dual');
     const otherTraveler = await createUser('other-traveler');
     const local = await createUser('limited-local');
@@ -367,16 +367,16 @@ describe('T06 answers and realtime', () => {
     const travelerOnly = await otherTraveler.agent
       .post(`/api/v1/questions/${ownQuestion}/answers`)
       .send(answerInput)
-      .expect(403);
-    expect(record(travelerOnly.body as unknown).code).toBe(
-      'LOCAL_VERIFICATION_REQUIRED',
+      .expect(201);
+    expect(record(record(travelerOnly.body as unknown).author).badge).toBe(
+      'VERIFIED_TRAVELER',
     );
     const expiredIdentity = await expiredLocal.agent
       .post(`/api/v1/questions/${ownQuestion}/answers`)
       .send(answerInput)
       .expect(403);
     expect(record(expiredIdentity.body as unknown).code).toBe(
-      'LOCAL_VERIFICATION_REQUIRED',
+      'PARTICIPANT_VERIFICATION_REQUIRED',
     );
 
     const expiredQuestion = await createQuestion(otherTraveler.id, {

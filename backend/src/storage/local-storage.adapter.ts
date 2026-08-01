@@ -9,7 +9,8 @@ import type {
   StoredObject,
 } from './storage.service';
 
-const SAFE_OBJECT_KEY = /^verification\/[A-Za-z0-9_-]+\/[0-9a-f-]{36}$/;
+const SAFE_OBJECT_KEY =
+  /^(?:verification|room-media)\/[A-Za-z0-9_-]+\/[0-9a-f-]{36}$/;
 
 @Injectable()
 export class LocalStorageAdapter implements StorageService {

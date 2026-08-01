@@ -6,13 +6,32 @@ import type {
 } from '../api/questions';
 
 export const categoryLabels: Record<QuestionCategory, string> = {
-  WEATHER: '날씨·운영',
+  WEATHER: '날씨',
   TRANSPORT: '교통·이동',
-  FOOD: '식당·카페',
-  PLACE: '대체 장소',
+  FOOD: '맛집·카페',
+  PLACE: '장소 추천',
+  WAITING: '대기 현황',
+  CROWD: '혼잡도',
+  OPEN_HOURS: '운영 여부',
+  EVENT: '행사·이벤트',
   SAFETY: '안전',
   OTHER: '기타',
 };
+
+export const crowdLabels = {
+  QUIET: '여유',
+  MODERATE: '보통',
+  BUSY: '많음',
+  VERY_BUSY: '매우 많음',
+} as const;
+
+export const entryLabels = {
+  OPEN: '입장 가능',
+  LIMITED: '제한 입장',
+  PAUSED: '입장 일시 중단',
+  CLOSED: '입장 마감',
+  UNKNOWN: '확인 필요',
+} as const;
 
 export const urgencyLabels: Record<QuestionUrgency, string> = {
   NORMAL: '오늘 중',

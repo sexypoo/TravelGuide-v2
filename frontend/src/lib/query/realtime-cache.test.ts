@@ -50,6 +50,7 @@ const answer: Answer = {
   sourceType: 'ON_SITE_NOW',
   sourceUrl: null,
   removed: false,
+  observation: null,
   createdAt: '2026-08-01T00:10:00.000Z',
   updatedAt: '2026-08-01T00:10:00.000Z',
 };
@@ -57,9 +58,13 @@ const message: ChatMessage = {
   id: 'message-1',
   roomId: 'room-1',
   author: question.author,
+  type: 'TEXT',
   content: '제주 공항 버스 운행 정보를 공유합니다.',
   contentFormat: 'PLAIN_TEXT',
   topicId: null,
+  image: null,
+  place: null,
+  sharedTopic: null,
   createdAt: '2026-08-01T00:05:00.000Z',
   updatedAt: '2026-08-01T00:05:00.000Z',
 };
@@ -71,7 +76,11 @@ describe('realtime cache merge', () => {
       pageParams: [null],
     };
     expect(mergeQuestionIntoFeed(feed, question)).toBe(feed);
-    const detail: QuestionDetail = { ...question, answers: [] };
+    const detail: QuestionDetail = {
+      ...question,
+      answers: [],
+      liveSummary: null,
+    };
     const merged = mergeAnswerIntoDetail(detail, answer);
     expect(merged?.answers).toHaveLength(1);
     expect(mergeAnswerIntoDetail(merged, answer)).toBe(merged);
@@ -110,7 +119,11 @@ describe('realtime cache merge', () => {
     expect(removeQuestionFromFeed(feed, question.id)?.pages[0]?.items).toEqual(
       [],
     );
-    const detail: QuestionDetail = { ...question, answers: [answer] };
+    const detail: QuestionDetail = {
+      ...question,
+      answers: [answer],
+      liveSummary: null,
+    };
     const resolved: Question = {
       ...question,
       status: 'RESOLVED',

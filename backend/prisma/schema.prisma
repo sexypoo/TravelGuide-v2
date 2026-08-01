@@ -37,8 +37,34 @@ enum QuestionCategory {
   TRANSPORT
   FOOD
   PLACE
+  WAITING
+  CROWD
+  OPEN_HOURS
+  EVENT
   SAFETY
   OTHER
+}
+
+enum ChatMessageType {
+  TEXT
+  IMAGE
+  PLACE
+  TOPIC_SHARE
+}
+
+enum CrowdLevel {
+  QUIET
+  MODERATE
+  BUSY
+  VERY_BUSY
+}
+
+enum EntryStatus {
+  OPEN
+  LIMITED
+  PAUSED
+  CLOSED
+  UNKNOWN
 }
 
 enum QuestionUrgency {
@@ -174,6 +200,7 @@ model Question {
   answers          Answer[]         @relation("QuestionAnswers")
   acceptedAnswer   Answer?          @relation("AcceptedAnswer", fields: [acceptedAnswerId], references: [id], onDelete: SetNull)
   sourceMessage    ChatMessage?     @relation("SourceMessage", fields: [sourceMessageId], references: [id], onDelete: SetNull)
+  sharedMessages   ChatMessage[]    @relation("SharedQuestion")
 
   @@index([roomId, status, createdAt, id])
   @@index([authorId, status])
@@ -181,28 +208,45 @@ model Question {
 }
 
 model ChatMessage {
-  id         String              @id @default(cuid())
-  roomId     String
-  authorId   String
-  authorKind RoomParticipantKind
-  content    String              @db.VarChar(500)
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
-  room       DestinationRoom     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  author     User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  topic      Question?           @relation("SourceMessage")
+  id                String              @id @default(cuid())
+  roomId            String
+  authorId          String
+  authorKind        RoomParticipantKind
+  type              ChatMessageType     @default(TEXT)
+  content           String              @db.VarChar(500)
+  imageObjectKey    String?             @db.VarChar(255)
+  imageOriginalName String?             @db.VarChar(255)
+  imageMimeType     String?             @db.VarChar(64)
+  imageSizeBytes    Int?
+  placeName         String?             @db.VarChar(100)
+  placeAddress      String?             @db.VarChar(200)
+  placeLatitude     Decimal?            @db.Decimal(9, 6)
+  placeLongitude    Decimal?            @db.Decimal(9, 6)
+  sharedQuestionId  String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  room              DestinationRoom     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  author            User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  topic             Question?           @relation("SourceMessage")
+  sharedQuestion    Question?           @relation("SharedQuestion", fields: [sharedQuestionId], references: [id], onDelete: SetNull)
 
   @@index([roomId, createdAt, id])
   @@index([authorId, createdAt])
+  @@index([sharedQuestionId])
 }
 
 model Answer {
   id                  String           @id @default(cuid())
   questionId          String
   authorId            String
+  authorKind          RoomParticipantKind @default(LOCAL)
   content             String           @db.VarChar(1000)
   sourceType          AnswerSourceType
   sourceUrl           String?          @db.VarChar(2048)
+  waitMinutes         Int?
+  crowdLevel          CrowdLevel?
+  entryStatus         EntryStatus?
+  observedAt          DateTime?
   removedAt           DateTime?
   removedById         String?
   createdAt           DateTime         @default(now())

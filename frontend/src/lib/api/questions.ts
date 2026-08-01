@@ -16,6 +16,10 @@ export const questionCategories = [
   'TRANSPORT',
   'FOOD',
   'PLACE',
+  'WAITING',
+  'CROWD',
+  'OPEN_HOURS',
+  'EVENT',
   'SAFETY',
   'OTHER',
 ] as const;
@@ -28,13 +32,22 @@ export type AnswerSourceType =
   | 'RECENT_EXPERIENCE'
   | 'OFFICIAL_SOURCE'
   | 'PERSONAL_OPINION';
+export type CrowdLevel = 'QUIET' | 'MODERATE' | 'BUSY' | 'VERY_BUSY';
+export type EntryStatus = 'OPEN' | 'LIMITED' | 'PAUSED' | 'CLOSED' | 'UNKNOWN';
+
+export interface FieldObservation {
+  waitMinutes: number | null;
+  crowdLevel: CrowdLevel | null;
+  entryStatus: EntryStatus | null;
+  observedAt: string;
+}
 
 export type QuestionAuthor = PublicParticipant;
 
 export interface AnswerAuthor {
   id: string;
   nickname: string;
-  badge: 'VERIFIED_LOCAL';
+  badge: 'VERIFIED_TRAVELER' | 'VERIFIED_LOCAL' | 'VERIFIED_BOTH';
   verifiedAt: string;
 }
 
@@ -47,6 +60,7 @@ export interface Answer {
   sourceType: AnswerSourceType;
   sourceUrl: string | null;
   removed: boolean;
+  observation: FieldObservation | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -73,6 +87,16 @@ export interface Question {
 
 export interface QuestionDetail extends Question {
   answers: Answer[];
+  liveSummary: {
+    responseCount: number;
+    agreementCount: number;
+    waitMinutes: { min: number; max: number } | null;
+    crowdLevel: CrowdLevel | null;
+    entryStatus: EntryStatus | null;
+    lastObservedAt: string;
+    recommendedRecheckAt: string;
+    description: string;
+  } | null;
 }
 
 export interface QuestionPage {
@@ -92,6 +116,10 @@ export interface CreateAnswerInput {
   content: string;
   sourceType: AnswerSourceType;
   sourceUrl?: string | null;
+  waitMinutes?: number;
+  crowdLevel?: CrowdLevel;
+  entryStatus?: EntryStatus;
+  observedAt?: string;
 }
 
 function parseQuestionAuthor(value: unknown): QuestionAuthor {
@@ -111,7 +139,7 @@ function parseAnswerAuthor(value: unknown): AnswerAuthor {
     !isRecord(value) ||
     typeof value.id !== 'string' ||
     typeof value.nickname !== 'string' ||
-    value.badge !== 'VERIFIED_LOCAL' ||
+    !isParticipantBadge(value.badge) ||
     !isIsoDate(value.verifiedAt)
   ) {
     throw new Error('답변 작성자 응답 형식이 올바르지 않습니다.');
@@ -144,6 +172,26 @@ export function parseAnswer(value: unknown): Answer {
   ) {
     throw new Error('답변 응답 형식이 올바르지 않습니다.');
   }
+  const observation = value.observation;
+  if (
+    observation !== undefined &&
+    observation !== null &&
+    (!isRecord(observation) ||
+      (observation.waitMinutes !== null &&
+        (typeof observation.waitMinutes !== 'number' ||
+          !Number.isInteger(observation.waitMinutes) ||
+          observation.waitMinutes < 0)) ||
+      (observation.crowdLevel !== null &&
+        !['QUIET', 'MODERATE', 'BUSY', 'VERY_BUSY'].includes(
+          String(observation.crowdLevel),
+        )) ||
+      (observation.entryStatus !== null &&
+        !['OPEN', 'LIMITED', 'PAUSED', 'CLOSED', 'UNKNOWN'].includes(
+          String(observation.entryStatus),
+        )) ||
+      !isIsoDate(observation.observedAt))
+  )
+    throw new Error('현장 관찰 응답 형식이 올바르지 않습니다.');
   if (typeof value.sourceUrl === 'string') {
     let url: URL;
     try {
@@ -164,6 +212,7 @@ export function parseAnswer(value: unknown): Answer {
     sourceType: value.sourceType as AnswerSourceType,
     sourceUrl: value.sourceUrl,
     removed: value.removed,
+    observation: (observation ?? null) as FieldObservation | null,
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
   };
@@ -222,7 +271,35 @@ export function parseQuestionDetail(value: unknown): QuestionDetail {
   if (!isRecord(value) || !Array.isArray(value.answers)) {
     throw new Error('질문 상세 응답 형식이 올바르지 않습니다.');
   }
-  return { ...parseQuestion(value), answers: value.answers.map(parseAnswer) };
+  const summary = value.liveSummary;
+  if (
+    summary !== undefined &&
+    summary !== null &&
+    (!isRecord(summary) ||
+      !Number.isInteger(summary.responseCount) ||
+      !Number.isInteger(summary.agreementCount) ||
+      (summary.waitMinutes !== null &&
+        (!isRecord(summary.waitMinutes) ||
+          !Number.isInteger(summary.waitMinutes.min) ||
+          !Number.isInteger(summary.waitMinutes.max))) ||
+      (summary.crowdLevel !== null &&
+        !['QUIET', 'MODERATE', 'BUSY', 'VERY_BUSY'].includes(
+          String(summary.crowdLevel),
+        )) ||
+      (summary.entryStatus !== null &&
+        !['OPEN', 'LIMITED', 'PAUSED', 'CLOSED', 'UNKNOWN'].includes(
+          String(summary.entryStatus),
+        )) ||
+      !isIsoDate(summary.lastObservedAt) ||
+      !isIsoDate(summary.recommendedRecheckAt) ||
+      typeof summary.description !== 'string')
+  )
+    throw new Error('현장 현황 응답 형식이 올바르지 않습니다.');
+  return {
+    ...parseQuestion(value),
+    answers: value.answers.map(parseAnswer),
+    liveSummary: (summary ?? null) as QuestionDetail['liveSummary'],
+  };
 }
 
 export function parseQuestionPage(value: unknown): QuestionPage {

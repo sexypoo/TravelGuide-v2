@@ -17,9 +17,13 @@ function message(id: string, minute: number): ChatMessage {
       nickname: `여행자 ${id}`,
       badge: 'VERIFIED_TRAVELER',
     },
+    type: 'TEXT',
     content: `${id} 번째 실시간 메시지입니다.`,
     contentFormat: 'PLAIN_TEXT',
     topicId: null,
+    image: null,
+    place: null,
+    sharedTopic: null,
     createdAt: timestamp,
     updatedAt: timestamp,
   };

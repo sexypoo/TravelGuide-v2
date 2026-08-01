@@ -92,7 +92,7 @@ describe('RoomAccessService', () => {
       canChat: true,
       canCreateTopic: true,
       canAskQuestion: true,
-      canAnswer: false,
+      canAnswer: true,
       participantKind: 'TRAVELER',
     });
 
@@ -151,23 +151,46 @@ describe('RoomAccessService', () => {
     });
   });
 
-  it('returns the approved local date when answering and rejects a traveler', async () => {
-    const reviewedAt = new Date('2026-07-01T00:00:00.000Z');
+  it('returns participant kind and verification date when answering', async () => {
+    const answerVerifiedAt = new Date('2026-07-01T00:00:00.000Z');
     jest
       .spyOn(prisma.verification, 'findFirst')
-      .mockResolvedValueOnce({ ...verification('LOCAL'), reviewedAt });
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(verification('LOCAL'))
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        ...verification('LOCAL'),
+        reviewedAt: answerVerifiedAt,
+      });
     await expect(
       service.assertCanAnswer(
         user('USER'),
         'jeju-id',
         new Date('2026-07-31T00:00:00.000Z'),
       ),
-    ).resolves.toEqual({ verifiedAt: reviewedAt });
+    ).resolves.toEqual({ kind: 'LOCAL', verifiedAt: answerVerifiedAt });
 
-    jest.spyOn(prisma.verification, 'findFirst').mockResolvedValueOnce(null);
+    jest
+      .spyOn(prisma.verification, 'findFirst')
+      .mockResolvedValueOnce(verification('TRAVELER'))
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        ...verification('TRAVELER'),
+        reviewedAt: answerVerifiedAt,
+      });
     await expect(
       service.assertCanAnswer(user('USER'), 'jeju-id'),
-    ).rejects.toMatchObject({ code: 'LOCAL_VERIFICATION_REQUIRED' });
+    ).resolves.toEqual({ kind: 'TRAVELER', verifiedAt: answerVerifiedAt });
+
+    jest
+      .spyOn(prisma.verification, 'findFirst')
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+    await expect(
+      service.assertCanAnswer(user('USER'), 'jeju-id'),
+    ).rejects.toMatchObject({ code: 'PARTICIPANT_VERIFICATION_REQUIRED' });
   });
 
   it('uses inclusive traveler grace boundaries and exclusive local expiry', async () => {

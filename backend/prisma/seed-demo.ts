@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { isAbsolute, resolve, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { ensureDemoWaitingTopic } from './demo-content';
 
 const prisma = new PrismaClient();
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -200,6 +201,7 @@ async function seedDemo(): Promise<void> {
       now,
     );
   }
+  await ensureDemoWaitingTopic(prisma, now);
 }
 
 async function run(): Promise<void> {

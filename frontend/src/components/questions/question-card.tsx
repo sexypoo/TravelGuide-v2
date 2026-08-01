@@ -7,11 +7,16 @@ import {
   statusLabels,
   urgencyLabels,
 } from '@/lib/questions/presentation';
+import { TopicShareButton } from './topic-share-button';
 
 export function QuestionCard({
   question,
+  roomSlug,
+  canShare = false,
 }: {
   question: Question;
+  roomSlug?: string;
+  canShare?: boolean;
 }): React.JSX.Element {
   const badgeKind =
     question.author.badge === 'VERIFIED_LOCAL'
@@ -55,6 +60,9 @@ export function QuestionCard({
           </span>
         </footer>
       </Link>
+      {canShare && roomSlug && question.status !== 'REMOVED' && (
+        <TopicShareButton roomSlug={roomSlug} questionId={question.id} />
+      )}
     </article>
   );
 }

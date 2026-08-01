@@ -50,4 +50,23 @@ describe('answer response', () => {
     expect(response.sourceUrl).toBeNull();
     expect(JSON.stringify(response)).not.toContain('공개되면 안 되는 원문');
   });
+
+  it('preserves a verified traveler badge on an answer', () => {
+    const response = toAnswerResponse(
+      {
+        id: 'traveler-answer',
+        questionId: 'question-id',
+        authorKind: 'TRAVELER',
+        content: '현장에서 직접 대기 줄을 확인했습니다.',
+        sourceType: 'ON_SITE_NOW',
+        sourceUrl: null,
+        removedAt: null,
+        createdAt: new Date('2026-08-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-08-01T00:00:00.000Z'),
+        author: { id: 'traveler-id', nickname: '현장여행자' },
+      },
+      new Date('2026-07-20T00:00:00.000Z'),
+    );
+    expect(response.author.badge).toBe('VERIFIED_TRAVELER');
+  });
 });

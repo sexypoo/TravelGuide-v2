@@ -70,7 +70,7 @@ export function RoomExperience({
         </div>
         <div className="conversationRoomHeader__copy">
           <div className="liveRoomEyebrow">
-            <span>JEJU LIVE ROOM</span>
+            <span>TRAVEL LIVE ROOM</span>
             <span
               className={`connectionPill connectionPill--${connectionState}`}
             >
@@ -78,7 +78,10 @@ export function RoomExperience({
             </span>
           </div>
           <h1>{room.title}</h1>
-          <p>제주의 지금을 이야기하고, 중요한 상황은 토픽으로 이어가세요.</p>
+          <p>
+            {room.destination.nameKo}의 지금을 이야기하고, 중요한 상황은
+            토픽으로 이어가세요.
+          </p>
         </div>
         <span className="roomRoleBadge">
           <span aria-hidden="true">✓</span>
@@ -115,7 +118,7 @@ export function RoomExperience({
           <header className="conversationStage__header">
             <div>
               <span>LIVE CONVERSATION</span>
-              <h2 id="chat-title">제주방 대화</h2>
+              <h2 id="chat-title">{room.destination.nameKo} 대화</h2>
             </div>
             <span className="conversationStage__hint">짧은 정보도 좋아요</span>
           </header>
@@ -131,7 +134,14 @@ export function RoomExperience({
             currentUserId={currentUserId}
             onPromote={promoteMessage}
           />
-          {room.access.canChat && <MessageComposer roomSlug={room.slug} />}
+          {room.access.canChat && (
+            <MessageComposer
+              roomSlug={room.slug}
+              onCreateTopic={
+                room.access.canCreateTopic ? openDirectTopic : undefined
+              }
+            />
+          )}
         </section>
 
         <aside className="topicRail" aria-labelledby="topic-rail-title">
@@ -188,7 +198,11 @@ export function RoomExperience({
               해결됨
             </button>
           </div>
-          <QuestionFeed roomSlug={room.slug} status={status} />
+          <QuestionFeed
+            roomSlug={room.slug}
+            status={status}
+            canShare={room.access.canChat}
+          />
         </aside>
       </div>
     </div>

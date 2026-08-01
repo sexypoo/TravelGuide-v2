@@ -66,6 +66,7 @@ export class AnswersService {
       where: { id: questionId },
       select: {
         id: true,
+        category: true,
         room: { select: { id: true, slug: true, destinationId: true } },
       },
     });
@@ -78,6 +79,39 @@ export class AnswersService {
       now,
     );
     const normalizedSourceUrl = normalizeSourceUrl(input);
+    const supportsObservation =
+      initialQuestion.category === 'WAITING' ||
+      initialQuestion.category === 'CROWD';
+    const hasObservation =
+      input.waitMinutes !== undefined ||
+      input.crowdLevel !== undefined ||
+      input.entryStatus !== undefined;
+    if (supportsObservation && !hasObservation) {
+      throw new ProblemException(
+        'STATUS_OBSERVATION_REQUIRED',
+        '대기·혼잡 토픽에는 현재 대기 또는 현장 상태를 하나 이상 알려주세요.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (!supportsObservation && hasObservation) {
+      throw new ProblemException(
+        'STATUS_OBSERVATION_NOT_ALLOWED',
+        '이 토픽 종류에는 현장 상태 항목을 추가할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const observedAt = hasObservation
+      ? input.observedAt === undefined
+        ? now
+        : new Date(input.observedAt)
+      : null;
+    if (observedAt !== null && observedAt > new Date(now.getTime() + 60_000)) {
+      throw new ProblemException(
+        'INVALID_OBSERVED_AT',
+        '현장 확인 시각은 미래일 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     const answer = await this.prisma.$transaction(async (transaction) => {
       const lockKey = `answer:${user.id}:${questionId}`;
@@ -129,9 +163,14 @@ export class AnswersService {
         data: {
           questionId,
           authorId: user.id,
+          authorKind: capability.kind,
           content: input.content,
           sourceType: input.sourceType,
           sourceUrl: normalizedSourceUrl,
+          waitMinutes: input.waitMinutes,
+          crowdLevel: input.crowdLevel,
+          entryStatus: input.entryStatus,
+          observedAt,
           createdAt: now,
         },
         include: answerInclude,

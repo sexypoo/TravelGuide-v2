@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ChatMessage } from '@/lib/api/messages';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import { formatChatTime } from '@/lib/questions/presentation';
+import { categoryLabels, statusLabels } from '@/lib/questions/presentation';
 
 export function MessageCard({
   message,
@@ -13,7 +14,10 @@ export function MessageCard({
   onPromote: (message: ChatMessage) => void;
 }): React.JSX.Element {
   const canPromote =
-    own && message.topicId === null && Array.from(message.content).length >= 20;
+    message.type === 'TEXT' &&
+    own &&
+    message.topicId === null &&
+    Array.from(message.content).length >= 20;
   const badgeKind =
     message.author.badge === 'VERIFIED_LOCAL'
       ? 'local'
@@ -38,9 +42,60 @@ export function MessageCard({
             {formatChatTime(message.createdAt)}
           </time>
         </header>
-        <div className="chatBubble">
-          <p>{message.content}</p>
-        </div>
+        {message.type === 'IMAGE' && message.image !== null ? (
+          <div className="chatBubble chatBubble--image">
+            {/* Protected room media is intentionally loaded from the authenticated API route. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={message.image.url}
+              alt={message.content || message.image.originalName}
+            />
+            {message.content && <p>{message.content}</p>}
+          </div>
+        ) : message.type === 'PLACE' && message.place !== null ? (
+          <div className="chatBubble chatBubble--place">
+            <span className="placeMessageIcon" aria-hidden="true">
+              ⌖
+            </span>
+            <div>
+              <small>공유된 장소</small>
+              <strong>{message.place.name}</strong>
+              {message.place.address && <span>{message.place.address}</span>}
+              {message.content && <p>{message.content}</p>}
+              <a
+                href={`https://maps.google.com/?q=${message.place.latitude},${message.place.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                지도에서 보기 ↗
+              </a>
+            </div>
+          </div>
+        ) : message.type === 'TOPIC_SHARE' && message.sharedTopic !== null ? (
+          <Link
+            className="chatBubble chatBubble--topic"
+            href={`/app/questions/${message.sharedTopic.id}`}
+          >
+            <span className="sharedTopicEyebrow">
+              LIVE TOPIC · {categoryLabels[message.sharedTopic.category]}
+            </span>
+            <strong>{message.sharedTopic.content}</strong>
+            {message.sharedTopic.areaText && (
+              <span>⌖ {message.sharedTopic.areaText}</span>
+            )}
+            <footer>
+              <span>
+                {statusLabels[message.sharedTopic.status]} · 답변{' '}
+                {message.sharedTopic.answerCount}
+              </span>
+              <b>자세히 보기 →</b>
+            </footer>
+          </Link>
+        ) : (
+          <div className="chatBubble">
+            <p>{message.content}</p>
+          </div>
+        )}
         {message.topicId !== null ? (
           <Link
             className="messageTopicLink"

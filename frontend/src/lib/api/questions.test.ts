@@ -66,4 +66,34 @@ describe('question API contracts', () => {
       }),
     ).toThrow('답변 출처 URL 형식');
   });
+
+  it('parses structured field observations and their live summary', () => {
+    const detail = parseQuestionDetail({
+      ...question,
+      category: 'WAITING',
+      answers: [
+        {
+          ...answer,
+          observation: {
+            waitMinutes: 35,
+            crowdLevel: 'BUSY',
+            entryStatus: 'OPEN',
+            observedAt: '2026-08-01T12:08:00.000Z',
+          },
+        },
+      ],
+      liveSummary: {
+        responseCount: 3,
+        agreementCount: 2,
+        waitMinutes: { min: 30, max: 40 },
+        crowdLevel: 'BUSY',
+        entryStatus: 'OPEN',
+        lastObservedAt: '2026-08-01T12:08:00.000Z',
+        recommendedRecheckAt: '2026-08-01T12:18:00.000Z',
+        description: '현장 답변 기준 약 30~40분입니다.',
+      },
+    });
+    expect(detail.liveSummary?.waitMinutes).toEqual({ min: 30, max: 40 });
+    expect(detail.answers[0]?.observation?.crowdLevel).toBe('BUSY');
+  });
 });

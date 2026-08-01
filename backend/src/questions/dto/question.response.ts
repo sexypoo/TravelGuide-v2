@@ -1,4 +1,6 @@
 import type {
+  CrowdLevel,
+  EntryStatus,
   QuestionCategory,
   QuestionStatus,
   QuestionUrgency,
@@ -34,6 +36,18 @@ export interface QuestionResponse {
 
 export interface QuestionDetailResponse extends QuestionResponse {
   answers: AnswerResponse[];
+  liveSummary: LiveStatusSummary | null;
+}
+
+export interface LiveStatusSummary {
+  responseCount: number;
+  agreementCount: number;
+  waitMinutes: { min: number; max: number } | null;
+  crowdLevel: CrowdLevel | null;
+  entryStatus: EntryStatus | null;
+  lastObservedAt: string;
+  recommendedRecheckAt: string;
+  description: string;
 }
 
 export interface QuestionListResponse {

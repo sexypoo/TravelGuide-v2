@@ -1,9 +1,12 @@
 import type { Answer } from '@/lib/api/questions';
+import { participantBadgeLabel } from '@/lib/api/participants';
 import { ReportMenu } from '@/components/reports/report-menu';
 import {
   formatDateTime,
   formatVerifiedDate,
   sourceLabels,
+  crowdLabels,
+  entryLabels,
 } from '@/lib/questions/presentation';
 
 export function AnswerCard({
@@ -15,6 +18,12 @@ export function AnswerCard({
   accepted: boolean;
   currentUserId: string;
 }): React.JSX.Element {
+  const badgeKind =
+    answer.author.badge === 'VERIFIED_LOCAL'
+      ? 'local'
+      : answer.author.badge === 'VERIFIED_BOTH'
+        ? 'both'
+        : 'traveler';
   return (
     <article
       className={`signalAnswerCard${accepted ? ' signalAnswerCard--accepted' : ''}${answer.removed ? ' signalAnswerCard--removed' : ''}`}
@@ -22,15 +31,47 @@ export function AnswerCard({
       <span className="signalAnswerCard__node" aria-hidden="true" />
       {accepted && <span className="acceptedAnswerFlag">채택된 답변</span>}
       <header>
-        <span className="publicBadge publicBadge--local">
-          <span aria-hidden="true">⌂</span>
-          {answer.author.nickname} · 인증 현지인
+        <span className={`publicBadge publicBadge--${badgeKind}`}>
+          <span aria-hidden="true">
+            {badgeKind === 'local'
+              ? '⌂'
+              : badgeKind === 'traveler'
+                ? '↗'
+                : '✓'}
+          </span>
+          {answer.author.nickname} ·{' '}
+          {participantBadgeLabel(answer.author.badge)}
         </span>
         <time dateTime={answer.createdAt}>
           {formatDateTime(answer.createdAt)}
         </time>
       </header>
       <p>{answer.content}</p>
+      {answer.observation && (
+        <div className="answerObservation" aria-label="현장 관찰 정보">
+          {answer.observation.waitMinutes !== null && (
+            <span>
+              <small>대기</small>
+              <strong>{answer.observation.waitMinutes}분</strong>
+            </span>
+          )}
+          {answer.observation.crowdLevel !== null && (
+            <span>
+              <small>혼잡</small>
+              <strong>{crowdLabels[answer.observation.crowdLevel]}</strong>
+            </span>
+          )}
+          {answer.observation.entryStatus !== null && (
+            <span>
+              <small>입장</small>
+              <strong>{entryLabels[answer.observation.entryStatus]}</strong>
+            </span>
+          )}
+          <time dateTime={answer.observation.observedAt}>
+            {formatDateTime(answer.observation.observedAt)} 확인
+          </time>
+        </div>
+      )}
       <footer>
         {!answer.removed && (
           <span
