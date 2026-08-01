@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { MessageComposer } from '@/components/messages/message-composer';
 import { MessageTimeline } from '@/components/messages/message-timeline';
 import { useRoomRealtime } from '@/components/providers/realtime-provider';
+import { RoomNotificationControl } from '@/components/rooms/room-notification-control';
 import { QuestionComposer } from '@/components/questions/question-composer';
 import { QuestionFeed } from '@/components/questions/question-feed';
 import type { ChatMessage } from '@/lib/api/messages';
@@ -83,10 +84,13 @@ export function RoomExperience({
             토픽으로 이어가세요.
           </p>
         </div>
-        <span className="roomRoleBadge">
-          <span aria-hidden="true">✓</span>
-          {roleLabel(room)}
-        </span>
+        <div className="conversationRoomHeader__actions">
+          <RoomNotificationControl />
+          <span className="roomRoleBadge">
+            <span aria-hidden="true">✓</span>
+            {roleLabel(room)}
+          </span>
+        </div>
       </header>
 
       <div className="roomTrustLine">

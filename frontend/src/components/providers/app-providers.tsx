@@ -6,7 +6,11 @@ import { RealtimeProvider } from './realtime-provider';
 
 export function AppProviders({
   children,
-}: Readonly<{ children: React.ReactNode }>): React.JSX.Element {
+  currentUserId,
+}: Readonly<{
+  children: React.ReactNode;
+  currentUserId: string;
+}>): React.JSX.Element {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -19,7 +23,9 @@ export function AppProviders({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RealtimeProvider>{children}</RealtimeProvider>
+      <RealtimeProvider currentUserId={currentUserId}>
+        {children}
+      </RealtimeProvider>
     </QueryClientProvider>
   );
 }

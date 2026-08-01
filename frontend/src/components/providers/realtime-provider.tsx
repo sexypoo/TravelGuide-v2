@@ -19,6 +19,7 @@ import {
   type QuestionPage,
 } from '@/lib/api/questions';
 import { queryKeys } from '@/lib/query/keys';
+import { deliverRealtimeNotification } from '@/lib/notifications/browser-notifications';
 import {
   incrementFeedAnswerCount,
   markMessagePromoted,
@@ -117,7 +118,11 @@ function parseRemovedTarget(value: unknown): {
 
 export function RealtimeProvider({
   children,
-}: Readonly<{ children: React.ReactNode }>): React.JSX.Element {
+  currentUserId,
+}: Readonly<{
+  children: React.ReactNode;
+  currentUserId: string;
+}>): React.JSX.Element {
   const queryClient = useQueryClient();
   const socketRef = useRef<Socket<ServerEvents, ClientEvents> | null>(null);
   const roomCounts = useRef(new Map<string, number>());
@@ -177,6 +182,20 @@ export function RealtimeProvider({
         setAnnouncement(
           `${message.author.nickname}님의 새 메시지가 도착했습니다.`,
         );
+        deliverRealtimeNotification({
+          authorId: message.author.id,
+          currentUserId,
+          title: `${message.author.nickname}님의 새 메시지`,
+          body:
+            message.content ||
+            (message.type === 'IMAGE'
+              ? '현장 사진을 공유했어요.'
+              : message.type === 'PLACE'
+                ? '장소를 공유했어요.'
+                : '토픽을 공유했어요.'),
+          tag: `room-message:${message.id}`,
+          url: `/app/rooms/${event.roomSlug}`,
+        });
       } catch {
         void queryClient.invalidateQueries({
           queryKey: queryKeys.roomRoot,
@@ -233,6 +252,14 @@ export function RealtimeProvider({
           setAnnouncement(
             `${answer.author.nickname}님의 새 답변이 도착했습니다.`,
           );
+          deliverRealtimeNotification({
+            authorId: answer.author.id,
+            currentUserId,
+            title: `${answer.author.nickname}님의 새 토픽 답변`,
+            body: answer.content,
+            tag: `topic-answer:${answer.id}`,
+            url: `/app/questions/${answer.questionId}`,
+          });
         }
       } catch {
         void queryClient.invalidateQueries({
@@ -316,7 +343,7 @@ export function RealtimeProvider({
       socket.close();
       socketRef.current = null;
     };
-  }, [queryClient]);
+  }, [currentUserId, queryClient]);
 
   const retainRoom = useCallback((roomSlug: string): (() => void) => {
     const nextCount = (roomCounts.current.get(roomSlug) ?? 0) + 1;

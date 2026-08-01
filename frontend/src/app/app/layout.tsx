@@ -30,7 +30,7 @@ export default async function AppLayout({
       </header>
       <AppNavigation />
       <main className="appContent">
-        <AppProviders>{children}</AppProviders>
+        <AppProviders currentUserId={user.id}>{children}</AppProviders>
       </main>
     </div>
   );

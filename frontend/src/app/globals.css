@@ -3611,6 +3611,87 @@ textarea:focus-visible {
   word-break: keep-all;
 }
 
+.conversationRoomHeader__actions {
+  display: grid;
+  max-width: 13.5rem;
+  gap: 0.55rem;
+  justify-items: end;
+}
+
+.roomNotificationControl {
+  display: grid;
+  gap: 0.28rem;
+  justify-items: end;
+}
+
+.roomNotificationControl > button {
+  display: inline-flex;
+  min-height: 2.35rem;
+  gap: 0.42rem;
+  align-items: center;
+  padding: 0.48rem 0.72rem;
+  border: 1px solid #e6dce6;
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.88);
+  font-size: 0.68rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.roomNotificationControl > button:hover:not(:disabled),
+.roomNotificationControl > button:focus-visible {
+  border-color: rgba(207, 66, 111, 0.45);
+  color: var(--berry);
+  background: #fff8fb;
+}
+
+.roomNotificationControl > button:disabled {
+  color: var(--subtle);
+  background: #f7f3f6;
+  cursor: not-allowed;
+}
+
+.roomNotificationControl svg {
+  width: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.roomNotificationControl > span {
+  max-width: 13.5rem;
+  color: var(--subtle);
+  font-size: 0.58rem;
+  line-height: 1.4;
+  text-align: right;
+  word-break: keep-all;
+}
+
+.roomNotificationControl--enabled > button {
+  border-color: rgba(207, 66, 111, 0.32);
+  color: var(--berry);
+  background: linear-gradient(120deg, #fff6fa, #f7f1ff);
+  animation: notificationBellPulse 2.8s ease-out infinite;
+}
+
+@keyframes notificationBellPulse {
+  0%,
+  65%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(207, 66, 111, 0);
+  }
+  78% {
+    box-shadow: 0 0 0 0.32rem rgba(207, 66, 111, 0.1);
+  }
+}
+
 .roomTrustLine {
   display: flex;
   gap: 0.5rem;
@@ -4290,9 +4371,17 @@ textarea:focus-visible {
     width: 2.25rem;
   }
 
-  .conversationRoomHeader .roomRoleBadge {
+  .conversationRoomHeader__actions {
     grid-column: 2;
-    justify-self: start;
+    justify-items: start;
+  }
+
+  .roomNotificationControl {
+    justify-items: start;
+  }
+
+  .roomNotificationControl > span {
+    text-align: left;
   }
 }
 
@@ -4310,7 +4399,7 @@ textarea:focus-visible {
     font-size: 1.75rem;
   }
 
-  .conversationRoomHeader .roomRoleBadge {
+  .conversationRoomHeader__actions {
     grid-column: 1;
   }
 
@@ -4383,6 +4472,7 @@ textarea:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .conversationRoomHeader__signal > span,
+  .roomNotificationControl--enabled > button,
   .messageTimelineSkeleton span,
   .newMessageShortcut {
     animation: none;
