@@ -15,6 +15,7 @@ export interface OwnProfileResponse {
 export interface PublicProfileResponse {
   id: string;
   nickname: string;
+  bio: string | null;
   isVerifiedLocal: boolean;
   verifiedDestination: {
     id: string;
@@ -22,6 +23,11 @@ export interface PublicProfileResponse {
     nameKo: string;
   } | null;
   verifiedAt: string | null;
+  joinedAt: string;
+  stats: {
+    answerCount: number;
+    acceptedAnswerCount: number;
+  };
 }
 
 export function toOwnProfileResponse(
@@ -46,8 +52,11 @@ export function toPublicProfileResponse(
   return {
     id: user.id,
     nickname: user.nickname,
+    bio: user.bio,
     isVerifiedLocal: localVerification !== undefined,
     verifiedDestination: localVerification?.destination ?? null,
     verifiedAt: localVerification?.reviewedAt?.toISOString() ?? null,
+    joinedAt: user.createdAt.toISOString(),
+    stats: user.stats,
   };
 }

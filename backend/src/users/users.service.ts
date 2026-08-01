@@ -34,10 +34,16 @@ export interface OwnProfileRecord {
 export interface PublicProfileRecord {
   id: string;
   nickname: string;
+  bio: string | null;
+  createdAt: Date;
   verifications: Array<{
     reviewedAt: Date | null;
     destination: { id: string; slug: string; nameKo: string };
   }>;
+  stats: {
+    answerCount: number;
+    acceptedAnswerCount: number;
+  };
 }
 
 function duplicateUserProblem(field: 'email' | 'nickname'): ProblemException {
@@ -173,26 +179,43 @@ export class UsersService {
   }
 
   async getPublicProfile(id: string): Promise<PublicProfileRecord> {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        nickname: true,
-        verifications: {
-          where: {
-            type: 'LOCAL',
-            status: 'APPROVED',
-            expiresAt: { gt: new Date() },
-          },
-          orderBy: { reviewedAt: 'desc' },
-          take: 1,
-          select: {
-            reviewedAt: true,
-            destination: { select: { id: true, slug: true, nameKo: true } },
+    const now = new Date();
+    const [user, answerCount, acceptedAnswerCount] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          nickname: true,
+          bio: true,
+          createdAt: true,
+          verifications: {
+            where: {
+              type: 'LOCAL',
+              status: 'APPROVED',
+              expiresAt: { gt: now },
+            },
+            orderBy: { reviewedAt: 'desc' },
+            take: 1,
+            select: {
+              reviewedAt: true,
+              destination: { select: { id: true, slug: true, nameKo: true } },
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.answer.count({
+        where: { authorId: id, removedAt: null },
+      }),
+      this.prisma.answer.count({
+        where: {
+          authorId: id,
+          removedAt: null,
+          acceptedForQuestion: {
+            is: { removedAt: null },
+          },
+        },
+      }),
+    ]);
 
     if (user === null) {
       throw new ProblemException(
@@ -202,7 +225,10 @@ export class UsersService {
       );
     }
 
-    return user;
+    return {
+      ...user,
+      stats: { answerCount, acceptedAnswerCount },
+    };
   }
 
   async updateProfile(

@@ -184,15 +184,19 @@ describe('T02 destination, profile, and room shell', () => {
     expect(asRecord(publicBody)).toEqual({
       id: stored.id,
       nickname: '새닉네임',
+      bio: '제주 여행을 준비 중입니다.',
       isVerifiedLocal: false,
       verifiedDestination: null,
       verifiedAt: null,
+      joinedAt: stored.createdAt.toISOString(),
+      stats: { answerCount: 0, acceptedAnswerCount: 0 },
     });
     const serialized = JSON.stringify(publicBody);
     expect(serialized).not.toContain('email');
-    expect(serialized).not.toContain('bio');
     expect(serialized).not.toContain('passwordHash');
     expect(serialized).not.toContain('role');
+    expect(serialized).not.toContain('proofObjectKey');
+    expect(serialized).not.toContain('gpsLat');
   });
 
   it('returns stable profile conflicts and missing-user errors', async () => {

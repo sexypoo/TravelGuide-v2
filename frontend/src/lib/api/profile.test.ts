@@ -1,4 +1,8 @@
-import { parseOwnProfile, updateOwnProfile } from './profile';
+import {
+  parseOwnProfile,
+  parsePublicContributorProfile,
+  updateOwnProfile,
+} from './profile';
 import { profilePayload } from '@/test/fixtures';
 
 const fetchMock = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
@@ -30,6 +34,24 @@ describe('profile contract', () => {
       bio: '제주 여행을 준비하고 있어요.',
     });
     expect(JSON.stringify(profile)).not.toContain('passwordHash');
+  });
+
+  it('validates public contribution stats and local verification context', () => {
+    expect(
+      parsePublicContributorProfile({
+        id: 'local-1',
+        nickname: '제주바람',
+        bio: null,
+        isVerifiedLocal: true,
+        verifiedDestination: { id: 'jeju-1', slug: 'jeju', nameKo: '제주' },
+        verifiedAt: '2026-02-01T00:00:00.000Z',
+        joinedAt: '2026-01-01T00:00:00.000Z',
+        stats: { answerCount: 12, acceptedAnswerCount: 4 },
+      }),
+    ).toMatchObject({
+      nickname: '제주바람',
+      stats: { answerCount: 12, acceptedAnswerCount: 4 },
+    });
   });
 
   it('updates through a credentialed relative request', async () => {

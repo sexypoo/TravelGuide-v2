@@ -39,6 +39,9 @@ describe('AnswerCard', () => {
     expect(
       screen.getByRole('link', { name: /공식 출처 열기/ }),
     ).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(
+      screen.getByRole('link', { name: '제주현지인 공개 프로필 보기' }),
+    ).toHaveAttribute('href', '/app/users/local-1');
   });
 
   it('marks an accepted answer and offers reporting only to another user', () => {
@@ -59,5 +62,19 @@ describe('AnswerCard', () => {
       />,
     );
     expect(screen.getByText(/인증 여행자/)).toBeInTheDocument();
+  });
+
+  it('does not link an author after moderation hides the answer', () => {
+    render(
+      <AnswerCard
+        answer={{ ...answer, removed: true }}
+        accepted={false}
+        currentUserId="traveler-1"
+      />,
+    );
+    expect(screen.getByText('숨김 처리된 답변')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: /공개 프로필 보기/ }),
+    ).not.toBeInTheDocument();
   });
 });

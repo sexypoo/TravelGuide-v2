@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Answer } from '@/lib/api/questions';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import { ReportMenu } from '@/components/reports/report-menu';
@@ -31,17 +32,28 @@ export function AnswerCard({
       <span className="signalAnswerCard__node" aria-hidden="true" />
       {accepted && <span className="acceptedAnswerFlag">채택된 답변</span>}
       <header>
-        <span className={`publicBadge publicBadge--${badgeKind}`}>
-          <span aria-hidden="true">
-            {badgeKind === 'local'
-              ? '⌂'
-              : badgeKind === 'traveler'
-                ? '↗'
-                : '✓'}
+        {answer.removed ? (
+          <span className={`publicBadge publicBadge--${badgeKind}`}>
+            <span aria-hidden="true">–</span>
+            숨김 처리된 답변
           </span>
-          {answer.author.nickname} ·{' '}
-          {participantBadgeLabel(answer.author.badge)}
-        </span>
+        ) : (
+          <Link
+            className={`publicBadge publicBadge--${badgeKind} publicBadge--linked`}
+            href={`/app/users/${encodeURIComponent(answer.author.id)}`}
+            aria-label={`${answer.author.nickname} 공개 프로필 보기`}
+          >
+            <span aria-hidden="true">
+              {badgeKind === 'local'
+                ? '⌂'
+                : badgeKind === 'traveler'
+                  ? '↗'
+                  : '✓'}
+            </span>
+            {answer.author.nickname} ·{' '}
+            {participantBadgeLabel(answer.author.badge)}
+          </Link>
+        )}
         <time dateTime={answer.createdAt}>
           {formatDateTime(answer.createdAt)}
         </time>
