@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RateLimitModule } from './common/rate-limit/rate-limit.module';
 import { AdminVerificationsModule } from './admin/verifications/admin-verifications.module';
 import { AdminReportsModule } from './admin/reports/admin-reports.module';
+import { AdminMetricsModule } from './admin/metrics/admin-metrics.module';
 import { AnswersModule } from './answers/answers.module';
 import { AuthModule } from './auth/auth.module';
 import { validateEnvironment } from './config/environment';
@@ -22,6 +23,7 @@ import { VerificationsModule } from './verifications/verifications.module';
       validate: validateEnvironment,
     }),
     RateLimitModule,
+    AdminMetricsModule,
     AdminVerificationsModule,
     AdminReportsModule,
     AnswersModule,

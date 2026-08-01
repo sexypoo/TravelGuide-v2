@@ -67,6 +67,7 @@ export default async function AdminPage({
         <nav className="adminTabs" aria-label="관리자 메뉴">
           <span aria-current="page">인증 심사</span>
           <Link href="/admin/reports">신고 관리</Link>
+          <Link href="/admin/metrics">서비스 지표</Link>
         </nav>
         <form className="adminFilters" method="get">
           <label>

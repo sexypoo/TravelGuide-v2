@@ -6827,6 +6827,207 @@ textarea:focus-visible {
   }
 }
 
+/* T18 — operations metrics */
+.adminMetricsWorkspace {
+  max-width: 980px;
+}
+
+.metricsSignalRail {
+  display: grid;
+  overflow: hidden;
+  margin-top: 1.5rem;
+  border: 1px solid #eadfe8;
+  border-radius: 1.5rem;
+  background: #fffafd;
+  box-shadow: 0 18px 42px rgba(69, 55, 76, 0.07);
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.metricsSignalRail > div {
+  position: relative;
+  min-height: 9.5rem;
+  padding: 1.4rem;
+}
+
+.metricsSignalRail > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.metricsSignalRail > div::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--signal-rate);
+  height: 0.3rem;
+  background: linear-gradient(90deg, #d34b78, #7c74e8);
+  content: '';
+}
+
+.metricsSignalRail span,
+.metricsSignalRail strong,
+.metricsSignalRail small {
+  display: block;
+}
+
+.metricsSignalRail span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+}
+
+.metricsSignalRail strong {
+  margin-top: 0.7rem;
+  color: var(--ink);
+  font-family: var(--utility);
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  letter-spacing: -0.08em;
+}
+
+.metricsSignalRail small {
+  margin-top: 0.35rem;
+  color: var(--purple);
+  font-family: var(--utility);
+  font-weight: 750;
+}
+
+.adminMetricCells {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.adminMetricCells article {
+  padding: 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 1.1rem;
+  background: white;
+}
+
+.adminMetricCells span,
+.adminMetricCells strong,
+.adminMetricCells p {
+  display: block;
+  margin: 0;
+}
+
+.adminMetricCells span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 720;
+}
+
+.adminMetricCells strong {
+  margin-top: 0.5rem;
+  color: #08795b;
+  font-family: var(--utility);
+  font-size: 1.55rem;
+}
+
+.adminMetricCells p {
+  margin-top: 0.4rem;
+  color: var(--subtle);
+  font-size: 0.67rem;
+}
+
+.contributorLedger {
+  margin-top: 1.5rem;
+  padding: 1.35rem;
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background: white;
+}
+
+.contributorLedger > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: end;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.contributorLedger header p,
+.contributorLedger header h2 {
+  margin: 0;
+}
+
+.contributorLedger header p {
+  color: var(--magenta);
+  font-family: var(--utility);
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.contributorLedger header h2 {
+  margin-top: 0.25rem;
+  font-family: var(--display);
+  font-size: 1.15rem;
+}
+
+.contributorLedger header > span,
+.metricsGeneratedAt {
+  color: var(--subtle);
+  font-size: 0.67rem;
+}
+
+.contributorLedger ol {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.contributorLedger li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.78rem;
+}
+
+.contributorLedger li:last-child {
+  border-bottom: 0;
+}
+
+.contributorLedger li a {
+  color: var(--ink);
+  font-weight: 760;
+  text-decoration: none;
+}
+
+.contributorLedger li a:hover {
+  color: var(--purple);
+}
+
+.contributorLedger li span {
+  color: var(--muted);
+  font-family: var(--utility);
+}
+
+.metricsGeneratedAt {
+  margin: 0.75rem 0 0;
+  text-align: right;
+}
+
+@media (max-width: 680px) {
+  .metricsSignalRail,
+  .adminMetricCells {
+    grid-template-columns: 1fr;
+  }
+
+  .metricsSignalRail > div {
+    min-height: 7.5rem;
+  }
+
+  .metricsSignalRail > div + div {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+}
+
 /* Open travel community */
 .communityPage,
 .communityDetailPage {
