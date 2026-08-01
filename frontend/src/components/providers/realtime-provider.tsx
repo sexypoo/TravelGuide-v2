@@ -283,12 +283,19 @@ export function RealtimeProvider({
         );
         queryClient.setQueryData<InfiniteData<QuestionPage>>(
           queryKeys.roomQuestions(event.roomSlug, 'RESOLVED'),
-          (current) => mergeQuestionIntoFeed(current, question),
+          (current) =>
+            question.status === 'RESOLVED'
+              ? mergeQuestionIntoFeed(current, question)
+              : removeQuestionFromFeed(current, question.id),
         );
         void queryClient.invalidateQueries({
           queryKey: queryKeys.roomQuestionsRoot(event.roomSlug),
         });
-        setAnnouncement('토픽이 해결됨으로 변경되었습니다.');
+        setAnnouncement(
+          question.status === 'EXPIRED'
+            ? '마감 시간이 지나 토픽이 종료되었습니다.'
+            : '토픽이 해결됨으로 변경되었습니다.',
+        );
       } catch {
         void queryClient.invalidateQueries({
           queryKey: queryKeys.questionRoot,

@@ -40,6 +40,10 @@ const questionInclude = {
 type QuestionRecord = Prisma.QuestionGetPayload<{
   include: typeof questionInclude;
 }>;
+const expiringQuestionInclude = {
+  ...questionInclude,
+  room: { select: { id: true, slug: true } },
+} satisfies Prisma.QuestionInclude;
 
 @Injectable()
 export class QuestionsService {
@@ -90,6 +94,48 @@ export class QuestionsService {
           ? encodeQuestionCursor({ createdAt: last.createdAt, id: last.id })
           : null,
     };
+  }
+
+  async expireDue(now = new Date()): Promise<number> {
+    const candidates = await this.prisma.question.findMany({
+      where: { status: 'OPEN', expiresAt: { lte: now } },
+      select: { id: true },
+      orderBy: [{ expiresAt: 'asc' }, { id: 'asc' }],
+      take: 100,
+    });
+    let expiredCount = 0;
+    for (const candidate of candidates) {
+      const expired = await this.prisma.$transaction(async (transaction) => {
+        const updated = await transaction.question.updateMany({
+          where: {
+            id: candidate.id,
+            status: 'OPEN',
+            expiresAt: { lte: now },
+          },
+          data: { status: 'EXPIRED' },
+        });
+        if (updated.count === 0) return null;
+        return transaction.question.findUnique({
+          where: { id: candidate.id },
+          include: expiringQuestionInclude,
+        });
+      });
+      if (expired === null) continue;
+      expiredCount += 1;
+      const response = toQuestionResponse(expired, now);
+      try {
+        this.publisher.publishQuestionUpdated(
+          expired.room.id,
+          expired.room.slug,
+          response,
+          now,
+        );
+      } catch (error: unknown) {
+        const name = error instanceof Error ? error.name : 'UnknownError';
+        this.logger.warn(`Question expiry publication failed: ${name}`);
+      }
+    }
+    return expiredCount;
   }
 
   async create(

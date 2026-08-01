@@ -1,0 +1,2 @@
+ALTER TYPE "QuestionStatus" ADD VALUE 'EXPIRED';
+
