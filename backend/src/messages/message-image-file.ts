@@ -50,7 +50,7 @@ export function validateMessageImage(
   if (file.size > MAX_MESSAGE_IMAGE_BYTES) {
     throw new ProblemException(
       'UPLOAD_TOO_LARGE',
-      '채팅 이미지는 10MB 이하여야 합니다.',
+      '이미지는 10MB 이하여야 합니다.',
       HttpStatus.BAD_REQUEST,
     );
   }

@@ -23,6 +23,7 @@ export interface QuestionResponse {
   content: string;
   contentFormat: 'PLAIN_TEXT';
   areaText: string | null;
+  image: { url: string; originalName: string; mimeType: string } | null;
   sourceMessageId: string | null;
   status: PublicQuestionStatus;
   safetyNotice: string | null;
@@ -64,6 +65,9 @@ export interface QuestionForResponse {
   urgency: QuestionUrgency;
   content: string;
   areaText: string | null;
+  imageObjectKey?: string | null;
+  imageOriginalName?: string | null;
+  imageMimeType?: string | null;
   authorKind: RoomParticipantKind;
   sourceMessageId: string | null;
   status: QuestionStatus;
@@ -113,6 +117,17 @@ export function toQuestionResponse(
     content: removed ? REMOVED_CONTENT : question.content,
     contentFormat: 'PLAIN_TEXT',
     areaText: removed ? null : question.areaText,
+    image:
+      !removed &&
+      question.imageObjectKey != null &&
+      question.imageOriginalName != null &&
+      question.imageMimeType != null
+        ? {
+            url: `/api/v1/questions/${question.id}/image`,
+            originalName: question.imageOriginalName,
+            mimeType: question.imageMimeType,
+          }
+        : null,
     sourceMessageId: question.sourceMessageId,
     status: deriveQuestionStatus(question, now),
     safetyNotice:

@@ -48,10 +48,33 @@ describe('question response', () => {
 
   it('hides removed content and area text', () => {
     const response = toQuestionResponse(
-      question({ status: 'REMOVED', removedAt: new Date() }),
+      question({
+        status: 'REMOVED',
+        removedAt: new Date(),
+        imageObjectKey: 'question-media/room-id/image-id',
+        imageOriginalName: '현장.png',
+        imageMimeType: 'image/png',
+      }),
     );
     expect(response.content).toBe('운영 정책에 따라 숨김 처리된 질문입니다.');
     expect(response.areaText).toBeNull();
+    expect(response.image).toBeNull();
+  });
+
+  it('exposes only an authenticated image route and public metadata', () => {
+    expect(
+      toQuestionResponse(
+        question({
+          imageObjectKey: 'question-media/room-id/image-id',
+          imageOriginalName: '현장.png',
+          imageMimeType: 'image/png',
+        }),
+      ).image,
+    ).toEqual({
+      url: '/api/v1/questions/question-id/image',
+      originalName: '현장.png',
+      mimeType: 'image/png',
+    });
   });
 
   it('uses the participant kind stored when the topic was created', () => {

@@ -27,6 +27,7 @@ const question: Question = {
   content: '제주에서 방문할 실내 장소를 자세히 추천해 주세요.',
   contentFormat: 'PLAIN_TEXT',
   areaText: null,
+  image: null,
   sourceMessageId: null,
   status: 'OPEN',
   safetyNotice: null,

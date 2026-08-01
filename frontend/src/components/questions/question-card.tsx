@@ -49,6 +49,17 @@ export function QuestionCard({
         {question.areaText !== null && (
           <span className="questionArea">⌖ {question.areaText}</span>
         )}
+        {question.image !== null && (
+          <div className="questionCardEvidence">
+            {/* Protected room media is served by the authenticated API route. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={question.image.url}
+              alt={`${question.areaText ?? '현장'} 토픽 첨부 사진`}
+            />
+            <span>현장 사진</span>
+          </div>
+        )}
         <footer className="questionCardFooter">
           <span className={`publicBadge publicBadge--${badgeKind}`}>
             <span aria-hidden="true">↗</span>

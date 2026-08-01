@@ -9,6 +9,7 @@ import { useState } from 'react';
 import type { ChatMessage, MessagePage } from '@/lib/api/messages';
 import {
   createQuestion,
+  createQuestionWithImage,
   questionCategories,
   type CreateQuestionInput,
   type QuestionPage,
@@ -56,9 +57,13 @@ export function QuestionComposer({
   const [urgency, setUrgency] = useState<QuestionUrgency>('NORMAL');
   const [areaText, setAreaText] = useState('');
   const [content, setContent] = useState(sourceMessage?.content ?? '');
+  const [image, setImage] = useState<File>();
   const [clientError, setClientError] = useState('');
   const mutation = useMutation({
-    mutationFn: (input: CreateQuestionInput) => createQuestion(roomSlug, input),
+    mutationFn: (input: CreateQuestionInput) =>
+      image === undefined
+        ? createQuestion(roomSlug, input)
+        : createQuestionWithImage(roomSlug, input, image),
     onSuccess: (question) => {
       queryClient.setQueryData<InfiniteData<QuestionPage>>(
         queryKeys.roomQuestions(roomSlug, 'OPEN'),
@@ -76,6 +81,7 @@ export function QuestionComposer({
       }
       setContent('');
       setAreaText('');
+      setImage(undefined);
       setClientError('');
       onCreated?.();
     },
@@ -162,21 +168,59 @@ export function QuestionComposer({
         />
       </label>
       {sourceMessage === undefined ? (
-        <label className="composerField">
-          <span>
-            토픽 내용 <small>{Array.from(content).length}/1000</small>
-          </span>
-          <textarea
-            value={content}
-            minLength={20}
-            maxLength={1000}
-            rows={7}
-            placeholder="현재 상황, 이미 확인한 내용, 결정해야 하는 시간을 함께 적어 주세요."
-            aria-describedby="question-composer-help"
-            aria-invalid={message.length > 0}
-            onChange={(event) => setContent(event.target.value)}
-          />
-        </label>
+        <>
+          <label className="composerField">
+            <span>
+              토픽 내용 <small>{Array.from(content).length}/1000</small>
+            </span>
+            <textarea
+              value={content}
+              minLength={20}
+              maxLength={1000}
+              rows={7}
+              placeholder="현재 상황, 이미 확인한 내용, 결정해야 하는 시간을 함께 적어 주세요."
+              aria-describedby="question-composer-help"
+              aria-invalid={message.length > 0}
+              onChange={(event) => setContent(event.target.value)}
+            />
+          </label>
+          <div className="topicImagePicker">
+            <div>
+              <span aria-hidden="true">▧</span>
+              <div>
+                <strong>현장 사진</strong>
+                <small>상황을 확인할 사진 한 장 · 최대 10MB</small>
+              </div>
+            </div>
+            {image === undefined ? (
+              <label>
+                사진 선택
+                <input
+                  className="srOnly"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => {
+                    const nextImage = event.target.files?.[0];
+                    if (nextImage && nextImage.size > 10 * 1024 * 1024) {
+                      setClientError('사진은 10MB 이하로 선택해 주세요.');
+                      event.target.value = '';
+                      return;
+                    }
+                    setImage(nextImage);
+                    setClientError('');
+                  }}
+                />
+              </label>
+            ) : (
+              <div className="topicImagePicker__selected">
+                <span title={image.name}>{image.name}</span>
+                <button type="button" onClick={() => setImage(undefined)}>
+                  제거
+                </button>
+              </div>
+            )}
+          </div>
+        </>
       ) : (
         <div className="sourceMessagePreview">
           <span>원본 메시지</span>

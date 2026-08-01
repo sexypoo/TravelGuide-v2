@@ -75,6 +75,7 @@ export interface Question {
   content: string;
   contentFormat: 'PLAIN_TEXT';
   areaText: string | null;
+  image: { url: string; originalName: string; mimeType: string } | null;
   sourceMessageId: string | null;
   status: QuestionStatus;
   safetyNotice: string | null;
@@ -233,6 +234,7 @@ export function parseAnswer(value: unknown): Answer {
 }
 
 export function parseQuestion(value: unknown): Question {
+  const image = isRecord(value) ? value.image : undefined;
   if (
     !isRecord(value) ||
     typeof value.id !== 'string' ||
@@ -260,6 +262,16 @@ export function parseQuestion(value: unknown): Question {
   ) {
     throw new Error('질문 응답 형식이 올바르지 않습니다.');
   }
+  if (
+    image !== undefined &&
+    image !== null &&
+    (!isRecord(image) ||
+      typeof image.url !== 'string' ||
+      typeof image.originalName !== 'string' ||
+      typeof image.mimeType !== 'string')
+  ) {
+    throw new Error('질문 이미지 응답 형식이 올바르지 않습니다.');
+  }
   return {
     id: value.id,
     roomId: value.roomId,
@@ -269,6 +281,7 @@ export function parseQuestion(value: unknown): Question {
     content: value.content,
     contentFormat: value.contentFormat,
     areaText: value.areaText,
+    image: (image ?? null) as Question['image'],
     sourceMessageId: value.sourceMessageId,
     status: value.status as QuestionStatus,
     safetyNotice: value.safetyNotice,
@@ -374,6 +387,30 @@ export async function createQuestion(
       body: JSON.stringify(input),
     }),
   );
+}
+
+export async function createQuestionWithImage(
+  roomSlug: string,
+  input: CreateQuestionInput,
+  image: File,
+): Promise<Question> {
+  const body = new FormData();
+  body.set('image', image);
+  body.set('category', input.category);
+  body.set('urgency', input.urgency);
+  if (input.content) body.set('content', input.content);
+  if (input.areaText) body.set('areaText', input.areaText);
+  const response = await fetch(
+    `/api/v1/rooms/${encodeURIComponent(roomSlug)}/questions/images`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+      body,
+    },
+  );
+  if (!response.ok) throw await problemFromResponse(response);
+  return parseQuestion(await response.json());
 }
 
 export async function getQuestion(questionId: string): Promise<QuestionDetail> {

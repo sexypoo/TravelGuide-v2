@@ -31,4 +31,12 @@ describe('LocalStorageAdapter', () => {
       ),
     ).resolves.toContain('/answer-media/room-id/');
   });
+
+  it('accepts generated question media keys inside private storage', async () => {
+    await expect(
+      adapter.getPrivateDownload(
+        'question-media/room-id/123e4567-e89b-12d3-a456-426614174000',
+      ),
+    ).resolves.toContain('/question-media/room-id/');
+  });
 });

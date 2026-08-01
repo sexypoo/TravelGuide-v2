@@ -1,12 +1,22 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
+import { basename } from 'node:path';
 import { toAnswerResponse } from '../answers/dto/answer.response';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import { ProblemException } from '../common/http/problem.exception';
+import {
+  type MessageImageFile,
+  validateMessageImage,
+} from '../messages/message-image-file';
 import { PrismaService } from '../prisma/prisma.service';
 import { RealtimePublisher } from '../realtime/realtime.publisher';
 import { RoomAccessService } from '../rooms/room-access.service';
 import { RoomsService } from '../rooms/rooms.service';
+import {
+  STORAGE_SERVICE,
+  type StorageService,
+} from '../storage/storage.service';
 import type { CreateQuestionDto } from './dto/create-question.dto';
 import type { ListQuestionsDto } from './dto/list-questions.dto';
 import {
@@ -27,6 +37,9 @@ const questionInclude = {
   author: { select: { id: true, nickname: true } },
   _count: { select: { answers: { where: { removedAt: null } } } },
 } satisfies Prisma.QuestionInclude;
+type QuestionRecord = Prisma.QuestionGetPayload<{
+  include: typeof questionInclude;
+}>;
 
 @Injectable()
 export class QuestionsService {
@@ -37,6 +50,7 @@ export class QuestionsService {
     private readonly rooms: RoomsService,
     private readonly roomAccess: RoomAccessService,
     private readonly publisher: RealtimePublisher,
+    @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
 
   async list(
@@ -83,101 +97,133 @@ export class QuestionsService {
     user: AuthenticatedUser,
     input: CreateQuestionDto,
     now = new Date(),
+    image?: MessageImageFile,
   ): Promise<QuestionResponse> {
     const room = await this.rooms.getIdentity(roomSlug);
     const capability = await this.roomAccess.assertCanParticipate(
       user,
       room.destinationId,
     );
-    const question = await this.prisma.$transaction(async (transaction) => {
-      const lockKey = `${user.id}:${room.id}`;
-      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
-      let content = input.content;
-      const sourceMessageId =
-        typeof input.sourceMessageId === 'string'
-          ? input.sourceMessageId
-          : undefined;
-      if (sourceMessageId !== undefined) {
-        const messageLockKey = `topic-message:${sourceMessageId}`;
-        await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${messageLockKey}))`;
-        const message = await transaction.chatMessage.findUnique({
-          where: { id: sourceMessageId },
-          select: {
-            roomId: true,
-            authorId: true,
-            content: true,
-            topic: { select: { id: true } },
-          },
-        });
-        if (
-          message === null ||
-          message.roomId !== room.id ||
-          message.authorId !== user.id
-        ) {
-          throw new ProblemException(
-            'MESSAGE_NOT_AVAILABLE_FOR_PROMOTION',
-            '본인이 이 방에 작성한 메시지만 토픽으로 만들 수 있습니다.',
-            HttpStatus.NOT_FOUND,
-          );
+    if (image !== undefined && typeof input.sourceMessageId === 'string') {
+      throw new ProblemException(
+        'TOPIC_IMAGE_NOT_ALLOWED_FOR_PROMOTION',
+        '메시지를 토픽으로 잇는 경우에는 새 사진을 첨부할 수 없습니다.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    let imageObjectKey: string | null = null;
+    if (image !== undefined) {
+      validateMessageImage(image);
+      imageObjectKey = `question-media/${room.id}/${randomUUID()}`;
+      await this.storage.putPrivate({
+        objectKey: imageObjectKey,
+        contents: image.buffer,
+      });
+    }
+    let question: QuestionRecord;
+    try {
+      question = await this.prisma.$transaction(async (transaction) => {
+        const lockKey = `${user.id}:${room.id}`;
+        await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+        let content = input.content;
+        const sourceMessageId =
+          typeof input.sourceMessageId === 'string'
+            ? input.sourceMessageId
+            : undefined;
+        if (sourceMessageId !== undefined) {
+          const messageLockKey = `topic-message:${sourceMessageId}`;
+          await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${messageLockKey}))`;
+          const message = await transaction.chatMessage.findUnique({
+            where: { id: sourceMessageId },
+            select: {
+              roomId: true,
+              authorId: true,
+              content: true,
+              topic: { select: { id: true } },
+            },
+          });
+          if (
+            message === null ||
+            message.roomId !== room.id ||
+            message.authorId !== user.id
+          ) {
+            throw new ProblemException(
+              'MESSAGE_NOT_AVAILABLE_FOR_PROMOTION',
+              '본인이 이 방에 작성한 메시지만 토픽으로 만들 수 있습니다.',
+              HttpStatus.NOT_FOUND,
+            );
+          }
+          if (message.topic !== null) {
+            throw new ProblemException(
+              'MESSAGE_ALREADY_PROMOTED',
+              '이미 토픽으로 만든 메시지입니다.',
+              HttpStatus.CONFLICT,
+            );
+          }
+          if (message.content.length < 20) {
+            throw new ProblemException(
+              'MESSAGE_TOO_SHORT_FOR_TOPIC',
+              '토픽으로 만들 메시지는 20자 이상이어야 합니다.',
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+          content = message.content;
         }
-        if (message.topic !== null) {
+        if (typeof content !== 'string') {
           throw new ProblemException(
-            'MESSAGE_ALREADY_PROMOTED',
-            '이미 토픽으로 만든 메시지입니다.',
-            HttpStatus.CONFLICT,
-          );
-        }
-        if (message.content.length < 20) {
-          throw new ProblemException(
-            'MESSAGE_TOO_SHORT_FOR_TOPIC',
-            '토픽으로 만들 메시지는 20자 이상이어야 합니다.',
+            'TOPIC_CONTENT_REQUIRED',
+            '토픽 본문 또는 원본 메시지가 필요합니다.',
             HttpStatus.BAD_REQUEST,
           );
         }
-        content = message.content;
-      }
-      if (typeof content !== 'string') {
-        throw new ProblemException(
-          'TOPIC_CONTENT_REQUIRED',
-          '토픽 본문 또는 원본 메시지가 필요합니다.',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      const activeCount = await transaction.question.count({
-        where: {
-          roomId: room.id,
-          authorId: user.id,
-          status: 'OPEN',
-          expiresAt: { gt: now },
-        },
-      });
-      if (activeCount >= 3) {
-        throw new ProblemException(
-          'OPEN_QUESTION_LIMIT_REACHED',
-          '한 방에서 동시에 진행할 수 있는 질문은 최대 3개입니다.',
-          HttpStatus.CONFLICT,
-        );
-      }
+        const activeCount = await transaction.question.count({
+          where: {
+            roomId: room.id,
+            authorId: user.id,
+            status: 'OPEN',
+            expiresAt: { gt: now },
+          },
+        });
+        if (activeCount >= 3) {
+          throw new ProblemException(
+            'OPEN_QUESTION_LIMIT_REACHED',
+            '한 방에서 동시에 진행할 수 있는 질문은 최대 3개입니다.',
+            HttpStatus.CONFLICT,
+          );
+        }
 
-      return transaction.question.create({
-        data: {
-          roomId: room.id,
-          authorId: user.id,
-          authorKind: capability.kind,
-          sourceMessageId,
-          category: input.category,
-          urgency: input.urgency,
-          content,
-          areaText:
-            input.areaText === undefined || input.areaText === ''
-              ? null
-              : input.areaText,
-          expiresAt: new Date(now.getTime() + DAY_MS),
-          createdAt: now,
-        },
-        include: questionInclude,
+        return transaction.question.create({
+          data: {
+            roomId: room.id,
+            authorId: user.id,
+            authorKind: capability.kind,
+            sourceMessageId,
+            category: input.category,
+            urgency: input.urgency,
+            content,
+            areaText:
+              input.areaText === undefined || input.areaText === ''
+                ? null
+                : input.areaText,
+            imageObjectKey,
+            imageOriginalName:
+              image === undefined
+                ? null
+                : basename(image.originalname).slice(0, 255),
+            imageMimeType: image?.mimetype,
+            imageSizeBytes: image?.size,
+            expiresAt: new Date(now.getTime() + DAY_MS),
+            createdAt: now,
+          },
+          include: questionInclude,
+        });
       });
-    });
+    } catch (error: unknown) {
+      if (imageObjectKey !== null) {
+        await this.storage.delete(imageObjectKey).catch(() => undefined);
+      }
+      throw error;
+    }
     const response = toQuestionResponse(question, now);
     try {
       this.publisher.publishQuestionCreated(room.id, roomSlug, response, now);
@@ -186,6 +232,46 @@ export class QuestionsService {
       this.logger.warn(`Question event publication failed: ${name}`);
     }
     return response;
+  }
+
+  async getImage(
+    questionId: string,
+    user: AuthenticatedUser,
+  ): Promise<{ path: string; mimeType: string; originalName: string }> {
+    const question = await this.prisma.question.findUnique({
+      where: { id: questionId },
+      select: {
+        status: true,
+        removedAt: true,
+        imageObjectKey: true,
+        imageMimeType: true,
+        imageOriginalName: true,
+        room: { select: { destinationId: true } },
+      },
+    });
+    if (
+      question === null ||
+      question.status === 'REMOVED' ||
+      question.removedAt !== null ||
+      question.imageObjectKey === null ||
+      question.imageMimeType === null ||
+      question.imageOriginalName === null
+    ) {
+      throw new ProblemException(
+        'QUESTION_IMAGE_NOT_FOUND',
+        '토픽 이미지를 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.roomAccess.assertCanViewContent(
+      user,
+      question.room.destinationId,
+    );
+    return {
+      path: await this.storage.getPrivateDownload(question.imageObjectKey, 60),
+      mimeType: question.imageMimeType,
+      originalName: question.imageOriginalName,
+    };
   }
 
   async get(

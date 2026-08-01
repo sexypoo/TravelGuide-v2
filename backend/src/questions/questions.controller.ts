@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import type { Response } from 'express';
+import { createReadStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -17,6 +28,18 @@ export class QuestionsController {
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<QuestionDetailResponse> {
     return this.questions.get(questionId, user);
+  }
+
+  @Get(':questionId/image')
+  async image(
+    @Param('questionId') questionId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Res() response: Response,
+  ): Promise<void> {
+    const image = await this.questions.getImage(questionId, user);
+    response.setHeader('Content-Type', image.mimeType);
+    response.setHeader('Cache-Control', 'private, max-age=300');
+    await pipeline(createReadStream(image.path), response);
   }
 
   @Patch(':questionId/accept-answer')

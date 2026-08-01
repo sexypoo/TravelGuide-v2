@@ -14,6 +14,11 @@ const question = {
   content: '<script>alert(1)</script> 제주 실내 장소를 알려주세요.',
   contentFormat: 'PLAIN_TEXT',
   areaText: '제주시',
+  image: {
+    url: '/api/v1/questions/question-1/image',
+    originalName: '현장.png',
+    mimeType: 'image/png',
+  },
   sourceMessageId: null,
   status: 'OPEN',
   safetyNotice: null,
@@ -50,6 +55,7 @@ describe('question API contracts', () => {
     const detail = parseQuestionDetail({ ...question, answers: [answer] });
     expect(detail.content).toContain('<script>');
     expect(detail.answers[0]?.sourceUrl).toBe('https://example.com/notice');
+    expect(detail.image?.originalName).toBe('현장.png');
     expect(JSON.stringify(detail)).not.toMatch(
       /private@example|proofObjectKey|gpsLat/,
     );

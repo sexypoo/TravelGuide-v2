@@ -110,6 +110,20 @@ export function QuestionDetailView({
         {question.areaText !== null && (
           <p className="questionArea">⌖ {question.areaText}</p>
         )}
+        {question.image !== null && (
+          <figure className="topicEvidencePanel">
+            {/* Protected room media is served by the authenticated API route. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={question.image.url}
+              alt={`${question.areaText ?? '현장'} 토픽 첨부 사진`}
+            />
+            <figcaption>
+              <strong>현장 사진</strong>
+              <span>{question.image.originalName}</span>
+            </figcaption>
+          </figure>
+        )}
         {question.safetyNotice !== null && (
           <div className="safetyNotice">
             <strong>긴급 상황 안내</strong>
