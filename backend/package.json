@@ -25,9 +25,13 @@
     "start": "nest start",
     "start:prod": "node dist/main.js",
     "test": "jest --config jest.config.cjs --runInBand",
+    "test:coverage": "yarn test:coverage:unit && yarn test:coverage:integration && node scripts/merge-coverage.cjs",
+    "test:coverage:unit": "jest --config jest.config.cjs --runInBand --coverage --coverageDirectory=coverage/unit --coverageReporters=json",
+    "test:coverage:integration": "tsx test/prepare-integration.ts && jest --config test/jest-e2e.json --runInBand --coverage --coverageDirectory=coverage/integration --coverageReporters=json",
     "test:integration": "tsx test/prepare-integration.ts && jest --config test/jest-e2e.json --runInBand",
+    "test:e2e:serve": "tsx test/prepare-integration.ts && tsx test/prepare-browser-e2e.ts && nest start",
     "typecheck": "tsc --noEmit",
-    "verify": "yarn lint && yarn format:check && yarn typecheck && yarn test && yarn test:integration && yarn db:validate && yarn build"
+    "verify": "yarn lint && yarn format:check && yarn typecheck && yarn test:coverage && yarn db:validate && yarn build"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

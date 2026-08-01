@@ -58,6 +58,7 @@ describe('T06 answers and realtime', () => {
   let publisher: RealtimePublisher;
   let destinationId: string;
   let roomId: string;
+  let testPasswordHash: string;
   const sockets: RealtimeClient[] = [];
 
   beforeAll(async () => {
@@ -76,6 +77,7 @@ describe('T06 answers and realtime', () => {
     prisma = app.get(PrismaService);
     jwt = app.get(JwtService);
     publisher = app.get(RealtimePublisher);
+    testPasswordHash = await bcrypt.hash('password123', 12);
     const room = await prisma.destinationRoom.findUniqueOrThrow({
       where: { slug: 'jeju' },
     });
@@ -111,7 +113,7 @@ describe('T06 answers and realtime', () => {
       data: {
         email,
         nickname: `T06-${name}`,
-        passwordHash: await bcrypt.hash(password, 12),
+        passwordHash: testPasswordHash,
       },
     });
     const agent = request.agent(server);

@@ -10,4 +10,7 @@ module.exports = {
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/main.ts'],
   coverageDirectory: 'coverage/unit',
+  coverageThreshold: {
+    global: { statements: 20, branches: 25, functions: 20, lines: 20 },
+  },
 };

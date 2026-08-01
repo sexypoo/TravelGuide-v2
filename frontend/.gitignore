@@ -3,6 +3,8 @@
 /.next-dev
 /.yarn
 /coverage
+/playwright-report
+/test-results
 /node_modules
 *.log
 *.tsbuildinfo

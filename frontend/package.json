@@ -14,13 +14,15 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{ts,mjs,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"*.{ts,mjs,json}\"",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"e2e/**/*.ts\" \"*.{ts,mjs,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\" \"e2e/**/*.ts\" \"*.{ts,mjs,json}\"",
     "lint": "eslint . --max-warnings=0",
     "start": "next start",
     "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
-    "verify": "yarn lint && yarn format:check && yarn typecheck && yarn test && yarn build"
+    "verify": "yarn lint && yarn format:check && yarn typecheck && yarn test:coverage && yarn build"
   },
   "dependencies": {
     "@tanstack/react-query": "5.101.4",
@@ -31,6 +33,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.1",
+    "@playwright/test": "1.51.1",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "6.8.0",
     "@testing-library/react": "16.3.0",
