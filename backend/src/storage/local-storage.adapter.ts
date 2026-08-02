@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { createReadStream } from 'node:fs';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { isAbsolute, resolve, sep } from 'node:path';
+import type { Readable } from 'node:stream';
 import type { Environment } from '../config/environment';
 import type {
   PrivateUpload,
   StorageService,
   StoredObject,
 } from './storage.service';
-
-const SAFE_OBJECT_KEY =
-  /^(?:verification|room-media|answer-media|question-media)\/[A-Za-z0-9_-]+\/[0-9a-f-]{36}$/;
+import { assertSafeObjectKey } from './storage-object-key';
 
 @Injectable()
 export class LocalStorageAdapter implements StorageService {
@@ -30,8 +30,10 @@ export class LocalStorageAdapter implements StorageService {
     return { objectKey: input.objectKey, sizeBytes: input.contents.byteLength };
   }
 
-  getPrivateDownload(objectKey: string): Promise<string> {
-    return Promise.resolve().then(() => this.resolveObjectPath(objectKey));
+  getPrivateDownload(objectKey: string): Promise<Readable> {
+    return Promise.resolve().then(() =>
+      createReadStream(this.resolveObjectPath(objectKey)),
+    );
   }
 
   async delete(objectKey: string): Promise<void> {
@@ -39,9 +41,7 @@ export class LocalStorageAdapter implements StorageService {
   }
 
   private resolveObjectPath(objectKey: string): string {
-    if (!SAFE_OBJECT_KEY.test(objectKey)) {
-      throw new Error('Unsafe private storage object key');
-    }
+    assertSafeObjectKey(objectKey);
 
     const path = resolve(this.root, objectKey);
     if (!path.startsWith(`${this.root}${sep}`)) {

@@ -100,6 +100,10 @@ differs:
 docker build --build-arg API_INTERNAL_URL=http://api:3001 -t travelguide-frontend .
 ```
 
+For the PM2/Nginx production path, keep `API_INTERNAL_URL` on loopback and follow
+[`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md). Browser requests remain on the
+single public HTTPS origin.
+
 ## Troubleshooting
 
 - If the page shows `API 연결 안 됨`, confirm the backend health endpoint works

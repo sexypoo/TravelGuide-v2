@@ -3,12 +3,17 @@ export type NodeEnvironment = 'development' | 'test' | 'production';
 export interface Environment {
   NODE_ENV: NodeEnvironment;
   DATABASE_URL: string;
+  API_HOST: string;
   API_PORT: number;
   WEB_ORIGIN: string;
   JWT_SECRET: string;
   JWT_EXPIRES_IN_SECONDS: number;
   STORAGE_DRIVER: 'local' | 's3';
   LOCAL_STORAGE_DIR: string;
+  S3_REGION?: string;
+  S3_BUCKET?: string;
+  S3_ACCESS_KEY_ID?: string;
+  S3_SECRET_ACCESS_KEY?: string;
 }
 
 const nodeEnvironments: readonly NodeEnvironment[] = [
@@ -27,6 +32,18 @@ function readRequiredString(
     throw new Error(`${key} is required`);
   }
 
+  return value.trim();
+}
+
+function readOptionalString(
+  config: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const value = config[key];
+  if (value === undefined || value === '') return undefined;
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error(`${key} must be a non-empty string when provided`);
+  }
   return value.trim();
 }
 
@@ -51,6 +68,17 @@ function parsePort(value: unknown): number {
   }
 
   return port;
+}
+
+function parseHost(value: unknown): string {
+  const host = value ?? '0.0.0.0';
+  if (
+    typeof host !== 'string' ||
+    !/^(?:localhost|[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\])$/.test(host)
+  ) {
+    throw new Error('API_HOST must be a hostname or IP address');
+  }
+  return host;
 }
 
 function parseJwtExpiresIn(value: unknown): number {
@@ -133,6 +161,10 @@ export function validateEnvironment(
   const nodeEnvironment = parseNodeEnvironment(config.NODE_ENV);
   const jwtSecret = readRequiredString(config, 'JWT_SECRET');
   const storageDriver = config.STORAGE_DRIVER ?? 'local';
+  const s3Region = readOptionalString(config, 'S3_REGION');
+  const s3Bucket = readOptionalString(config, 'S3_BUCKET');
+  const s3AccessKeyId = readOptionalString(config, 'S3_ACCESS_KEY_ID');
+  const s3SecretAccessKey = readOptionalString(config, 'S3_SECRET_ACCESS_KEY');
 
   if (storageDriver !== 'local' && storageDriver !== 's3') {
     throw new Error('STORAGE_DRIVER must be local or s3');
@@ -150,6 +182,19 @@ export function validateEnvironment(
     throw new Error('Production requires STORAGE_DRIVER=s3');
   }
 
+  if (
+    storageDriver === 's3' &&
+    (s3Region === undefined || s3Bucket === undefined)
+  ) {
+    throw new Error('S3_REGION and S3_BUCKET are required for S3 storage');
+  }
+
+  if ((s3AccessKeyId === undefined) !== (s3SecretAccessKey === undefined)) {
+    throw new Error(
+      'S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY must be provided together',
+    );
+  }
+
   return {
     ...config,
     NODE_ENV: nodeEnvironment,
@@ -157,6 +202,7 @@ export function validateEnvironment(
       'postgres:',
       'postgresql:',
     ]),
+    API_HOST: parseHost(config.API_HOST),
     API_PORT: parsePort(config.API_PORT),
     WEB_ORIGIN: parseWebOrigin(
       config.WEB_ORIGIN ?? 'http://localhost:3000',
@@ -170,5 +216,9 @@ export function validateEnvironment(
       config.LOCAL_STORAGE_DIR.trim().length > 0
         ? config.LOCAL_STORAGE_DIR.trim()
         : '.data/private-uploads',
+    S3_REGION: s3Region,
+    S3_BUCKET: s3Bucket,
+    S3_ACCESS_KEY_ID: s3AccessKeyId,
+    S3_SECRET_ACCESS_KEY: s3SecretAccessKey,
   };
 }

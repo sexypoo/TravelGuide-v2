@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { createReadStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import type { AuthenticatedUser } from '../../auth/authenticated-user';
 import { CurrentUser } from '../../auth/current-user.decorator';
@@ -44,7 +43,7 @@ export class AdminVerificationsController {
       `inline; filename*=UTF-8''${encodeURIComponent(evidence.originalName)}`,
     );
     response.setHeader('Cache-Control', 'private, no-store');
-    await pipeline(createReadStream(evidence.path), response);
+    await pipeline(evidence.stream, response);
   }
 
   @Get(':id')

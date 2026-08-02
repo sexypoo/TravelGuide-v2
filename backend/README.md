@@ -35,6 +35,10 @@ Use `/api/v1/health/ready` for deployment readiness checks. It returns success
 only after a live PostgreSQL query; `/health/live` deliberately checks the API
 process only.
 
+Production uses the private S3 adapter and PM2/Nginx same-origin deployment.
+Follow [`docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md); do not deploy with the local
+storage driver or expose port 3001 publicly.
+
 ## Authentication API
 
 T01 provides the real cookie-authenticated endpoints below:

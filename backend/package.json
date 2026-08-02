@@ -19,11 +19,12 @@
     "db:up": "docker compose up -d --wait",
     "db:validate": "prisma validate",
     "dev": "nest start --watch",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"prisma/**/*.ts\"",
-    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"prisma/**/*.ts\"",
-    "lint": "eslint src test prisma --max-warnings=0",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"prisma/**/*.ts\" \"scripts/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"prisma/**/*.ts\" \"scripts/**/*.ts\"",
+    "lint": "eslint src test prisma \"scripts/**/*.ts\" --max-warnings=0",
     "start": "nest start",
     "start:prod": "node dist/main.js",
+    "smoke:production": "tsx scripts/deployment-smoke.ts",
     "test": "jest --config jest.config.cjs --runInBand",
     "test:coverage": "yarn test:coverage:unit && yarn test:coverage:integration && node scripts/merge-coverage.cjs",
     "test:coverage:unit": "jest --config jest.config.cjs --runInBand --coverage --coverageDirectory=coverage/unit --coverageReporters=json",
@@ -37,6 +38,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1101.0",
     "@nestjs/common": "11.1.28",
     "@nestjs/config": "4.0.4",
     "@nestjs/core": "11.1.28",

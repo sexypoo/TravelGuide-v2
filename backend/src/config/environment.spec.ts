@@ -8,6 +8,8 @@ const validProduction = {
   JWT_SECRET: 'a-secure-production-secret-over-32-characters',
   JWT_EXPIRES_IN: '24h',
   STORAGE_DRIVER: 's3',
+  S3_REGION: 'ap-northeast-2',
+  S3_BUCKET: 'travelguide-private',
 };
 
 describe('environment validation hardening', () => {
@@ -40,5 +42,17 @@ describe('environment validation hardening', () => {
         validateEnvironment({ ...validProduction, WEB_ORIGIN: origin }),
       ).toThrow('must be an origin');
     }
+  });
+
+  it('requires complete private S3 configuration', () => {
+    expect(() =>
+      validateEnvironment({ ...validProduction, S3_BUCKET: '' }),
+    ).toThrow('S3_REGION and S3_BUCKET');
+    expect(() =>
+      validateEnvironment({
+        ...validProduction,
+        S3_ACCESS_KEY_ID: 'access-key',
+      }),
+    ).toThrow('must be provided together');
   });
 });

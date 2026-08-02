@@ -56,7 +56,7 @@ type MessageRecord = Prisma.ChatMessageGetPayload<{
 }>;
 
 export interface MessageImageDownload {
-  path: string;
+  stream: NodeJS.ReadableStream;
   mimeType: string;
   originalName: string;
 }
@@ -267,7 +267,7 @@ export class MessagesService {
       message.room.destinationId,
     );
     return {
-      path: await this.storage.getPrivateDownload(message.imageObjectKey, 60),
+      stream: await this.storage.getPrivateDownload(message.imageObjectKey, 60),
       mimeType: message.imageMimeType,
       originalName: message.imageOriginalName,
     };

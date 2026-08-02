@@ -1,5 +1,6 @@
 import type { Destination } from '@prisma/client';
 import { Prisma } from '@prisma/client';
+import { Readable } from 'node:stream';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
   PrivateUpload,
@@ -21,8 +22,8 @@ class CleanupTrackingStorage implements StorageService {
     });
   }
 
-  getPrivateDownload(): Promise<string> {
-    return Promise.resolve('/private/path');
+  getPrivateDownload(): Promise<Readable> {
+    return Promise.resolve(Readable.from('proof'));
   }
 
   delete(objectKey: string): Promise<void> {

@@ -8,7 +8,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { createReadStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -39,7 +38,7 @@ export class QuestionsController {
     const image = await this.questions.getImage(questionId, user);
     response.setHeader('Content-Type', image.mimeType);
     response.setHeader('Cache-Control', 'private, max-age=300');
-    await pipeline(createReadStream(image.path), response);
+    await pipeline(image.stream, response);
   }
 
   @Patch(':questionId/accept-answer')

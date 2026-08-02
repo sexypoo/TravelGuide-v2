@@ -22,7 +22,7 @@ const adminInclude = {
 } satisfies Prisma.VerificationInclude;
 
 export interface EvidenceDownload {
-  path: string;
+  stream: NodeJS.ReadableStream;
   originalName: string;
   mimeType: string;
 }
@@ -69,7 +69,7 @@ export class AdminVerificationsService {
       throw this.notFoundProblem();
     }
     return {
-      path: await this.storage.getPrivateDownload(item.proofObjectKey, 60),
+      stream: await this.storage.getPrivateDownload(item.proofObjectKey, 60),
       originalName: item.proofOriginalName,
       mimeType: item.proofMimeType,
     };

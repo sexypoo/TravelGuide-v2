@@ -13,10 +13,11 @@ async function bootstrap(): Promise<void> {
   });
   const config = app.get(ConfigService);
   const port = config.getOrThrow<number>('API_PORT');
+  const host = config.getOrThrow<string>('API_HOST');
 
   configureApp(app);
   app.set('trust proxy', 1);
-  await app.listen(port);
+  await app.listen(port, host);
   Logger.log(`API listening on port ${port}`, 'Bootstrap');
 }
 

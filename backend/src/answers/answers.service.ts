@@ -230,7 +230,11 @@ export class AnswersService {
   async getImage(
     answerId: string,
     user: AuthenticatedUser,
-  ): Promise<{ path: string; mimeType: string; originalName: string }> {
+  ): Promise<{
+    stream: NodeJS.ReadableStream;
+    mimeType: string;
+    originalName: string;
+  }> {
     const answer = await this.prisma.answer.findUnique({
       where: { id: answerId },
       select: {
@@ -261,7 +265,7 @@ export class AnswersService {
       answer.question.room.destinationId,
     );
     return {
-      path: await this.storage.getPrivateDownload(answer.imageObjectKey, 60),
+      stream: await this.storage.getPrivateDownload(answer.imageObjectKey, 60),
       mimeType: answer.imageMimeType,
       originalName: answer.imageOriginalName,
     };

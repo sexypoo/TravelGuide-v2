@@ -10,6 +10,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { isAbsolute, resolve, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { ensureDemoWaitingTopic } from './demo-content';
+import { assertDemoSeedAllowed } from './demo-seed-guard';
 
 const prisma = new PrismaClient();
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -18,6 +19,7 @@ const DEMO_PROOF = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
   'base64',
 );
+let s3Client: S3Client | undefined;
 
 interface DemoIdentity {
   email: string;
@@ -80,9 +82,37 @@ function storageRoot(): string {
     : resolve(process.cwd(), configured);
 }
 
+function requiredEnvironment(name: string): string {
+  const value = process.env[name]?.trim();
+  if (value === undefined || value.length === 0) {
+    throw new Error(`${name} is required`);
+  }
+  return value;
+}
+
 async function ensureProof(objectKey: string): Promise<void> {
   if (!SAFE_OBJECT_KEY.test(objectKey)) {
     throw new Error('Demo proof object key is unsafe');
+  }
+  const storageDriver = process.env.STORAGE_DRIVER ?? 'local';
+  if (storageDriver === 's3') {
+    const region = requiredEnvironment('S3_REGION');
+    const bucket = requiredEnvironment('S3_BUCKET');
+    s3Client ??= new S3Client({ region });
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: objectKey,
+        Body: DEMO_PROOF,
+        ContentLength: DEMO_PROOF.byteLength,
+        ContentType: 'image/png',
+        ServerSideEncryption: 'AES256',
+      }),
+    );
+    return;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Production demo seed requires STORAGE_DRIVER=s3');
   }
   const root = storageRoot();
   const path = resolve(root, objectKey);
@@ -148,9 +178,7 @@ async function ensureVerification(
 }
 
 async function seedDemo(): Promise<void> {
-  if (process.env.DEMO_SEED_ENABLED !== 'true') {
-    throw new Error('Set DEMO_SEED_ENABLED=true to run the demo seed');
-  }
+  assertDemoSeedAllowed();
   const demoPassword = requiredPassword('DEMO_USER_PASSWORD');
   const adminPassword = requiredPassword('DEMO_ADMIN_PASSWORD');
   const [demoHash, adminHash] = await Promise.all([
@@ -213,3 +241,4 @@ async function run(): Promise<void> {
 }
 
 void run();
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';

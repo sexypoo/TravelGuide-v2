@@ -1,4 +1,5 @@
 import { AnswerSourceType, UserRole } from '@prisma/client';
+import { Readable } from 'node:stream';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import { AnswersService } from './answers.service';
 
@@ -51,7 +52,7 @@ function serviceWith(input: { answer?: unknown; transaction?: jest.Mock }): {
       objectKey: 'answer-media/room-id/generated-id',
       sizeBytes: 8,
     }),
-    getPrivateDownload: jest.fn().mockResolvedValue('/private/answer.png'),
+    getPrivateDownload: jest.fn().mockResolvedValue(Readable.from('image')),
     delete: jest.fn().mockResolvedValue(undefined),
   };
   return {
@@ -78,8 +79,9 @@ describe('answer image access and cleanup', () => {
       },
     });
 
-    await expect(service.getImage('answer-id', user)).resolves.toEqual({
-      path: '/private/answer.png',
+    const download = await service.getImage('answer-id', user);
+    expect(download.stream).toBeInstanceOf(Readable);
+    expect(download).toMatchObject({
       mimeType: 'image/png',
       originalName: '현장.png',
     });

@@ -12,7 +12,7 @@ import { STORAGE_SERVICE, type StorageService } from './storage.service';
       inject: [ConfigService],
       useFactory: (config: ConfigService<Environment, true>): StorageService =>
         config.get('STORAGE_DRIVER', { infer: true }) === 's3'
-          ? new S3StorageAdapter()
+          ? new S3StorageAdapter(config)
           : new LocalStorageAdapter(config),
     },
   ],

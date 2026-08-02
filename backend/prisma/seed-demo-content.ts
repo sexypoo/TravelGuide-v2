@@ -1,12 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { ensureDemoWaitingTopic } from './demo-content';
+import { assertDemoSeedAllowed } from './demo-seed-guard';
 
 const prisma = new PrismaClient();
 
 async function run(): Promise<void> {
-  if (process.env.DEMO_SEED_ENABLED !== 'true') {
-    throw new Error('Set DEMO_SEED_ENABLED=true to run the demo content seed');
-  }
+  assertDemoSeedAllowed();
   try {
     await ensureDemoWaitingTopic(prisma);
   } finally {

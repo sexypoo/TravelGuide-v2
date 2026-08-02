@@ -16,6 +16,7 @@ RUN yarn db:generate && yarn build
 FROM base AS runtime
 
 ENV NODE_ENV=production
+ENV API_HOST=0.0.0.0
 WORKDIR /app
 
 COPY package.json yarn.lock .yarnrc.yml ./
