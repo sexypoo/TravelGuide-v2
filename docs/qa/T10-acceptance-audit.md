@@ -36,9 +36,10 @@ measured baseline while the browser suite carries cross-client behavior assertio
   writes, live rendering, offline interval, reconnect, and missed-answer refetch;
 - 390x844 room rendering, composer visibility, and horizontal overflow.
 
-The config compiles and discovers both tests. It was not executed on 2026-08-02
-because the current runtime reports no available browser. Do not consider E2E-017,
-E2E-018, or E2E-027 browser-complete until `yarn test:e2e` passes three times.
+The config compiles and both tests passed three consecutive Chromium runs on
+2026-08-02 (31.2s, 30.9s, 29.9s). E2E-017, E2E-018, and the automated portion
+of E2E-027 are browser-complete. Physical mobile Safari/Chrome and production
+HTTPS remain manual release gates.
 
 ## Manual / deployment-only
 
@@ -54,4 +55,5 @@ cd frontend
 TEST_DATABASE_URL=postgresql://... yarn test:e2e
 ```
 
-Run three consecutive successful executions before marking T10 complete.
+The three-run automation gate is complete; continue with the deployment-only
+and physical-device checks above.

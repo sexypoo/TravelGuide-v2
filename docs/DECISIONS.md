@@ -89,6 +89,8 @@
 
 ### ADR-013 T03 비공개 증빙 검증과 저장소 fail-closed
 
+- 상태: 저장소 배포 부분은 2026-08-02 ADR-024로 대체됨.
+
 - 날짜: 2026-07-31
 - 상태: accepted
 - 문제: 로컬 개발용 증빙 저장과 운영 S3 저장의 경계를 지키면서 MIME 위조, 공개 URL 노출, 파일/DB 불일치를 막아야 한다. 현재 운영 S3 자격 증명과 SDK는 제공되지 않았다.
@@ -97,6 +99,16 @@
 - 이유: 제공되지 않은 배포 자격 증명이나 불필요한 production dependency를 가정하지 않으면서 비공개 저장 요구를 fail-closed로 지키기 위해서다.
 - 영향: 운영 배포 전 private bucket, 최소 IAM 권한, AWS SDK 기반 put/presign/delete 구현이 필요하다. API DTO에는 object key, 다운로드 URL, 파일 경로, 정확한 GPS를 포함하지 않는다.
 - 되돌리는 조건: 운영 private S3 bucket과 자격 증명 주입 방식이 확정될 때 S3 adapter 내부 구현만 교체한다.
+
+### ADR-024 T11 production 비공개 S3 스트리밍
+
+- 날짜: 2026-08-02
+- 상태: accepted
+- 문제: production은 S3를 강제하지만 기존 어댑터가 시작 즉시 실패하고, 다운로드 계약도 로컬 파일 경로를 전제로 해 실제 배포가 불가능했다.
+- 결정: AWS SDK v3로 안전한 prefix의 객체만 AES256 서버 암호화해 저장·조회·삭제한다. 다운로드는 공개 URL이나 object key를 클라이언트에 주지 않고 기존 API 권한 확인 뒤 서버 스트림으로 전달한다. AWS 자격 증명은 instance role 또는 표준 provider chain에서 받고 bucket과 region만 앱 시작 시 필수 검증한다.
+- 이유: 로컬과 production 저장소가 같은 비공개 계약을 사용하면서 인증 증빙·채팅·토픽·답변 이미지를 동일한 권한 경계 안에 유지하기 위해서다.
+- 영향: S3 bucket public access block, prefix 제한 IAM, versioning/retention/backup은 배포 인프라에서 설정해야 한다. 단위 테스트는 명령과 key 검증을 확인하지만 실제 IAM/bucket smoke는 T11 외부 완료 조건으로 남는다.
+- 되돌리는 조건: 다른 private object storage로 이전하면 `StorageService`의 stream 계약을 유지한 채 adapter만 교체한다.
 
 ### ADR-014 T05 질문 커서와 동시 생성 제한
 

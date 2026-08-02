@@ -49,7 +49,14 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   const firstAnswer = `현장 E2E 확인 답변 ${Date.now()}`;
   const firstResponse = await localContext.request.post(
     `/api/v1/questions/${topic.id}/answers`,
-    { data: { content: firstAnswer, sourceType: 'ON_SITE_NOW' } },
+    {
+      data: {
+        content: firstAnswer,
+        sourceType: 'ON_SITE_NOW',
+        waitMinutes: 25,
+        observedAt: new Date().toISOString(),
+      },
+    },
   );
   expect(firstResponse.ok()).toBeTruthy();
   await expect(traveler.getByText(firstAnswer)).toBeVisible();
@@ -58,7 +65,14 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   const missedAnswer = `재연결 중 작성한 E2E 답변 ${Date.now()}`;
   const missedResponse = await localContext.request.post(
     `/api/v1/questions/${topic.id}/answers`,
-    { data: { content: missedAnswer, sourceType: 'RECENT_EXPERIENCE' } },
+    {
+      data: {
+        content: missedAnswer,
+        sourceType: 'RECENT_EXPERIENCE',
+        waitMinutes: 30,
+        observedAt: new Date().toISOString(),
+      },
+    },
   );
   expect(missedResponse.ok()).toBeTruthy();
   await travelerContext.setOffline(false);
