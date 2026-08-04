@@ -26,4 +26,4 @@ COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/prisma ./prisma
 
 EXPOSE 3001
-CMD ["sh", "-c", "yarn db:deploy && node dist/main.js"]
+CMD ["sh", "-c", "yarn db:deploy && yarn db:seed && node dist/main.js"]

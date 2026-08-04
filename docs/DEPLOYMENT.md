@@ -19,9 +19,11 @@ Connect both application services to the same GitHub repository and `main`
 branch. Set each service's Root Directory exactly as shown above. Both folders
 contain a Dockerfile, so custom build and start commands are unnecessary.
 
-The backend container runs `prisma migrate deploy` before starting NestJS. Do
-not use `prisma db push` in production. Configure the backend health check as
-`/health/ready` after its public domain and database are available.
+The backend container runs `prisma migrate deploy` and the idempotent base seed
+before starting NestJS. The base seed only upserts the Jeju destination and
+room; demo accounts are never created automatically. Do not use `prisma db push`
+in production. Configure the backend health check as `/health/ready` after its
+public domain and database are available.
 
 The application reads Railway's generated `PORT` automatically and binds to
 `0.0.0.0`.
@@ -98,7 +100,7 @@ is not proxied by the frontend.
 
 1. Create `Postgres` and `uploads`.
 2. Create `backend`, set its root directory and all variables, then deploy.
-3. Confirm migration output and `GET /health/ready`.
+3. Confirm migration and base-seed output, then check `GET /health/ready`.
 4. Create `frontend`, set `API_INTERNAL_URL`, then deploy.
 5. Put the frontend Railway HTTPS origin in backend `WEB_ORIGIN` and redeploy the
    backend if the reference was not already used.
