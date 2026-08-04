@@ -46,6 +46,9 @@
 | `JWT_SECRET` | 32자 이상 Sealed Variable | `[ ]` |
 | `JWT_EXPIRES_IN` | `24h` | `[ ]` |
 | `STORAGE_DRIVER` | `s3` | `[ ]` |
+| `INITIAL_ADMIN_EMAIL` | 운영 관리자 이메일 | `[ ]` |
+| `INITIAL_ADMIN_PASSWORD` | 10~72자 Sealed Variable | `[ ]` |
+| `INITIAL_ADMIN_NICKNAME` | 고유한 2~20자 닉네임 | `[ ]` |
 
 `PORT`는 Railway가 자동 주입하므로 직접 만들지 않습니다. 기존
 `GOOGLE_CLIENT_*`, `CORS_ORIGINS`, `USE_S3`, `AWS_REGION`, `AWS_S3_BUCKET` 변수는

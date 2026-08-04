@@ -4,7 +4,7 @@ module.exports = {
   rootDir: '.',
   testEnvironment: 'node',
   watchman: false,
-  testMatch: ['<rootDir>/src/**/*.spec.ts'],
+  testMatch: ['<rootDir>/src/**/*.spec.ts', '<rootDir>/prisma/**/*.spec.ts'],
   transform: {
     '^.+\\.(t|j)s$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
   },

@@ -40,6 +40,9 @@ WEB_ORIGIN=https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}
 JWT_SECRET=<sealed random value of at least 32 characters>
 JWT_EXPIRES_IN=24h
 STORAGE_DRIVER=s3
+INITIAL_ADMIN_EMAIL=<production administrator email>
+INITIAL_ADMIN_PASSWORD=<sealed 10-72 character password with a letter and digit>
+INITIAL_ADMIN_NICKNAME=<unique 2-20 character nickname>
 ```
 
 Do not set `PORT`; Railway supplies it. `API_PORT` remains supported outside
@@ -47,7 +50,9 @@ Railway, but `PORT` takes precedence when present. `FRONTEND_URL` is accepted as
 a legacy alias for `WEB_ORIGIN`.
 
 Generate the JWT secret outside Git, for example with `openssl rand -base64 48`,
-and paste it into a sealed Railway variable.
+and paste it into a sealed Railway variable. Keep `INITIAL_ADMIN_PASSWORD` sealed
+as well. The base seed creates the administrator only when the email does not
+exist; later deployments do not reset an existing administrator password.
 
 ## 3. Railway Bucket
 
