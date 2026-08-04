@@ -12,6 +12,8 @@ export interface Environment {
   LOCAL_STORAGE_DIR: string;
   S3_REGION?: string;
   S3_BUCKET?: string;
+  S3_ENDPOINT?: string;
+  S3_URL_STYLE?: 'virtual' | 'path';
   S3_ACCESS_KEY_ID?: string;
   S3_SECRET_ACCESS_KEY?: string;
 }
@@ -45,6 +47,17 @@ function readOptionalString(
     throw new Error(`${key} must be a non-empty string when provided`);
   }
   return value.trim();
+}
+
+function readFirstOptionalString(
+  config: Record<string, unknown>,
+  keys: readonly string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = readOptionalString(config, key);
+    if (value !== undefined) return value;
+  }
+  return undefined;
 }
 
 function parseNodeEnvironment(value: unknown): NodeEnvironment {
@@ -154,6 +167,34 @@ function parseWebOrigin(value: unknown, environment: NodeEnvironment): string {
   return url.origin;
 }
 
+function parseS3Endpoint(value: string | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  const parsedValue = parseUrl(value, 'S3_ENDPOINT', ['http:', 'https:']);
+  const url = new URL(parsedValue);
+  if (
+    url.username.length > 0 ||
+    url.password.length > 0 ||
+    url.pathname !== '/' ||
+    url.search.length > 0 ||
+    url.hash.length > 0
+  ) {
+    throw new Error(
+      'S3_ENDPOINT must be an origin without credentials or path',
+    );
+  }
+  return url.origin;
+}
+
+function parseS3UrlStyle(
+  value: string | undefined,
+): 'virtual' | 'path' | undefined {
+  if (value === undefined) return undefined;
+  if (value !== 'virtual' && value !== 'path') {
+    throw new Error('S3_URL_STYLE must be virtual or path');
+  }
+  return value;
+}
+
 export function validateEnvironment(
   config: Record<string, unknown>,
 ): Environment & Record<string, unknown> {
@@ -161,10 +202,37 @@ export function validateEnvironment(
   const nodeEnvironment = parseNodeEnvironment(config.NODE_ENV);
   const jwtSecret = readRequiredString(config, 'JWT_SECRET');
   const storageDriver = config.STORAGE_DRIVER ?? 'local';
-  const s3Region = readOptionalString(config, 'S3_REGION');
-  const s3Bucket = readOptionalString(config, 'S3_BUCKET');
-  const s3AccessKeyId = readOptionalString(config, 'S3_ACCESS_KEY_ID');
-  const s3SecretAccessKey = readOptionalString(config, 'S3_SECRET_ACCESS_KEY');
+  const s3Region = readFirstOptionalString(config, [
+    'S3_REGION',
+    'AWS_REGION',
+    'AWS_DEFAULT_REGION',
+    'REGION',
+  ]);
+  const s3Bucket = readFirstOptionalString(config, [
+    'S3_BUCKET',
+    'AWS_S3_BUCKET',
+    'AWS_S3_BUCKET_NAME',
+    'BUCKET',
+  ]);
+  const s3Endpoint = readFirstOptionalString(config, [
+    'S3_ENDPOINT',
+    'AWS_ENDPOINT_URL',
+    'ENDPOINT',
+  ]);
+  const s3UrlStyle = readFirstOptionalString(config, [
+    'S3_URL_STYLE',
+    'AWS_S3_URL_STYLE',
+  ]);
+  const s3AccessKeyId = readFirstOptionalString(config, [
+    'S3_ACCESS_KEY_ID',
+    'AWS_ACCESS_KEY_ID',
+    'ACCESS_KEY_ID',
+  ]);
+  const s3SecretAccessKey = readFirstOptionalString(config, [
+    'S3_SECRET_ACCESS_KEY',
+    'AWS_SECRET_ACCESS_KEY',
+    'SECRET_ACCESS_KEY',
+  ]);
 
   if (storageDriver !== 'local' && storageDriver !== 's3') {
     throw new Error('STORAGE_DRIVER must be local or s3');
@@ -203,9 +271,9 @@ export function validateEnvironment(
       'postgresql:',
     ]),
     API_HOST: parseHost(config.API_HOST),
-    API_PORT: parsePort(config.API_PORT),
+    API_PORT: parsePort(config.PORT ?? config.API_PORT),
     WEB_ORIGIN: parseWebOrigin(
-      config.WEB_ORIGIN ?? 'http://localhost:3000',
+      config.WEB_ORIGIN ?? config.FRONTEND_URL ?? 'http://localhost:3000',
       nodeEnvironment,
     ),
     JWT_SECRET: jwtSecret,
@@ -218,6 +286,8 @@ export function validateEnvironment(
         : '.data/private-uploads',
     S3_REGION: s3Region,
     S3_BUCKET: s3Bucket,
+    S3_ENDPOINT: parseS3Endpoint(s3Endpoint),
+    S3_URL_STYLE: parseS3UrlStyle(s3UrlStyle),
     S3_ACCESS_KEY_ID: s3AccessKeyId,
     S3_SECRET_ACCESS_KEY: s3SecretAccessKey,
   };

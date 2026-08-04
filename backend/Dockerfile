@@ -23,6 +23,7 @@ COPY package.json yarn.lock .yarnrc.yml ./
 RUN yarn workspaces focus --production
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/prisma ./prisma
 
 EXPOSE 3001
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "yarn db:deploy && node dist/main.js"]

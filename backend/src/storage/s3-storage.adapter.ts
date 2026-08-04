@@ -3,6 +3,7 @@ import {
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
+  type S3ClientConfig,
 } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -15,6 +16,24 @@ import type {
 } from './storage.service';
 import { assertSafeObjectKey } from './storage-object-key';
 
+export function buildS3ClientConfig(
+  config: ConfigService<Environment, true>,
+): S3ClientConfig {
+  const endpoint = config.get('S3_ENDPOINT', { infer: true });
+  const urlStyle = config.get('S3_URL_STYLE', { infer: true });
+  const accessKeyId = config.get('S3_ACCESS_KEY_ID', { infer: true });
+  const secretAccessKey = config.get('S3_SECRET_ACCESS_KEY', { infer: true });
+
+  return {
+    region: config.getOrThrow('S3_REGION', { infer: true }),
+    ...(endpoint === undefined ? {} : { endpoint }),
+    ...(accessKeyId === undefined || secretAccessKey === undefined
+      ? {}
+      : { credentials: { accessKeyId, secretAccessKey } }),
+    forcePathStyle: urlStyle === 'path',
+  };
+}
+
 @Injectable()
 export class S3StorageAdapter implements StorageService {
   private readonly bucket: string;
@@ -22,11 +41,7 @@ export class S3StorageAdapter implements StorageService {
 
   constructor(config: ConfigService<Environment, true>, client?: S3Client) {
     this.bucket = config.getOrThrow('S3_BUCKET', { infer: true });
-    this.client =
-      client ??
-      new S3Client({
-        region: config.getOrThrow('S3_REGION', { infer: true }),
-      });
+    this.client = client ?? new S3Client(buildS3ClientConfig(config));
   }
 
   async putPrivate(input: PrivateUpload): Promise<StoredObject> {

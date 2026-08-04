@@ -1,142 +1,148 @@
-# TravelGuide production deployment
+# TravelGuide Railway deployment
 
-This runbook targets one Linux host with Nginx and PM2, a managed PostgreSQL 16
-database, and a private S3 bucket. The public surface is one HTTPS origin; ports
-3000, 3001, and 5432 must not be exposed by the host firewall.
+This runbook deploys TravelGuide v2 to one Railway project without AWS. Create
+four resources in the same `production` environment:
 
-## 1. Required external resources
+| Resource | Source root | Public | Purpose |
+| --- | --- | --- | --- |
+| `frontend` | `/frontend` | Yes | Next.js web application |
+| `backend` | `/backend` | Yes | NestJS API and Socket.io |
+| `Postgres` | Railway managed | No | Application database |
+| `uploads` | Railway Bucket | No | Private evidence and chat media |
 
-- DNS A/AAAA record for the presentation domain.
-- PostgreSQL 16 database reachable only from the application host.
-- Private S3 bucket with public access blocked, versioning enabled, and a
-  lifecycle policy appropriate for verification evidence.
-- Instance role, workload identity, or least-privilege AWS credentials allowing
-  `s3:GetObject`, `s3:PutObject`, and `s3:DeleteObject` only below the bucket's
-  `verification/`, `room-media/`, `answer-media/`, and `question-media/` prefixes.
-- Node.js 20, Corepack, Nginx, Certbot, and PM2 installed on the host.
+The backend proxies authorized private files from the bucket. Do not expose the
+Postgres service or bucket publicly.
 
-Do not add bucket website hosting, public ACLs, or public object URLs. Downloads
-are authorized by NestJS and streamed from S3 through the same HTTPS origin.
+## 1. GitHub services
 
-## 2. Environment files
+Connect both application services to the same GitHub repository and `main`
+branch. Set each service's Root Directory exactly as shown above. Both folders
+contain a Dockerfile, so custom build and start commands are unnecessary.
 
-Copy `backend/.env.production.example` to `backend/.env` and
-`frontend/.env.production.example` to `frontend/.env.production`. Replace every
-blank required value and the example public origin. Prefer an instance role; if
-static AWS credentials are unavoidable, provide both key variables.
+The backend container runs `prisma migrate deploy` before starting NestJS. Do
+not use `prisma db push` in production. Configure the backend health check as
+`/health/ready` after its public domain and database are available.
 
-```bash
-chmod 600 backend/.env frontend/.env.production
+The application reads Railway's generated `PORT` automatically and binds to
+`0.0.0.0`.
+
+## 2. Backend variables
+
+Add these variables to the `backend` service. Use Railway variable references
+instead of copying secret values where possible.
+
+```text
+NODE_ENV=production
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+WEB_ORIGIN=https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}
+JWT_SECRET=<sealed random value of at least 32 characters>
+JWT_EXPIRES_IN=24h
+STORAGE_DRIVER=s3
 ```
 
-`WEB_ORIGIN` must exactly equal the public HTTPS origin. `API_INTERNAL_URL` stays
-on loopback and is never a browser-visible API base URL. Generate a JWT secret
-with at least 32 random characters and store it outside Git.
+Do not set `PORT`; Railway supplies it. `API_PORT` remains supported outside
+Railway, but `PORT` takes precedence when present. `FRONTEND_URL` is accepted as
+a legacy alias for `WEB_ORIGIN`.
 
-## 3. First HTTPS setup
+Generate the JWT secret outside Git, for example with `openssl rand -base64 48`,
+and paste it into a sealed Railway variable.
 
-Obtain the certificate before enabling the TLS server block. Then render the
-checked-in template with the domain as the only substitution:
+## 3. Railway Bucket
 
-```bash
-export TRAVELGUIDE_DOMAIN=travel.example.com
-envsubst '${TRAVELGUIDE_DOMAIN}' \
-  < deploy/nginx/travelguide.conf.template \
-  | sudo tee /etc/nginx/sites-available/travelguide.conf >/dev/null
-sudo ln -s /etc/nginx/sites-available/travelguide.conf /etc/nginx/sites-enabled/travelguide.conf
-sudo nginx -t
-sudo systemctl reload nginx
+Create a Storage Bucket named `uploads`, then use its Credentials tab to inject
+the AWS SDK-compatible variables into the `backend` service. The application
+supports Railway's current automatic variable names:
+
+```text
+AWS_ENDPOINT_URL
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_S3_BUCKET_NAME
+AWS_DEFAULT_REGION
+AWS_S3_URL_STYLE
 ```
 
-Use the host's approved Certbot flow and confirm automatic renewal with
-`certbot renew --dry-run`. The template redirects HTTP to HTTPS, forwards REST
-and Socket.io to NestJS, forwards all other traffic to Next.js, and accepts the
-current 10 MiB media limit with a 12 MiB proxy ceiling.
+It also supports direct Railway references if automatic injection is not used:
 
-## 4. Deploy
+```text
+S3_ENDPOINT=${{uploads.ENDPOINT}}
+S3_ACCESS_KEY_ID=${{uploads.ACCESS_KEY_ID}}
+S3_SECRET_ACCESS_KEY=${{uploads.SECRET_ACCESS_KEY}}
+S3_BUCKET=${{uploads.BUCKET}}
+S3_REGION=${{uploads.REGION}}
+S3_URL_STYLE=virtual
+```
 
-Record the current revision and take a PostgreSQL snapshot before every deploy.
-From the repository root:
+Use `BUCKET`, not `RAILWAY_BUCKET_NAME`, for the S3 API bucket name. New Railway
+buckets use `virtual` URL style. If the Bucket Credentials tab explicitly says
+the bucket is an older path-style bucket, set `S3_URL_STYLE=path`.
+
+Railway Buckets are private and S3-compatible. They replace AWS S3 for the first
+release without changing stored object keys, so a later migration to AWS can
+reuse the same storage interface.
+
+## 4. Frontend variables
+
+Add this runtime variable to the `frontend` service:
+
+```text
+API_INTERNAL_URL=http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:${{backend.PORT}}
+```
+
+The browser uses the frontend's same-origin routes; it must not receive a
+`*.railway.internal` URL. Generate a public domain for the frontend. The backend
+also needs a public domain for direct health checks and any Socket.io route that
+is not proxied by the frontend.
+
+## 5. First deploy order
+
+1. Create `Postgres` and `uploads`.
+2. Create `backend`, set its root directory and all variables, then deploy.
+3. Confirm migration output and `GET /health/ready`.
+4. Create `frontend`, set `API_INTERNAL_URL`, then deploy.
+5. Put the frontend Railway HTTPS origin in backend `WEB_ORIGIN` and redeploy the
+   backend if the reference was not already used.
+6. Verify login, room join, Socket.io reconnect, image upload/download, and topic
+   sharing in a real browser.
+
+## 6. Smoke checks
+
+Use an approved demo traveler or local account:
 
 ```bash
-git rev-parse HEAD
 cd backend
-corepack yarn install --immutable
-corepack yarn verify
-corepack yarn db:deploy
-corepack yarn build
-
-cd ../frontend
-corepack yarn install --immutable
-corepack yarn verify
-corepack yarn build
-
-cd ..
-pm2 startOrReload deploy/ecosystem.config.cjs --update-env
-pm2 save
-```
-
-Run `pm2 startup` once using the exact command it prints, reboot the host, and
-confirm both processes return with `pm2 status`. Do not use `prisma db push`.
-
-## 5. Controlled demo data
-
-Base destination data is idempotent:
-
-```bash
-cd backend
-corepack yarn db:seed
-```
-
-Demo accounts and content require environment-supplied passwords plus two
-production confirmations. Run this only against the intended presentation DB:
-
-```bash
-NODE_ENV=production \
-DEMO_SEED_ENABLED=true \
-DEMO_SEED_CONFIRM_PRODUCTION=seed-travelguide-demo \
-DEMO_USER_PASSWORD='from-secret-manager' \
-DEMO_ADMIN_PASSWORD='from-secret-manager' \
-corepack yarn db:seed:demo
-```
-
-The command upserts the documented demo identities, uploads synthetic proof to
-the configured private S3 bucket, and never prints passwords. Keep the account
-inventory and real values outside the repository.
-
-## 6. Smoke and restart verification
-
-Use an approved demo traveler/local account that can join the Jeju room:
-
-```bash
-cd backend
-SMOKE_BASE_URL=https://travel.example.com \
-SMOKE_EMAIL='demo-account@example.com' \
-SMOKE_PASSWORD='from-secret-manager' \
+SMOKE_BASE_URL=https://<backend-domain> \
+SMOKE_EMAIL='<demo-email>' \
+SMOKE_PASSWORD='<secret-value>' \
 corepack yarn smoke:production
 ```
 
-The command requires HTTPS and verifies `/health/live`, `/health/ready`, the
-same-origin login cookie, a real WebSocket transport, and authorized `room.join`.
-Run it once after deployment and again after a host reboot. Separately confirm
-GPS permission and a private upload/download on a physical mobile browser.
+The smoke command checks HTTPS health, login cookie behavior, WebSocket
+transport, and authorized room join. Never commit the password or paste it into
+deployment logs.
+
+Also confirm:
+
+- `/health/live` and `/health/ready` return success.
+- Railway deploy logs show a successful Prisma migration before Nest starts.
+- A private upload can be read only by an authorized user.
+- A redeploy does not remove uploaded files.
+- Frontend requests and Socket.io use the expected HTTPS origin.
 
 ## 7. Rollback
 
-1. Stop writes or put the site in maintenance mode.
-2. Restore the pre-deploy PostgreSQL snapshot if the new migration changed data
-   or schema. Never point old code at an incompatible newer schema.
-3. Check out the previously recorded Git revision.
-4. Install immutable dependencies and rebuild both separated apps.
-5. Run `pm2 startOrReload deploy/ecosystem.config.cjs --update-env`.
-6. Repeat health, login, Socket, upload, and mobile smoke checks.
+Railway application rollback does not roll back PostgreSQL schema changes.
+Before a migration, create or verify a database backup and review whether the
+migration is backward compatible. If a release fails:
 
-If only application code changed and the schema is backward compatible, the DB
-restore may be unnecessary; record that decision in the deployment log.
+1. Stop or limit writes when data compatibility is uncertain.
+2. Roll back the frontend and backend deployments to the recorded revision.
+3. Restore the database only when the migration requires it.
+4. Repeat health, login, Socket.io, and private upload checks.
 
-## 8. Acceptance record
+## 8. Later AWS migration
 
-Record the domain, Git revision, migration output, snapshot identifier, PM2
-status, certificate expiry, smoke output, reboot result, mobile browser/device,
-and operator. Do not record JWTs, database URLs, passwords, exact GPS, or private
-object keys.
+When AWS becomes available, copy private objects from Railway Bucket to a private
+S3 bucket, then replace the six storage variables with AWS values. Remove
+`S3_ENDPOINT` for standard AWS S3 and keep `STORAGE_DRIVER=s3`. Validate object
+counts and authorized downloads before deleting the Railway Bucket.

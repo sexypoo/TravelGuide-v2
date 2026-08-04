@@ -55,4 +55,60 @@ describe('environment validation hardening', () => {
       }),
     ).toThrow('must be provided together');
   });
+
+  it('normalizes Railway service and bucket variables', () => {
+    expect(
+      validateEnvironment({
+        ...validProduction,
+        API_PORT: undefined,
+        PORT: '8080',
+        WEB_ORIGIN: undefined,
+        FRONTEND_URL: 'https://travelguide-web.up.railway.app',
+        S3_REGION: undefined,
+        S3_BUCKET: undefined,
+        AWS_DEFAULT_REGION: 'auto',
+        AWS_S3_BUCKET_NAME: 'travelguide-files-a1b2c3',
+        AWS_ENDPOINT_URL: 'https://storage.railway.app',
+        AWS_S3_URL_STYLE: 'virtual',
+        AWS_ACCESS_KEY_ID: 'railway-access-key',
+        AWS_SECRET_ACCESS_KEY: 'railway-secret-key',
+      }),
+    ).toMatchObject({
+      API_PORT: 8080,
+      WEB_ORIGIN: 'https://travelguide-web.up.railway.app',
+      S3_REGION: 'auto',
+      S3_BUCKET: 'travelguide-files-a1b2c3',
+      S3_ENDPOINT: 'https://storage.railway.app',
+      S3_URL_STYLE: 'virtual',
+      S3_ACCESS_KEY_ID: 'railway-access-key',
+      S3_SECRET_ACCESS_KEY: 'railway-secret-key',
+    });
+  });
+
+  it('rejects malformed S3-compatible endpoint settings', () => {
+    expect(() =>
+      validateEnvironment({
+        ...validProduction,
+        S3_ENDPOINT: 'https://storage.example/private',
+      }),
+    ).toThrow('S3_ENDPOINT must be an origin');
+    expect(() =>
+      validateEnvironment({ ...validProduction, S3_URL_STYLE: 'invalid' }),
+    ).toThrow('S3_URL_STYLE must be virtual or path');
+  });
+
+  it('keeps legacy AWS region and bucket aliases compatible', () => {
+    expect(
+      validateEnvironment({
+        ...validProduction,
+        S3_REGION: undefined,
+        S3_BUCKET: undefined,
+        AWS_REGION: 'ap-northeast-2',
+        AWS_S3_BUCKET: 'legacy-private-bucket',
+      }),
+    ).toMatchObject({
+      S3_REGION: 'ap-northeast-2',
+      S3_BUCKET: 'legacy-private-bucket',
+    });
+  });
 });
