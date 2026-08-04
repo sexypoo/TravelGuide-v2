@@ -18,10 +18,16 @@ const steps = [
   },
   {
     label: '답변',
-    title: '여러 현지인의 판단을 받아요',
+    title: '직접 겪은 답을 비교해요',
     description:
-      '한 명과 매칭되지 않고, 인증된 현지인의 답을 비교해 결정합니다.',
+      '여행 중인 사람의 방금 경험과 인증 현지인의 생활 추천을 함께 보고 결정합니다.',
   },
+] as const;
+
+const trustSignals = [
+  '여행 중 방금 확인한 정보',
+  '인증 현지인의 생활 추천',
+  '광고성 글 신고·관리',
 ] as const;
 
 export default function Home(): React.JSX.Element {
@@ -42,7 +48,7 @@ export default function Home(): React.JSX.Element {
       <section className="landingHero" aria-labelledby="landing-title">
         <div className="landingHero__copy">
           <p className="heroEyebrow">
-            <span aria-hidden="true" /> 여행지별 실시간 여행 도움방
+            <span aria-hidden="true" /> 광고성 추천보다, 직접 겪은 사람의 답
           </p>
           <h1 id="landing-title">
             여행이 틀어지는 순간,
@@ -50,9 +56,17 @@ export default function Home(): React.JSX.Element {
             <em>지금 그곳을 아는 사람</em>에게 묻다.
           </h1>
           <p className="landingHero__description">
-            검색 결과보다 지금의 여행지가 필요할 때,
-            <br /> 인증된 여행자와 현지인이 한 방에서 답을 나눕니다.
+            여행 중인 사람의 방금 겪은 경험과,
+            <br /> 인증 현지인의 생활 속 추천을 한 방에서 비교해 보세요.
           </p>
+          <ul className="trustSignals" aria-label="신뢰할 수 있는 정보 기준">
+            {trustSignals.map((signal) => (
+              <li key={signal}>
+                <span aria-hidden="true">✓</span>
+                {signal}
+              </li>
+            ))}
+          </ul>
           <div className="heroActions">
             <Link className="primaryLink" href="/auth/register">
               무료로 시작하기 <span aria-hidden="true">→</span>
@@ -70,8 +84,10 @@ export default function Home(): React.JSX.Element {
               ?
             </span>
             <div>
-              <strong>여행자의 질문</strong>
-              <p>오늘 성산 쪽 바람이 많이 부나요?</p>
+              <strong>여행 중인 사람 · 방금 전</strong>
+              <p>
+                협재 해변 앞은 주차 줄이 길어요. 서쪽 공영 주차장은 여유 있어요.
+              </p>
             </div>
           </div>
           <div className="signalCard signalCard--answer">
@@ -79,8 +95,11 @@ export default function Home(): React.JSX.Element {
               ✓
             </span>
             <div>
-              <strong>인증 현지인</strong>
-              <p>오후부터 강해져요. 우도 배편을 먼저 확인하세요.</p>
+              <strong>인증 현지인 · 생활 추천</strong>
+              <p>
+                해변 앞보다 옹포리 쪽 식당이 덜 붐비고, 저녁 현지인들이 자주
+                가요.
+              </p>
             </div>
           </div>
         </div>
