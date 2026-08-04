@@ -53,4 +53,38 @@ describe('MessageCard topic handoff', () => {
       screen.getByRole('link', { name: /토픽으로 이어짐/ }),
     ).toHaveAttribute('href', '/app/questions/topic-1');
   });
+
+  it('shows a shared topic as a concise status card', () => {
+    render(
+      <MessageCard
+        message={{
+          ...message,
+          type: 'TOPIC_SHARE',
+          content: '',
+          sharedTopic: {
+            id: 'topic-2',
+            authorNickname: '제주여행자',
+            category: 'WAITING',
+            urgency: 'URGENT',
+            content: '성산일출봉 입장 대기가 얼마나 되나요?',
+            areaText: '성산일출봉 매표소',
+            status: 'OPEN',
+            answerCount: 3,
+          },
+        }}
+        own={false}
+        onPromote={jest.fn()}
+      />,
+    );
+
+    const topicCard = screen.getByRole('link', {
+      name: /성산일출봉 입장 대기가 얼마나 되나요/,
+    });
+    expect(topicCard).toHaveAttribute('href', '/app/questions/topic-2');
+    expect(topicCard).toHaveTextContent('대기 현황');
+    expect(topicCard).toHaveTextContent('진행 중');
+    expect(topicCard).toHaveTextContent('도착한 답변3개');
+    expect(topicCard).toHaveTextContent('답변 요청1시간 내');
+    expect(topicCard).toHaveTextContent('성산일출봉 매표소');
+  });
 });

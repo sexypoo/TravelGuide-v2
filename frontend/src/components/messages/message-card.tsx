@@ -2,7 +2,11 @@ import Link from 'next/link';
 import type { ChatMessage } from '@/lib/api/messages';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import { formatChatTime } from '@/lib/questions/presentation';
-import { categoryLabels, statusLabels } from '@/lib/questions/presentation';
+import {
+  categoryLabels,
+  statusLabels,
+  urgencyLabels,
+} from '@/lib/questions/presentation';
 import { ReportMenu } from '@/components/reports/report-menu';
 
 export function MessageCard({
@@ -81,19 +85,37 @@ export function MessageCard({
             className="chatBubble chatBubble--topic"
             href={`/app/questions/${message.sharedTopic.id}`}
           >
-            <span className="sharedTopicEyebrow">
-              LIVE TOPIC · {categoryLabels[message.sharedTopic.category]}
-            </span>
+            <header className="sharedTopicHeader">
+              <span className="sharedTopicCategory">
+                <i aria-hidden="true" />
+                {categoryLabels[message.sharedTopic.category]}
+              </span>
+              <span
+                className={`sharedTopicStatus sharedTopicStatus--${message.sharedTopic.status.toLowerCase()}`}
+              >
+                {statusLabels[message.sharedTopic.status]}
+              </span>
+            </header>
             <strong>{message.sharedTopic.content}</strong>
             {message.sharedTopic.areaText && (
-              <span>⌖ {message.sharedTopic.areaText}</span>
-            )}
-            <footer>
-              <span>
-                {statusLabels[message.sharedTopic.status]} · 답변{' '}
-                {message.sharedTopic.answerCount}
+              <span className="sharedTopicPlace">
+                <span aria-hidden="true">⌖</span>
+                {message.sharedTopic.areaText}
               </span>
-              <b>자세히 보기 →</b>
+            )}
+            <div className="sharedTopicMeta">
+              <span>
+                <small>도착한 답변</small>
+                <b>{message.sharedTopic.answerCount}개</b>
+              </span>
+              <span>
+                <small>답변 요청</small>
+                <b>{urgencyLabels[message.sharedTopic.urgency]}</b>
+              </span>
+            </div>
+            <footer>
+              <span>현장 답변과 최신 현황 보기</span>
+              <b aria-hidden="true">→</b>
             </footer>
           </Link>
         ) : (

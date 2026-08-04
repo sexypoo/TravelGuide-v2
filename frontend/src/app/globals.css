@@ -356,7 +356,7 @@
 
 .reviewComplete p {
   margin: 0.45rem 0 0;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 @media (max-width: 600px) {
@@ -444,6 +444,7 @@ body {
   min-width: 320px;
   background: var(--canvas);
   font-family: var(--body);
+  font-weight: 500;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -4992,7 +4993,7 @@ textarea:focus-visible {
   right: 0;
   color: var(--subtle);
   font-size: 0.67rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 .stackField textarea {
   resize: vertical;
@@ -5023,7 +5024,7 @@ textarea:focus-visible {
   overflow: hidden;
   color: var(--muted);
   font-size: 0.7rem;
-  font-weight: 500;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -7202,7 +7203,7 @@ textarea:focus-visible {
 
 .communityComposer small {
   color: var(--subtle);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .communityComposer input,
@@ -7508,5 +7509,184 @@ textarea:focus-visible {
   .communityPage,
   .communityDetailPage {
     animation: none;
+  }
+}
+
+/* Legibility pass: keep supporting copy calm without letting it fade away. */
+input::placeholder,
+textarea::placeholder {
+  font-weight: 500;
+}
+
+/* Shared topics read like compact field notes inside the conversation. */
+.chatMessage .chatBubble--topic {
+  display: grid;
+  width: min(21.5rem, 78vw);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #dedce3;
+  border-radius: 1.05rem;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(73, 70, 83, 0.09);
+  color: var(--ink);
+  gap: 0;
+  text-align: left;
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.chatMessage .chatBubble--topic:hover {
+  border-color: #cfc7dc;
+  box-shadow: 0 12px 28px rgba(73, 70, 83, 0.13);
+  transform: translateY(-1px);
+}
+
+.chatMessage .chatBubble--topic:focus-visible {
+  border-color: var(--purple);
+  outline: 3px solid rgba(112, 104, 216, 0.2);
+  outline-offset: 3px;
+}
+
+.sharedTopicHeader {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1rem 0;
+}
+
+.sharedTopicCategory,
+.sharedTopicStatus {
+  display: inline-flex;
+  min-height: 1.6rem;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.sharedTopicCategory {
+  gap: 0.42rem;
+  color: #55515d;
+}
+
+.sharedTopicCategory > i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 0.2rem;
+  background: var(--gradient);
+  box-shadow: 0 0 0 0.22rem #f6edf7;
+}
+
+.sharedTopicStatus {
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  background: #edf9f5;
+  color: #08795b;
+}
+
+.sharedTopicStatus--resolved {
+  background: var(--iris-soft);
+  color: var(--purple-dark);
+}
+
+.sharedTopicStatus--expired,
+.sharedTopicStatus--removed {
+  background: #f1f2f4;
+  color: #68636e;
+}
+
+.chatMessage .chatBubble--topic > strong {
+  padding: 0.8rem 1rem 0;
+  color: #302d36;
+  font-size: 0.91rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  line-height: 1.52;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+.sharedTopicPlace {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.45rem 1rem 0;
+  color: var(--muted);
+  font-size: 0.67rem;
+  font-weight: 600;
+}
+
+.sharedTopicPlace > span {
+  color: var(--magenta);
+  font-size: 0.8rem;
+}
+
+.sharedTopicMeta {
+  display: grid;
+  margin: 0.85rem 1rem 0;
+  overflow: hidden;
+  border: 1px solid #ece9ee;
+  border-radius: 0.78rem;
+  background: #f8f8fa;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sharedTopicMeta > span {
+  display: grid;
+  min-width: 0;
+  padding: 0.68rem 0.75rem;
+  gap: 0.18rem;
+}
+
+.sharedTopicMeta > span + span {
+  border-left: 1px solid #e7e4e9;
+}
+
+.sharedTopicMeta small {
+  color: var(--subtle);
+  font-size: 0.58rem;
+  font-weight: 600;
+}
+
+.sharedTopicMeta b {
+  overflow: hidden;
+  color: #3e3a45;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatMessage .chatBubble--topic footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.85rem;
+  padding: 0.78rem 1rem;
+  border-top: 1px solid #ece9ee;
+  background: #fff;
+  color: var(--purple-dark);
+  font-size: 0.65rem;
+  font-weight: 750;
+}
+
+.chatMessage .chatBubble--topic footer b {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--iris-soft);
+  color: var(--purple-dark);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 520px) {
+  .chatMessage .chatBubble--topic {
+    width: min(20rem, 82vw);
   }
 }
