@@ -118,14 +118,10 @@ export function RoomExperience({
       </div>
 
       <div className="conversationWorkspace" data-mobile-view={mobileView}>
-        <section className="conversationStage" aria-labelledby="chat-title">
-          <header className="conversationStage__header">
-            <div>
-              <span>LIVE CONVERSATION</span>
-              <h2 id="chat-title">{room.destination.nameKo} 대화</h2>
-            </div>
-            <span className="conversationStage__hint">짧은 정보도 좋아요</span>
-          </header>
+        <section
+          className="conversationStage"
+          aria-label={`${room.destination.nameKo} 대화`}
+        >
           {connectionState !== 'connected' && (
             <div className="connectionNotice" role="status" aria-live="polite">
               {connectionState === 'offline'

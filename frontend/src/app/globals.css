@@ -3761,13 +3761,25 @@ textarea:focus-visible {
   --chat-line: #eee7ec;
   --chat-soft: #faf5f8;
   --topic-wash: #f7f3fb;
+  display: flex;
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: white;
+  flex-direction: column;
+}
+
+.chatRoomExperience > .appBackLink {
+  flex: 0 0 auto;
+  margin-bottom: 0.65rem;
 }
 
 .conversationRoomHeader {
   display: grid;
-  padding: 0.35rem 0 1.5rem;
-  grid-template-columns: 4rem minmax(0, 1fr) auto;
-  gap: 1rem;
+  padding: 0.2rem 0 0.8rem;
+  grid-template-columns: 3.15rem minmax(0, 1fr) auto;
+  gap: 0.75rem;
   align-items: center;
   border-bottom: 1px solid var(--line);
 }
@@ -3775,17 +3787,17 @@ textarea:focus-visible {
 .conversationRoomHeader__signal {
   position: relative;
   display: grid;
-  width: 3.75rem;
-  height: 3.75rem;
+  width: 2.9rem;
+  height: 2.9rem;
   place-items: center;
   border: 1px solid #e9e2ed;
-  border-radius: 1.15rem;
+  border-radius: 0.9rem;
   background: white;
   box-shadow: 0 10px 26px rgba(73, 70, 83, 0.08);
 }
 
 .conversationRoomHeader__signal svg {
-  width: 2.55rem;
+  width: 2rem;
   fill: var(--ink);
 }
 
@@ -3805,25 +3817,29 @@ textarea:focus-visible {
 .conversationRoomHeader h1 {
   margin: 0;
   font-family: var(--display);
-  font-size: clamp(1.75rem, 3vw, 2.35rem);
-  font-weight: 780;
-  letter-spacing: -0.065em;
-  line-height: 1.15;
+  font-size: clamp(1.3rem, 2vw, 1.65rem);
+  font-weight: 760;
+  letter-spacing: -0.05em;
+  line-height: 1.2;
 }
 
 .conversationRoomHeader__copy > p {
-  margin: 0.45rem 0 0;
+  margin: 0.22rem 0 0;
   color: var(--muted);
-  font-size: 0.78rem;
-  line-height: 1.55;
+  font-size: 0.7rem;
+  line-height: 1.4;
   word-break: keep-all;
 }
 
 .conversationRoomHeader__actions {
-  display: grid;
-  max-width: 13.5rem;
-  gap: 0.55rem;
-  justify-items: end;
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.conversationRoomHeader .roomNotificationControl > span {
+  display: none;
 }
 
 .roomNotificationControl {
@@ -3904,7 +3920,8 @@ textarea:focus-visible {
   display: flex;
   gap: 0.5rem;
   align-items: center;
-  padding: 0.72rem 0.15rem 0;
+  flex: 0 0 auto;
+  padding: 0.5rem 0.15rem 0;
   color: var(--subtle);
   font-size: 0.68rem;
 }
@@ -3920,22 +3937,21 @@ textarea:focus-visible {
 
 .conversationWorkspace {
   display: grid;
-  margin-top: 1.5rem;
+  min-height: 0;
+  flex: 1;
+  margin-top: 1.1rem;
   grid-template-columns: minmax(0, 1fr) minmax(18.5rem, 21.5rem);
-  gap: 1rem;
-  align-items: start;
+  gap: 1.4rem;
+  align-items: stretch;
 }
 
 .conversationStage {
+  display: flex;
   min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--chat-line);
-  border-radius: 1.5rem;
-  background: white;
-  box-shadow: 0 16px 42px rgba(25, 31, 40, 0.055);
+  min-height: 0;
+  flex-direction: column;
 }
 
-.conversationStage__header,
 .topicRail__header {
   display: flex;
   gap: 1rem;
@@ -3943,12 +3959,6 @@ textarea:focus-visible {
   justify-content: space-between;
 }
 
-.conversationStage__header {
-  padding: 1.15rem 1.3rem;
-  border-bottom: 1px solid #eff1f3;
-}
-
-.conversationStage__header > div > span,
 .topicRail__header > div > span {
   color: var(--purple);
   font-family: var(--utility);
@@ -3957,7 +3967,6 @@ textarea:focus-visible {
   letter-spacing: 0.08em;
 }
 
-.conversationStage__header h2,
 .topicRail__header h2 {
   margin: 0.25rem 0 0;
   font-family: var(--display);
@@ -3966,23 +3975,21 @@ textarea:focus-visible {
   letter-spacing: -0.045em;
 }
 
-.conversationStage__hint {
-  color: var(--subtle);
-  font-size: 0.66rem;
-}
-
 .conversationStage > .connectionNotice {
-  margin: 0.75rem 1.25rem 0;
+  margin: 0 0 0.75rem;
 }
 
 .messageTimelineFrame {
   position: relative;
+  min-height: 0;
+  flex: 1;
 }
 
 .messageTimeline {
-  min-height: 28rem;
-  max-height: min(59vh, 40rem);
-  padding: 1rem 1.25rem 1.5rem;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  padding: 0.75rem 0.75rem 1.5rem 0.15rem;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-color: #d9dce1 transparent;
@@ -4226,12 +4233,15 @@ textarea:focus-visible {
 }
 
 .messageComposer {
-  position: sticky;
-  bottom: 0;
+  position: relative;
   z-index: 2;
-  padding: 0.9rem 1rem 0.8rem;
-  border-top: 1px solid #e8eaf0;
-  background: rgba(255, 255, 255, 0.96);
+  padding: 0.9rem 0 0.35rem;
+  border-top: 1px solid rgba(229, 224, 231, 0.9);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 249, 251, 0.82),
+    var(--canvas) 28%
+  );
   backdrop-filter: blur(12px);
 }
 
@@ -4349,7 +4359,8 @@ textarea:focus-visible {
 
 .messageTimelineSkeleton {
   display: grid;
-  min-height: 30rem;
+  min-height: 0;
+  flex: 1;
   padding: 2rem 1.25rem;
   gap: 1rem;
   align-content: center;
@@ -4364,14 +4375,22 @@ textarea:focus-visible {
   animation: skeletonFlow 1.3s ease-in-out infinite;
 }
 
+.conversationStage > .chatQueryState {
+  min-height: 0;
+  flex: 1;
+}
+
 .messageTimelineSkeleton span:nth-child(2) {
   justify-self: end;
 }
 
 .topicRail {
   position: relative;
+  height: 100%;
   min-width: 0;
-  padding: 0.2rem 0 1rem;
+  overflow-y: auto;
+  padding: 0.2rem 0 1rem 1.35rem;
+  border-left: 1px solid rgba(229, 224, 231, 0.9);
 }
 
 .topicRail__header {
@@ -4520,6 +4539,7 @@ textarea:focus-visible {
     border-radius: 0.85rem;
     background: #eceef1;
     grid-template-columns: 1fr 1fr;
+    flex: 0 0 auto;
   }
 
   .mobileRoomSwitcher button {
@@ -4549,8 +4569,9 @@ textarea:focus-visible {
   }
 
   .topicRail {
-    min-height: 32rem;
-    padding-top: 0.45rem;
+    min-height: 0;
+    padding: 0.45rem 0 1rem;
+    border-left: 0;
   }
 
   .topicComposerTray {
@@ -4566,49 +4587,98 @@ textarea:focus-visible {
   }
 
   .conversationRoomHeader {
-    grid-template-columns: 3.4rem minmax(0, 1fr);
+    min-height: 2.75rem;
+    padding: 0 2.65rem 0.45rem 2.45rem;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .conversationRoomHeader__signal {
-    width: 3.25rem;
-    height: 3.25rem;
-    border-radius: 1rem;
+  .chatRoomExperience > .appBackLink {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: white;
+    font-size: 0;
   }
 
-  .conversationRoomHeader__signal svg {
-    width: 2.25rem;
-  }
-
-  .conversationRoomHeader__actions {
-    grid-column: 2;
-    justify-items: start;
-  }
-
-  .roomNotificationControl {
-    justify-items: start;
-  }
-
-  .roomNotificationControl > span {
-    text-align: left;
-  }
-}
-
-@media (max-width: 520px) {
-  .conversationRoomHeader {
-    padding-bottom: 1.1rem;
-    grid-template-columns: 1fr;
+  .chatRoomExperience > .appBackLink > span {
+    font-size: 1rem;
   }
 
   .conversationRoomHeader__signal {
     display: none;
   }
 
+  .conversationRoomHeader__actions {
+    grid-column: 2;
+  }
+
+  .liveRoomEyebrow,
+  .conversationRoomHeader__copy > p,
+  .roomTrustLine,
+  .roomRoleBadge {
+    display: none;
+  }
+
   .conversationRoomHeader h1 {
-    font-size: 1.75rem;
+    overflow: hidden;
+    font-size: 1.2rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .conversationRoomHeader .roomNotificationControl > button {
+    width: 2rem;
+    min-height: 2rem;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .conversationRoomHeader .roomNotificationControl > button > span {
+    display: none;
+  }
+
+  .mobileRoomSwitcher {
+    margin-top: 0.45rem;
+    padding: 0.18rem;
+    border-radius: 0.72rem;
+  }
+
+  .mobileRoomSwitcher button {
+    min-height: 2.15rem;
+  }
+
+  .conversationWorkspace {
+    margin-top: 0.35rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .conversationRoomHeader {
+    padding-bottom: 0.65rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .conversationRoomHeader h1 {
+    font-size: 1.3rem;
   }
 
   .conversationRoomHeader__actions {
-    grid-column: 1;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .conversationRoomHeader__copy > p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .roomTrustLine {
@@ -4616,22 +4686,11 @@ textarea:focus-visible {
     line-height: 1.5;
   }
 
-  .conversationStage {
-    border-radius: 1.15rem;
-  }
-
-  .conversationStage__header {
-    padding: 1rem;
-  }
-
-  .conversationStage__hint {
-    display: none;
-  }
-
   .messageTimeline {
-    min-height: 24rem;
-    max-height: 54vh;
-    padding: 0.85rem 0.85rem 1.25rem;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    padding: 0.65rem 0.35rem 1.25rem;
   }
 
   .newMessageShortcut {
@@ -4662,7 +4721,7 @@ textarea:focus-visible {
   }
 
   .messageComposer {
-    padding: 0.75rem;
+    padding: 0.75rem 0 0.25rem;
   }
 
   .messageComposer > footer > span:first-child {
@@ -7739,9 +7798,23 @@ textarea::placeholder {
   padding: 1.25rem 0 2rem;
 }
 
+.appShell--room:has(.chatRoomExperience) {
+  height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
+  background: white;
+}
+
+.appContent.appContent--room:has(.chatRoomExperience) {
+  height: 100svh;
+  height: 100dvh;
+  overflow: hidden;
+  background: white;
+}
+
 @media (max-width: 760px) {
   .appContent.appContent--room {
     width: min(100% - 1.5rem, 1280px);
-    padding: 0.75rem 0 calc(1rem + env(safe-area-inset-bottom));
+    padding: 0.35rem 0 calc(0.4rem + env(safe-area-inset-bottom));
   }
 }

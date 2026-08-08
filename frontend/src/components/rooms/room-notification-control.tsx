@@ -71,6 +71,7 @@ export function RoomNotificationControl(): React.JSX.Element {
       <button
         type="button"
         disabled={unavailable}
+        aria-label={copy.label}
         aria-pressed={state === 'enabled'}
         aria-describedby="room-notification-detail"
         onClick={() => void toggle()}

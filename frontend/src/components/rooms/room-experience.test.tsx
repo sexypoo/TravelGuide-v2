@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { Room } from '@/lib/api/rooms';
 import { RoomExperience } from './room-experience';
 
@@ -46,7 +46,12 @@ const room: Room = {
 describe('RoomExperience conversation and topics', () => {
   it('makes conversation primary and opens direct topic creation', () => {
     render(<RoomExperience room={room} currentUserId="traveler-1" />);
-    expect(screen.getByText('실제 대화 타임라인')).toBeInTheDocument();
+    const conversation = screen.getByRole('region', { name: '제주 대화' });
+
+    expect(
+      within(conversation).queryByText('LIVE CONVERSATION'),
+    ).not.toBeInTheDocument();
+    expect(within(conversation).getByText('실제 대화 타임라인')).toBeVisible();
     expect(screen.getByText('메시지 작성 폼')).toBeInTheDocument();
     expect(screen.queryByText('토픽 작성 폼')).not.toBeInTheDocument();
 
