@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppFrame } from '@/components/app/app-frame';
 import { AppNavigation } from '@/components/app/app-navigation';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { Wordmark } from '@/components/brand/wordmark';
@@ -12,26 +13,29 @@ export default async function AppLayout({
   const initial = Array.from(user.nickname)[0] ?? '여';
 
   return (
-    <div className="appShell">
-      <header className="appHeader">
-        <Wordmark />
-        <div className="appHeader__profile">
-          <Link className="appProfileLink" href="/app/profile">
-            <span className="avatar" aria-hidden="true">
-              {initial}
-            </span>
-            <span>
-              <strong>{user.nickname}</strong>
-              <small>내 프로필</small>
-            </span>
-          </Link>
-          <LogoutButton />
-        </div>
-      </header>
-      <AppNavigation />
-      <main className="appContent">
-        <AppProviders currentUserId={user.id}>{children}</AppProviders>
-      </main>
-    </div>
+    <AppFrame
+      chrome={
+        <>
+          <header className="appHeader">
+            <Wordmark />
+            <div className="appHeader__profile">
+              <Link className="appProfileLink" href="/app/profile">
+                <span className="avatar" aria-hidden="true">
+                  {initial}
+                </span>
+                <span>
+                  <strong>{user.nickname}</strong>
+                  <small>내 프로필</small>
+                </span>
+              </Link>
+              <LogoutButton />
+            </div>
+          </header>
+          <AppNavigation />
+        </>
+      }
+    >
+      <AppProviders currentUserId={user.id}>{children}</AppProviders>
+    </AppFrame>
   );
 }
