@@ -114,7 +114,7 @@ describe('MessageCard topic handoff', () => {
       />,
     );
 
-    expect(screen.getByText('PLACE')).toBeInTheDocument();
+    expect(screen.getByText('장소 추천')).toBeInTheDocument();
     expect(screen.getByText('동백식당')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /지도 보기/ })).toHaveAttribute(
       'href',

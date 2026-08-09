@@ -222,10 +222,11 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
       </div>
 
       <fieldset className="profileTravelStyles">
-        <legend>
-          나의 여행 스타일 <span>{travelStyles.length}/5</span>
-        </legend>
-        <p>여행 취향을 최대 5개까지 골라주세요.</p>
+        <legend>나의 여행 스타일</legend>
+        <div className="profileTravelStyles__meta">
+          <p>나를 잘 보여주는 취향을 최대 5개 골라주세요.</p>
+          <span aria-live="polite">{travelStyles.length}/5 선택</span>
+        </div>
         <div>
           {TRAVEL_STYLES.map((style) => {
             const selected = travelStyles.includes(style);
@@ -247,7 +248,11 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
                   {travelStyleEmojis[style]}
                 </span>
                 <span>{travelStyleLabels[style]}</span>
-                {selected && <AppIcon name="check" />}
+                {selected && (
+                  <i className="profileTravelStyles__check" aria-hidden="true">
+                    <AppIcon name="check" />
+                  </i>
+                )}
               </button>
             );
           })}

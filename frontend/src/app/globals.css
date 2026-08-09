@@ -2182,19 +2182,17 @@ textarea:focus-visible {
 }
 
 .placePicker {
-  display: grid;
-  width: min(100%, 46rem);
-  max-height: min(48rem, calc(100dvh - 2rem));
-  padding: 1rem;
-  overflow: hidden;
+  display: flex;
+  width: min(100%, 38rem);
+  max-height: min(41rem, calc(100dvh - 2rem));
+  padding: 0.9rem;
+  overflow-y: auto;
   border: 1px solid #e8dfe8;
-  border-radius: 1.4rem;
+  border-radius: 1.25rem;
   background: white;
   box-shadow: 0 24px 70px rgba(45, 34, 52, 0.24);
-  grid-template-rows:
-    auto auto auto minmax(12rem, 1fr) minmax(5rem, auto)
-    auto auto;
-  gap: 0.65rem;
+  flex-direction: column;
+  gap: 0.55rem;
 }
 
 .placePicker > header {
@@ -2214,7 +2212,7 @@ textarea:focus-visible {
 .placePicker > header h2 {
   margin: 0.15rem 0 0;
   font-family: var(--display);
-  font-size: 1.35rem;
+  font-size: 1.18rem;
   letter-spacing: -0.05em;
 }
 
@@ -2278,7 +2276,9 @@ textarea:focus-visible {
 }
 
 .placePickerMap {
-  min-height: 12rem;
+  height: clamp(8.5rem, 24dvh, 11rem);
+  min-height: 8.5rem;
+  flex: 0 0 auto;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 1rem;
@@ -2296,13 +2296,13 @@ textarea:focus-visible {
 
 .placePickerResults {
   display: grid;
-  max-height: 12rem;
+  max-height: 9.5rem;
   overflow-y: auto;
   gap: 0.35rem;
 }
 
 .placePickerResults > p {
-  margin: 1rem 0;
+  margin: 0.75rem 0;
   color: var(--muted);
   font-size: 0.7rem;
   text-align: center;
@@ -2381,6 +2381,7 @@ textarea:focus-visible {
   gap: 0.5rem;
   align-items: center;
   justify-content: flex-end;
+  padding-top: 0.1rem;
 }
 
 .placePicker > footer button {
@@ -2425,11 +2426,18 @@ textarea:focus-visible {
 
   .placePicker {
     width: 100%;
-    max-height: 92dvh;
-    border-radius: 1.35rem 1.35rem 0 0;
-    grid-template-rows:
-      auto auto auto minmax(11rem, 1fr) minmax(5rem, auto)
-      auto auto;
+    max-height: 86dvh;
+    padding: 0.8rem 0.85rem calc(0.8rem + env(safe-area-inset-bottom));
+    border-radius: 1.2rem 1.2rem 0 0;
+  }
+
+  .placePickerMap {
+    height: 8.75rem;
+    min-height: 8.75rem;
+  }
+
+  .placePickerResults {
+    max-height: 8.25rem;
   }
 }
 
@@ -5123,29 +5131,35 @@ textarea:focus-visible {
 
   .conversationRoomHeader {
     min-height: 2.75rem;
-    padding: 0 2.65rem 0.45rem 2.45rem;
+    padding: 0 2.65rem 0.45rem 2.35rem;
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .chatRoomExperience > .appBackLink {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: -0.05rem;
+    left: -0.6rem;
     z-index: 2;
     display: grid;
-    width: 2rem;
-    height: 2rem;
+    width: 2.75rem;
+    height: 2.75rem;
     margin: 0;
     place-items: center;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    background: white;
+    border: 0;
+    border-radius: 0.8rem;
+    background: transparent;
+    color: var(--ink);
     font-size: 0;
   }
 
+  .chatRoomExperience > .appBackLink:active {
+    background: #f5f1f5;
+  }
+
   .chatRoomExperience > .appBackLink > .appIcon {
-    width: 1rem;
-    height: 1rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    stroke-width: 2.15;
   }
 
   .conversationRoomHeader__signal {
@@ -8677,45 +8691,13 @@ textarea::placeholder {
   border-radius: 1.05rem;
   background: #fff;
   box-shadow: 0 8px 24px rgba(73, 70, 83, 0.08);
-  grid-template-columns: 2.75rem minmax(0, 1fr);
   gap: 0;
-}
-
-.placeTicket__rail {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  padding-top: 1rem;
-  background: linear-gradient(180deg, #fff0f5, #f5f2ff);
-}
-
-.placeTicket__rail > span {
-  display: grid;
-  width: 1.75rem;
-  height: 1.75rem;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--gradient);
-  color: #fff;
-  font-size: 0.8rem;
-}
-
-.placeTicket__rail > span > .appIcon {
-  width: 0.9rem;
-  height: 0.9rem;
-}
-
-.placeTicket__rail > i {
-  width: 1px;
-  flex: 1;
-  margin-top: 0.5rem;
-  background: linear-gradient(#d9c4dd, transparent);
 }
 
 .chatBubble--place > .placeTicket__content {
   display: grid;
   min-width: 0;
-  padding: 0.9rem 0.95rem 0.8rem;
+  padding: 0.82rem 0.9rem 0.78rem;
   gap: 0;
 }
 
@@ -8727,11 +8709,27 @@ textarea::placeholder {
 }
 
 .placeTicket__eyebrow > span {
+  display: inline-flex;
+  gap: 0.38rem;
+  align-items: center;
   color: var(--magenta);
-  font-family: var(--display);
-  font-size: 0.55rem;
-  font-weight: 850;
-  letter-spacing: 0.13em;
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+
+.placeTicket__eyebrow > span > i {
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border-radius: 0.48rem;
+  background: var(--gradient);
+  color: white;
+}
+
+.placeTicket__eyebrow > span > i > .appIcon {
+  width: 0.76rem;
+  height: 0.76rem;
 }
 
 .placeTicket__eyebrow > small {
@@ -9093,74 +9091,99 @@ textarea::placeholder {
 
 .profileTravelStyles {
   margin: 2rem 0 0;
-  padding: 1.15rem;
+  padding: 1.1rem;
   border: 1px solid #ebe5f5;
   border-radius: 1.1rem;
-  background: linear-gradient(120deg, #fdfaff, #f7f5ff);
+  background: #fbf9fd;
 }
 
 .profileTravelStyles legend {
-  width: 100%;
   color: #4e5968;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
+  font-weight: 780;
+}
+
+.profileTravelStyles__meta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0.35rem 0 0.85rem;
+}
+
+.profileTravelStyles__meta > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.profileTravelStyles__meta > span {
+  flex: 0 0 auto;
+  color: var(--subtle);
+  font-family: var(--utility);
+  font-size: 0.62rem;
   font-weight: 750;
 }
 
-.profileTravelStyles legend span {
-  float: right;
-  color: var(--subtle);
-  font-size: 0.68rem;
-}
-
-.profileTravelStyles > p {
-  margin: 0.4rem 0 0.9rem;
-  color: var(--muted);
-  font-size: 0.68rem;
-}
-
-.profileTravelStyles > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.48rem;
+.profileTravelStyles > div:last-child {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
 }
 
 .profileTravelStyles button {
+  position: relative;
   display: inline-flex;
-  min-height: 2.35rem;
+  min-width: 0;
+  min-height: 2.65rem;
   align-items: center;
-  padding: 0 0.65rem 0 0.42rem;
+  padding: 0.4rem 1.8rem 0.4rem 0.48rem;
   border: 1px solid #e4dce3;
-  border-radius: 999px;
+  border-radius: 0.78rem;
   background: #fff;
   color: var(--muted);
   cursor: pointer;
-  font-size: 0.68rem;
-  font-weight: 680;
-  gap: 0.38rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  gap: 0.42rem;
+  text-align: left;
 }
 
-.profileTravelStyles button > .appIcon {
-  width: 0.72rem;
-  height: 0.72rem;
-  margin-left: 0.05rem;
-  stroke-width: 2.3;
+.profileTravelStyles__check {
+  position: absolute;
+  right: 0.55rem;
+  display: grid;
+  width: 1rem;
+  height: 1rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--plum);
+  color: white;
+}
+
+.profileTravelStyles__check > .appIcon {
+  width: 0.62rem;
+  height: 0.62rem;
+  stroke-width: 2.5;
 }
 
 .profileTravelStyles__emoji {
   display: grid;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: 0 0 auto;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 0.55rem;
   background: #f5f1f5;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   line-height: 1;
 }
 
 .profileTravelStyles button[aria-pressed='true'] {
-  border-color: rgba(145, 75, 165, 0.28);
-  background: var(--plum-soft);
+  border-color: rgba(145, 75, 165, 0.35);
+  background: #fff7fc;
   color: var(--plum);
+  box-shadow: inset 0 0 0 1px rgba(145, 75, 165, 0.06);
 }
 
 .profileTravelStyles button[aria-pressed='true'] .profileTravelStyles__emoji {
@@ -9184,6 +9207,14 @@ textarea::placeholder {
     width: 4.4rem;
     height: 4.4rem;
     border-radius: 1.35rem;
+  }
+
+  .profileTravelStyles > div:last-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profileTravelStyles button {
+    padding-right: 1.65rem;
   }
 }
 

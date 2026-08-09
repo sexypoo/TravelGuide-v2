@@ -73,15 +73,14 @@ export function MessageCard({
           </div>
         ) : message.type === 'PLACE' && message.place !== null ? (
           <div className="chatBubble chatBubble--place placeTicket">
-            <div className="placeTicket__rail" aria-hidden="true">
-              <span>
-                <AppIcon name="pin" />
-              </span>
-              <i />
-            </div>
             <div className="placeTicket__content">
               <header className="placeTicket__eyebrow">
-                <span>PLACE</span>
+                <span>
+                  <i aria-hidden="true">
+                    <AppIcon name="pin" />
+                  </i>
+                  장소 추천
+                </span>
                 <small>공유된 장소</small>
               </header>
               <strong className="placeTicket__name">
