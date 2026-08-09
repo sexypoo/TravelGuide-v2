@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { ApiConnectionStatus } from '@/components/api-connection-status';
 import { SignalHalo } from '@/components/brand/signal-halo';
 import { Wordmark } from '@/components/brand/wordmark';
 import { AppIcon } from '@/components/common';
+import { getCurrentUser } from '@/lib/auth/session';
 
 const steps = [
   {
@@ -31,7 +33,12 @@ const trustSignals = [
   '광고성 글 신고·관리',
 ] as const;
 
-export default function Home(): React.JSX.Element {
+export default async function Home(): Promise<React.JSX.Element> {
+  const user = await getCurrentUser();
+  if (user !== null) {
+    redirect(user.isAdmin ? '/admin' : '/app');
+  }
+
   return (
     <main className="landingPage">
       <header className="landingHeader">
