@@ -49,6 +49,7 @@
 | `INITIAL_ADMIN_EMAIL` | 운영 관리자 이메일 | `[ ]` |
 | `INITIAL_ADMIN_PASSWORD` | 10~72자 Sealed Variable | `[ ]` |
 | `INITIAL_ADMIN_NICKNAME` | 고유한 2~20자 닉네임 | `[ ]` |
+| `GOOGLE_PLACES_API_KEY` | Places API (New) 전용 Sealed 서버 키 | `[ ]` |
 
 `PORT`는 Railway가 자동 주입하므로 직접 만들지 않습니다. 기존
 `GOOGLE_CLIENT_*`, `CORS_ORIGINS`, `USE_S3`, `AWS_REGION`, `AWS_S3_BUCKET` 변수는
@@ -85,6 +86,19 @@ S3_URL_STYLE=virtual
 | 변수 | 권장 설정 | 완료 |
 | --- | --- | --- |
 | `API_INTERNAL_URL` | `http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:${{backend.PORT}}` | `[ ]` |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Maps JavaScript API용 HTTP referrer 제한 브라우저 키 | `[ ]` |
+
+Vercel에 frontend를 배포한다면 `API_INTERNAL_URL`에는 Railway backend의
+공개 HTTPS URL을 입력합니다. `*.railway.internal` 주소는 Vercel에서 접근할 수
+없습니다.
+
+Google Cloud 준비 상태:
+
+- [ ] Maps JavaScript API를 활성화했다.
+- [ ] Places API (New)를 활성화했다.
+- [ ] 서버 키와 브라우저 키를 분리했다.
+- [ ] 브라우저 키에 운영/Preview 도메인 HTTP referrer 제한을 걸었다.
+- [ ] Places 사용량 quota와 결제 예산 알림을 설정했다.
 
 frontend의 공개 URL:
 

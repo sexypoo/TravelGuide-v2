@@ -46,6 +46,7 @@ export interface MessageResponse {
     address: string | null;
     latitude: number;
     longitude: number;
+    googlePlaceId: string | null;
   } | null;
   sharedTopic: SharedTopicResponse | null;
   createdAt: string;
@@ -70,6 +71,7 @@ export interface MessageForResponse {
   placeAddress?: string | null;
   placeLatitude?: { toNumber(): number } | null;
   placeLongitude?: { toNumber(): number } | null;
+  placeGoogleId?: string | null;
   createdAt: Date;
   updatedAt: Date;
   removedAt?: Date | null;
@@ -148,6 +150,7 @@ export function toMessageResponse(
             address: message.placeAddress ?? null,
             latitude: message.placeLatitude.toNumber(),
             longitude: message.placeLongitude.toNumber(),
+            googlePlaceId: message.placeGoogleId ?? null,
           }
         : null,
     sharedTopic:

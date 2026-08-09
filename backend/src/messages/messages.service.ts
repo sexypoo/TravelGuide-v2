@@ -145,6 +145,7 @@ export class MessagesService {
         placeAddress: input.address?.trim() || null,
         placeLatitude: input.latitude,
         placeLongitude: input.longitude,
+        placeGoogleId: input.googlePlaceId?.trim() || null,
       },
       now,
     );

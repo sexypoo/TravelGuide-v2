@@ -8,6 +8,7 @@ import {
   urgencyLabels,
 } from '@/lib/questions/presentation';
 import { ReportMenu } from '@/components/reports/report-menu';
+import { PlaceFavoriteButton } from '@/components/places/place-favorite-button';
 
 export function MessageCard({
   message,
@@ -29,6 +30,12 @@ export function MessageCard({
       : message.author.badge === 'VERIFIED_BOTH'
         ? 'both'
         : 'traveler';
+  const placeMapUrl =
+    message.place === null
+      ? ''
+      : message.place.googlePlaceId === null
+        ? `https://www.google.com/maps/search/?api=1&query=${message.place.latitude},${message.place.longitude}`
+        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(message.place.name)}&query_place_id=${encodeURIComponent(message.place.googlePlaceId)}`;
 
   return (
     <article className={`chatMessage${own ? ' chatMessage--own' : ''}`}>
@@ -71,13 +78,15 @@ export function MessageCard({
               <strong>{message.place.name}</strong>
               {message.place.address && <span>{message.place.address}</span>}
               {message.content && <p>{message.content}</p>}
-              <a
-                href={`https://maps.google.com/?q=${message.place.latitude},${message.place.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                지도에서 보기 ↗
-              </a>
+              <span className="placeMessageActions">
+                <a href={placeMapUrl} target="_blank" rel="noopener noreferrer">
+                  지도 보기 ↗
+                </a>
+                <PlaceFavoriteButton
+                  messageId={message.id}
+                  placeName={message.place.name}
+                />
+              </span>
             </div>
           </div>
         ) : message.type === 'TOPIC_SHARE' && message.sharedTopic !== null ? (

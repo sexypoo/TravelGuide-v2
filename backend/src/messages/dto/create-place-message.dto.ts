@@ -13,6 +13,12 @@ function trim(value: unknown): unknown {
 
 export class CreatePlaceMessageDto {
   @Transform(({ value }): unknown => trim(value))
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  googlePlaceId?: string;
+
+  @Transform(({ value }): unknown => trim(value))
   @IsString()
   @MaxLength(100)
   placeName!: string;

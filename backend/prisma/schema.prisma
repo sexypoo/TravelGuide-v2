@@ -150,6 +150,7 @@ model User {
   communityComments        CommunityComment[] @relation("CommunityCommentAuthor")
   removedCommunityPosts    CommunityPost[]    @relation("CommunityPostRemover")
   removedCommunityComments CommunityComment[] @relation("CommunityCommentRemover")
+  placeFavorites           PlaceFavorite[]
 }
 
 model Destination {
@@ -229,6 +230,7 @@ model ChatMessage {
   placeAddress      String?             @db.VarChar(200)
   placeLatitude     Decimal?            @db.Decimal(9, 6)
   placeLongitude    Decimal?            @db.Decimal(9, 6)
+  placeGoogleId     String?             @db.VarChar(255)
   sharedQuestionId  String?
   removedAt         DateTime?
   removedById       String?
@@ -239,10 +241,29 @@ model ChatMessage {
   removedBy         User?               @relation("ChatMessageRemover", fields: [removedById], references: [id], onDelete: SetNull)
   topic             Question?           @relation("SourceMessage")
   sharedQuestion    Question?           @relation("SharedQuestion", fields: [sharedQuestionId], references: [id], onDelete: SetNull)
+  placeFavorites    PlaceFavorite[]
 
   @@index([roomId, createdAt, id])
   @@index([authorId, createdAt])
   @@index([sharedQuestionId])
+}
+
+model PlaceFavorite {
+  id              String       @id @default(cuid())
+  userId          String
+  sourceMessageId String?
+  name            String       @db.VarChar(100)
+  address         String?      @db.VarChar(200)
+  latitude        Decimal      @db.Decimal(9, 6)
+  longitude       Decimal      @db.Decimal(9, 6)
+  provider        String?      @db.VarChar(20)
+  providerPlaceId String?      @db.VarChar(255)
+  createdAt       DateTime     @default(now())
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceMessage   ChatMessage? @relation(fields: [sourceMessageId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, sourceMessageId])
+  @@index([userId, createdAt, id])
 }
 
 model Answer {

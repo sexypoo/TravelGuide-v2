@@ -16,6 +16,7 @@ export interface Environment {
   S3_URL_STYLE?: 'virtual' | 'path';
   S3_ACCESS_KEY_ID?: string;
   S3_SECRET_ACCESS_KEY?: string;
+  GOOGLE_PLACES_API_KEY?: string;
 }
 
 const nodeEnvironments: readonly NodeEnvironment[] = [
@@ -233,6 +234,10 @@ export function validateEnvironment(
     'AWS_SECRET_ACCESS_KEY',
     'SECRET_ACCESS_KEY',
   ]);
+  const googlePlacesApiKey = readOptionalString(
+    config,
+    'GOOGLE_PLACES_API_KEY',
+  );
 
   if (storageDriver !== 'local' && storageDriver !== 's3') {
     throw new Error('STORAGE_DRIVER must be local or s3');
@@ -290,5 +295,6 @@ export function validateEnvironment(
     S3_URL_STYLE: parseS3UrlStyle(s3UrlStyle),
     S3_ACCESS_KEY_ID: s3AccessKeyId,
     S3_SECRET_ACCESS_KEY: s3SecretAccessKey,
+    GOOGLE_PLACES_API_KEY: googlePlacesApiKey,
   };
 }

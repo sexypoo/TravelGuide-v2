@@ -16,6 +16,8 @@ import {
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { mergeMessageIntoTimeline } from '@/lib/query/realtime-cache';
+import type { GooglePlace } from '@/lib/api/places';
+import { PlacePicker } from '@/components/places/place-picker';
 
 type Attachment = 'image' | 'place' | null;
 
@@ -41,34 +43,9 @@ export function MessageComposer({
   const [menuOpen, setMenuOpen] = useState(false);
   const [attachment, setAttachment] = useState<Attachment>(null);
   const [image, setImage] = useState<File>();
-  const [placeName, setPlaceName] = useState('');
-  const [address, setAddress] = useState('');
-  const [placeMode, setPlaceMode] = useState<'device' | 'manual'>('device');
-  const [manualLatitude, setManualLatitude] = useState('');
-  const [manualLongitude, setManualLongitude] = useState('');
-  const [coordinates, setCoordinates] = useState<{
-    latitude: number;
-    longitude: number;
-  }>();
-  const [locating, setLocating] = useState(false);
+  const [placePickerOpen, setPlacePickerOpen] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<GooglePlace>();
   const [clientError, setClientError] = useState('');
-  const manualCoordinates = {
-    latitude: Number(manualLatitude),
-    longitude: Number(manualLongitude),
-  };
-  const validManualCoordinates =
-    manualLatitude.trim() !== '' &&
-    manualLongitude.trim() !== '' &&
-    manualCoordinates.latitude >= -90 &&
-    manualCoordinates.latitude <= 90 &&
-    manualCoordinates.longitude >= -180 &&
-    manualCoordinates.longitude <= 180;
-  const selectedCoordinates =
-    placeMode === 'device'
-      ? coordinates
-      : validManualCoordinates
-        ? manualCoordinates
-        : undefined;
 
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -100,12 +77,13 @@ export function MessageComposer({
     mutationFn: async (): Promise<ChatMessage> => {
       if (attachment === 'image' && image)
         return createImageMessage(roomSlug, image, content);
-      if (attachment === 'place' && selectedCoordinates) {
+      if (attachment === 'place' && selectedPlace) {
         return createPlaceMessage(roomSlug, {
-          placeName: placeName.trim(),
-          address: address.trim() || undefined,
-          latitude: selectedCoordinates.latitude,
-          longitude: selectedCoordinates.longitude,
+          googlePlaceId: selectedPlace.id,
+          placeName: selectedPlace.name,
+          address: selectedPlace.address ?? undefined,
+          latitude: selectedPlace.latitude,
+          longitude: selectedPlace.longitude,
           note: content.trim() || undefined,
         });
       }
@@ -119,11 +97,7 @@ export function MessageComposer({
       setContent('');
       setImage(undefined);
       setAttachment(null);
-      setPlaceName('');
-      setAddress('');
-      setCoordinates(undefined);
-      setManualLatitude('');
-      setManualLongitude('');
+      setSelectedPlace(undefined);
       setClientError('');
     },
   });
@@ -131,39 +105,12 @@ export function MessageComposer({
   function submit(): void {
     if (attachment === 'image' && !image)
       return setClientError('보낼 사진을 선택해 주세요.');
-    if (attachment === 'place' && !placeName.trim())
-      return setClientError('장소 이름을 입력해 주세요.');
-    if (attachment === 'place' && !selectedCoordinates)
-      return setClientError(
-        placeMode === 'device'
-          ? '현재 위치 공유를 먼저 허용해 주세요.'
-          : '유효한 위도와 경도를 입력해 주세요.',
-      );
+    if (attachment === 'place' && !selectedPlace)
+      return setClientError('보낼 장소를 지도에서 선택해 주세요.');
     if (attachment === null && content.trim().length === 0)
       return setClientError('공유할 내용을 입력해 주세요.');
     setClientError('');
     mutation.mutate();
-  }
-
-  function requestLocation(): void {
-    if (!navigator.geolocation)
-      return setClientError('이 브라우저에서는 위치 공유를 지원하지 않아요.');
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setCoordinates({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        });
-        setLocating(false);
-        setClientError('');
-      },
-      () => {
-        setLocating(false);
-        setClientError('위치 권한을 허용한 뒤 다시 시도해 주세요.');
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
   }
 
   const error =
@@ -189,7 +136,7 @@ export function MessageComposer({
             onClick={() => {
               setAttachment(null);
               setImage(undefined);
-              setCoordinates(undefined);
+              setSelectedPlace(undefined);
             }}
             aria-label="첨부 닫기"
           >
@@ -217,92 +164,14 @@ export function MessageComposer({
           ) : (
             <>
               <strong>장소 보내기</strong>
-              <p>이 방의 인증된 참여자에게 선택한 좌표가 공유됩니다.</p>
-              <div
-                className="placeModeSwitch"
-                role="group"
-                aria-label="장소 좌표 선택 방식"
-              >
-                <button
-                  type="button"
-                  aria-pressed={placeMode === 'device'}
-                  onClick={() => setPlaceMode('device')}
-                >
-                  현재 위치
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={placeMode === 'manual'}
-                  onClick={() => setPlaceMode('manual')}
-                >
-                  다른 장소 지정
+              <p>{selectedPlace?.address ?? 'Google 지도에서 선택한 장소'}</p>
+              <div className="selectedPlacePreview">
+                <span aria-hidden="true">⌖</span>
+                <strong>{selectedPlace?.name}</strong>
+                <button type="button" onClick={() => setPlacePickerOpen(true)}>
+                  다른 장소
                 </button>
               </div>
-              <div className="placeAttachmentFields">
-                <input
-                  value={placeName}
-                  maxLength={100}
-                  placeholder="장소 이름"
-                  aria-label="장소 이름"
-                  onChange={(event) => setPlaceName(event.target.value)}
-                />
-                <input
-                  value={address}
-                  maxLength={200}
-                  placeholder="주소 또는 찾는 방법 (선택)"
-                  aria-label="장소 주소"
-                  onChange={(event) => setAddress(event.target.value)}
-                />
-              </div>
-              {placeMode === 'device' ? (
-                <button
-                  className={`locationConsentButton${coordinates ? ' locationConsentButton--ready' : ''}`}
-                  type="button"
-                  onClick={requestLocation}
-                  disabled={locating}
-                >
-                  <span aria-hidden="true">⌖</span>{' '}
-                  {locating
-                    ? '현재 위치 확인 중…'
-                    : coordinates
-                      ? '현재 위치 확인됨'
-                      : '현재 위치 공유하기'}
-                </button>
-              ) : (
-                <div className="manualCoordinateFields">
-                  <label>
-                    위도
-                    <input
-                      type="number"
-                      min="-90"
-                      max="90"
-                      step="0.000001"
-                      value={manualLatitude}
-                      onChange={(event) =>
-                        setManualLatitude(event.target.value)
-                      }
-                      placeholder="33.4589"
-                    />
-                  </label>
-                  <label>
-                    경도
-                    <input
-                      type="number"
-                      min="-180"
-                      max="180"
-                      step="0.000001"
-                      value={manualLongitude}
-                      onChange={(event) =>
-                        setManualLongitude(event.target.value)
-                      }
-                      placeholder="126.9425"
-                    />
-                  </label>
-                  <small>
-                    지도에서 확인한 좌표를 입력해 다른 장소를 지정할 수 있어요.
-                  </small>
-                </div>
-              )}
             </>
           )}
         </section>
@@ -342,8 +211,8 @@ export function MessageComposer({
             type="button"
             role="menuitem"
             onClick={() => {
-              setAttachment('place');
               setMenuOpen(false);
+              setPlacePickerOpen(true);
             }}
           >
             <span
@@ -435,6 +304,17 @@ export function MessageComposer({
         <p role="alert" className="composerError">
           {error}
         </p>
+      )}
+      {placePickerOpen && (
+        <PlacePicker
+          onClose={() => setPlacePickerOpen(false)}
+          onSelect={(place) => {
+            setSelectedPlace(place);
+            setAttachment('place');
+            setPlacePickerOpen(false);
+            setClientError('');
+          }}
+        />
       )}
     </form>
   );

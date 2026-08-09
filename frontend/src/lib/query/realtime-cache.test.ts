@@ -124,6 +124,7 @@ describe('realtime cache merge', () => {
         address: '제주특별자치도 제주시 공항로 2',
         latitude: 33.5104,
         longitude: 126.4914,
+        googlePlaceId: null,
       },
     };
     const timeline: InfiniteData<MessagePage> = {

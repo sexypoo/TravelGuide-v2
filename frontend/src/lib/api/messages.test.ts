@@ -68,5 +68,19 @@ describe('message API contracts', () => {
         },
       }),
     ).toThrow('장소 메시지 응답 형식');
+
+    expect(
+      parseMessage({
+        ...message,
+        type: 'PLACE',
+        place: {
+          name: '성산일출봉',
+          address: '제주특별자치도 서귀포시 성산읍',
+          latitude: 33.458,
+          longitude: 126.942,
+          googlePlaceId: 'ChIJ-google-place',
+        },
+      }).place?.googlePlaceId,
+    ).toBe('ChIJ-google-place');
   });
 });

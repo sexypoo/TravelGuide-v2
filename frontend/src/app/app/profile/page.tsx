@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { getOwnProfile } from '@/lib/api/profile.server';
 
@@ -33,6 +34,15 @@ export default async function ProfilePage(): Promise<React.JSX.Element> {
         </div>
         <span className="profileIdentity__status">일반 사용자</span>
       </section>
+
+      <Link className="profileSavedPlacesLink" href="/app/saved-places">
+        <span aria-hidden="true">♥</span>
+        <div>
+          <strong>찜한 장소</strong>
+          <p>실시간방에서 저장한 추천 장소를 다시 확인하세요.</p>
+        </div>
+        <b aria-hidden="true">→</b>
+      </Link>
 
       <section className="profileEdit" aria-labelledby="profile-edit-title">
         <div>

@@ -43,6 +43,7 @@ STORAGE_DRIVER=s3
 INITIAL_ADMIN_EMAIL=<production administrator email>
 INITIAL_ADMIN_PASSWORD=<sealed 10-72 character password with a letter and digit>
 INITIAL_ADMIN_NICKNAME=<unique 2-20 character nickname>
+GOOGLE_PLACES_API_KEY=<sealed Google server API key>
 ```
 
 Do not set `PORT`; Railway supplies it. `API_PORT` remains supported outside
@@ -88,12 +89,29 @@ Railway Buckets are private and S3-compatible. They replace AWS S3 for the first
 release without changing stored object keys, so a later migration to AWS can
 reuse the same storage interface.
 
-## 4. Frontend variables
+## 4. Google Maps and Places
+
+In Google Cloud, enable **Maps JavaScript API** and **Places API (New)**, attach
+a billing account, and create two separate keys:
+
+- Server key: restrict to Places API (New), keep it sealed in Railway as
+  `GOOGLE_PLACES_API_KEY`, and never expose it to the browser.
+- Browser key: restrict by HTTP referrer to the production and preview frontend
+  domains, allow Maps JavaScript API, and set it as
+  `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` in Vercel.
+
+Set conservative daily quotas and billing budget alerts before launch. Place
+search is proxied through the backend. The more expensive nearby opening-hours
+request is only sent when a user explicitly taps the nearby-open-restaurants
+button.
+
+## 5. Frontend variables
 
 Add this runtime variable to the `frontend` service:
 
 ```text
 API_INTERNAL_URL=http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:${{backend.PORT}}
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=<HTTP-referrer-restricted browser key>
 ```
 
 The browser uses the frontend's same-origin routes; it must not receive a
@@ -101,7 +119,11 @@ The browser uses the frontend's same-origin routes; it must not receive a
 also needs a public domain for direct health checks and any Socket.io route that
 is not proxied by the frontend.
 
-## 5. First deploy order
+When deploying the frontend to Vercel, use the backend's **public HTTPS domain**
+for `API_INTERNAL_URL`; Vercel cannot resolve Railway private networking. The
+private-domain example above applies only when the frontend is also on Railway.
+
+## 6. First deploy order
 
 1. Create `Postgres` and `uploads`.
 2. Create `backend`, set its root directory and all variables, then deploy.
@@ -112,7 +134,7 @@ is not proxied by the frontend.
 6. Verify login, room join, Socket.io reconnect, image upload/download, and topic
    sharing in a real browser.
 
-## 6. Smoke checks
+## 7. Smoke checks
 
 Use an approved demo traveler or local account:
 
@@ -136,7 +158,7 @@ Also confirm:
 - A redeploy does not remove uploaded files.
 - Frontend requests and Socket.io use the expected HTTPS origin.
 
-## 7. Rollback
+## 8. Rollback
 
 Railway application rollback does not roll back PostgreSQL schema changes.
 Before a migration, create or verify a database backup and review whether the
@@ -147,7 +169,7 @@ migration is backward compatible. If a release fails:
 3. Restore the database only when the migration requires it.
 4. Repeat health, login, Socket.io, and private upload checks.
 
-## 8. Later AWS migration
+## 9. Later AWS migration
 
 When AWS becomes available, copy private objects from Railway Bucket to a private
 S3 bucket, then replace the six storage variables with AWS values. Remove

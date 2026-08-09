@@ -2021,6 +2021,279 @@ textarea:focus-visible {
   outline: 0;
 }
 
+.selectedPlacePreview {
+  display: grid;
+  padding: 0.65rem;
+  border: 1px solid #e3dce9;
+  border-radius: 0.8rem;
+  background: white;
+  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.selectedPlacePreview > span {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: var(--gradient);
+  color: white;
+}
+
+.selectedPlacePreview > strong {
+  overflow: hidden;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selectedPlacePreview > button {
+  color: var(--purple);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 760;
+}
+
+.placePickerBackdrop {
+  position: fixed;
+  z-index: 80;
+  display: grid;
+  padding: 1rem;
+  background: rgba(35, 29, 40, 0.48);
+  inset: 0;
+  place-items: center;
+  backdrop-filter: blur(6px);
+}
+
+.placePicker {
+  display: grid;
+  width: min(100%, 46rem);
+  max-height: min(48rem, calc(100dvh - 2rem));
+  padding: 1rem;
+  overflow: hidden;
+  border: 1px solid #e8dfe8;
+  border-radius: 1.4rem;
+  background: white;
+  box-shadow: 0 24px 70px rgba(45, 34, 52, 0.24);
+  grid-template-rows:
+    auto auto auto minmax(12rem, 1fr) minmax(5rem, auto)
+    auto auto;
+  gap: 0.65rem;
+}
+
+.placePicker > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.placePicker > header small {
+  color: var(--berry);
+  font-family: var(--utility);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.placePicker > header h2 {
+  margin: 0.15rem 0 0;
+  font-family: var(--display);
+  font-size: 1.35rem;
+  letter-spacing: -0.05em;
+}
+
+.placePicker > header > button {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: #f2eef2;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.placePickerSearch {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.45rem;
+}
+
+.placePickerSearch input {
+  min-width: 0;
+  height: 2.65rem;
+  padding: 0 0.8rem;
+  border: 1px solid #dddfe4;
+  border-radius: 0.8rem;
+  background: #f7f8fa;
+  font: inherit;
+  font-size: 0.74rem;
+  outline: none;
+}
+
+.placePickerSearch input:focus {
+  border-color: rgba(124, 58, 237, 0.45);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
+}
+
+.placePickerSearch button,
+.nearbyRestaurantButton {
+  min-height: 2.65rem;
+  padding: 0 0.85rem;
+  border-radius: 0.8rem;
+  background: var(--ink);
+  color: white;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 760;
+}
+
+.nearbyRestaurantButton {
+  justify-self: start;
+  min-height: 2.2rem;
+  background: #f4effb;
+  color: var(--purple);
+}
+
+.placePickerMap {
+  min-height: 12rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #eef0f3;
+}
+
+.placePickerMap--unavailable {
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.placePickerResults {
+  display: grid;
+  max-height: 12rem;
+  overflow-y: auto;
+  gap: 0.35rem;
+}
+
+.placePickerResults > p {
+  margin: 1rem 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.placePickerResults > button {
+  display: grid;
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 0.8rem;
+  background: #f7f8fa;
+  cursor: pointer;
+  grid-template-columns: 1.8rem minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  align-items: center;
+  text-align: left;
+}
+
+.placePickerResults > button.isSelected {
+  border-color: rgba(207, 66, 111, 0.35);
+  background: #fff4f8;
+}
+
+.placePickerResults > button > span {
+  color: var(--berry);
+  text-align: center;
+}
+
+.placePickerResults > button div {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.placePickerResults strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placePickerResults small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.6rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placePickerResults b {
+  color: var(--subtle);
+  font-size: 0.58rem;
+  white-space: nowrap;
+}
+
+.placePickerResults b.isOpen {
+  color: var(--success);
+}
+
+.placePickerError {
+  margin: 0;
+  color: var(--error);
+  font-size: 0.65rem;
+}
+
+.placePicker > footer {
+  display: grid;
+  grid-template-columns: 0.65fr 1.35fr;
+  gap: 0.5rem;
+}
+
+.placePicker > footer button {
+  min-height: 2.65rem;
+  border-radius: 0.8rem;
+  background: #f0edf1;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 760;
+}
+
+.placePicker > footer button:last-child {
+  background: var(--gradient);
+  color: white;
+}
+
+.placePicker > footer button:disabled,
+.placePicker button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@media (max-width: 600px) {
+  .placePickerBackdrop {
+    padding: 0;
+    place-items: end center;
+  }
+
+  .placePicker {
+    width: 100%;
+    max-height: 92dvh;
+    border-radius: 1.35rem 1.35rem 0 0;
+    grid-template-rows:
+      auto auto auto minmax(11rem, 1fr) minmax(5rem, auto)
+      auto auto;
+  }
+}
+
 .chatBubble--image {
   max-width: min(19rem, 72vw);
   padding: 0.3rem;
@@ -2075,6 +2348,51 @@ textarea:focus-visible {
   font-size: 0.62rem;
   font-weight: 750;
   text-decoration: none;
+}
+
+.chatBubble--place .placeMessageActions {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  margin-top: 0.35rem;
+}
+
+.placeFavoriteControl {
+  display: inline-grid;
+  gap: 0.25rem;
+}
+
+.chatBubble--place .placeFavoriteControl > button {
+  display: inline-flex;
+  min-height: 1.9rem;
+  gap: 0.28rem;
+  align-items: center;
+  padding: 0 0.58rem;
+  border: 1px solid #e3dce9;
+  border-radius: 999px;
+  background: white;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 760;
+}
+
+.chatBubble--place .placeFavoriteControl > button.isSaved {
+  border-color: rgba(207, 66, 111, 0.28);
+  background: #fff3f8;
+  color: var(--berry);
+}
+
+.chatBubble--place .placeFavoriteControl > button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.chatBubble--place .placeFavoriteControl > small {
+  max-width: 11rem;
+  color: var(--error);
+  font-size: 0.55rem;
+  line-height: 1.4;
 }
 .chatBubble--topic {
   display: grid;
@@ -6338,6 +6656,163 @@ textarea:focus-visible {
   border: 1px solid var(--line);
   border-radius: 1.3rem;
   background: white;
+}
+
+.profileSavedPlacesLink {
+  display: grid;
+  margin-top: 1rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid #eadde6;
+  border-radius: 1.2rem;
+  background: linear-gradient(110deg, #fff8fb, #faf7ff);
+  color: var(--ink);
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: center;
+  text-decoration: none;
+}
+
+.profileSavedPlacesLink > span {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 0.8rem;
+  background: var(--gradient);
+  color: white;
+}
+
+.profileSavedPlacesLink strong {
+  font-size: 0.86rem;
+}
+
+.profileSavedPlacesLink p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.profileSavedPlacesLink > b {
+  color: var(--berry);
+}
+
+.savedPlacesPage > .appBackLink {
+  margin-bottom: 1.25rem;
+}
+
+.savedPlacesGrid {
+  display: grid;
+  margin-top: 2rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.savedPlaceCard {
+  display: grid;
+  padding: 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  background: white;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0.9rem;
+}
+
+.savedPlaceCard__pin {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, #d8457d, #766ee8);
+  color: white;
+}
+
+.savedPlaceCard small {
+  color: var(--berry);
+  font-size: 0.62rem;
+  font-weight: 760;
+}
+
+.savedPlaceCard h2 {
+  margin: 0.2rem 0 0;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  letter-spacing: -0.035em;
+}
+
+.savedPlaceCard p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.savedPlaceCard footer {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  margin-top: 0.85rem;
+}
+
+.savedPlaceCard footer a,
+.savedPlaceCard footer button {
+  color: var(--purple);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 760;
+  text-decoration: none;
+}
+
+.savedPlaceCard footer button {
+  color: var(--subtle);
+}
+
+.savedPlacesState {
+  display: grid;
+  min-height: 18rem;
+  margin-top: 2rem;
+  place-items: center;
+  align-content: center;
+  padding: 2rem;
+  border: 1px dashed #dfd5df;
+  border-radius: 1.3rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.savedPlacesState > span {
+  color: var(--berry);
+  font-size: 1.8rem;
+}
+
+.savedPlacesState strong {
+  margin-top: 0.7rem;
+  color: var(--ink);
+}
+
+.savedPlacesState p {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+}
+
+.savedPlacesState button {
+  margin-top: 0.8rem;
+  color: var(--purple);
+  background: transparent;
+  cursor: pointer;
+  font-weight: 760;
+}
+
+.savedPlacesError {
+  grid-column: 1 / -1;
+  color: var(--error);
+  font-size: 0.72rem;
+}
+
+@media (max-width: 760px) {
+  .savedPlacesGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .profileEdit > div > p {

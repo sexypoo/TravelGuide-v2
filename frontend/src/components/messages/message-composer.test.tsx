@@ -44,4 +44,21 @@ describe('MessageComposer action menu', () => {
     expect(onCreateTopic).toHaveBeenCalledTimes(1);
     expect(screen.queryByLabelText('사진 첨부')).not.toBeInTheDocument();
   });
+
+  it('opens place selection as a dialog without shrinking the chat composer', () => {
+    renderComposer();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '사진, 장소 또는 토픽 추가' }),
+    );
+    fireEvent.click(screen.getByRole('menuitem', { name: /장소/ }));
+
+    expect(
+      screen.getByRole('dialog', { name: '장소 보내기' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('지도 API 키를 설정하면 지도가 표시됩니다.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
 });

@@ -13,4 +13,5 @@ export const queryKeys = {
   ) => ['room', roomSlug, 'questions', status, category ?? 'ALL'] as const,
   questionRoot: ['questions'] as const,
   question: (questionId: string) => ['questions', questionId] as const,
+  placeFavorites: ['place-favorites'] as const,
 };

@@ -36,6 +36,7 @@ export interface ChatMessage {
     address: string | null;
     latitude: number;
     longitude: number;
+    googlePlaceId: string | null;
   } | null;
   sharedTopic: {
     id: string;
@@ -103,7 +104,10 @@ export function parseMessage(value: unknown): ChatMessage {
       typeof place.name !== 'string' ||
       (place.address !== null && typeof place.address !== 'string') ||
       typeof place.latitude !== 'number' ||
-      typeof place.longitude !== 'number')
+      typeof place.longitude !== 'number' ||
+      (place.googlePlaceId !== undefined &&
+        place.googlePlaceId !== null &&
+        typeof place.googlePlaceId !== 'string'))
   )
     throw new Error('장소 메시지 응답 형식이 올바르지 않습니다.');
   const sharedTopic = value.sharedTopic;
@@ -134,7 +138,19 @@ export function parseMessage(value: unknown): ChatMessage {
     removed: value.removed ?? false,
     topicId: value.topicId,
     image: (image ?? null) as ChatMessage['image'],
-    place: (place ?? null) as ChatMessage['place'],
+    place:
+      place === undefined || place === null
+        ? null
+        : {
+            name: place.name as string,
+            address: place.address as string | null,
+            latitude: place.latitude as number,
+            longitude: place.longitude as number,
+            googlePlaceId:
+              typeof place.googlePlaceId === 'string'
+                ? place.googlePlaceId
+                : null,
+          },
     sharedTopic: (sharedTopic ?? null) as ChatMessage['sharedTopic'],
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
@@ -226,6 +242,7 @@ export async function createImageMessage(
 export async function createPlaceMessage(
   roomSlug: string,
   input: {
+    googlePlaceId?: string;
     placeName: string;
     address?: string;
     latitude: number;
