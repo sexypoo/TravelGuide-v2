@@ -57,6 +57,11 @@ export function RoomExperience({
     setSourceMessage(undefined);
   }
 
+  function finishTopicCreation(result: { autoShared: boolean }): void {
+    closeComposer();
+    if (result.autoShared) setMobileView('chat');
+  }
+
   return (
     <div className="roomExperience chatRoomExperience">
       <Link className="appBackLink" href="/app">
@@ -172,7 +177,7 @@ export function RoomExperience({
                 key={sourceMessage?.id ?? 'direct-topic'}
                 roomSlug={room.slug}
                 sourceMessage={sourceMessage}
-                onCreated={closeComposer}
+                onCreated={finishTopicCreation}
               />
             </div>
           )}

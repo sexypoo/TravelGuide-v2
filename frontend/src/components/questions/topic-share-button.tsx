@@ -36,14 +36,14 @@ export function TopicShareButton({
     <div className="topicShareAction">
       <button
         type="button"
-        disabled={mutation.isPending || sent}
+        disabled={mutation.isPending}
         onClick={() => mutation.mutate()}
       >
         <AppIcon name="send" />
         {mutation.isPending
           ? '보내는 중'
           : sent
-            ? '채팅방에 보냄'
+            ? '채팅방에 다시 보내기'
             : '채팅방에 카드로 보내기'}
       </button>
       {mutation.isError && (

@@ -41,7 +41,7 @@ describe('PlacePicker', () => {
       longitude: 126.5312,
     });
     fireEvent.click(screen.getByRole('button', { name: /동백식당/ }));
-    fireEvent.click(screen.getByRole('button', { name: '이 장소 선택' }));
+    fireEvent.click(screen.getByRole('button', { name: '이 장소 보내기' }));
     expect(onSelect).toHaveBeenCalledWith(place);
   });
 

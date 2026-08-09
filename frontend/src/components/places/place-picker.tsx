@@ -172,7 +172,8 @@ export function PlacePicker({
             disabled={selected === undefined}
             onClick={() => selected !== undefined && onSelect(selected)}
           >
-            {selected === undefined ? '장소를 선택하세요' : '이 장소 선택'}
+            <AppIcon name="check" />
+            {selected === undefined ? '장소 선택' : '이 장소 보내기'}
           </button>
         </footer>
       </section>

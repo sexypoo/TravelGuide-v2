@@ -7,7 +7,11 @@ import {
 } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
-import type { ChatMessage, MessagePage } from '@/lib/api/messages';
+import {
+  shareTopicMessage,
+  type ChatMessage,
+  type MessagePage,
+} from '@/lib/api/messages';
 import {
   createQuestion,
   createQuestionWithImage,
@@ -21,6 +25,7 @@ import { categoryLabels, urgencyLabels } from '@/lib/questions/presentation';
 import { queryKeys } from '@/lib/query/keys';
 import {
   markMessagePromoted,
+  mergeMessageIntoTimeline,
   mergeQuestionIntoFeed,
 } from '@/lib/query/realtime-cache';
 
@@ -50,7 +55,7 @@ export function QuestionComposer({
 }: {
   roomSlug: string;
   sourceMessage?: ChatMessage;
-  onCreated?: () => void;
+  onCreated?: (result: { autoShared: boolean }) => void;
 }): React.JSX.Element {
   const queryClient = useQueryClient();
   const [category, setCategory] =
@@ -61,11 +66,20 @@ export function QuestionComposer({
   const [image, setImage] = useState<File>();
   const [clientError, setClientError] = useState('');
   const mutation = useMutation({
-    mutationFn: (input: CreateQuestionInput) =>
-      image === undefined
+    mutationFn: async (input: CreateQuestionInput) => {
+      const question = await (image === undefined
         ? createQuestion(roomSlug, input)
-        : createQuestionWithImage(roomSlug, input, image),
-    onSuccess: (question) => {
+        : createQuestionWithImage(roomSlug, input, image));
+      try {
+        return {
+          question,
+          sharedMessage: await shareTopicMessage(roomSlug, question.id),
+        };
+      } catch {
+        return { question, sharedMessage: null };
+      }
+    },
+    onSuccess: ({ question, sharedMessage }) => {
       queryClient.setQueryData<InfiniteData<QuestionPage>>(
         queryKeys.roomQuestions(roomSlug, 'OPEN'),
         (current) => mergeQuestionIntoFeed(current, question),
@@ -80,11 +94,17 @@ export function QuestionComposer({
             markMessagePromoted(current, sourceMessage.id, question.id),
         );
       }
+      if (sharedMessage !== null) {
+        queryClient.setQueryData<InfiniteData<MessagePage>>(
+          queryKeys.roomMessages(roomSlug),
+          (current) => mergeMessageIntoTimeline(current, sharedMessage),
+        );
+      }
       setContent('');
       setAreaText('');
       setImage(undefined);
       setClientError('');
-      onCreated?.();
+      onCreated?.({ autoShared: sharedMessage !== null });
     },
   });
 
