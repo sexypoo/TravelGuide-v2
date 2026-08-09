@@ -157,7 +157,11 @@ export function RoomExperience({
               <h2 id="topic-rail-title">지금 이어지는 토픽</h2>
             </div>
             {room.access.canCreateTopic && (
-              <button type="button" onClick={openDirectTopic}>
+              <button
+                className="iconTextControl"
+                type="button"
+                onClick={openDirectTopic}
+              >
                 <AppIcon name="add" /> 새 토픽
               </button>
             )}
@@ -166,7 +170,7 @@ export function RoomExperience({
           {topicComposerOpen && (
             <div className="topicComposerTray">
               <button
-                className="topicComposerTray__close"
+                className="topicComposerTray__close iconOnlyControl"
                 type="button"
                 onClick={closeComposer}
                 aria-label="토픽 작성 닫기"

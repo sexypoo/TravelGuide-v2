@@ -89,7 +89,12 @@ export function PlacePicker({
             <small>GOOGLE PLACES</small>
             <h2 id="place-picker-title">장소 보내기</h2>
           </div>
-          <button type="button" onClick={onClose} aria-label="장소 선택 닫기">
+          <button
+            className="iconOnlyControl"
+            type="button"
+            onClick={onClose}
+            aria-label="장소 선택 닫기"
+          >
             <AppIcon name="close" />
           </button>
         </header>
@@ -108,6 +113,7 @@ export function PlacePicker({
             }}
           />
           <button
+            className="iconTextControl"
             type="button"
             disabled={loading}
             onClick={() => void runSearch()}

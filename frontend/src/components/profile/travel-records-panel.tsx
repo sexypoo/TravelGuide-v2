@@ -104,7 +104,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
           <h2 id="travel-records-title">나의 여행 기록</h2>
           <span>기억하고 싶은 여행을 짧게 남겨두세요. 나에게만 보여요.</span>
         </div>
-        <button type="button" onClick={openCreate}>
+        <button className="iconTextControl" type="button" onClick={openCreate}>
           <AppIcon name="add" /> 기록 추가
         </button>
       </header>
@@ -116,6 +116,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
               {editingId === undefined ? '새 여행 기록' : '여행 기록 수정'}
             </strong>
             <button
+              className="iconOnlyControl"
               type="button"
               aria-label="여행 기록 폼 닫기"
               onClick={() => setIsFormOpen(false)}

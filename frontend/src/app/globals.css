@@ -479,7 +479,7 @@ textarea {
 }
 
 .appIcon {
-  display: block;
+  display: inline-block;
   width: 1em;
   height: 1em;
   flex: 0 0 auto;
@@ -489,6 +489,22 @@ textarea {
   stroke-width: 1.85;
   stroke-linecap: round;
   stroke-linejoin: round;
+  vertical-align: middle;
+}
+
+.iconTextControl {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.iconOnlyControl {
+  display: grid;
+  padding: 0;
+  place-items: center;
+  line-height: 0;
 }
 
 .primaryLink > .appIcon,
@@ -9524,7 +9540,8 @@ textarea::placeholder {
   }
 
   .travelRecords > header > button {
-    width: 100%;
+    width: auto;
+    align-self: flex-start;
   }
 
   .travelRecordTimeline article > header {

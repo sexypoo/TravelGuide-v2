@@ -132,7 +132,7 @@ export function MessageComposer({
           aria-label={attachment === 'image' ? '사진 첨부' : '장소 공유'}
         >
           <button
-            className="messageAttachmentTray__close"
+            className="messageAttachmentTray__close iconOnlyControl"
             type="button"
             onClick={() => {
               setAttachment(null);
@@ -256,7 +256,7 @@ export function MessageComposer({
       <div className="messageComposer__inputRow">
         <button
           ref={addButton}
-          className="messageAddButton"
+          className="messageAddButton iconOnlyControl"
           type="button"
           aria-label="사진, 장소 또는 토픽 추가"
           aria-haspopup="menu"
@@ -289,7 +289,7 @@ export function MessageComposer({
           }}
         />
         <button
-          className="messageSendButton"
+          className="messageSendButton iconOnlyControl"
           type="submit"
           disabled={mutation.isPending}
         >

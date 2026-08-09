@@ -104,7 +104,7 @@ export function ReportMenu({
         >
           <button
             ref={closeRef}
-            className="reportSheet__close"
+            className="reportSheet__close iconOnlyControl"
             type="button"
             onClick={close}
             aria-label="신고 창 닫기"

@@ -32,8 +32,8 @@ const paths: Readonly<Record<AppIconName, ReactNode>> = {
       <path d="M12 9v4M12 17h.01" />
     </>
   ),
-  'arrow-left': <path d="m14.5 5-7 7 7 7" />,
-  'arrow-right': <path d="m9.5 5 7 7-7 7" />,
+  'arrow-left': <path d="M19 12H5m6-6-6 6 6 6" />,
+  'arrow-right': <path d="M5 12h14m-6-6 6 6-6 6" />,
   check: <path d="m5.5 12.5 4.2 4.2L18.8 7.6" />,
   clock: (
     <>

@@ -133,7 +133,11 @@ export function CommunityBoard({
           <h1>여행자 커뮤니티</h1>
           <span>인증 전에도 여행 정보를 편하게 묻고 나눌 수 있어요.</span>
         </div>
-        <button type="button" onClick={() => setComposerOpen((open) => !open)}>
+        <button
+          className="iconTextControl"
+          type="button"
+          onClick={() => setComposerOpen((open) => !open)}
+        >
           <AppIcon name={composerOpen ? 'close' : 'add'} />
           {composerOpen ? '작성 닫기' : '정보 나누기'}
         </button>

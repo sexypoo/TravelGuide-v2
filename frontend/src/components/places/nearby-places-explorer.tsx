@@ -127,7 +127,12 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
             현재 위치에서 가까운 영업 중 식당을 지도와 함께 보여드려요.
           </span>
         </div>
-        <button type="button" disabled={loading} onClick={findNearby}>
+        <button
+          className="iconTextControl"
+          type="button"
+          disabled={loading}
+          onClick={findNearby}
+        >
           <AppIcon name="pin" />
           {loading
             ? '주변을 찾는 중…'

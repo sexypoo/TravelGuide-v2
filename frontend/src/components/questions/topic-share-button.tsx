@@ -35,6 +35,7 @@ export function TopicShareButton({
   return (
     <div className="topicShareAction">
       <button
+        className="iconTextControl"
         type="button"
         disabled={mutation.isPending}
         onClick={() => mutation.mutate()}
