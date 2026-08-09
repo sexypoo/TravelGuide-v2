@@ -124,4 +124,32 @@ describe('MessageCard topic handoff', () => {
       screen.getByRole('button', { name: '동백식당 찜하기' }),
     ).toBeInTheDocument();
   });
+
+  it('hides the generated image caption but keeps a written caption', () => {
+    const imageMessage: ChatMessage = {
+      ...message,
+      type: 'IMAGE',
+      content: '사진을 공유했습니다.',
+      image: {
+        url: '/api/v1/messages/message-1/image',
+        originalName: 'jeju.webp',
+        mimeType: 'image/webp',
+      },
+    };
+    const { container, rerender } = render(
+      <MessageCard message={imageMessage} own onPromote={jest.fn()} />,
+    );
+    expect(container.querySelector('.chatBubble--image p')).toBeNull();
+
+    rerender(
+      <MessageCard
+        message={{ ...imageMessage, content: '오늘 협재 바다예요.' }}
+        own
+        onPromote={jest.fn()}
+      />,
+    );
+    expect(container.querySelector('.chatBubble--image p')).toHaveTextContent(
+      '오늘 협재 바다예요.',
+    );
+  });
 });

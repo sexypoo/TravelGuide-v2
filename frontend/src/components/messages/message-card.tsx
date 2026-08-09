@@ -67,7 +67,9 @@ export function MessageCard({
               src={message.image.url}
               alt={message.content || message.image.originalName}
             />
-            {message.content && <p>{message.content}</p>}
+            {message.content && message.content !== '사진을 공유했습니다.' && (
+              <p>{message.content}</p>
+            )}
           </div>
         ) : message.type === 'PLACE' && message.place !== null ? (
           <div className="chatBubble chatBubble--place placeTicket">

@@ -30,8 +30,17 @@ export default async function PublicProfilePage({
       <section className="contributorPassport" aria-labelledby="profile-name">
         <div className="contributorPassport__path" aria-hidden="true" />
         <header>
-          <span className="contributorPassport__avatar" aria-hidden="true">
-            {initial}
+          <span className="contributorPassport__avatar">
+            {profile.profileImageUrl === null ? (
+              <span aria-hidden="true">{initial}</span>
+            ) : (
+              // Authenticated media is intentionally loaded from the same-origin API.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.profileImageUrl}
+                alt={`${profile.nickname} 프로필 사진`}
+              />
+            )}
           </span>
           <div>
             <p>TRAVEL SIGNAL CONTRIBUTOR</p>

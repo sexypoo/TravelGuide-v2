@@ -1,7 +1,9 @@
 import {
   parseOwnProfile,
   parsePublicContributorProfile,
+  removeOwnProfileImage,
   updateOwnProfile,
+  updateOwnProfileImage,
 } from './profile';
 import { profilePayload } from '@/test/fixtures';
 
@@ -43,6 +45,7 @@ describe('profile contract', () => {
         id: 'local-1',
         nickname: '제주바람',
         bio: null,
+        profileImageUrl: null,
         isVerifiedLocal: true,
         verifiedDestination: { id: 'jeju-1', slug: 'jeju', nameKo: '제주' },
         verifiedAt: '2026-02-01T00:00:00.000Z',
@@ -104,5 +107,41 @@ describe('profile contract', () => {
       status: 409,
       code: 'NICKNAME_ALREADY_EXISTS',
     });
+  });
+
+  it('uploads and removes a profile image through credentialed requests', async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        response(
+          {
+            ...profilePayload,
+            profileImageUrl: '/api/v1/users/user-1/avatar',
+          },
+          200,
+        ),
+      )
+      .mockResolvedValueOnce(response(profilePayload, 200));
+    const image = new File(['avatar'], 'avatar.webp', {
+      type: 'image/webp',
+    });
+
+    await expect(updateOwnProfileImage(image)).resolves.toMatchObject({
+      profileImageUrl: '/api/v1/users/user-1/avatar',
+    });
+    const uploadCall = fetchMock.mock.calls[0];
+    expect(uploadCall?.[0]).toBe('/api/v1/users/me/avatar');
+    expect(uploadCall?.[1]).toMatchObject({
+      method: 'POST',
+      credentials: 'include',
+    });
+    expect(uploadCall?.[1]?.body).toBeInstanceOf(FormData);
+
+    await expect(removeOwnProfileImage()).resolves.toMatchObject({
+      profileImageUrl: null,
+    });
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/api/v1/users/me/avatar',
+      expect.objectContaining({ method: 'DELETE', credentials: 'include' }),
+    );
   });
 });

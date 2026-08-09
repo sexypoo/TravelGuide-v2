@@ -86,4 +86,44 @@ describe('ProfileForm', () => {
     );
     expect(refreshMock).not.toHaveBeenCalled();
   });
+
+  it('uploads a selected profile image and shows travel style symbols', async () => {
+    fetchMock.mockResolvedValue(
+      response(
+        {
+          ...profilePayload,
+          profileImageUrl: '/api/v1/users/user-1/avatar',
+          updatedAt: '2026-08-09T13:00:00.000Z',
+        },
+        200,
+      ),
+    );
+    render(<ProfileForm profile={parseOwnProfile(profilePayload)} />);
+
+    expect(screen.getByText('🌿')).toBeInTheDocument();
+    const image = new File(['avatar'], 'avatar.webp', {
+      type: 'image/webp',
+    });
+    fireEvent.change(screen.getByLabelText('사진 선택'), {
+      target: { files: [image] },
+    });
+
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      '프로필 사진을 바꿨어요.',
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/users/me/avatar',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+        body: expect.any(FormData),
+      }),
+    );
+    expect(
+      screen.getByRole('img', { name: '현재 프로필 사진' }),
+    ).toHaveAttribute(
+      'src',
+      expect.stringContaining('/api/v1/users/user-1/avatar?v='),
+    );
+  });
 });

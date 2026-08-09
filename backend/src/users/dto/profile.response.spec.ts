@@ -6,6 +6,7 @@ describe('public profile response', () => {
       id: 'local-id',
       nickname: '제주바람',
       bio: '제주의 오늘을 전합니다.',
+      avatarObjectKey: null,
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
       verifications: [
         {
@@ -20,6 +21,7 @@ describe('public profile response', () => {
       id: 'local-id',
       nickname: '제주바람',
       bio: '제주의 오늘을 전합니다.',
+      profileImageUrl: null,
       isVerifiedLocal: true,
       verifiedDestination: { id: 'jeju-id', slug: 'jeju', nameKo: '제주' },
       verifiedAt: '2026-02-01T00:00:00.000Z',

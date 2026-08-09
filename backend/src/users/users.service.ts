@@ -28,6 +28,7 @@ export interface OwnProfileRecord {
   nickname: string;
   bio: string | null;
   travelStyles: TravelStyle[];
+  avatarObjectKey: string | null;
   role: UserRole;
   createdAt: Date;
   updatedAt: Date;
@@ -37,6 +38,7 @@ export interface PublicProfileRecord {
   id: string;
   nickname: string;
   bio: string | null;
+  avatarObjectKey: string | null;
   createdAt: Date;
   verifications: Array<{
     reviewedAt: Date | null;
@@ -164,6 +166,7 @@ export class UsersService {
         nickname: true,
         bio: true,
         travelStyles: true,
+        avatarObjectKey: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -193,6 +196,7 @@ export class UsersService {
           id: true,
           nickname: true,
           bio: true,
+          avatarObjectKey: true,
           createdAt: true,
           verifications: {
             where: {
@@ -273,6 +277,7 @@ export class UsersService {
           nickname: true,
           bio: true,
           travelStyles: true,
+          avatarObjectKey: true,
           role: true,
           createdAt: true,
           updatedAt: true,

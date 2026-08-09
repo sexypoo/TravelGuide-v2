@@ -134,6 +134,10 @@ model User {
   nickname                 String             @unique @db.VarChar(20)
   bio                      String?            @db.VarChar(300)
   travelStyles             String[]           @default([])
+  avatarObjectKey          String?            @db.VarChar(500)
+  avatarOriginalName       String?            @db.VarChar(255)
+  avatarMimeType           String?            @db.VarChar(100)
+  avatarSizeBytes          Int?
   role                     UserRole           @default(USER)
   createdAt                DateTime           @default(now())
   updatedAt                DateTime           @updatedAt

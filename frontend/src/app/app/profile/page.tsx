@@ -26,8 +26,14 @@ export default async function ProfilePage(): Promise<React.JSX.Element> {
       </header>
 
       <section className="profileIdentity" aria-label="계정 요약">
-        <span className="profileIdentity__avatar" aria-hidden="true">
-          {initial}
+        <span className="profileIdentity__avatar">
+          {profile.profileImageUrl === null ? (
+            <span aria-hidden="true">{initial}</span>
+          ) : (
+            // Authenticated media is intentionally loaded from the same-origin API.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profile.profileImageUrl} alt="내 프로필 사진" />
+          )}
         </span>
         <div>
           <strong>{profile.nickname}</strong>

@@ -8,6 +8,7 @@ export interface OwnProfileResponse {
   nickname: string;
   bio: string | null;
   travelStyles: TravelStyle[];
+  profileImageUrl: string | null;
   role: UserRole;
   isAdmin: boolean;
   createdAt: string;
@@ -18,6 +19,7 @@ export interface PublicProfileResponse {
   id: string;
   nickname: string;
   bio: string | null;
+  profileImageUrl: string | null;
   isVerifiedLocal: boolean;
   verifiedDestination: {
     id: string;
@@ -41,6 +43,8 @@ export function toOwnProfileResponse(
     nickname: user.nickname,
     bio: user.bio,
     travelStyles: user.travelStyles,
+    profileImageUrl:
+      user.avatarObjectKey === null ? null : `/api/v1/users/${user.id}/avatar`,
     role: user.role,
     isAdmin: user.role === 'ADMIN',
     createdAt: user.createdAt.toISOString(),
@@ -56,6 +60,8 @@ export function toPublicProfileResponse(
     id: user.id,
     nickname: user.nickname,
     bio: user.bio,
+    profileImageUrl:
+      user.avatarObjectKey === null ? null : `/api/v1/users/${user.id}/avatar`,
     isVerifiedLocal: localVerification !== undefined,
     verifiedDestination: localVerification?.destination ?? null,
     verifiedAt: localVerification?.reviewedAt?.toISOString() ?? null,

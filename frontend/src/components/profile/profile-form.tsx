@@ -4,11 +4,14 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import {
+  removeOwnProfileImage,
   updateOwnProfile,
+  updateOwnProfileImage,
   type OwnProfile,
   type TravelStyle,
   type UpdateProfileInput,
   TRAVEL_STYLES,
+  travelStyleEmojis,
   travelStyleLabels,
 } from '@/lib/api/profile';
 import { AppIcon } from '@/components/common';
@@ -50,11 +53,70 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
   const [travelStyles, setTravelStyles] = useState<TravelStyle[]>(
     profile.travelStyles,
   );
+  const [profileImageUrl, setProfileImageUrl] = useState(
+    profile.profileImageUrl === null
+      ? null
+      : `${profile.profileImageUrl}?v=${encodeURIComponent(profile.updatedAt)}`,
+  );
+  const [isAvatarSaving, setIsAvatarSaving] = useState(false);
   const [errors, setErrors] = useState<ProfileErrors>({});
   const [message, setMessage] = useState<
     { type: 'success' | 'error'; text: string } | undefined
   >();
   const [isSaving, setIsSaving] = useState(false);
+
+  async function handleAvatarChange(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ): Promise<void> {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (file === undefined) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setMessage({
+        type: 'error',
+        text: 'JPEG, PNG, WebP 사진만 사용할 수 있어요.',
+      });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({
+        type: 'error',
+        text: '프로필 사진은 5MB 이하로 골라주세요.',
+      });
+      return;
+    }
+    setIsAvatarSaving(true);
+    setMessage(undefined);
+    try {
+      const updated = await updateOwnProfileImage(file);
+      setProfileImageUrl(
+        updated.profileImageUrl === null
+          ? null
+          : `${updated.profileImageUrl}?v=${encodeURIComponent(updated.updatedAt)}`,
+      );
+      setMessage({ type: 'success', text: '프로필 사진을 바꿨어요.' });
+      router.refresh();
+    } catch (error: unknown) {
+      setMessage({ type: 'error', text: saveError(error) });
+    } finally {
+      setIsAvatarSaving(false);
+    }
+  }
+
+  async function handleAvatarRemove(): Promise<void> {
+    setIsAvatarSaving(true);
+    setMessage(undefined);
+    try {
+      await removeOwnProfileImage();
+      setProfileImageUrl(null);
+      setMessage({ type: 'success', text: '프로필 사진을 지웠어요.' });
+      router.refresh();
+    } catch (error: unknown) {
+      setMessage({ type: 'error', text: saveError(error) });
+    } finally {
+      setIsAvatarSaving(false);
+    }
+  }
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>,
@@ -94,6 +156,48 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
       onSubmit={(event) => void handleSubmit(event)}
       noValidate
     >
+      <section
+        className="profilePhotoEditor"
+        aria-labelledby="profile-photo-title"
+      >
+        <div className="profilePhotoEditor__preview">
+          {profileImageUrl === null ? (
+            <span aria-hidden="true">{Array.from(nickname)[0] ?? '여'}</span>
+          ) : (
+            // Authenticated media is intentionally loaded from the same-origin API.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profileImageUrl} alt="현재 프로필 사진" />
+          )}
+        </div>
+        <div className="profilePhotoEditor__copy">
+          <strong id="profile-photo-title">프로필 사진</strong>
+          <p>얼굴이나 여행의 분위기가 잘 보이는 정사각형 사진이 좋아요.</p>
+          <div>
+            <label className={isAvatarSaving ? 'isDisabled' : ''}>
+              <AppIcon name="image" />
+              {isAvatarSaving ? '사진 저장 중' : '사진 선택'}
+              <input
+                className="srOnly"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={isAvatarSaving}
+                onChange={(event) => void handleAvatarChange(event)}
+              />
+            </label>
+            {profileImageUrl !== null && (
+              <button
+                type="button"
+                disabled={isAvatarSaving}
+                onClick={() => void handleAvatarRemove()}
+              >
+                사진 지우기
+              </button>
+            )}
+          </div>
+          <small>JPEG, PNG, WebP · 최대 5MB</small>
+        </div>
+      </section>
+
       <div className="profileField">
         <div>
           <label htmlFor="profile-nickname">닉네임</label>
@@ -139,8 +243,11 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
                   )
                 }
               >
-                <AppIcon name={selected ? 'check' : 'add'} />
-                {travelStyleLabels[style]}
+                <span className="profileTravelStyles__emoji" aria-hidden="true">
+                  {travelStyleEmojis[style]}
+                </span>
+                <span>{travelStyleLabels[style]}</span>
+                {selected && <AppIcon name="check" />}
               </button>
             );
           })}
@@ -179,7 +286,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
           role={message.type === 'error' ? 'alert' : 'status'}
         >
           <span aria-hidden="true">
-            {message.type === 'success' ? <AppIcon name="check" /> : '!'}
+            <AppIcon name={message.type === 'success' ? 'check' : 'alert'} />
           </span>
           {message.text}
         </div>

@@ -29,6 +29,19 @@ export const travelStyleLabels: Readonly<Record<TravelStyle, string>> = {
   FAMILY: '가족 여행',
 };
 
+export const travelStyleEmojis: Readonly<Record<TravelStyle, string>> = {
+  FOOD_EXPLORER: '🍜',
+  SLOW_TRAVEL: '🌿',
+  NATURE: '🏔️',
+  CULTURE_ART: '🎨',
+  ACTIVITY: '🏄',
+  NIGHTLIFE: '🌙',
+  SHOPPING: '🛍️',
+  PHOTO: '📷',
+  SOLO: '🎒',
+  FAMILY: '👨‍👩‍👧',
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -44,6 +57,7 @@ export interface OwnProfile {
   nickname: string;
   bio: string | null;
   travelStyles: TravelStyle[];
+  profileImageUrl: string | null;
   role: UserRole;
   isAdmin: boolean;
   createdAt: string;
@@ -54,6 +68,7 @@ export interface PublicContributorProfile {
   id: string;
   nickname: string;
   bio: string | null;
+  profileImageUrl: string | null;
   isVerifiedLocal: boolean;
   verifiedDestination: {
     id: string;
@@ -88,6 +103,8 @@ export function parseOwnProfile(value: unknown): OwnProfile {
     typeof value.email !== 'string' ||
     typeof value.nickname !== 'string' ||
     (value.bio !== null && typeof value.bio !== 'string') ||
+    (value.profileImageUrl !== null &&
+      typeof value.profileImageUrl !== 'string') ||
     !Array.isArray(value.travelStyles) ||
     value.travelStyles.length > 5 ||
     !value.travelStyles.every(isTravelStyle) ||
@@ -108,6 +125,7 @@ export function parseOwnProfile(value: unknown): OwnProfile {
     nickname: value.nickname,
     bio: value.bio,
     travelStyles: [...new Set(value.travelStyles)],
+    profileImageUrl: value.profileImageUrl,
     role: value.role,
     isAdmin: value.isAdmin,
     createdAt: value.createdAt,
@@ -123,6 +141,8 @@ export function parsePublicContributorProfile(
     typeof value.id !== 'string' ||
     typeof value.nickname !== 'string' ||
     (value.bio !== null && typeof value.bio !== 'string') ||
+    (value.profileImageUrl !== null &&
+      typeof value.profileImageUrl !== 'string') ||
     typeof value.isVerifiedLocal !== 'boolean' ||
     typeof value.joinedAt !== 'string' ||
     !isIsoDate(value.joinedAt) ||
@@ -165,6 +185,7 @@ export function parsePublicContributorProfile(
     id: value.id,
     nickname: value.nickname,
     bio: value.bio,
+    profileImageUrl: value.profileImageUrl,
     isVerifiedLocal: value.isVerifiedLocal,
     verifiedDestination,
     verifiedAt: value.verifiedAt,
@@ -193,5 +214,28 @@ export async function updateOwnProfile(
     throw await problemFromResponse(response);
   }
 
+  return parseOwnProfile(await response.json());
+}
+
+export async function updateOwnProfileImage(image: File): Promise<OwnProfile> {
+  const body = new FormData();
+  body.set('image', image);
+  const response = await fetch('/api/v1/users/me/avatar', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { Accept: 'application/json' },
+    body,
+  });
+  if (!response.ok) throw await problemFromResponse(response);
+  return parseOwnProfile(await response.json());
+}
+
+export async function removeOwnProfileImage(): Promise<OwnProfile> {
+  const response = await fetch('/api/v1/users/me/avatar', {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: { Accept: 'application/json' },
+  });
+  if (!response.ok) throw await problemFromResponse(response);
   return parseOwnProfile(await response.json());
 }
