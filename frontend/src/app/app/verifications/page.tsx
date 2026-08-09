@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppIcon } from '@/components/common';
 import { VerificationStatusCard } from '@/components/verifications/verification-status-card';
 import { getMyVerifications } from '@/lib/api/verifications.server';
 
@@ -36,7 +37,9 @@ export default async function VerificationsPage({
       </header>
       {submitted !== null && (
         <div className="submissionSuccess" role="status">
-          <span>✓</span>
+          <span>
+            <AppIcon name="check" />
+          </span>
           <div>
             <strong>{submitted} 인증을 보냈어요</strong>
             <p>관리자가 확인하면 이 화면에 바로 반영됩니다.</p>
@@ -51,7 +54,9 @@ export default async function VerificationsPage({
         </section>
       ) : (
         <section className="verificationEmpty">
-          <span aria-hidden="true">⌁</span>
+          <span aria-hidden="true">
+            <AppIcon name="live" />
+          </span>
           <h2>아직 만든 패스가 없어요</h2>
           <p>질문하려면 여행자 인증을, 답변하려면 현지인 인증을 시작하세요.</p>
         </section>
@@ -75,7 +80,7 @@ export default async function VerificationsPage({
             }
           >
             <span className="qualificationIcon qualificationIcon--traveler">
-              ↗
+              <AppIcon name="pin" />
             </span>
             <strong>여행자로 질문하기</strong>
             <p>
@@ -83,7 +88,15 @@ export default async function VerificationsPage({
                 ? '여행자 신청을 심사하고 있어요.'
                 : '일정과 예약 증빙으로 신청해요.'}
             </p>
-            <b>{pendingTypes.has('TRAVELER') ? '심사 중' : '신청 시작 →'}</b>
+            <b>
+              {pendingTypes.has('TRAVELER') ? (
+                '심사 중'
+              ) : (
+                <>
+                  신청 시작 <AppIcon name="arrow-right" />
+                </>
+              )}
+            </b>
           </Link>
           <Link
             aria-disabled={pendingTypes.has('LOCAL')}
@@ -95,7 +108,7 @@ export default async function VerificationsPage({
             }
           >
             <span className="qualificationIcon qualificationIcon--local">
-              ⌂
+              <AppIcon name="shield" />
             </span>
             <strong>현지인으로 답변하기</strong>
             <p>
@@ -103,12 +116,22 @@ export default async function VerificationsPage({
                 ? '현지인 신청을 심사하고 있어요.'
                 : '위치와 연고 증빙으로 신청해요.'}
             </p>
-            <b>{pendingTypes.has('LOCAL') ? '심사 중' : '신청 시작 →'}</b>
+            <b>
+              {pendingTypes.has('LOCAL') ? (
+                '심사 중'
+              ) : (
+                <>
+                  신청 시작 <AppIcon name="arrow-right" />
+                </>
+              )}
+            </b>
           </Link>
         </div>
       </section>
       <div className="verificationGuide__notice">
-        <span>i</span>
+        <span aria-hidden="true">
+          <AppIcon name="info" />
+        </span>
         <p>증빙과 정확한 위치는 공개되지 않으며 관리자 심사에만 사용됩니다.</p>
       </div>
     </div>

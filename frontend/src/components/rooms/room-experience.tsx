@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { AppIcon } from '@/components/common';
 import { MessageComposer } from '@/components/messages/message-composer';
 import { MessageTimeline } from '@/components/messages/message-timeline';
 import { useRoomRealtime } from '@/components/providers/realtime-provider';
@@ -59,7 +60,7 @@ export function RoomExperience({
   return (
     <div className="roomExperience chatRoomExperience">
       <Link className="appBackLink" href="/app">
-        <span aria-hidden="true">←</span> 홈으로
+        <AppIcon name="arrow-left" /> 홈으로
       </Link>
 
       <header className="conversationRoomHeader">
@@ -87,7 +88,7 @@ export function RoomExperience({
         <div className="conversationRoomHeader__actions">
           <RoomNotificationControl />
           <span className="roomRoleBadge">
-            <span aria-hidden="true">✓</span>
+            <AppIcon name="check" />
             {roleLabel(room)}
           </span>
         </div>
@@ -152,7 +153,7 @@ export function RoomExperience({
             </div>
             {room.access.canCreateTopic && (
               <button type="button" onClick={openDirectTopic}>
-                + 새 토픽
+                <AppIcon name="add" /> 새 토픽
               </button>
             )}
           </header>
@@ -165,7 +166,7 @@ export function RoomExperience({
                 onClick={closeComposer}
                 aria-label="토픽 작성 닫기"
               >
-                ×
+                <AppIcon name="close" />
               </button>
               <QuestionComposer
                 key={sourceMessage?.id ?? 'direct-topic'}

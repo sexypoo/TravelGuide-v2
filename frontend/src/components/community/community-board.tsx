@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AppIcon } from '@/components/common';
 import { useEffect, useState } from 'react';
 import { ReportMenu } from '@/components/reports/report-menu';
 import {
@@ -133,7 +134,8 @@ export function CommunityBoard({
           <span>인증 전에도 여행 정보를 편하게 묻고 나눌 수 있어요.</span>
         </div>
         <button type="button" onClick={() => setComposerOpen((open) => !open)}>
-          {composerOpen ? '작성 닫기' : '+ 정보 나누기'}
+          <AppIcon name={composerOpen ? 'close' : 'add'} />
+          {composerOpen ? '작성 닫기' : '정보 나누기'}
         </button>
       </header>
 
@@ -223,7 +225,11 @@ export function CommunityBoard({
               <Link href={`/app/community/${post.id}`}>
                 <div className="communityCard__meta">
                   <span>{communityCategoryLabels[post.category]}</span>
-                  {post.areaText !== null && <mark>⌖ {post.areaText}</mark>}
+                  {post.areaText !== null && (
+                    <mark>
+                      <AppIcon name="pin" /> {post.areaText}
+                    </mark>
+                  )}
                 </div>
                 <h2>{post.title}</h2>
                 <p>{post.content}</p>

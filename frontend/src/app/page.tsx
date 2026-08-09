@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ApiConnectionStatus } from '@/components/api-connection-status';
 import { SignalHalo } from '@/components/brand/signal-halo';
 import { Wordmark } from '@/components/brand/wordmark';
+import { AppIcon } from '@/components/common';
 
 const steps = [
   {
@@ -62,14 +63,16 @@ export default function Home(): React.JSX.Element {
           <ul className="trustSignals" aria-label="신뢰할 수 있는 정보 기준">
             {trustSignals.map((signal) => (
               <li key={signal}>
-                <span aria-hidden="true">✓</span>
+                <span aria-hidden="true">
+                  <AppIcon name="check" />
+                </span>
                 {signal}
               </li>
             ))}
           </ul>
           <div className="heroActions">
             <Link className="primaryLink" href="/auth/register">
-              무료로 시작하기 <span aria-hidden="true">→</span>
+              무료로 시작하기 <AppIcon name="arrow-right" />
             </Link>
             <Link className="secondaryLink" href="/auth/login">
               이미 계정이 있어요
@@ -92,7 +95,7 @@ export default function Home(): React.JSX.Element {
           </div>
           <div className="signalCard signalCard--answer">
             <span className="verifiedDot" aria-hidden="true">
-              ✓
+              <AppIcon name="check" />
             </span>
             <div>
               <strong>인증 현지인 · 생활 추천</strong>
@@ -124,7 +127,9 @@ export default function Home(): React.JSX.Element {
       <section className="landingFootnote" aria-label="서비스 상태와 안전 안내">
         <ApiConnectionStatus />
         <div className="safetyNote">
-          <span aria-hidden="true">i</span>
+          <span aria-hidden="true">
+            <AppIcon name="info" />
+          </span>
           <p>
             TravelGuide는 여행 판단을 돕는 서비스입니다. 긴급 구조나 의료 상담이
             필요하면 119 등 공식 기관에 먼저 연락해 주세요.

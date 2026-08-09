@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppIcon } from '@/components/common';
 import { AccessIcon } from '@/components/app/access-icon';
 import { RoomExperience } from '@/components/rooms/room-experience';
 import { getRoom } from '@/lib/api/rooms.server';
@@ -25,7 +26,7 @@ export default async function RoomPage({
   return (
     <div className="lockedRoomPage">
       <Link className="appBackLink" href="/app">
-        <span aria-hidden="true">←</span> 홈으로
+        <AppIcon name="arrow-left" /> 홈으로
       </Link>
       <header className="roomHeader">
         <div>

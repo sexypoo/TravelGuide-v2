@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppIcon } from '@/components/common';
 import { SignalHalo } from '@/components/brand/signal-halo';
 import { Wordmark } from '@/components/brand/wordmark';
 
@@ -43,7 +44,7 @@ export function AuthShell({
       <section className="authContent" aria-labelledby="auth-title">
         <div className="authContent__inner">
           <Link className="authBack" href="/">
-            <span aria-hidden="true">←</span> 처음으로
+            <AppIcon name="arrow-left" /> 처음으로
           </Link>
           <div className="authHeading">
             <p>{eyebrow}</p>

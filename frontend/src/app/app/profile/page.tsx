@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ProfileForm } from '@/components/profile/profile-form';
 import { TravelRecordsPanel } from '@/components/profile/travel-records-panel';
 import { getOwnProfile } from '@/lib/api/profile.server';
+import { AppIcon } from '@/components/common';
 
 function formatJoinDate(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', {
@@ -38,20 +39,28 @@ export default async function ProfilePage(): Promise<React.JSX.Element> {
 
       <div className="profileQuickLinks">
         <Link className="profileSavedPlacesLink" href="/app/saved-places">
-          <span aria-hidden="true">♥</span>
+          <span aria-hidden="true">
+            <AppIcon name="heart-filled" />
+          </span>
           <div>
             <strong>찜한 장소</strong>
             <p>추천받고 저장한 장소를 다시 확인하세요.</p>
           </div>
-          <b aria-hidden="true">→</b>
+          <b aria-hidden="true">
+            <AppIcon name="arrow-right" />
+          </b>
         </Link>
         <Link className="profileSavedPlacesLink" href="/app/verifications">
-          <span aria-hidden="true">✓</span>
+          <span aria-hidden="true">
+            <AppIcon name="shield" />
+          </span>
           <div>
             <strong>지역 인증</strong>
             <p>여행자 또는 현지인 인증 상태를 관리하세요.</p>
           </div>
-          <b aria-hidden="true">→</b>
+          <b aria-hidden="true">
+            <AppIcon name="arrow-right" />
+          </b>
         </Link>
       </div>
 

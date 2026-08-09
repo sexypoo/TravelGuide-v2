@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { AppIcon } from '@/components/common';
 import type { LocalProofType } from '@/lib/api/verifications';
 import { submitLocalVerification } from '@/lib/api/verifications';
 import { applicationError, proofError } from './verification-form-utils';
@@ -162,7 +163,9 @@ export function LocalVerificationForm({
             className={`locationResult${location === undefined ? ' locationResult--error' : ''}`}
             role="status"
           >
-            <span aria-hidden="true">{location === undefined ? '!' : '✓'}</span>
+            <span aria-hidden="true">
+              <AppIcon name={location === undefined ? 'alert' : 'check'} />
+            </span>
             {locationMessage}
           </div>
         )}
@@ -221,7 +224,9 @@ export function LocalVerificationForm({
       </label>
       {error !== undefined && (
         <div className="formAlert" role="alert">
-          <span>!</span>
+          <span aria-hidden="true">
+            <AppIcon name="alert" />
+          </span>
           <p>{error}</p>
         </div>
       )}

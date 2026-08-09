@@ -33,6 +33,11 @@
   font-weight: 850;
 }
 
+.resolutionSummary > span > .appIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
 .resolutionSummary strong,
 .resolutionSummary p {
   display: block;
@@ -473,6 +478,66 @@ textarea {
   -webkit-tap-highlight-color: transparent;
 }
 
+.appIcon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.primaryLink > .appIcon,
+.authBack > .appIcon,
+.appBackLink > .appIcon,
+.communityHero > button > .appIcon,
+.communityCard__meta .appIcon,
+.communityLane > strong > .appIcon,
+.qualificationGrid div > span > .appIcon,
+.verificationChoiceGrid b > .appIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.communityHero > button,
+.communityCard__meta mark,
+.communityLane > strong,
+.qualificationGrid div > span,
+.verificationChoiceGrid b {
+  display: inline-flex;
+  gap: 0.38rem;
+  align-items: center;
+}
+
+.reportSheet__close > .appIcon,
+.reportComplete > span > .appIcon,
+.submissionSuccess > span > .appIcon,
+.verificationEmpty > span > .appIcon,
+.qualificationIcon > .appIcon,
+.contributorVerification > span > .appIcon,
+.locationResult > span > .appIcon,
+.verifiedDot > .appIcon {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.safetyNote > span > .appIcon,
+.qualificationSummary > span > .appIcon,
+.verificationGuide__notice > span > .appIcon,
+.formAlert > span > .appIcon {
+  width: 0.82rem;
+  height: 0.82rem;
+}
+
+.appError > span > .appIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
@@ -681,6 +746,12 @@ textarea:focus-visible {
   color: var(--purple);
   font-size: 0.62rem;
   font-weight: 850;
+}
+
+.trustSignals li span > .appIcon {
+  width: 0.68rem;
+  height: 0.68rem;
+  stroke-width: 2.3;
 }
 
 .heroActions {
@@ -1811,11 +1882,15 @@ textarea:focus-visible {
   color: var(--purple);
 }
 
-.messageComposer__inputRow > .messageAddButton > span {
+.messageComposer__inputRow > .messageAddButton > .appIcon {
+  width: 1.1rem;
+  height: 1.1rem;
   transition: transform 160ms ease;
 }
 
-.messageComposer__inputRow > .messageAddButton[aria-expanded='true'] > span {
+.messageComposer__inputRow
+  > .messageAddButton[aria-expanded='true']
+  > .appIcon {
   transform: rotate(45deg);
 }
 
@@ -1823,6 +1898,12 @@ textarea:focus-visible {
   background: var(--gradient);
   box-shadow: 0 7px 16px rgba(124, 58, 237, 0.2);
   color: #fff;
+}
+
+.messageComposer__inputRow > .messageSendButton > .appIcon {
+  width: 1.15rem;
+  height: 1.15rem;
+  transform: translateX(0.04rem);
 }
 
 .messageComposer > .messageActionMenu {
@@ -1917,6 +1998,11 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
+.messageActionMenu__icon > .appIcon {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
 .messageActionMenu__icon--image {
   background: #fff0f7;
   color: #cf3f82;
@@ -1986,6 +2072,12 @@ textarea:focus-visible {
   color: var(--muted);
   cursor: pointer;
 }
+
+.messageAttachmentTray__close > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: auto;
+}
 .attachmentSelectButton,
 .locationConsentButton {
   min-height: 2.25rem;
@@ -2040,6 +2132,11 @@ textarea:focus-visible {
   border-radius: 0.65rem;
   background: var(--gradient);
   color: white;
+}
+
+.selectedPlacePreview > span > .appIcon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .selectedPlacePreview > strong {
@@ -2113,6 +2210,12 @@ textarea:focus-visible {
   color: var(--muted);
   cursor: pointer;
   font-size: 1.1rem;
+}
+
+.placePicker > header > button > .appIcon {
+  width: 1rem;
+  height: 1rem;
+  margin: auto;
 }
 
 .placePickerSearch {
@@ -2211,6 +2314,12 @@ textarea:focus-visible {
 .placePickerResults > button > span {
   color: var(--berry);
   text-align: center;
+}
+
+.placePickerResults > button > span > .appIcon {
+  width: 1rem;
+  height: 1rem;
+  margin: auto;
 }
 
 .placePickerResults > button div {
@@ -2377,6 +2486,11 @@ textarea:focus-visible {
   font-weight: 760;
 }
 
+.chatBubble--place .placeFavoriteControl > button > .appIcon {
+  width: 0.82rem;
+  height: 0.82rem;
+}
+
 .chatBubble--place .placeFavoriteControl > button.isSaved {
   border-color: rgba(207, 66, 111, 0.28);
   background: #fff3f8;
@@ -2444,7 +2558,9 @@ textarea:focus-visible {
   padding-right: 0;
 }
 .topicShareAction button {
+  display: inline-flex;
   min-height: 2.2rem;
+  align-items: center;
   padding: 0 0.75rem;
   border: 1px solid #e0d4ef;
   border-radius: 0.7rem;
@@ -2453,6 +2569,12 @@ textarea:focus-visible {
   cursor: pointer;
   font-size: 0.65rem;
   font-weight: 760;
+  gap: 0.35rem;
+}
+
+.topicShareAction button > .appIcon {
+  width: 0.85rem;
+  height: 0.85rem;
 }
 .topicShareAction button:disabled {
   cursor: default;
@@ -2487,6 +2609,11 @@ textarea:focus-visible {
   box-shadow: 0 10px 24px rgba(15, 159, 153, 0.2);
   color: #fff;
   font-size: 1.7rem;
+}
+
+.liveStatusClock > .appIcon {
+  width: 1.65rem;
+  height: 1.65rem;
 }
 .liveStatusBoard header p {
   margin: 0;
@@ -2535,6 +2662,11 @@ textarea:focus-visible {
   color: #14a49e;
   font-size: 0.8rem;
 }
+
+.liveStatusMetrics > div > span > .appIcon {
+  width: 1.05rem;
+  height: 1.05rem;
+}
 .liveStatusMetrics small {
   margin-top: 0.3rem;
   color: var(--muted);
@@ -2553,12 +2685,20 @@ textarea:focus-visible {
   flex-wrap: wrap;
 }
 .liveStatusBoard > footer span {
+  display: inline-flex;
+  align-items: center;
   padding: 0.28rem 0.55rem;
   border-radius: 999px;
   background: #e8faf7;
   color: #087b76;
   font-size: 0.58rem;
   font-weight: 720;
+  gap: 0.25rem;
+}
+
+.liveStatusBoard > footer .appIcon {
+  width: 0.72rem;
+  height: 0.72rem;
 }
 
 .fieldObservationFields {
@@ -3005,7 +3145,9 @@ textarea:focus-visible {
 }
 
 .roomRoleBadge > span,
-.publicBadge > span {
+.publicBadge > span,
+.roomRoleBadge > .appIcon,
+.publicBadge > .appIcon {
   display: grid;
   width: 1.2rem;
   height: 1.2rem;
@@ -3013,6 +3155,11 @@ textarea:focus-visible {
   border-radius: 0.4rem;
   background: white;
   font-size: 0.65rem;
+}
+
+.roomRoleBadge > .appIcon,
+.publicBadge > .appIcon {
+  padding: 0.25rem;
 }
 
 .roomTrustStrip,
@@ -3308,11 +3455,19 @@ textarea:focus-visible {
 }
 
 .questionArea {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   margin-top: 0.8rem;
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 650;
+  gap: 0.3rem;
+}
+
+.questionArea > .appIcon {
+  width: 0.85rem;
+  height: 0.85rem;
+  color: var(--plum);
 }
 
 .questionCardEvidence {
@@ -3411,6 +3566,12 @@ textarea:focus-visible {
 .roomQueryState > span {
   color: var(--purple);
   font-size: 1.4rem;
+}
+
+.roomQueryState > span > .appIcon,
+.chatEmptyState > span > .appIcon {
+  width: 1.4rem;
+  height: 1.4rem;
 }
 
 .roomQueryState h1,
@@ -3617,6 +3778,11 @@ textarea:focus-visible {
   border-radius: 0.7rem;
   background: #f4eaf4;
   color: var(--plum);
+}
+
+.topicImagePicker > div:first-child > span > .appIcon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .topicImagePicker strong,
@@ -3858,11 +4024,19 @@ textarea:focus-visible {
 }
 
 .signalAnswerCard > footer > a {
+  display: inline-flex;
+  align-items: center;
   margin-left: auto;
   color: var(--purple);
   font-size: 0.68rem;
   font-weight: 750;
   text-decoration: none;
+  gap: 0.25rem;
+}
+
+.signalAnswerCard > footer > a > .appIcon {
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 .sourceChip {
@@ -4717,7 +4891,9 @@ textarea:focus-visible {
 }
 
 .topicRail__header > button {
+  display: inline-flex;
   min-height: 2.25rem;
+  align-items: center;
   padding: 0 0.72rem;
   border-radius: 0.72rem;
   background: var(--ink);
@@ -4726,6 +4902,12 @@ textarea:focus-visible {
   font-size: 0.65rem;
   font-weight: 750;
   white-space: nowrap;
+  gap: 0.3rem;
+}
+
+.topicRail__header > button > .appIcon {
+  width: 0.8rem;
+  height: 0.8rem;
 }
 
 .topicTabs {
@@ -4808,6 +4990,11 @@ textarea:focus-visible {
   color: var(--muted);
   cursor: pointer;
   font-size: 1rem;
+}
+
+.topicComposerTray__close > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .topicComposerTray .questionComposer {
@@ -4926,8 +5113,9 @@ textarea:focus-visible {
     font-size: 0;
   }
 
-  .chatRoomExperience > .appBackLink > span {
-    font-size: 1rem;
+  .chatRoomExperience > .appBackLink > .appIcon {
+    width: 1rem;
+    height: 1rem;
   }
 
   .conversationRoomHeader__signal {
@@ -5509,6 +5697,11 @@ textarea:focus-visible {
   border-radius: 50%;
   background: #eafbf5;
   font-weight: 800;
+}
+
+.locationResult--error > span > .appIcon {
+  width: 0.95rem;
+  height: 0.95rem;
 }
 .locationResult--error {
   color: #b4232a;
@@ -6251,6 +6444,11 @@ textarea:focus-visible {
   text-decoration: none;
 }
 
+.roomCard__body > a > .appIcon {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
 .emptyState {
   padding: 3rem 1.5rem;
   border: 1px dashed var(--line-strong);
@@ -6358,6 +6556,11 @@ textarea:focus-visible {
 
 .appBackLink:hover {
   color: var(--ink);
+}
+
+.appBackLink > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .roomHeader {
@@ -6682,6 +6885,11 @@ textarea:focus-visible {
   color: white;
 }
 
+.profileSavedPlacesLink > span > .appIcon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
 .profileSavedPlacesLink strong {
   font-size: 0.86rem;
 }
@@ -6694,6 +6902,11 @@ textarea:focus-visible {
 
 .profileSavedPlacesLink > b {
   color: var(--berry);
+}
+
+.profileSavedPlacesLink > b > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .savedPlacesPage > .appBackLink {
@@ -6725,6 +6938,11 @@ textarea:focus-visible {
   border-radius: 0.9rem;
   background: linear-gradient(135deg, #d8457d, #766ee8);
   color: white;
+}
+
+.savedPlaceCard__pin > .appIcon {
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .savedPlaceCard small {
@@ -6763,6 +6981,17 @@ textarea:focus-visible {
   text-decoration: none;
 }
 
+.savedPlaceCard footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.savedPlaceCard footer a > .appIcon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
 .savedPlaceCard footer button {
   color: var(--subtle);
 }
@@ -6783,6 +7012,12 @@ textarea:focus-visible {
 .savedPlacesState > span {
   color: var(--berry);
   font-size: 1.8rem;
+}
+
+.savedPlacesState > .appIcon {
+  width: 1.8rem;
+  height: 1.8rem;
+  color: var(--berry);
 }
 
 .savedPlacesState strong {
@@ -8191,9 +8426,10 @@ textarea::placeholder {
   font-weight: 600;
 }
 
-.sharedTopicPlace > span {
+.sharedTopicPlace > .appIcon {
+  width: 0.8rem;
+  height: 0.8rem;
   color: var(--magenta);
-  font-size: 0.8rem;
 }
 
 .sharedTopicMeta {
@@ -8327,6 +8563,11 @@ textarea::placeholder {
   font-size: 0.8rem;
 }
 
+.placeTicket__rail > span > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
 .placeTicket__rail > i {
   width: 1px;
   flex: 1;
@@ -8411,9 +8652,10 @@ textarea::placeholder {
   font-weight: 760;
 }
 
-.chatBubble--place .placeTicket__actions > a b {
+.chatBubble--place .placeTicket__actions > a .appIcon {
+  width: 0.72rem;
+  height: 0.72rem;
   margin-left: 0.25rem;
-  font-size: 0.72rem;
 }
 
 .nearbyExplorer {
@@ -8470,6 +8712,11 @@ textarea::placeholder {
   font-size: 0.76rem;
   font-weight: 760;
   gap: 0.45rem;
+}
+
+.nearbyExplorer__hero > button > .appIcon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .nearbyExplorer__hero > button:disabled {
@@ -8567,6 +8814,11 @@ textarea::placeholder {
   background: var(--iris-soft);
   color: var(--purple);
   font-size: 1rem;
+}
+
+.nearbyExplorer__empty > span > .appIcon {
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .nearbyExplorer__empty strong {
@@ -8669,14 +8921,25 @@ textarea::placeholder {
   text-decoration: none;
 }
 
+.nearbyPlaceCard > a > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
 .nearbyExplorer__privacy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 0.8rem 0 0;
   color: var(--subtle);
   font-size: 0.64rem;
   text-align: center;
+  gap: 0.3rem;
 }
 
-.nearbyExplorer__privacy span {
+.nearbyExplorer__privacy .appIcon {
+  width: 0.75rem;
+  height: 0.75rem;
   color: var(--success);
 }
 
@@ -8737,6 +9000,11 @@ textarea::placeholder {
   gap: 0.25rem;
 }
 
+.profileTravelStyles button > .appIcon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
 .profileTravelStyles button[aria-pressed='true'] {
   border-color: rgba(145, 75, 165, 0.28);
   background: var(--plum-soft);
@@ -8778,6 +9046,7 @@ textarea::placeholder {
 }
 
 .travelRecords > header > button {
+  display: inline-flex;
   min-height: 2.5rem;
   flex: 0 0 auto;
   padding: 0 0.8rem;
@@ -8787,6 +9056,12 @@ textarea::placeholder {
   cursor: pointer;
   font-size: 0.68rem;
   font-weight: 750;
+  gap: 0.3rem;
+}
+
+.travelRecords > header > button > .appIcon {
+  width: 0.8rem;
+  height: 0.8rem;
 }
 
 .travelRecordForm {
@@ -8813,6 +9088,11 @@ textarea::placeholder {
   color: var(--muted);
   cursor: pointer;
   font-size: 1rem;
+}
+
+.travelRecordForm__heading button > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .travelRecordForm__grid {
@@ -8906,6 +9186,12 @@ textarea::placeholder {
 .travelRecordsState > span {
   color: var(--magenta);
   font-size: 1.1rem;
+}
+
+.travelRecordsState > .appIcon {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--magenta);
 }
 
 .travelRecordsState strong {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppIcon } from '@/components/common';
 import type { ChatMessage } from '@/lib/api/messages';
 import { formatChatDate } from '@/lib/questions/presentation';
 import { useMessages } from '@/lib/query/use-messages';
@@ -140,7 +141,9 @@ export function MessageTimeline({
         )}
         {messages.length === 0 ? (
           <div className="chatEmptyState">
-            <span aria-hidden="true">⌁</span>
+            <span aria-hidden="true">
+              <AppIcon name="live" />
+            </span>
             <strong>제주의 첫 대화를 시작해 보세요</strong>
             <p>
               지금 보고 들은 짧은 정보도 누군가의 다음 결정을 도울 수 있어요.

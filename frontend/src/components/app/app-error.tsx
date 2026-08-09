@@ -1,5 +1,7 @@
 'use client';
 
+import { AppIcon } from '@/components/common';
+
 interface AppErrorProps {
   reset: () => void;
   title?: string;
@@ -11,7 +13,9 @@ export function AppError({
 }: AppErrorProps): React.JSX.Element {
   return (
     <section className="appError" role="alert">
-      <span aria-hidden="true">!</span>
+      <span aria-hidden="true">
+        <AppIcon name="alert" />
+      </span>
       <h1>{title}</h1>
       <p>연결 상태를 확인한 뒤 다시 시도해 주세요.</p>
       <button type="button" onClick={reset}>

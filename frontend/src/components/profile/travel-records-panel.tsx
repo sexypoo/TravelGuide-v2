@@ -12,6 +12,7 @@ import {
 } from '@/lib/api/travel-records';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
+import { AppIcon } from '@/components/common';
 
 const emptyInput: SaveTravelRecordInput = {
   title: '',
@@ -104,7 +105,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
           <span>기억하고 싶은 여행을 짧게 남겨두세요. 나에게만 보여요.</span>
         </div>
         <button type="button" onClick={openCreate}>
-          <span aria-hidden="true">＋</span> 기록 추가
+          <AppIcon name="add" /> 기록 추가
         </button>
       </header>
 
@@ -119,7 +120,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
               aria-label="여행 기록 폼 닫기"
               onClick={() => setIsFormOpen(false)}
             >
-              ×
+              <AppIcon name="close" />
             </button>
           </div>
           <div className="travelRecordForm__grid">
@@ -227,7 +228,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
         </div>
       ) : records.data.length === 0 ? (
         <div className="travelRecordsState travelRecordsState--empty">
-          <span aria-hidden="true">✦</span>
+          <AppIcon name="sparkle" />
           <strong>첫 여행을 기록해 보세요</strong>
           <p>여행지와 날짜, 한 줄의 기억이면 충분해요.</p>
         </div>

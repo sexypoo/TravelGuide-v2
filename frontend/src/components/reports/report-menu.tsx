@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { AppIcon } from '@/components/common';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import {
   createReport,
@@ -108,11 +109,13 @@ export function ReportMenu({
             onClick={close}
             aria-label="신고 창 닫기"
           >
-            ×
+            <AppIcon name="close" />
           </button>
           {complete ? (
             <div className="reportComplete" role="status">
-              <span aria-hidden="true">✓</span>
+              <span aria-hidden="true">
+                <AppIcon name="check" />
+              </span>
               <strong>신고가 접수됐어요</strong>
               <p>운영자가 내용을 확인하기 전까지 자동으로 숨기지 않습니다.</p>
               <button type="button" onClick={close}>

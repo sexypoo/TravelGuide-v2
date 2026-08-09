@@ -5,6 +5,7 @@ import {
   type QuestionCategory,
   type QuestionListStatus,
 } from '@/lib/api/questions';
+import { AppIcon } from '@/components/common';
 import { categoryLabels } from '@/lib/questions/presentation';
 import { useState } from 'react';
 import { useQuestions } from '@/lib/query/use-questions';
@@ -61,7 +62,9 @@ export function QuestionFeed({
       <>
         {filters}
         <div className="roomQueryState roomQueryState--error" role="alert">
-          <span aria-hidden="true">!</span>
+          <span aria-hidden="true">
+            <AppIcon name="alert" />
+          </span>
           <h2>토픽을 불러오지 못했어요</h2>
           <p>연결을 확인한 뒤 다시 시도해 주세요.</p>
           <button type="button" onClick={() => void query.refetch()}>
@@ -78,7 +81,9 @@ export function QuestionFeed({
       <>
         {filters}
         <div className="roomQueryState">
-          <span aria-hidden="true">⌁</span>
+          <span aria-hidden="true">
+            <AppIcon name="live" />
+          </span>
           <h2>
             {status === 'OPEN'
               ? '아직 진행 중인 토픽이 없어요'

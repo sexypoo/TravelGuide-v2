@@ -9,6 +9,7 @@ import {
 } from '@/lib/questions/presentation';
 import { ReportMenu } from '@/components/reports/report-menu';
 import { PlaceFavoriteButton } from '@/components/places/place-favorite-button';
+import { AppIcon } from '@/components/common';
 
 export function MessageCard({
   message,
@@ -71,7 +72,9 @@ export function MessageCard({
         ) : message.type === 'PLACE' && message.place !== null ? (
           <div className="chatBubble chatBubble--place placeTicket">
             <div className="placeTicket__rail" aria-hidden="true">
-              <span>⌖</span>
+              <span>
+                <AppIcon name="pin" />
+              </span>
               <i />
             </div>
             <div className="placeTicket__content">
@@ -92,7 +95,7 @@ export function MessageCard({
               )}
               <span className="placeMessageActions placeTicket__actions">
                 <a href={placeMapUrl} target="_blank" rel="noopener noreferrer">
-                  지도 보기 <b aria-hidden="true">↗</b>
+                  지도 보기 <AppIcon name="external" />
                 </a>
                 <PlaceFavoriteButton
                   messageId={message.id}
@@ -120,7 +123,7 @@ export function MessageCard({
             <strong>{message.sharedTopic.content}</strong>
             {message.sharedTopic.areaText && (
               <span className="sharedTopicPlace">
-                <span aria-hidden="true">⌖</span>
+                <AppIcon name="pin" />
                 {message.sharedTopic.areaText}
               </span>
             )}
@@ -136,7 +139,9 @@ export function MessageCard({
             </div>
             <footer>
               <span>현장 답변과 최신 현황 보기</span>
-              <b aria-hidden="true">→</b>
+              <b aria-hidden="true">
+                <AppIcon name="arrow-right" />
+              </b>
             </footer>
           </Link>
         ) : (

@@ -55,7 +55,7 @@ describe('RoomExperience conversation and topics', () => {
     expect(screen.getByText('메시지 작성 폼')).toBeInTheDocument();
     expect(screen.queryByText('토픽 작성 폼')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: '+ 새 토픽' }));
+    fireEvent.click(screen.getByRole('button', { name: '새 토픽' }));
     expect(screen.getByText('토픽 작성 폼')).toBeInTheDocument();
   });
 
@@ -75,6 +75,6 @@ describe('RoomExperience conversation and topics', () => {
     );
     expect(screen.getByText('인증 현지인')).toBeInTheDocument();
     expect(screen.getByText('메시지 작성 폼')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '+ 새 토픽' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: '새 토픽' })).toBeEnabled();
   });
 });

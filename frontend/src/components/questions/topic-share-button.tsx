@@ -6,6 +6,7 @@ import {
   type InfiniteData,
 } from '@tanstack/react-query';
 import { useState } from 'react';
+import { AppIcon } from '@/components/common';
 import { shareTopicMessage, type MessagePage } from '@/lib/api/messages';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
@@ -38,7 +39,7 @@ export function TopicShareButton({
         disabled={mutation.isPending || sent}
         onClick={() => mutation.mutate()}
       >
-        <span aria-hidden="true">↗</span>{' '}
+        <AppIcon name="send" />
         {mutation.isPending
           ? '보내는 중'
           : sent

@@ -6,6 +6,7 @@ import {
   type InfiniteData,
 } from '@tanstack/react-query';
 import { useState } from 'react';
+import { AppIcon } from '@/components/common';
 import type { ChatMessage, MessagePage } from '@/lib/api/messages';
 import {
   createQuestion,
@@ -186,7 +187,9 @@ export function QuestionComposer({
           </label>
           <div className="topicImagePicker">
             <div>
-              <span aria-hidden="true">▧</span>
+              <span aria-hidden="true">
+                <AppIcon name="image" />
+              </span>
               <div>
                 <strong>현장 사진</strong>
                 <small>상황을 확인할 사진 한 장 · 최대 10MB</small>

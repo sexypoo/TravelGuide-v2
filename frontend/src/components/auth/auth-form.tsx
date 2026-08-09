@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { AppIcon } from '@/components/common';
 import {
   login,
   register,
@@ -201,7 +202,9 @@ export function AuthForm({
 
       {formError !== null && (
         <div className="formAlert" role="alert">
-          <span aria-hidden="true">!</span>
+          <span aria-hidden="true">
+            <AppIcon name="alert" />
+          </span>
           <p>{formError}</p>
         </div>
       )}

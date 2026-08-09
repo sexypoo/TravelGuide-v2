@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { SavedPlacesList } from '@/components/places/saved-places-list';
+import { AppIcon } from '@/components/common';
 
 export default function SavedPlacesPage(): React.JSX.Element {
   return (
     <div className="savedPlacesPage">
       <Link className="appBackLink" href="/app/profile">
-        <span aria-hidden="true">←</span> 프로필로
+        <AppIcon name="arrow-left" /> 프로필로
       </Link>
       <header className="pageHeading">
         <p>다시 가고 싶은 곳</p>

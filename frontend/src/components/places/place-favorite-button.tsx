@@ -8,6 +8,7 @@ import {
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { usePlaceFavorites } from '@/lib/query/use-place-favorites';
+import { AppIcon } from '@/components/common';
 
 export function PlaceFavoriteButton({
   messageId,
@@ -44,7 +45,7 @@ export function PlaceFavoriteButton({
         disabled={favorites.isPending || mutation.isPending}
         onClick={() => mutation.mutate()}
       >
-        <span aria-hidden="true">{saved === undefined ? '♡' : '♥'}</span>
+        <AppIcon name={saved === undefined ? 'heart' : 'heart-filled'} />
         {mutation.isPending ? '저장 중' : label}
       </button>
       {mutation.isError && (

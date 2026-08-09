@@ -18,6 +18,7 @@ import { queryKeys } from '@/lib/query/keys';
 import { mergeMessageIntoTimeline } from '@/lib/query/realtime-cache';
 import type { GooglePlace } from '@/lib/api/places';
 import { PlacePicker } from '@/components/places/place-picker';
+import { AppIcon } from '@/components/common';
 
 type Attachment = 'image' | 'place' | null;
 
@@ -140,7 +141,7 @@ export function MessageComposer({
             }}
             aria-label="첨부 닫기"
           >
-            ×
+            <AppIcon name="close" />
           </button>
           {attachment === 'image' ? (
             <>
@@ -166,7 +167,9 @@ export function MessageComposer({
               <strong>장소 보내기</strong>
               <p>{selectedPlace?.address ?? 'Google 지도에서 선택한 장소'}</p>
               <div className="selectedPlacePreview">
-                <span aria-hidden="true">⌖</span>
+                <span aria-hidden="true">
+                  <AppIcon name="pin" />
+                </span>
                 <strong>{selectedPlace?.name}</strong>
                 <button type="button" onClick={() => setPlacePickerOpen(true)}>
                   다른 장소
@@ -200,7 +203,7 @@ export function MessageComposer({
               className="messageActionMenu__icon messageActionMenu__icon--image"
               aria-hidden="true"
             >
-              ▧
+              <AppIcon name="image" />
             </span>
             <span>
               <strong>사진</strong>
@@ -219,7 +222,7 @@ export function MessageComposer({
               className="messageActionMenu__icon messageActionMenu__icon--place"
               aria-hidden="true"
             >
-              ⌖
+              <AppIcon name="pin" />
             </span>
             <span>
               <strong>장소</strong>
@@ -240,7 +243,7 @@ export function MessageComposer({
                 className="messageActionMenu__icon messageActionMenu__icon--topic"
                 aria-hidden="true"
               >
-                ⌁
+                <AppIcon name="topic" />
               </span>
               <span>
                 <strong>토픽</strong>
@@ -261,7 +264,7 @@ export function MessageComposer({
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((open) => !open)}
         >
-          <span aria-hidden="true">+</span>
+          <AppIcon name="add" />
         </button>
         <textarea
           id="room-message"
@@ -290,7 +293,7 @@ export function MessageComposer({
           type="submit"
           disabled={mutation.isPending}
         >
-          <span aria-hidden="true">↗</span>
+          <AppIcon name="send" />
           <span className="srOnly">
             {mutation.isPending ? '메시지 보내는 중' : '메시지 보내기'}
           </span>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getNearbyOpenRestaurants, type GooglePlace } from '@/lib/api/places';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { loadGoogleMaps } from '@/lib/maps/google-maps-loader';
+import { AppIcon } from '@/components/common';
 
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.978 };
 
@@ -127,7 +128,7 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
           </span>
         </div>
         <button type="button" disabled={loading} onClick={findNearby}>
-          <span aria-hidden="true">⌖</span>
+          <AppIcon name="pin" />
           {loading
             ? '주변을 찾는 중…'
             : hasSearched
@@ -159,7 +160,9 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
         <div className="nearbyExplorer__list" aria-live="polite">
           {!hasSearched ? (
             <div className="nearbyExplorer__empty">
-              <span aria-hidden="true">⌖</span>
+              <span aria-hidden="true">
+                <AppIcon name="pin" />
+              </span>
               <strong>현재 위치를 알려주세요</strong>
               <p>위치는 주변 검색에만 사용하고 저장하지 않아요.</p>
             </div>
@@ -206,7 +209,7 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
                     rel="noopener noreferrer"
                     aria-label={`${place.name} Google 지도에서 보기`}
                   >
-                    ↗
+                    <AppIcon name="external" />
                   </a>
                 </article>
               ))}
@@ -215,8 +218,8 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
         </div>
       </div>
       <p className="nearbyExplorer__privacy">
-        <span aria-hidden="true">✓</span> 현재 위치는 검색에만 사용되며 서버에
-        저장하지 않습니다.
+        <AppIcon name="check" /> 현재 위치는 검색에만 사용되며 서버에 저장하지
+        않습니다.
       </p>
     </section>
   );

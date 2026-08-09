@@ -65,7 +65,7 @@ describe('CommunityBoard', () => {
     render(<CommunityBoard currentUserId="viewer-1" />);
 
     await screen.findByText('아직 도착한 여행 정보가 없어요');
-    fireEvent.click(screen.getByRole('button', { name: '+ 정보 나누기' }));
+    fireEvent.click(screen.getByRole('button', { name: '정보 나누기' }));
     fireEvent.change(screen.getByLabelText('분류'), {
       target: { value: 'FOOD' },
     });

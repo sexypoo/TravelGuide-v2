@@ -1,3 +1,4 @@
+import { AppIcon } from '@/components/common';
 import type { QuestionDetail } from '@/lib/api/questions';
 import {
   crowdLabels,
@@ -25,7 +26,7 @@ export function LiveStatusBoard({
     >
       <header>
         <span className="liveStatusClock" aria-hidden="true">
-          ◷
+          <AppIcon name="clock" />
         </span>
         <div>
           <p>
@@ -50,33 +51,46 @@ export function LiveStatusBoard({
       )}
       <div className="liveStatusMetrics">
         <div>
-          <span aria-hidden="true">♟</span>
+          <span aria-hidden="true">
+            <AppIcon name="clock" />
+          </span>
           <small>현재 대기</small>
           <strong>{wait ? `${wait.min}~${wait.max}분` : '확인 중'}</strong>
         </div>
         <div>
-          <span aria-hidden="true">●●●</span>
+          <span aria-hidden="true">
+            <AppIcon name="crowd" />
+          </span>
           <small>현장 혼잡</small>
           <strong>
             {summary.crowdLevel ? crowdLabels[summary.crowdLevel] : '확인 중'}
           </strong>
         </div>
         <div>
-          <span aria-hidden="true">▯</span>
+          <span aria-hidden="true">
+            <AppIcon name="door" />
+          </span>
           <small>입장 상태</small>
           <strong>
             {summary.entryStatus ? entryLabels[summary.entryStatus] : '확인 중'}
           </strong>
         </div>
         <div>
-          <span aria-hidden="true">↻</span>
+          <span aria-hidden="true">
+            <AppIcon name="refresh" />
+          </span>
           <small>다시 확인</small>
           <strong>{formatDateTime(summary.recommendedRecheckAt)}</strong>
         </div>
       </div>
       <footer>
-        <span>{stale ? '◷ 지난 정보' : '⌁ 실시간'}</span>
-        <span>✓ 현장 답변 기반</span>
+        <span>
+          <AppIcon name={stale ? 'clock' : 'live'} />
+          {stale ? '지난 정보' : '실시간'}
+        </span>
+        <span>
+          <AppIcon name="check" /> 현장 답변 기반
+        </span>
         <span>답변에 현장 사진을 바로 첨부할 수 있어요</span>
       </footer>
     </section>

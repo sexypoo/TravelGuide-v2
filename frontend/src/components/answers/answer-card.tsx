@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppIcon, type AppIconName } from '@/components/common';
 import type { Answer } from '@/lib/api/questions';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import { ReportMenu } from '@/components/reports/report-menu';
@@ -25,6 +26,12 @@ export function AnswerCard({
       : answer.author.badge === 'VERIFIED_BOTH'
         ? 'both'
         : 'traveler';
+  const badgeIcon: AppIconName =
+    badgeKind === 'local'
+      ? 'shield'
+      : badgeKind === 'traveler'
+        ? 'pin'
+        : 'check';
   return (
     <article
       className={`signalAnswerCard${accepted ? ' signalAnswerCard--accepted' : ''}${answer.removed ? ' signalAnswerCard--removed' : ''}`}
@@ -34,7 +41,7 @@ export function AnswerCard({
       <header>
         {answer.removed ? (
           <span className={`publicBadge publicBadge--${badgeKind}`}>
-            <span aria-hidden="true">–</span>
+            <AppIcon name="minus" />
             숨김 처리된 답변
           </span>
         ) : (
@@ -43,13 +50,7 @@ export function AnswerCard({
             href={`/app/users/${encodeURIComponent(answer.author.id)}`}
             aria-label={`${answer.author.nickname} 공개 프로필 보기`}
           >
-            <span aria-hidden="true">
-              {badgeKind === 'local'
-                ? '⌂'
-                : badgeKind === 'traveler'
-                  ? '↗'
-                  : '✓'}
-            </span>
+            <AppIcon name={badgeIcon} />
             {answer.author.nickname} ·{' '}
             {participantBadgeLabel(answer.author.badge)}
           </Link>
@@ -104,7 +105,7 @@ export function AnswerCard({
         )}
         {answer.sourceUrl !== null && (
           <a href={answer.sourceUrl} target="_blank" rel="noopener noreferrer">
-            공식 출처 열기 ↗
+            공식 출처 열기 <AppIcon name="external" />
           </a>
         )}
         {answer.author.id !== currentUserId && !answer.removed && (

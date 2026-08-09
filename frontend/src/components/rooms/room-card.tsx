@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppIcon } from '@/components/common';
 import { AccessIcon } from '@/components/app/access-icon';
 import type { Room } from '@/lib/api/rooms';
 
@@ -54,8 +55,8 @@ export function RoomCard({ room }: RoomCardProps): React.JSX.Element {
           </div>
         </dl>
         <Link href={`/app/rooms/${room.slug}`}>
-          {locked ? '방 소개 보기' : '방으로 이동'}{' '}
-          <span aria-hidden="true">→</span>
+          {locked ? '방 소개 보기' : '방으로 이동'}
+          <AppIcon name="arrow-right" />
         </Link>
       </div>
     </article>

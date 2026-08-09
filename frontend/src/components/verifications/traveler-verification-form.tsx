@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { AppIcon } from '@/components/common';
 import { submitTravelerVerification } from '@/lib/api/verifications';
 import {
   applicationError,
@@ -121,7 +122,9 @@ export function TravelerVerificationForm({
       <Consent checked={consent} onChange={setConsent} />
       {error !== undefined && (
         <div className="formAlert" role="alert">
-          <span>!</span>
+          <span aria-hidden="true">
+            <AppIcon name="alert" />
+          </span>
           <p>{error}</p>
         </div>
       )}

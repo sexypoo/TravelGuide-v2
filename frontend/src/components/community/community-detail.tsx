@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AppIcon } from '@/components/common';
 import { useCallback, useEffect, useState } from 'react';
 import { ReportMenu } from '@/components/reports/report-menu';
 import { communityCategoryLabels } from './community-board';
@@ -70,7 +71,9 @@ export function CommunityDetail({
   if (post === undefined) {
     return (
       <div className="communityDetailPage">
-        <Link href="/app/community">← 커뮤니티</Link>
+        <Link href="/app/community">
+          <AppIcon name="arrow-left" /> 커뮤니티
+        </Link>
         <p role={error === undefined ? 'status' : 'alert'}>
           {error ?? '게시글을 불러오는 중…'}
         </p>
@@ -81,12 +84,16 @@ export function CommunityDetail({
   return (
     <div className="communityDetailPage">
       <Link className="appBackLink" href="/app/community">
-        ← 여행자 커뮤니티
+        <AppIcon name="arrow-left" /> 여행자 커뮤니티
       </Link>
       <article className="communityDetailCard">
         <div className="communityCard__meta">
           <span>{communityCategoryLabels[post.category]}</span>
-          {post.areaText !== null && <mark>⌖ {post.areaText}</mark>}
+          {post.areaText !== null && (
+            <mark>
+              <AppIcon name="pin" /> {post.areaText}
+            </mark>
+          )}
         </div>
         <h1>{post.title}</h1>
         <p>{post.content}</p>

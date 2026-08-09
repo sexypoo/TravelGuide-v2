@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppIcon } from '@/components/common';
 import { getPublicContributorProfile } from '@/lib/api/profile.server';
 
 interface PublicProfilePageProps {
@@ -23,7 +24,7 @@ export default async function PublicProfilePage({
   return (
     <main className="contributorProfilePage">
       <Link className="appBackLink" href="/app">
-        ← 여행지로 돌아가기
+        <AppIcon name="arrow-left" /> 여행지로 돌아가기
       </Link>
 
       <section className="contributorPassport" aria-labelledby="profile-name">
@@ -58,7 +59,9 @@ export default async function PublicProfilePage({
 
         {profile.isVerifiedLocal && profile.verifiedDestination !== null ? (
           <aside className="contributorVerification">
-            <span aria-hidden="true">✓</span>
+            <span aria-hidden="true">
+              <AppIcon name="shield" />
+            </span>
             <div>
               <strong>{profile.verifiedDestination.nameKo} 인증 현지인</strong>
               <p>
@@ -70,7 +73,9 @@ export default async function PublicProfilePage({
           </aside>
         ) : (
           <aside className="contributorVerification contributorVerification--traveler">
-            <span aria-hidden="true">↗</span>
+            <span aria-hidden="true">
+              <AppIcon name="pin" />
+            </span>
             <div>
               <strong>여행자 기여자</strong>
               <p>여행 중 확인한 정보를 함께 나누고 있어요.</p>

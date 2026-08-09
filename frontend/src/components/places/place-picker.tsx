@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { searchPlaces, type GooglePlace } from '@/lib/api/places';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { loadGoogleMaps } from '@/lib/maps/google-maps-loader';
+import { AppIcon } from '@/components/common';
 
 const JEJU_CENTER = { latitude: 33.4996, longitude: 126.5312 };
 
@@ -89,7 +90,7 @@ export function PlacePicker({
             <h2 id="place-picker-title">장소 보내기</h2>
           </div>
           <button type="button" onClick={onClose} aria-label="장소 선택 닫기">
-            ×
+            <AppIcon name="close" />
           </button>
         </header>
 
@@ -139,7 +140,9 @@ export function PlacePicker({
                 className={selected?.id === place.id ? 'isSelected' : ''}
                 onClick={() => showPlace(place)}
               >
-                <span aria-hidden="true">⌖</span>
+                <span aria-hidden="true">
+                  <AppIcon name="pin" />
+                </span>
                 <div>
                   <strong>{place.name}</strong>
                   <small>

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppIcon } from '@/components/common';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import type { Question } from '@/lib/api/questions';
 import {
@@ -47,7 +48,9 @@ export function QuestionCard({
         </div>
         <p className="questionCardContent">{question.content}</p>
         {question.areaText !== null && (
-          <span className="questionArea">⌖ {question.areaText}</span>
+          <span className="questionArea">
+            <AppIcon name="pin" /> {question.areaText}
+          </span>
         )}
         {question.image !== null && (
           <div className="questionCardEvidence">
@@ -62,7 +65,7 @@ export function QuestionCard({
         )}
         <footer className="questionCardFooter">
           <span className={`publicBadge publicBadge--${badgeKind}`}>
-            <span aria-hidden="true">↗</span>
+            <AppIcon name="external" />
             {question.author.nickname} ·{' '}
             {participantBadgeLabel(question.author.badge)}
           </span>

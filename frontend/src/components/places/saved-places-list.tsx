@@ -5,6 +5,7 @@ import { removePlaceFavorite } from '@/lib/api/place-favorites';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { usePlaceFavorites } from '@/lib/query/use-place-favorites';
+import { AppIcon } from '@/components/common';
 
 export function SavedPlacesList(): React.JSX.Element {
   const favorites = usePlaceFavorites();
@@ -33,7 +34,7 @@ export function SavedPlacesList(): React.JSX.Element {
   if (favorites.data.length === 0) {
     return (
       <div className="savedPlacesState">
-        <span aria-hidden="true">♡</span>
+        <AppIcon name="heart" />
         <strong>아직 찜한 장소가 없어요</strong>
         <p>실시간방에서 받은 장소 카드의 찜 버튼을 눌러보세요.</p>
       </div>
@@ -45,7 +46,7 @@ export function SavedPlacesList(): React.JSX.Element {
       {favorites.data.map((favorite) => (
         <article key={favorite.id} className="savedPlaceCard">
           <span className="savedPlaceCard__pin" aria-hidden="true">
-            ⌖
+            <AppIcon name="pin" />
           </span>
           <div>
             <small>찜한 장소</small>
@@ -57,7 +58,7 @@ export function SavedPlacesList(): React.JSX.Element {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                지도에서 보기 ↗
+                지도에서 보기 <AppIcon name="external" />
               </a>
               <button
                 type="button"

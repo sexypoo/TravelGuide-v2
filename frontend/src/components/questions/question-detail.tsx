@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AppIcon } from '@/components/common';
 import { AnswerCard } from '@/components/answers/answer-card';
 import { AnswerForm } from '@/components/answers/answer-form';
 import { useRoomRealtime } from '@/components/providers/realtime-provider';
@@ -46,10 +47,12 @@ export function QuestionDetailView({
     return (
       <div className="questionDetailPage">
         <Link className="appBackLink" href={`/app/rooms/${room.slug}`}>
-          ← {room.destination.nameKo} 도움방
+          <AppIcon name="arrow-left" /> {room.destination.nameKo} 도움방
         </Link>
         <div className="roomQueryState roomQueryState--error" role="alert">
-          <span aria-hidden="true">!</span>
+          <span aria-hidden="true">
+            <AppIcon name="alert" />
+          </span>
           <h1>토픽을 불러오지 못했어요</h1>
           <p>토픽이 삭제되었거나 연결이 잠시 불안정할 수 있어요.</p>
           <button type="button" onClick={() => void query.refetch()}>
@@ -81,7 +84,7 @@ export function QuestionDetailView({
   return (
     <div className="questionDetailPage">
       <Link className="appBackLink" href={`/app/rooms/${room.slug}`}>
-        ← {room.destination.nameKo} 도움방
+        <AppIcon name="arrow-left" /> {room.destination.nameKo} 도움방
       </Link>
       {connectionState !== 'connected' && (
         <div className="connectionNotice" role="status" aria-live="polite">
@@ -108,7 +111,9 @@ export function QuestionDetailView({
         </div>
         <h1>{question.content}</h1>
         {question.areaText !== null && (
-          <p className="questionArea">⌖ {question.areaText}</p>
+          <p className="questionArea">
+            <AppIcon name="pin" /> {question.areaText}
+          </p>
         )}
         {question.image !== null && (
           <figure className="topicEvidencePanel">
@@ -132,7 +137,7 @@ export function QuestionDetailView({
         )}
         <footer>
           <span className={`publicBadge publicBadge--${badgeKind}`}>
-            <span aria-hidden="true">↗</span>
+            <AppIcon name="external" />
             {question.author.nickname} ·{' '}
             {participantBadgeLabel(question.author.badge)}
           </span>
@@ -163,7 +168,9 @@ export function QuestionDetailView({
 
       {question.status === 'RESOLVED' && (
         <div className="resolutionSummary" role="status">
-          <span aria-hidden="true">✓</span>
+          <span aria-hidden="true">
+            <AppIcon name="check" />
+          </span>
           <div>
             <strong>
               {question.acceptedAnswerId === null
@@ -195,7 +202,9 @@ export function QuestionDetailView({
         </div>
         {question.answers.length === 0 ? (
           <div className="roomQueryState">
-            <span aria-hidden="true">⌁</span>
+            <span aria-hidden="true">
+              <AppIcon name="live" />
+            </span>
             <h3>아직 도착한 답변이 없어요</h3>
             <p>
               실시간 연결을 유지하고 있어요. 참여자의 첫 답변이 오면 바로

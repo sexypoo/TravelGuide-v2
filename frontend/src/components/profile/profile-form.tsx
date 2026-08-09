@@ -11,6 +11,7 @@ import {
   TRAVEL_STYLES,
   travelStyleLabels,
 } from '@/lib/api/profile';
+import { AppIcon } from '@/components/common';
 
 interface ProfileFormProps {
   profile: OwnProfile;
@@ -138,7 +139,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
                   )
                 }
               >
-                <span aria-hidden="true">{selected ? '✓' : '＋'}</span>
+                <AppIcon name={selected ? 'check' : 'add'} />
                 {travelStyleLabels[style]}
               </button>
             );
@@ -178,7 +179,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
           role={message.type === 'error' ? 'alert' : 'status'}
         >
           <span aria-hidden="true">
-            {message.type === 'success' ? '✓' : '!'}
+            {message.type === 'success' ? <AppIcon name="check" /> : '!'}
           </span>
           {message.text}
         </div>
