@@ -1,6 +1,34 @@
 import { problemFromResponse } from './problem-details';
 import type { UserRole } from './auth-contract';
 
+export const TRAVEL_STYLES = [
+  'FOOD_EXPLORER',
+  'SLOW_TRAVEL',
+  'NATURE',
+  'CULTURE_ART',
+  'ACTIVITY',
+  'NIGHTLIFE',
+  'SHOPPING',
+  'PHOTO',
+  'SOLO',
+  'FAMILY',
+] as const;
+
+export type TravelStyle = (typeof TRAVEL_STYLES)[number];
+
+export const travelStyleLabels: Readonly<Record<TravelStyle, string>> = {
+  FOOD_EXPLORER: '맛집 탐방',
+  SLOW_TRAVEL: '느린 여행',
+  NATURE: '자연·휴양',
+  CULTURE_ART: '문화·예술',
+  ACTIVITY: '액티비티',
+  NIGHTLIFE: '야간 여행',
+  SHOPPING: '쇼핑',
+  PHOTO: '사진 여행',
+  SOLO: '혼자 여행',
+  FAMILY: '가족 여행',
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -15,6 +43,7 @@ export interface OwnProfile {
   email: string;
   nickname: string;
   bio: string | null;
+  travelStyles: TravelStyle[];
   role: UserRole;
   isAdmin: boolean;
   createdAt: string;
@@ -42,6 +71,14 @@ export interface PublicContributorProfile {
 export interface UpdateProfileInput {
   nickname: string;
   bio: string | null;
+  travelStyles: TravelStyle[];
+}
+
+function isTravelStyle(value: unknown): value is TravelStyle {
+  return (
+    typeof value === 'string' &&
+    (TRAVEL_STYLES as readonly string[]).includes(value)
+  );
 }
 
 export function parseOwnProfile(value: unknown): OwnProfile {
@@ -51,6 +88,9 @@ export function parseOwnProfile(value: unknown): OwnProfile {
     typeof value.email !== 'string' ||
     typeof value.nickname !== 'string' ||
     (value.bio !== null && typeof value.bio !== 'string') ||
+    !Array.isArray(value.travelStyles) ||
+    value.travelStyles.length > 5 ||
+    !value.travelStyles.every(isTravelStyle) ||
     (value.role !== 'USER' && value.role !== 'ADMIN') ||
     typeof value.isAdmin !== 'boolean' ||
     typeof value.createdAt !== 'string' ||
@@ -67,6 +107,7 @@ export function parseOwnProfile(value: unknown): OwnProfile {
     email: value.email,
     nickname: value.nickname,
     bio: value.bio,
+    travelStyles: [...new Set(value.travelStyles)],
     role: value.role,
     isAdmin: value.isAdmin,
     createdAt: value.createdAt,

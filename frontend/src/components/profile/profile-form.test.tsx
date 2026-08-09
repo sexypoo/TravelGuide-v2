@@ -44,6 +44,7 @@ describe('ProfileForm', () => {
     fireEvent.change(screen.getByLabelText('짧은 소개'), {
       target: { value: ' 새로운 소개 ' },
     });
+    fireEvent.click(screen.getByRole('button', { name: /자연·휴양/ }));
     fireEvent.click(screen.getByRole('button', { name: '변경 내용 저장' }));
 
     expect(await screen.findByRole('status')).toHaveTextContent(
@@ -52,7 +53,11 @@ describe('ProfileForm', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/v1/users/me',
       expect.objectContaining({
-        body: JSON.stringify({ nickname: '새닉네임', bio: '새로운 소개' }),
+        body: JSON.stringify({
+          nickname: '새닉네임',
+          bio: '새로운 소개',
+          travelStyles: ['SLOW_TRAVEL', 'FOOD_EXPLORER', 'NATURE'],
+        }),
       }),
     );
     await waitFor(() => expect(refreshMock).toHaveBeenCalledTimes(1));

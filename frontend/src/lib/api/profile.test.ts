@@ -32,6 +32,7 @@ describe('profile contract', () => {
       id: 'user-1',
       nickname: '제주여행자',
       bio: '제주 여행을 준비하고 있어요.',
+      travelStyles: ['SLOW_TRAVEL', 'FOOD_EXPLORER'],
     });
     expect(JSON.stringify(profile)).not.toContain('passwordHash');
   });
@@ -58,14 +59,22 @@ describe('profile contract', () => {
     fetchMock.mockResolvedValue(response(profilePayload, 200));
 
     await expect(
-      updateOwnProfile({ nickname: '제주여행자', bio: null }),
+      updateOwnProfile({
+        nickname: '제주여행자',
+        bio: null,
+        travelStyles: ['SLOW_TRAVEL'],
+      }),
     ).resolves.toMatchObject({ nickname: '제주여행자' });
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/v1/users/me',
       expect.objectContaining({
         method: 'PATCH',
         credentials: 'include',
-        body: JSON.stringify({ nickname: '제주여행자', bio: null }),
+        body: JSON.stringify({
+          nickname: '제주여행자',
+          bio: null,
+          travelStyles: ['SLOW_TRAVEL'],
+        }),
       }),
     );
   });
@@ -86,7 +95,11 @@ describe('profile contract', () => {
     );
 
     await expect(
-      updateOwnProfile({ nickname: '중복닉네임', bio: null }),
+      updateOwnProfile({
+        nickname: '중복닉네임',
+        bio: null,
+        travelStyles: [],
+      }),
     ).rejects.toMatchObject({
       status: 409,
       code: 'NICKNAME_ALREADY_EXISTS',

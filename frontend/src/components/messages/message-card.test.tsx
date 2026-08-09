@@ -2,6 +2,12 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ChatMessage } from '@/lib/api/messages';
 import { MessageCard } from './message-card';
 
+jest.mock('../places/place-favorite-button', () => ({
+  PlaceFavoriteButton: ({ placeName }: { placeName: string }) => (
+    <button type="button">{placeName} 찜하기</button>
+  ),
+}));
+
 const message: ChatMessage = {
   id: 'message-1',
   roomId: 'room-1',
@@ -86,5 +92,36 @@ describe('MessageCard topic handoff', () => {
     expect(topicCard).toHaveTextContent('도착한 답변3개');
     expect(topicCard).toHaveTextContent('답변 요청1시간 내');
     expect(topicCard).toHaveTextContent('성산일출봉 매표소');
+  });
+
+  it('presents shared places as a clear place ticket', () => {
+    render(
+      <MessageCard
+        message={{
+          ...message,
+          type: 'PLACE',
+          content: '고등어구이가 좋아요.',
+          place: {
+            googlePlaceId: 'google-place-1',
+            name: '동백식당',
+            address: '제주시 바다로 1',
+            latitude: 33.5,
+            longitude: 126.5,
+          },
+        }}
+        own
+        onPromote={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText('PLACE')).toBeInTheDocument();
+    expect(screen.getByText('동백식당')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /지도 보기/ })).toHaveAttribute(
+      'href',
+      expect.stringContaining('query_place_id=google-place-1'),
+    );
+    expect(
+      screen.getByRole('button', { name: '동백식당 찜하기' }),
+    ).toBeInTheDocument();
   });
 });

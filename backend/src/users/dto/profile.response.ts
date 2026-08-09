@@ -1,11 +1,13 @@
 import type { UserRole } from '@prisma/client';
 import type { OwnProfileRecord, PublicProfileRecord } from '../users.service';
+import type { TravelStyle } from '../travel-styles';
 
 export interface OwnProfileResponse {
   id: string;
   email: string;
   nickname: string;
   bio: string | null;
+  travelStyles: TravelStyle[];
   role: UserRole;
   isAdmin: boolean;
   createdAt: string;
@@ -38,6 +40,7 @@ export function toOwnProfileResponse(
     email: user.email,
     nickname: user.nickname,
     bio: user.bio,
+    travelStyles: user.travelStyles,
     role: user.role,
     isAdmin: user.role === 'ADMIN',
     createdAt: user.createdAt.toISOString(),

@@ -6,7 +6,10 @@ import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import {
   updateOwnProfile,
   type OwnProfile,
+  type TravelStyle,
   type UpdateProfileInput,
+  TRAVEL_STYLES,
+  travelStyleLabels,
 } from '@/lib/api/profile';
 
 interface ProfileFormProps {
@@ -43,6 +46,9 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
   const router = useRouter();
   const [nickname, setNickname] = useState(profile.nickname);
   const [bio, setBio] = useState(profile.bio ?? '');
+  const [travelStyles, setTravelStyles] = useState<TravelStyle[]>(
+    profile.travelStyles,
+  );
   const [errors, setErrors] = useState<ProfileErrors>({});
   const [message, setMessage] = useState<
     { type: 'success' | 'error'; text: string } | undefined
@@ -58,6 +64,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
     const input: UpdateProfileInput = {
       nickname: nickname.trim(),
       bio: bio.trim().length === 0 ? null : bio.trim(),
+      travelStyles,
     };
     const nextErrors = validate(input);
     setErrors(nextErrors);
@@ -70,6 +77,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
       const updated = await updateOwnProfile(input);
       setNickname(updated.nickname);
       setBio(updated.bio ?? '');
+      setTravelStyles(updated.travelStyles);
       setMessage({ type: 'success', text: '프로필을 저장했습니다.' });
       setIsSaving(false);
       router.refresh();
@@ -107,6 +115,36 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
           </p>
         )}
       </div>
+
+      <fieldset className="profileTravelStyles">
+        <legend>
+          나의 여행 스타일 <span>{travelStyles.length}/5</span>
+        </legend>
+        <p>여행 취향을 최대 5개까지 골라주세요.</p>
+        <div>
+          {TRAVEL_STYLES.map((style) => {
+            const selected = travelStyles.includes(style);
+            return (
+              <button
+                key={style}
+                type="button"
+                aria-pressed={selected}
+                disabled={!selected && travelStyles.length >= 5}
+                onClick={() =>
+                  setTravelStyles((current) =>
+                    selected
+                      ? current.filter((item) => item !== style)
+                      : [...current, style],
+                  )
+                }
+              >
+                <span aria-hidden="true">{selected ? '✓' : '＋'}</span>
+                {travelStyleLabels[style]}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
 
       <div className="profileField">
         <div>

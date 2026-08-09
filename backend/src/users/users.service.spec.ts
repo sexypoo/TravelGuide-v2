@@ -32,4 +32,26 @@ describe('UsersService public profile', () => {
       },
     });
   });
+
+  it('filters unknown stored travel styles from the own profile contract', async () => {
+    const prisma = {
+      user: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'traveler-id',
+          email: 'traveler@example.com',
+          nickname: '느린여행자',
+          bio: null,
+          travelStyles: ['SLOW_TRAVEL', 'LEGACY_UNKNOWN'],
+          role: 'USER',
+          createdAt: new Date('2026-01-01T00:00:00.000Z'),
+          updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+      },
+    };
+    const service = new UsersService(prisma as never);
+
+    await expect(service.getOwnProfile('traveler-id')).resolves.toMatchObject({
+      travelStyles: ['SLOW_TRAVEL'],
+    });
+  });
 });

@@ -29,6 +29,7 @@ export const profilePayload = {
   email: 'traveler@example.com',
   nickname: '제주여행자',
   bio: '제주 여행을 준비하고 있어요.',
+  travelStyles: ['SLOW_TRAVEL', 'FOOD_EXPLORER'],
   role: 'USER',
   isAdmin: false,
   createdAt: '2026-07-30T12:00:00.000Z',

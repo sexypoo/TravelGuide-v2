@@ -14,4 +14,5 @@ export const queryKeys = {
   questionRoot: ['questions'] as const,
   question: (questionId: string) => ['questions', questionId] as const,
   placeFavorites: ['place-favorites'] as const,
+  travelRecords: ['travel-records'] as const,
 };

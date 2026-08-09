@@ -16,6 +16,7 @@ import { QuestionsModule } from './questions/questions.module';
 import { ReportsModule } from './reports/reports.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { UsersModule } from './users/users.module';
+import { TravelRecordsModule } from './travel-records/travel-records.module';
 import { VerificationsModule } from './verifications/verifications.module';
 
 @Module({
@@ -37,6 +38,7 @@ import { VerificationsModule } from './verifications/verifications.module';
     PlacesModule,
     QuestionsModule,
     ReportsModule,
+    TravelRecordsModule,
     UsersModule,
     RoomsModule,
     VerificationsModule,

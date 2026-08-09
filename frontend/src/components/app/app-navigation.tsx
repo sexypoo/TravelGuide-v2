@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-type NavIconName = 'home' | 'community' | 'verify' | 'room' | 'profile';
+type NavIconName = 'home' | 'community' | 'nearby' | 'room' | 'profile';
 
 interface NavItem {
   href: string;
@@ -26,10 +26,10 @@ const items: readonly NavItem[] = [
     matches: (pathname) => pathname === '/app',
   },
   {
-    href: '/app/verifications',
-    label: '인증',
-    icon: 'verify',
-    matches: (pathname) => pathname.startsWith('/app/verifications'),
+    href: '/app/nearby',
+    label: '주변',
+    icon: 'nearby',
+    matches: (pathname) => pathname.startsWith('/app/nearby'),
   },
   {
     href: '/app/rooms/jeju',
@@ -54,10 +54,10 @@ function NavIcon({ name }: { name: NavIconName }): React.JSX.Element {
         <path d="M8 9.5h8M8 12.5h5" />
       </>
     ),
-    verify: (
+    nearby: (
       <>
-        <path d="M12 3 5 6v5c0 4.7 2.9 8.4 7 10 4.1-1.6 7-5.3 7-10V6l-7-3Z" />
-        <path d="m9.2 12.2 1.8 1.8 3.9-4.2" />
+        <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+        <circle cx="12" cy="10" r="2.5" />
       </>
     ),
     room: (

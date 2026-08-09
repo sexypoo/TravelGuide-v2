@@ -3,6 +3,7 @@ import { Prisma, type UserRole } from '@prisma/client';
 import { ProblemException } from '../common/http/problem.exception';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UpdateProfileDto } from './dto/update-profile.dto';
+import { normalizeTravelStyles, type TravelStyle } from './travel-styles';
 
 export interface CreateUserInput {
   email: string;
@@ -26,6 +27,7 @@ export interface OwnProfileRecord {
   email: string;
   nickname: string;
   bio: string | null;
+  travelStyles: TravelStyle[];
   role: UserRole;
   createdAt: Date;
   updatedAt: Date;
@@ -161,6 +163,7 @@ export class UsersService {
         email: true,
         nickname: true,
         bio: true,
+        travelStyles: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -175,7 +178,10 @@ export class UsersService {
       );
     }
 
-    return user;
+    return {
+      ...user,
+      travelStyles: normalizeTravelStyles(user.travelStyles),
+    };
   }
 
   async getPublicProfile(id: string): Promise<PublicProfileRecord> {
@@ -250,24 +256,32 @@ export class UsersService {
     }
 
     try {
-      return await this.prisma.user.update({
+      const user = await this.prisma.user.update({
         where: { id },
         data: {
           ...(input.nickname === undefined ? {} : { nickname: input.nickname }),
           ...(input.bio === undefined
             ? {}
             : { bio: input.bio === '' ? null : input.bio }),
+          ...(input.travelStyles === undefined
+            ? {}
+            : { travelStyles: [...new Set(input.travelStyles)] }),
         },
         select: {
           id: true,
           email: true,
           nickname: true,
           bio: true,
+          travelStyles: true,
           role: true,
           createdAt: true,
           updatedAt: true,
         },
       });
+      return {
+        ...user,
+        travelStyles: normalizeTravelStyles(user.travelStyles),
+      };
     } catch (error: unknown) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&

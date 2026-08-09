@@ -8293,3 +8293,796 @@ textarea::placeholder {
     padding: 0.35rem 0 calc(0.4rem + env(safe-area-inset-bottom));
   }
 }
+
+/* T24 — nearby discovery, place tickets, and personal journeys */
+.placeTicket.chatBubble--place {
+  display: grid;
+  width: min(20rem, 78vw);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #e8e1e7;
+  border-radius: 1.05rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(73, 70, 83, 0.08);
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 0;
+}
+
+.placeTicket__rail {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding-top: 1rem;
+  background: linear-gradient(180deg, #fff0f5, #f5f2ff);
+}
+
+.placeTicket__rail > span {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--gradient);
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+.placeTicket__rail > i {
+  width: 1px;
+  flex: 1;
+  margin-top: 0.5rem;
+  background: linear-gradient(#d9c4dd, transparent);
+}
+
+.chatBubble--place > .placeTicket__content {
+  display: grid;
+  min-width: 0;
+  padding: 0.9rem 0.95rem 0.8rem;
+  gap: 0;
+}
+
+.placeTicket__eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.placeTicket__eyebrow > span {
+  color: var(--magenta);
+  font-family: var(--display);
+  font-size: 0.55rem;
+  font-weight: 850;
+  letter-spacing: 0.13em;
+}
+
+.placeTicket__eyebrow > small {
+  color: var(--subtle);
+  font-size: 0.55rem;
+  font-weight: 650;
+}
+
+.chatBubble--place .placeTicket__name {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 0.9rem;
+  font-weight: 780;
+  letter-spacing: -0.035em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatBubble--place .placeTicket__address {
+  margin-top: 0.18rem;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 580;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatBubble--place .placeTicket__note {
+  margin: 0.7rem 0 0;
+  padding: 0.6rem 0.65rem;
+  border-radius: 0.65rem;
+  background: #faf8fa;
+  color: #625d68;
+  font-size: 0.66rem;
+  font-weight: 580;
+  line-height: 1.55;
+}
+
+.chatBubble--place .placeTicket__actions {
+  display: grid;
+  margin-top: 0.7rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #f0ebef;
+  grid-template-columns: 1fr auto;
+}
+
+.chatBubble--place .placeTicket__actions > a {
+  display: inline-flex;
+  min-height: 1.9rem;
+  align-items: center;
+  margin: 0;
+  color: var(--purple-dark);
+  font-weight: 760;
+}
+
+.chatBubble--place .placeTicket__actions > a b {
+  margin-left: 0.25rem;
+  font-size: 0.72rem;
+}
+
+.nearbyExplorer {
+  padding-bottom: 2rem;
+}
+
+.nearbyExplorer__hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0.75rem 0 1.6rem;
+  gap: 2rem;
+}
+
+.nearbyExplorer__hero p,
+.travelRecords > header p {
+  margin: 0;
+  color: var(--magenta);
+  font-family: var(--display);
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+}
+
+.nearbyExplorer__hero h1 {
+  margin: 0.45rem 0 0;
+  font-family: var(--display);
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 820;
+  letter-spacing: -0.07em;
+  line-height: 1.05;
+}
+
+.nearbyExplorer__hero > div > span {
+  display: block;
+  margin-top: 0.7rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.nearbyExplorer__hero > button {
+  display: inline-flex;
+  min-height: 3.2rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.1rem;
+  border-radius: 0.9rem;
+  background: var(--ink);
+  box-shadow: 0 10px 24px rgba(73, 70, 83, 0.18);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 760;
+  gap: 0.45rem;
+}
+
+.nearbyExplorer__hero > button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.nearbyExplorer__error,
+.travelRecordError {
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  background: #fff0f2;
+  color: #a92536;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.nearbyExplorer__content {
+  display: grid;
+  min-height: 31rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 1.35rem;
+  background: #fff;
+  box-shadow: var(--shadow-card);
+  grid-template-columns: minmax(0, 3fr) minmax(17rem, 2fr);
+}
+
+.nearbyExplorer__map {
+  min-height: 31rem;
+  background: #eeedf0;
+}
+
+.nearbyExplorer__map--unavailable {
+  display: grid;
+  align-content: center;
+  padding: 2rem;
+  color: var(--muted);
+  justify-items: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.nearbyExplorer__map--unavailable strong {
+  color: var(--ink);
+}
+
+.nearbyExplorer__map--unavailable span {
+  font-size: 0.72rem;
+}
+
+.nearbyExplorer__list {
+  max-height: 31rem;
+  padding: 1rem;
+  overflow-y: auto;
+  border-left: 1px solid var(--line);
+  background: #fffdfd;
+}
+
+.nearbyExplorer__listHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.2rem 0.2rem 0.75rem;
+}
+
+.nearbyExplorer__listHeading strong {
+  font-size: 0.78rem;
+}
+
+.nearbyExplorer__listHeading span {
+  color: var(--subtle);
+  font-size: 0.66rem;
+}
+
+.nearbyExplorer__empty {
+  display: grid;
+  min-height: 100%;
+  align-content: center;
+  justify-items: center;
+  padding: 2rem 1rem;
+  color: var(--muted);
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.nearbyExplorer__empty > span {
+  display: grid;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin-bottom: 0.45rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--iris-soft);
+  color: var(--purple);
+  font-size: 1rem;
+}
+
+.nearbyExplorer__empty strong {
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
+.nearbyExplorer__empty p {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.nearbyPlaceCard {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid #eee8ed;
+  border-radius: 0.95rem;
+  background: #fff;
+  grid-template-columns: minmax(0, 1fr) 2.5rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.nearbyPlaceCard + .nearbyPlaceCard {
+  margin-top: 0.55rem;
+}
+
+.nearbyPlaceCard.isSelected {
+  border-color: rgba(207, 66, 111, 0.42);
+  box-shadow: 0 7px 18px rgba(145, 75, 165, 0.09);
+}
+
+.nearbyPlaceCard__main {
+  display: grid;
+  min-width: 0;
+  padding: 0.75rem;
+  background: transparent;
+  cursor: pointer;
+  grid-template-columns: 1.7rem minmax(0, 1fr);
+  gap: 0.6rem;
+  text-align: left;
+}
+
+.nearbyPlaceCard__number {
+  color: var(--plum);
+  font-family: var(--display);
+  font-size: 0.6rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+}
+
+.nearbyPlaceCard__main > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 0.18rem;
+}
+
+.nearbyPlaceCard__main small {
+  display: flex;
+  align-items: center;
+  color: var(--success);
+  font-size: 0.56rem;
+  font-weight: 780;
+  gap: 0.28rem;
+}
+
+.nearbyPlaceCard__main small i {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.nearbyPlaceCard__main strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nearbyPlaceCard__main > span:last-child > span {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.6rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nearbyPlaceCard > a {
+  display: grid;
+  place-items: center;
+  border-left: 1px solid #f0eaef;
+  color: var(--purple);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.nearbyExplorer__privacy {
+  margin: 0.8rem 0 0;
+  color: var(--subtle);
+  font-size: 0.64rem;
+  text-align: center;
+}
+
+.nearbyExplorer__privacy span {
+  color: var(--success);
+}
+
+.profileQuickLinks {
+  display: grid;
+  margin-top: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.profileQuickLinks .profileSavedPlacesLink {
+  margin-top: 0;
+}
+
+.profileTravelStyles {
+  margin: 1.4rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.profileTravelStyles legend {
+  width: 100%;
+  color: #4e5968;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.profileTravelStyles legend span {
+  float: right;
+  color: var(--subtle);
+  font-size: 0.68rem;
+}
+
+.profileTravelStyles > p {
+  margin: 0.35rem 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.profileTravelStyles > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.48rem;
+}
+
+.profileTravelStyles button {
+  display: inline-flex;
+  min-height: 2.35rem;
+  align-items: center;
+  padding: 0 0.72rem;
+  border: 1px solid #e4dce3;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 680;
+  gap: 0.25rem;
+}
+
+.profileTravelStyles button[aria-pressed='true'] {
+  border-color: rgba(145, 75, 165, 0.28);
+  background: var(--plum-soft);
+  color: var(--plum);
+}
+
+.profileTravelStyles button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.travelRecords {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 1.3rem;
+  background: #fff;
+}
+
+.travelRecords > header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.travelRecords > header h2 {
+  margin: 0.25rem 0 0;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  letter-spacing: -0.045em;
+}
+
+.travelRecords > header > div > span {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.travelRecords > header > button {
+  min-height: 2.5rem;
+  flex: 0 0 auto;
+  padding: 0 0.8rem;
+  border-radius: 0.75rem;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+.travelRecordForm {
+  margin-top: 1.2rem;
+  padding: 1rem;
+  border: 1px solid #e6dce5;
+  border-radius: 1rem;
+  background: #fffbfd;
+}
+
+.travelRecordForm__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.travelRecordForm__heading strong {
+  font-size: 0.8rem;
+}
+
+.travelRecordForm__heading button {
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.travelRecordForm__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.travelRecordForm label {
+  display: grid;
+  color: var(--ink);
+  font-size: 0.66rem;
+  font-weight: 720;
+  gap: 0.35rem;
+}
+
+.travelRecordForm > label {
+  margin-top: 0.7rem;
+}
+
+.travelRecordForm label > span {
+  color: var(--subtle);
+  font-weight: 550;
+}
+
+.travelRecordForm input,
+.travelRecordForm textarea {
+  width: 100%;
+  padding: 0 0.75rem;
+  border: 1px solid #e3dce2;
+  border-radius: 0.72rem;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.72rem;
+  outline: none;
+}
+
+.travelRecordForm input {
+  height: 2.7rem;
+}
+
+.travelRecordForm textarea {
+  padding-block: 0.65rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.travelRecordForm input:focus,
+.travelRecordForm textarea:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(112, 104, 216, 0.08);
+}
+
+.travelRecordForm footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.8rem;
+  gap: 0.45rem;
+}
+
+.travelRecordForm footer button {
+  min-height: 2.4rem;
+  padding: 0 0.8rem;
+  border-radius: 0.7rem;
+  background: #f0ebef;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 730;
+}
+
+.travelRecordForm footer button:last-child {
+  background: var(--gradient);
+  color: #fff;
+}
+
+.travelRecordsState {
+  display: grid;
+  min-height: 11rem;
+  align-content: center;
+  justify-items: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px dashed #e2d8e0;
+  border-radius: 1rem;
+  color: var(--muted);
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.travelRecordsState > span {
+  color: var(--magenta);
+  font-size: 1.1rem;
+}
+
+.travelRecordsState strong {
+  color: var(--ink);
+  font-size: 0.78rem;
+}
+
+.travelRecordsState p {
+  margin: 0;
+  font-size: 0.66rem;
+}
+
+.travelRecordsState button {
+  margin-top: 0.5rem;
+  background: transparent;
+  color: var(--purple);
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.travelRecordTimeline {
+  margin: 1.1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.travelRecordTimeline > li {
+  position: relative;
+  display: grid;
+  padding-left: 1.25rem;
+}
+
+.travelRecordTimeline > li:not(:last-child) {
+  padding-bottom: 0.7rem;
+}
+
+.travelRecordTimeline > li::before {
+  position: absolute;
+  top: 0.7rem;
+  bottom: -0.7rem;
+  left: 0.3rem;
+  width: 1px;
+  background: #e2d6e0;
+  content: '';
+}
+
+.travelRecordTimeline > li:last-child::before {
+  display: none;
+}
+
+.travelRecordTimeline__dot {
+  position: absolute;
+  z-index: 1;
+  top: 0.65rem;
+  left: 0;
+  width: 0.65rem;
+  height: 0.65rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--magenta);
+  box-shadow: 0 0 0 1px rgba(207, 66, 111, 0.25);
+}
+
+.travelRecordTimeline article {
+  padding: 0.85rem 0.95rem;
+  border: 1px solid #eee7ec;
+  border-radius: 0.9rem;
+  background: #fffdfd;
+}
+
+.travelRecordTimeline article > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.travelRecordTimeline small {
+  color: var(--plum);
+  font-size: 0.58rem;
+  font-weight: 780;
+}
+
+.travelRecordTimeline h3 {
+  margin: 0.14rem 0 0;
+  font-size: 0.82rem;
+  letter-spacing: -0.025em;
+}
+
+.travelRecordTimeline time {
+  color: var(--subtle);
+  font-size: 0.62rem;
+  white-space: nowrap;
+}
+
+.travelRecordTimeline article > p {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+
+.travelRecordTimeline article > footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.55rem;
+  gap: 0.55rem;
+}
+
+.travelRecordTimeline article > footer button {
+  padding: 0;
+  background: transparent;
+  color: var(--subtle);
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: 680;
+}
+
+@media (max-width: 760px) {
+  .nearbyExplorer__hero {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .nearbyExplorer__hero > button {
+    width: 100%;
+  }
+
+  .nearbyExplorer__content {
+    grid-template-columns: 1fr;
+  }
+
+  .nearbyExplorer__map {
+    min-height: 18rem;
+  }
+
+  .nearbyExplorer__list {
+    max-height: none;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .nearbyExplorer__empty {
+    min-height: 10rem;
+  }
+
+  .profileQuickLinks {
+    grid-template-columns: 1fr;
+  }
+
+  .travelRecordForm__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .placeTicket.chatBubble--place {
+    width: min(20rem, 84vw);
+  }
+
+  .travelRecords {
+    padding: 1.15rem;
+  }
+
+  .travelRecords > header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .travelRecords > header > button {
+    width: 100%;
+  }
+
+  .travelRecordTimeline article > header {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+}

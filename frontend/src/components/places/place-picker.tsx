@@ -1,11 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import {
-  getNearbyOpenRestaurants,
-  searchPlaces,
-  type GooglePlace,
-} from '@/lib/api/places';
+import { searchPlaces, type GooglePlace } from '@/lib/api/places';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { loadGoogleMaps } from '@/lib/maps/google-maps-loader';
 
@@ -24,7 +20,6 @@ export function PlacePicker({
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GooglePlace[]>([]);
   const [selected, setSelected] = useState<GooglePlace>();
-  const [location, setLocation] = useState(JEJU_CENTER);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
@@ -72,48 +67,12 @@ export function PlacePicker({
     setLoading(true);
     setError('');
     try {
-      setResults(await searchPlaces(query.trim(), location));
+      setResults(await searchPlaces(query.trim(), JEJU_CENTER));
     } catch (searchError: unknown) {
       setError(actionableErrorMessage(searchError, '장소를 찾지 못했어요.'));
     } finally {
       setLoading(false);
     }
-  }
-
-  function findNearby(): void {
-    if (!navigator.geolocation) {
-      setError('이 브라우저에서는 현재 위치를 확인할 수 없어요.');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        const current = {
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-        };
-        setLocation(current);
-        map.current?.setCenter({
-          lat: current.latitude,
-          lng: current.longitude,
-        });
-        map.current?.setZoom(14);
-        void getNearbyOpenRestaurants(current)
-          .then(setResults)
-          .catch((nearbyError: unknown) =>
-            setError(
-              actionableErrorMessage(nearbyError, '근처 식당을 찾지 못했어요.'),
-            ),
-          )
-          .finally(() => setLoading(false));
-      },
-      () => {
-        setLoading(false);
-        setError('위치 권한을 허용한 뒤 다시 시도해 주세요.');
-      },
-      { enableHighAccuracy: true, timeout: 10000 },
-    );
   }
 
   return (
@@ -155,15 +114,6 @@ export function PlacePicker({
             검색
           </button>
         </div>
-        <button
-          className="nearbyRestaurantButton"
-          type="button"
-          disabled={loading}
-          onClick={findNearby}
-        >
-          <span aria-hidden="true">⌖</span> 현재 위치 근처 영업 중 식당
-        </button>
-
         {apiKey.length === 0 ? (
           <div className="placePickerMap placePickerMap--unavailable">
             지도 API 키를 설정하면 지도가 표시됩니다.
@@ -180,7 +130,7 @@ export function PlacePicker({
           {loading ? (
             <p>장소를 찾고 있어요…</p>
           ) : results.length === 0 ? (
-            <p>검색하거나 현재 위치 근처 식당을 확인해 보세요.</p>
+            <p>보내고 싶은 장소를 검색해 보세요.</p>
           ) : (
             results.map((place) => (
               <button

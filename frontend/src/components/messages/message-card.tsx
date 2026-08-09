@@ -69,18 +69,30 @@ export function MessageCard({
             {message.content && <p>{message.content}</p>}
           </div>
         ) : message.type === 'PLACE' && message.place !== null ? (
-          <div className="chatBubble chatBubble--place">
-            <span className="placeMessageIcon" aria-hidden="true">
-              ⌖
-            </span>
-            <div>
-              <small>공유된 장소</small>
-              <strong>{message.place.name}</strong>
-              {message.place.address && <span>{message.place.address}</span>}
-              {message.content && <p>{message.content}</p>}
-              <span className="placeMessageActions">
+          <div className="chatBubble chatBubble--place placeTicket">
+            <div className="placeTicket__rail" aria-hidden="true">
+              <span>⌖</span>
+              <i />
+            </div>
+            <div className="placeTicket__content">
+              <header className="placeTicket__eyebrow">
+                <span>PLACE</span>
+                <small>공유된 장소</small>
+              </header>
+              <strong className="placeTicket__name">
+                {message.place.name}
+              </strong>
+              {message.place.address && (
+                <span className="placeTicket__address">
+                  {message.place.address}
+                </span>
+              )}
+              {message.content && (
+                <p className="placeTicket__note">“{message.content}”</p>
+              )}
+              <span className="placeMessageActions placeTicket__actions">
                 <a href={placeMapUrl} target="_blank" rel="noopener noreferrer">
-                  지도 보기 ↗
+                  지도 보기 <b aria-hidden="true">↗</b>
                 </a>
                 <PlaceFavoriteButton
                   messageId={message.id}
