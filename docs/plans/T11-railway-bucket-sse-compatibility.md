@@ -2,15 +2,16 @@
 
 ## Goal
 
-Restore production uploads by avoiding the unsupported per-request
-`ServerSideEncryption` option for Railway's S3-compatible Bucket while keeping
-the existing AES256 request for standard AWS S3.
+Restore production uploads by avoiding unsupported per-request encryption and
+automatic optional checksum behavior for Railway's S3-compatible Bucket while
+keeping the existing AES256 request and SDK checksum defaults for standard AWS
+S3.
 
 ## Files
 
 - `backend/src/storage/s3-storage.adapter.ts`: select the PutObject encryption
-  option from whether the SDK uses the standard AWS endpoint or a custom
-  S3-compatible endpoint.
+  option and SDK checksum policy from whether the SDK uses the standard AWS
+  endpoint or a custom S3-compatible endpoint.
 - `backend/src/storage/s3-storage.adapter.spec.ts`: cover Railway-compatible
   puts and the preserved AWS AES256 behavior.
 - `docs/DECISIONS.md`: record the compatibility refinement to ADR-024.
@@ -34,5 +35,8 @@ None. Database data and object keys are unchanged.
   provider's responsibility.
 - Standard AWS S3 must continue receiving `ServerSideEncryption: AES256`; a
   regression test protects this branch.
+- AWS SDK v3 enables optional CRC32 request checksums by default. Railway's
+  S3-compatible endpoint can persist an object but still fail that request, so
+  custom endpoints use checksums only when the S3 operation requires one.
 - A production deploy is required before uploads recover; the code change alone
   does not alter the currently running Railway service.

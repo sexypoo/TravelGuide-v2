@@ -90,7 +90,10 @@ release without changing stored object keys, so a later migration to AWS can
 reuse the same storage interface. Railway does not support the per-request S3
 server-side encryption option, so the adapter omits that option whenever a
 custom S3 endpoint is configured. Standard AWS S3 deployments without
-`S3_ENDPOINT` continue to request AES256 server-side encryption.
+`S3_ENDPOINT` continue to request AES256 server-side encryption. For custom S3
+endpoints, the adapter also configures AWS SDK request and response checksums as
+`WHEN_REQUIRED`; this prevents newer SDK versions from adding optional CRC32
+behavior that Railway Bucket does not reliably support.
 
 ## 4. Google Maps and Places
 

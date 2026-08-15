@@ -26,7 +26,13 @@ export function buildS3ClientConfig(
 
   return {
     region: config.getOrThrow('S3_REGION', { infer: true }),
-    ...(endpoint === undefined ? {} : { endpoint }),
+    ...(endpoint === undefined
+      ? {}
+      : {
+          endpoint,
+          requestChecksumCalculation: 'WHEN_REQUIRED' as const,
+          responseChecksumValidation: 'WHEN_REQUIRED' as const,
+        }),
     ...(accessKeyId === undefined || secretAccessKey === undefined
       ? {}
       : { credentials: { accessKeyId, secretAccessKey } }),

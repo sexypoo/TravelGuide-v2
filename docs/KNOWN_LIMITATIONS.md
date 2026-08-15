@@ -23,8 +23,10 @@
 - The private S3 implementation relies on bucket policy/IAM. Standard AWS S3
   uploads request server-side AES256 encryption; custom S3-compatible providers
   such as Railway use the provider's storage encryption because Railway rejects
-  the per-request S3 encryption option. Bucket creation, versioning, retention,
-  backup, and credential rotation are external infrastructure responsibilities.
+  the per-request S3 encryption option. Custom endpoints also use AWS SDK
+  checksums only when an operation requires them; standard AWS endpoints retain
+  the SDK defaults. Bucket creation, versioning, retention, backup, and
+  credential rotation are external infrastructure responsibilities.
 - Demo reset is an idempotent refresh of managed accounts, their non-image Jeju
   room messages, and the canonical waiting topic. It is not a general-purpose
   production data deletion tool and preserves unrelated users' content outside

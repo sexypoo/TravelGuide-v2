@@ -69,12 +69,37 @@ describe('S3StorageAdapter', () => {
     expect(buildS3ClientConfig(config)).toMatchObject({
       region: 'auto',
       endpoint: 'https://storage.railway.app',
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
       forcePathStyle: false,
       credentials: {
         accessKeyId: 'railway-access-key',
         secretAccessKey: 'railway-secret-key',
       },
     });
+  });
+
+  it('keeps the AWS checksum defaults for the standard S3 endpoint', () => {
+    const config = new ConfigService<Environment, true>({
+      NODE_ENV: 'production',
+      DATABASE_URL: 'postgresql://database.example/travelguide',
+      API_HOST: '0.0.0.0',
+      API_PORT: 3001,
+      WEB_ORIGIN: 'https://travel.example',
+      JWT_SECRET: 'production-secret-longer-than-thirty-two-characters',
+      JWT_EXPIRES_IN_SECONDS: 86_400,
+      STORAGE_DRIVER: 's3',
+      LOCAL_STORAGE_DIR: '.data/private-uploads',
+      S3_REGION: 'ap-northeast-2',
+      S3_BUCKET: 'travelguide-private',
+      S3_URL_STYLE: 'virtual',
+    });
+
+    const clientConfig = buildS3ClientConfig(config);
+
+    expect(clientConfig).not.toHaveProperty('endpoint');
+    expect(clientConfig).not.toHaveProperty('requestChecksumCalculation');
+    expect(clientConfig).not.toHaveProperty('responseChecksumValidation');
   });
 
   it('stores a private Railway object without unsupported options or a public ACL', async () => {
