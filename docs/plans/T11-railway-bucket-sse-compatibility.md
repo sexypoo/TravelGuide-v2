@@ -16,6 +16,9 @@ S3.
   puts and the preserved AWS AES256 behavior.
 - `backend/src/users/user-avatars.service.ts`: retain a redacted stage-specific
   diagnostic when production storage or the following database update fails.
+- `backend/src/storage/storage-object-key.ts` and its focused regression test:
+  allow the generated private `profile-images/{userId}/{uuid}` namespace while
+  continuing to reject traversal and unknown prefixes.
 - `docs/DECISIONS.md`: record the compatibility refinement to ADR-024.
 - `docs/DEPLOYMENT.md` and `docs/KNOWN_LIMITATIONS.md`: document the effective
   encryption contract for Railway and AWS.
@@ -44,3 +47,5 @@ None. Database data and object keys are unchanged.
   does not alter the currently running Railway service.
 - Storage and database failures must remain distinguishable without logging
   credentials, database URLs, image contents, or user profile fields.
+- Extending the private key allowlist must cover only the profile namespace and
+  must not weaken the user-id, UUID, or traversal constraints.
