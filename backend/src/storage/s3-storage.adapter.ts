@@ -38,9 +38,12 @@ export function buildS3ClientConfig(
 export class S3StorageAdapter implements StorageService {
   private readonly bucket: string;
   private readonly client: S3Client;
+  private readonly useAwsServerSideEncryption: boolean;
 
   constructor(config: ConfigService<Environment, true>, client?: S3Client) {
     this.bucket = config.getOrThrow('S3_BUCKET', { infer: true });
+    this.useAwsServerSideEncryption =
+      config.get('S3_ENDPOINT', { infer: true }) === undefined;
     this.client = client ?? new S3Client(buildS3ClientConfig(config));
   }
 
@@ -52,7 +55,9 @@ export class S3StorageAdapter implements StorageService {
         Key: input.objectKey,
         Body: input.contents,
         ContentLength: input.contents.byteLength,
-        ServerSideEncryption: 'AES256',
+        ...(this.useAwsServerSideEncryption
+          ? { ServerSideEncryption: 'AES256' as const }
+          : {}),
       }),
     );
     return { objectKey: input.objectKey, sizeBytes: input.contents.byteLength };

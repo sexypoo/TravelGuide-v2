@@ -110,6 +110,14 @@
 - 영향: S3 bucket public access block, prefix 제한 IAM, versioning/retention/backup은 배포 인프라에서 설정해야 한다. 단위 테스트는 명령과 key 검증을 확인하지만 실제 IAM/bucket smoke는 T11 외부 완료 조건으로 남는다.
 - 되돌리는 조건: 다른 private object storage로 이전하면 `StorageService`의 stream 계약을 유지한 채 adapter만 교체한다.
 
+#### 2026-08-15 Railway Bucket 호환성 보완
+
+- Railway Bucket은 S3 `ServerSideEncryption` 요청 옵션을 지원하지 않아 모든
+  운영 업로드가 500으로 실패했다.
+- 표준 AWS endpoint를 사용하는 경우에만 `AES256` 옵션을 보내고,
+  `S3_ENDPOINT`가 설정된 S3 호환 저장소에는 해당 옵션을 보내지 않는다.
+- 비공개 접근, 안전한 object key, 인증된 서버 스트리밍 계약은 그대로 유지한다.
+
 ### ADR-014 T05 질문 커서와 동시 생성 제한
 
 - 날짜: 2026-07-31

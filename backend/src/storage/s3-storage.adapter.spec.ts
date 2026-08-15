@@ -77,13 +77,50 @@ describe('S3StorageAdapter', () => {
     });
   });
 
-  it('stores a private encrypted object without a public ACL', async () => {
+  it('stores a private Railway object without unsupported options or a public ACL', async () => {
     const { adapter, commands, responses } = createAdapter();
     responses.push({});
 
     await expect(
       adapter.putPrivate({ objectKey, contents: Buffer.from('proof') }),
     ).resolves.toEqual({ objectKey, sizeBytes: 5 });
+    const command = commands[0];
+    if (!(command instanceof PutObjectCommand)) {
+      throw new Error('Expected PutObjectCommand');
+    }
+    expect(command.input).toMatchObject({
+      Bucket: 'travelguide-private',
+      Key: objectKey,
+      ContentLength: 5,
+    });
+    expect(command.input).not.toHaveProperty('ServerSideEncryption');
+    expect(command.input).not.toHaveProperty('ACL');
+  });
+
+  it('requests AES256 server-side encryption from standard AWS S3', async () => {
+    const config = new ConfigService<Environment, true>({
+      NODE_ENV: 'production',
+      DATABASE_URL: 'postgresql://database.example/travelguide',
+      API_HOST: '127.0.0.1',
+      API_PORT: 3001,
+      WEB_ORIGIN: 'https://travel.example',
+      JWT_SECRET: 'production-secret-longer-than-thirty-two-characters',
+      JWT_EXPIRES_IN_SECONDS: 86_400,
+      STORAGE_DRIVER: 's3',
+      LOCAL_STORAGE_DIR: '.data/private-uploads',
+      S3_REGION: 'ap-northeast-2',
+      S3_BUCKET: 'travelguide-private',
+      S3_URL_STYLE: 'virtual',
+    });
+    const commands: unknown[] = [];
+    const send = jest.fn((command: unknown): Promise<unknown> => {
+      commands.push(command);
+      return Promise.resolve({});
+    });
+    const adapter = new S3StorageAdapter(config, { send } as never);
+
+    await adapter.putPrivate({ objectKey, contents: Buffer.from('proof') });
+
     const command = commands[0];
     if (!(command instanceof PutObjectCommand)) {
       throw new Error('Expected PutObjectCommand');

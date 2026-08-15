@@ -87,7 +87,10 @@ the bucket is an older path-style bucket, set `S3_URL_STYLE=path`.
 
 Railway Buckets are private and S3-compatible. They replace AWS S3 for the first
 release without changing stored object keys, so a later migration to AWS can
-reuse the same storage interface.
+reuse the same storage interface. Railway does not support the per-request S3
+server-side encryption option, so the adapter omits that option whenever a
+custom S3 endpoint is configured. Standard AWS S3 deployments without
+`S3_ENDPOINT` continue to request AES256 server-side encryption.
 
 ## 4. Google Maps and Places
 

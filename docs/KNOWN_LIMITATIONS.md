@@ -20,9 +20,11 @@
   presentation deployment. It is not shared across horizontally scaled nodes.
 - Socket delivery is best effort. PostgreSQL/REST is the source of truth and the
   client refetches after reconnect; there is no transactional outbox or replay.
-- The private S3 implementation relies on bucket policy/IAM and server-side AES256
-  encryption. Bucket creation, versioning, retention, backup, and credential
-  rotation are external infrastructure responsibilities.
+- The private S3 implementation relies on bucket policy/IAM. Standard AWS S3
+  uploads request server-side AES256 encryption; custom S3-compatible providers
+  such as Railway use the provider's storage encryption because Railway rejects
+  the per-request S3 encryption option. Bucket creation, versioning, retention,
+  backup, and credential rotation are external infrastructure responsibilities.
 - Demo reset is an idempotent refresh of managed accounts, their non-image Jeju
   room messages, and the canonical waiting topic. It is not a general-purpose
   production data deletion tool and preserves unrelated users' content outside
