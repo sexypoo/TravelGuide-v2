@@ -44,6 +44,9 @@ export default async function Home(): Promise<React.JSX.Element> {
       <header className="landingHeader">
         <Wordmark />
         <nav aria-label="인증 메뉴">
+          <Link className="textButton" href="/preorder">
+            사전예약
+          </Link>
           <Link className="textButton" href="/auth/login">
             로그인
           </Link>
@@ -147,7 +150,7 @@ export default async function Home(): Promise<React.JSX.Element> {
       <footer className="landingFooter">
         <Wordmark />
         <p>여행의 변수에, 사람들의 답.</p>
-        <span>© 2026 Yeojju</span>
+        <span>© 2026 여쭈어</span>
       </footer>
     </main>
   );

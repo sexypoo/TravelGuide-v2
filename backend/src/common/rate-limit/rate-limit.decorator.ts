@@ -7,7 +7,8 @@ export type RateLimitCategory =
   | 'ANSWER'
   | 'REPORT'
   | 'COMMUNITY_POST'
-  | 'COMMUNITY_COMMENT';
+  | 'COMMUNITY_COMMENT'
+  | 'PREORDER';
 
 export function RateLimit(
   category: RateLimitCategory,

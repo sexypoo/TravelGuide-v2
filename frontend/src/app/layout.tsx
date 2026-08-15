@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: '여쭈어 (Yeojju) — 여행지의 지금을 나누는 커뮤니티',
+    default: '여쭈어 (여JJU) — 여행지의 지금을 나누는 커뮤니티',
     template: '%s | 여쭈어',
   },
   description:

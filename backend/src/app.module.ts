@@ -12,6 +12,7 @@ import { HealthModule } from './health/health.module';
 import { MessagesModule } from './messages/messages.module';
 import { PlaceFavoritesModule } from './place-favorites/place-favorites.module';
 import { PlacesModule } from './places/places.module';
+import { PreordersModule } from './preorders/preorders.module';
 import { QuestionsModule } from './questions/questions.module';
 import { ReportsModule } from './reports/reports.module';
 import { RoomsModule } from './rooms/rooms.module';
@@ -36,6 +37,7 @@ import { VerificationsModule } from './verifications/verifications.module';
     MessagesModule,
     PlaceFavoritesModule,
     PlacesModule,
+    PreordersModule,
     QuestionsModule,
     ReportsModule,
     TravelRecordsModule,

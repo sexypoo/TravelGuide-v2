@@ -1,4 +1,4 @@
-# 여쭈어 (Yeojju / 여JJU) 인수 테스트 명세
+# 여쭈어 (여JJU) 인수 테스트 명세
 
 - 목적: Codex와 사람이 같은 기준으로 P0 완료 여부를 판단한다.
 - 테스트 방식: 실제 PostgreSQL, 실제 API, 실제 Socket.io, 실제 브라우저
@@ -375,6 +375,26 @@ Then WebSocket upgrade가 성공한다
 And 질문과 답변 이벤트가 전달된다
 ```
 
+### E2E-029 공개 사전예약 신청
+
+```gherkin
+Given 로그인하지 않은 사용자가 사전예약 페이지를 열었다
+When 유효한 이름과 이메일을 입력하고 개인정보 수집에 동의한다
+Then 정규화된 이메일과 이름, 동의 시각이 PostgreSQL에 저장된다
+And 응답은 신청자의 이름이나 이메일을 포함하지 않는다
+
+When 같은 이메일을 대소문자와 공백만 바꿔 다시 신청한다
+Then 최초 신청과 구분되지 않는 성공 응답을 반환한다
+And 사전예약 레코드는 하나만 유지된다
+
+When 이메일이 유효하지 않거나 동의하지 않는다
+Then 400과 VALIDATION_FAILED를 반환한다
+And 사전예약 레코드는 생성되지 않는다
+
+When 공개 사전예약 목록을 요청한다
+Then 목록을 제공하지 않는다
+```
+
 ---
 
 ## 3. 백엔드 통합 테스트 세부 목록
@@ -393,6 +413,7 @@ And 질문과 답변 이벤트가 전달된다
 | INT-QST-03 | resolve | state transition, answer rejection afterward |
 | INT-REP-01 | report | target exists, unique, own content |
 | INT-ADM-01 | remove | soft delete, public DTO redaction |
+| INT-PRE-01 | preorder | normalize, consent, idempotent unique email, no list |
 
 ---
 

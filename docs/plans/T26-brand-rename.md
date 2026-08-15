@@ -2,7 +2,7 @@
 
 ## Goal
 
-Present the service consistently as `여쭈어` (`Yeojju`, wordmark `여JJU`)
+Present the service consistently as `여쭈어` (wordmark `여JJU`)
 without risking the
 release candidate through a repository-wide technical rename.
 

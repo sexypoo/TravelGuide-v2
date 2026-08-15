@@ -159,6 +159,14 @@ model User {
   travelRecords            TravelRecord[]
 }
 
+model PreorderRegistration {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(30)
+  email       String   @unique @db.VarChar(320)
+  consentedAt DateTime
+  createdAt   DateTime @default(now())
+}
+
 model TravelRecord {
   id          String   @id @default(cuid())
   userId      String

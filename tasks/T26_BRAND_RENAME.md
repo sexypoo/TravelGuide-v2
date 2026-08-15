@@ -7,8 +7,7 @@ preserving stable technical identifiers.
 
 ## Required work
 
-- Use `여쭈어` as the Korean service name, `Yeojju` as its English name, and
-  `여JJU` as the compact visual wordmark.
+- Use `여쭈어` as the service name and `여JJU` as the compact visual wordmark.
 - Update the shared wordmark, landing copy, metadata, and primary product docs.
 - Keep package names, database names, deployment variables, demo email domains,
   local-storage keys, and TypeScript integration identifiers unchanged.

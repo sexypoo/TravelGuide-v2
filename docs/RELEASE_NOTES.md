@@ -1,4 +1,4 @@
-# 여쭈어 (Yeojju / 여JJU) release candidate notes
+# 여쭈어 (여JJU) release candidate notes
 
 ## Candidate status
 
@@ -9,6 +9,8 @@ rehearsals remain mandatory.
 
 ## Product capability
 
+- Public Jeju-pilot preorder registration with explicit consent, minimal
+  PostgreSQL storage, idempotent duplicate handling, and no applicant-list API.
 - Account registration, secure cookie login/logout, profile editing, and public
   contributor profiles.
 - Evidence-based traveler/local verification with administrator review and
@@ -35,6 +37,8 @@ rehearsals remain mandatory.
 
 ## Automated evidence
 
+- T27 focused evidence: 2 backend unit tests, 7 real-PostgreSQL integration
+  tests, and 7 frontend focused tests passed; both production builds passed.
 - Backend: 33 unit suites/92 tests and 12 PostgreSQL integration suites/40 tests.
 - Frontend: 50 suites/120 tests with global coverage gate at 55/59/57/56 for
   statements/branches/functions/lines.

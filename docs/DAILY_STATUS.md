@@ -1,6 +1,17 @@
-# 여쭈어 (Yeojju / 여JJU) 일일 상태
+# 여쭈어 (여JJU) 일일 상태
 
 ## 2026-08-15
+
+- 완료 Task: T27 공개 사전예약 페이지와 PostgreSQL 실제 저장
+- 완료 acceptance IDs: E2E-029, INT-PRE-01; 이름·이메일 정규화, 필수 동의,
+  중복 비공개 성공, 공개 목록 차단, 모바일 390px 무가로스크롤
+- 실행 명령: Prisma generate/format/migrate deploy/validate, T27 backend unit 및
+  PostgreSQL integration, frontend API/validation/form tests, 양쪽 lint/typecheck/
+  format check/build, 인앱 브라우저 실제 폼 제출과 DB 조회
+- 테스트 결과: T27 backend unit 2/2, integration 7/7, frontend focused 7/7;
+  프로덕션 빌드 성공, 브라우저 콘솔 오류·경고 0
+- 개인정보 범위: 이름, 정규화 이메일, 동의 시각, 생성 시각만 저장; 공개 조회 API 없음
+- 배포 가능 여부: 로컬 기능 게이트 통과; 실제 운영 전 개인정보 보존·철회 정책 확정 필요
 
 - 완료 Task: T25 최종 MVP 릴리스 안정화 로컬 범위
 - 완료 acceptance IDs: 공개 프로필 계약 회귀, 발표 데모 리셋, 승인 인증 CTA,

@@ -18,6 +18,7 @@ const limits: Readonly<Record<RateLimitCategory, LimitDefinition>> = {
   REPORT: { limit: 10, windowMs: 60 * 60 * 1000 },
   COMMUNITY_POST: { limit: 10, windowMs: 10 * 60 * 1000 },
   COMMUNITY_COMMENT: { limit: 30, windowMs: 10 * 60 * 1000 },
+  PREORDER: { limit: 5, windowMs: 10 * 60 * 1000 },
 };
 
 export type RateLimitResult =

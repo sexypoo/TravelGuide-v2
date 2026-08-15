@@ -1,4 +1,4 @@
-# 여쭈어 (Yeojju / 여JJU) — 2.5주 Codex 실행 계획
+# 여쭈어 (여JJU) — 2.5주 Codex 실행 계획
 
 - 기간 가정: 13 개발일
 - 작업 방식: 한 번에 하나의 검토 가능한 vertical slice
