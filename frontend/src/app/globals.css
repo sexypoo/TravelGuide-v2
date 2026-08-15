@@ -4300,18 +4300,29 @@ textarea:focus-visible {
   flex-direction: column;
 }
 
-.chatRoomExperience > .appBackLink {
-  flex: 0 0 auto;
-  margin-bottom: 0.65rem;
-}
-
 .conversationRoomHeader {
   display: grid;
-  padding: 0.2rem 0 0.8rem;
-  grid-template-columns: 3.15rem minmax(0, 1fr) auto;
-  gap: 0.75rem;
+  min-height: 5.25rem;
+  padding: 0.7rem 0.85rem;
+  grid-template-columns: auto 3.15rem minmax(0, 1fr) auto;
+  gap: 0.85rem;
   align-items: center;
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: 1.1rem;
+  background: linear-gradient(110deg, #ffffff 0%, #fff9fb 68%, #f1efff 100%);
+  box-shadow: 0 8px 24px rgba(73, 70, 83, 0.055);
+}
+
+.conversationRoomHeader > .appBackLink {
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 0.72rem;
+  border: 1px solid rgba(220, 211, 218, 0.82);
+  border-radius: 0.78rem;
+  background: rgba(255, 255, 255, 0.82);
+  white-space: nowrap;
 }
 
 .conversationRoomHeader__signal {
@@ -5130,33 +5141,37 @@ textarea:focus-visible {
   }
 
   .conversationRoomHeader {
-    min-height: 2.75rem;
-    padding: 0 2.65rem 0.45rem 2.35rem;
-    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 3.55rem;
+    padding: 0.35rem 0.35rem 0.55rem;
+    grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+    gap: 0.35rem;
+    border-width: 0 0 1px;
+    border-radius: 0;
+    background: white;
+    box-shadow: none;
   }
 
-  .chatRoomExperience > .appBackLink {
-    position: absolute;
-    top: -0.05rem;
-    left: -0.6rem;
-    z-index: 2;
-    display: grid;
-    width: 2.75rem;
-    height: 2.75rem;
+  .conversationRoomHeader > .appBackLink {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
     margin: 0;
-    place-items: center;
+    padding: 0;
     border: 0;
-    border-radius: 0.8rem;
+    border-radius: 0.75rem;
     background: transparent;
     color: var(--ink);
     font-size: 0;
+    gap: 0;
   }
 
-  .chatRoomExperience > .appBackLink:active {
+  .conversationRoomHeader > .appBackLink:active {
     background: #f5f1f5;
   }
 
-  .chatRoomExperience > .appBackLink > .appIcon {
+  .conversationRoomHeader > .appBackLink > .appIcon {
     width: 1.15rem;
     height: 1.15rem;
     stroke-width: 2.15;
@@ -5166,8 +5181,15 @@ textarea:focus-visible {
     display: none;
   }
 
-  .conversationRoomHeader__actions {
+  .conversationRoomHeader__copy {
+    min-width: 0;
     grid-column: 2;
+    text-align: center;
+  }
+
+  .conversationRoomHeader__actions {
+    grid-column: 3;
+    justify-content: center;
   }
 
   .liveRoomEyebrow,
@@ -5180,13 +5202,14 @@ textarea:focus-visible {
   .conversationRoomHeader h1 {
     overflow: hidden;
     font-size: 1.2rem;
+    letter-spacing: -0.045em;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .conversationRoomHeader .roomNotificationControl > button {
-    width: 2rem;
-    min-height: 2rem;
+    width: 2.5rem;
+    min-height: 2.5rem;
     padding: 0;
     justify-content: center;
   }
@@ -5212,8 +5235,7 @@ textarea:focus-visible {
 
 @media (max-width: 520px) {
   .conversationRoomHeader {
-    padding-bottom: 0.65rem;
-    grid-template-columns: minmax(0, 1fr) auto;
+    padding-bottom: 0.55rem;
   }
 
   .conversationRoomHeader h1 {
@@ -5221,7 +5243,7 @@ textarea:focus-visible {
   }
 
   .conversationRoomHeader__actions {
-    grid-column: 2;
+    grid-column: 3;
     grid-row: 1;
   }
 
@@ -6536,6 +6558,11 @@ textarea:focus-visible {
 
 .qualificationPending {
   opacity: 0.72;
+}
+
+.qualificationGrid > a.qualificationApproved {
+  border-color: rgba(43, 151, 132, 0.24);
+  background: #f6fffc;
 }
 
 .qualificationGrid > a:hover {
@@ -8054,10 +8081,10 @@ textarea:focus-visible {
 .communityLane p,
 .communityHero > div > p {
   color: var(--magenta);
-  font-family: var(--utility);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-family: var(--display);
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.14em;
 }
 
 .communityLane h2 {
@@ -8096,7 +8123,9 @@ textarea:focus-visible {
   margin: 0.5rem 0 0;
   font-family: var(--display);
   font-size: clamp(2.3rem, 6vw, 3.5rem);
+  font-weight: 820;
   letter-spacing: -0.07em;
+  line-height: 1.05;
 }
 
 .communityHero > div > span {
@@ -8118,7 +8147,7 @@ textarea:focus-visible {
   color: white;
   font: inherit;
   font-size: 0.8rem;
-  font-weight: 800;
+  font-weight: 760;
   cursor: pointer;
 }
 
@@ -8282,6 +8311,7 @@ textarea:focus-visible {
   margin: 0.8rem 0 0;
   font-family: var(--display);
   font-size: 1.18rem;
+  font-weight: 760;
   letter-spacing: -0.035em;
 }
 
@@ -8360,6 +8390,7 @@ textarea:focus-visible {
   margin: 1rem 0 0;
   font-family: var(--display);
   font-size: clamp(1.7rem, 5vw, 2.45rem);
+  font-weight: 820;
   letter-spacing: -0.055em;
   line-height: 1.3;
 }
@@ -8398,6 +8429,7 @@ textarea:focus-visible {
   margin: 0;
   font-family: var(--display);
   font-size: 1.05rem;
+  font-weight: 760;
 }
 
 .communityComments > p {

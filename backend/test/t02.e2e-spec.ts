@@ -185,6 +185,7 @@ describe('T02 destination, profile, and room shell', () => {
       id: stored.id,
       nickname: '새닉네임',
       bio: '제주 여행을 준비 중입니다.',
+      profileImageUrl: null,
       isVerifiedLocal: false,
       verifiedDestination: null,
       verifiedAt: null,

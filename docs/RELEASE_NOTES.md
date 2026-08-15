@@ -35,14 +35,13 @@ rehearsals remain mandatory.
 
 ## Automated evidence
 
-- Backend: 27 unit suites/71 tests and 9 PostgreSQL integration suites/37 tests.
-- Frontend: 37 suites/90 tests with global coverage gate at 55/59/57/56 for
+- Backend: 33 unit suites/92 tests and 12 PostgreSQL integration suites/40 tests.
+- Frontend: 50 suites/120 tests with global coverage gate at 55/59/57/56 for
   statements/branches/functions/lines.
-- Backend combined coverage is 85.23/62.85/84.24/85.96 with a gate at
+- Backend combined coverage is 85.85/64.73/85.19/86.55 with a gate at
   80/60/75/80 for statements/branches/functions/lines.
 - Playwright's two real-stack multi-context/mobile scenarios passed three
-  consecutive Chromium runs after aligning waiting-topic fixtures with the
-  structured observation contract.
+  consecutive Chromium runs in 36.4s, 38.0s, and 33.5s on 2026-08-15.
 
 Exact final results, candidate revision, domain, device, and rehearsal timestamps
 must be copied into `docs/PRESENTATION_CHECKLIST.md` before tagging.

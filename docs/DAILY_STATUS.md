@@ -1,5 +1,20 @@
 # TravelGuide v2 일일 상태
 
+## 2026-08-15
+
+- 완료 Task: T25 최종 MVP 릴리스 안정화 로컬 범위
+- 완료 acceptance IDs: 공개 프로필 계약 회귀, 발표 데모 리셋, 승인 인증 CTA,
+  핵심 실시간방 우선순위, E2E-017/018/027 자동화 재검증
+- 실행 명령: Node 20.20.2 backend/frontend `verify`, PostgreSQL T25 통합 테스트,
+  Playwright 3회, guarded local demo seed, 390x844 및 1440x900 화면 검수
+- 테스트 결과: backend 33/92 unit + 12/40 integration, frontend 50/120,
+  Playwright 2/2가 36.4s·38.0s·33.5s로 3회 연속 성공
+- 데모 상태: 리셋 1.54s, 대표 토픽 OPEN, 현재 답변 2개, 공유 카드 1개,
+  보이는 관리 데모 메시지 3개
+- Blocker: 실제 HTTPS/S3/PM2 호스트 smoke, 물리 모바일 GPS·키보드,
+  수동 4계정 리허설 3회, 백업 영상은 미완료
+- 배포 가능 여부: 로컬 발표 후보는 통과; 외부 릴리스 게이트 전 태그 금지
+
 ## 2026-08-02
 
 - 완료 Task: T18; T10 자동화 구성, T11 저장소 배포 준비 완료; T12 릴리스 문서 준비 중

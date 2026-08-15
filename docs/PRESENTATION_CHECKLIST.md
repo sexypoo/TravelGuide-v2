@@ -2,7 +2,7 @@
 
 ## Candidate identity
 
-- Candidate Git revision: `[record after freeze commit]`
+- Candidate Git revision: `working tree based on fa79b0a; record T25 commit after review`
 - Rollback Git revision: `755772e`
 - Proposed final tag: `v0.1.0` (do not create before all required checks pass)
 - Public HTTPS origin: `[not provided]`
@@ -22,8 +22,11 @@
 
 The guarded seed refreshes known account passwords and verification windows,
 reopens the canonical waiting topic, clears its accepted/resolved state, and
-refreshes its two seeded local answers. It does not delete unrelated production
-content.
+refreshes its two seeded local answers and three-message room scene. It removes
+non-image room messages authored by the four managed demo participants and their
+message reports; unrelated users' content outside the canonical demo topic is
+preserved. Demo image messages are soft-removed so stored objects are not
+orphaned.
 
 ```bash
 cd backend
@@ -36,9 +39,12 @@ DEMO_ADMIN_PASSWORD='from-secret-manager' \
 corepack yarn db:seed:demo
 ```
 
-- [ ] Reset duration recorded: `[not run]`
+- [x] Local reset duration recorded: `1.54s on 2026-08-15`.
+- [ ] Production reset duration recorded: `[not run]`
 - [ ] Correct database hostname/name was independently checked before seeding.
-- [ ] Canonical Jeju waiting topic is OPEN with two current answers.
+- [x] Local canonical Jeju waiting topic is OPEN with two current answers and
+      one visible shared card.
+- [ ] Production canonical Jeju waiting topic is confirmed after deployment.
 
 ## Automated gates
 
@@ -51,8 +57,11 @@ corepack yarn db:seed:demo
 - [ ] `SMOKE_BASE_URL=... corepack yarn smoke:production` passes before reboot.
 - [ ] The same production smoke passes after reboot and PM2 auto-start.
 
-Automated run record (2026-08-02): backend 27/71 unit and 9/37 integration;
-frontend 37/90; Playwright 2/2 passed in 31.2s, 30.9s, and 29.9s.
+Automated run record (2026-08-15, Node 20.20.2): backend 33 suites/92 unit and
+12 suites/40 PostgreSQL integration tests; frontend 50 suites/120 tests;
+Playwright 2/2 passed in 36.4s, 38.0s, and 33.5s. Backend coverage is
+85.85/64.73/85.19/86.55 and frontend coverage is
+61.63/64.22/63.78/62.88 (statements/branches/functions/lines).
 
 ## Rehearsal scenario
 
@@ -81,9 +90,10 @@ Run timestamps and notes:
 ## Device and visual checks
 
 - [ ] Physical iOS Safari or Android Chrome geolocation permission works on HTTPS.
-- [ ] 390x844: no horizontal scroll; composer remains reachable with keyboard.
+- [x] 390x844 automated/in-app check: no horizontal scroll and composer visible.
+- [ ] Physical mobile keyboard does not cover the composer.
 - [ ] 768x1024: room/chat/topic split remains usable.
-- [ ] 1440x900: content width and chat follow behavior are correct.
+- [x] 1440x900 local content width and primary-navigation layout are correct.
 - [ ] Long nickname/content, empty, loading, error, removed, expired, and resolved
       states were inspected.
 - [ ] Private evidence/image endpoints return 403 to unauthorized users.

@@ -47,7 +47,14 @@ describe('RoomExperience conversation and topics', () => {
   it('makes conversation primary and opens direct topic creation', () => {
     render(<RoomExperience room={room} currentUserId="traveler-1" />);
     const conversation = screen.getByRole('region', { name: '제주 대화' });
+    const roomHeader = screen
+      .getByRole('heading', { name: room.title })
+      .closest('header');
 
+    expect(roomHeader).not.toBeNull();
+    expect(
+      within(roomHeader as HTMLElement).getByRole('link', { name: '홈으로' }),
+    ).toHaveAttribute('href', '/app');
     expect(
       within(conversation).queryByText('LIVE CONVERSATION'),
     ).not.toBeInTheDocument();

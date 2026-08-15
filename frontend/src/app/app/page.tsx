@@ -4,6 +4,7 @@ import { RoomCard } from '@/components/rooms/room-card';
 import { getRooms } from '@/lib/api/rooms.server';
 import { getMyVerifications } from '@/lib/api/verifications.server';
 import { requireUser } from '@/lib/auth/session';
+import { getQualificationPresentation } from '@/lib/verifications/presentation';
 
 export default async function AppHome(): Promise<React.JSX.Element> {
   const [user, rooms, verifications] = await Promise.all([
@@ -13,10 +14,13 @@ export default async function AppHome(): Promise<React.JSX.Element> {
   ]);
   const approved = verifications.find((item) => item.status === 'APPROVED');
   const pending = verifications.find((item) => item.status === 'PENDING');
-  const pendingTypes = new Set(
-    verifications
-      .filter((item) => item.status === 'PENDING')
-      .map((item) => item.type),
+  const travelerQualification = getQualificationPresentation(
+    verifications,
+    'TRAVELER',
+  );
+  const localQualification = getQualificationPresentation(
+    verifications,
+    'LOCAL',
   );
   const summary =
     approved !== undefined
@@ -52,23 +56,6 @@ export default async function AppHome(): Promise<React.JSX.Element> {
         </div>
       </section>
 
-      <Link className="communityLane" href="/app/community">
-        <span className="communityLane__stamp" aria-hidden="true">
-          OPEN
-        </span>
-        <div>
-          <p>인증 없이 바로 참여</p>
-          <h2>여행자 커뮤니티</h2>
-          <span>
-            목적지에 상관없이 궁금한 것을 묻고, 알고 있는 여행 정보를
-            나눠보세요.
-          </span>
-        </div>
-        <strong>
-          정보 둘러보기 <AppIcon name="arrow-right" />
-        </strong>
-      </Link>
-
       <section className="homeSection" aria-labelledby="room-section-title">
         <div className="homeSection__heading">
           <div>
@@ -94,6 +81,23 @@ export default async function AppHome(): Promise<React.JSX.Element> {
         )}
       </section>
 
+      <Link className="communityLane" href="/app/community">
+        <span className="communityLane__stamp" aria-hidden="true">
+          OPEN
+        </span>
+        <div>
+          <p>인증 없이 바로 참여</p>
+          <h2>여행자 커뮤니티</h2>
+          <span>
+            목적지에 상관없이 궁금한 것을 묻고, 알고 있는 여행 정보를
+            나눠보세요.
+          </span>
+        </div>
+        <strong>
+          정보 둘러보기 <AppIcon name="arrow-right" />
+        </strong>
+      </Link>
+
       <section className="homeSection" aria-labelledby="qualification-title">
         <div className="homeSection__heading">
           <div>
@@ -102,72 +106,42 @@ export default async function AppHome(): Promise<React.JSX.Element> {
           </div>
         </div>
         <div className="qualificationGrid">
-          {pendingTypes.has('TRAVELER') ? (
-            <Link className="qualificationPending" href="/app/verifications">
-              <span
-                className="qualificationIcon qualificationIcon--traveler"
-                aria-hidden="true"
-              >
-                <AppIcon name="pin" />
+          <Link
+            className={travelerQualification.className}
+            href={travelerQualification.href}
+          >
+            <span
+              className="qualificationIcon qualificationIcon--traveler"
+              aria-hidden="true"
+            >
+              <AppIcon name="pin" />
+            </span>
+            <div>
+              <strong>{travelerQualification.title}</strong>
+              <p>{travelerQualification.body}</p>
+              <span>
+                {travelerQualification.action} <AppIcon name="arrow-right" />
               </span>
-              <div>
-                <strong>여행자 인증 심사 중</strong>
-                <p>같은 유형은 심사가 끝난 뒤 다시 신청할 수 있어요.</p>
-                <span>
-                  인증 현황에서 확인 <AppIcon name="arrow-right" />
-                </span>
-              </div>
-            </Link>
-          ) : (
-            <Link href="/app/verifications/traveler">
-              <span
-                className="qualificationIcon qualificationIcon--traveler"
-                aria-hidden="true"
-              >
-                <AppIcon name="pin" />
+            </div>
+          </Link>
+          <Link
+            className={localQualification.className}
+            href={localQualification.href}
+          >
+            <span
+              className="qualificationIcon qualificationIcon--local"
+              aria-hidden="true"
+            >
+              <AppIcon name="shield" />
+            </span>
+            <div>
+              <strong>{localQualification.title}</strong>
+              <p>{localQualification.body}</p>
+              <span>
+                {localQualification.action} <AppIcon name="arrow-right" />
               </span>
-              <div>
-                <strong>제주를 여행 중인가요?</strong>
-                <p>여행 일정과 증빙을 준비해 질문할 수 있어요.</p>
-                <span>
-                  여행자 인증 시작 <AppIcon name="arrow-right" />
-                </span>
-              </div>
-            </Link>
-          )}
-          {pendingTypes.has('LOCAL') ? (
-            <Link className="qualificationPending" href="/app/verifications">
-              <span
-                className="qualificationIcon qualificationIcon--local"
-                aria-hidden="true"
-              >
-                <AppIcon name="shield" />
-              </span>
-              <div>
-                <strong>현지인 인증 심사 중</strong>
-                <p>같은 유형은 심사가 끝난 뒤 다시 신청할 수 있어요.</p>
-                <span>
-                  인증 현황에서 확인 <AppIcon name="arrow-right" />
-                </span>
-              </div>
-            </Link>
-          ) : (
-            <Link href="/app/verifications/local">
-              <span
-                className="qualificationIcon qualificationIcon--local"
-                aria-hidden="true"
-              >
-                <AppIcon name="shield" />
-              </span>
-              <div>
-                <strong>제주에 살고 있나요?</strong>
-                <p>현재 위치와 거주 증빙을 준비해 답변할 수 있어요.</p>
-                <span>
-                  현지인 인증 시작 <AppIcon name="arrow-right" />
-                </span>
-              </div>
-            </Link>
-          )}
+            </div>
+          </Link>
         </div>
       </section>
     </div>

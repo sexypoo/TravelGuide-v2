@@ -64,11 +64,10 @@ export function RoomExperience({
 
   return (
     <div className="roomExperience chatRoomExperience">
-      <Link className="appBackLink" href="/app">
-        <AppIcon name="arrow-left" /> 홈으로
-      </Link>
-
       <header className="conversationRoomHeader">
+        <Link className="appBackLink" href="/app">
+          <AppIcon name="arrow-left" /> 홈으로
+        </Link>
         <div className="conversationRoomHeader__signal" aria-hidden="true">
           <span />
           <svg viewBox="0 0 96 70">

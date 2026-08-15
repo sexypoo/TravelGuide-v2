@@ -14,28 +14,28 @@ interface NavItem {
 
 const items: readonly NavItem[] = [
   {
-    href: '/app/community',
-    label: '커뮤니티',
-    icon: 'community',
-    matches: (pathname) => pathname.startsWith('/app/community'),
-  },
-  {
     href: '/app',
     label: '홈',
     icon: 'home',
     matches: (pathname) => pathname === '/app',
   },
   {
-    href: '/app/nearby',
-    label: '주변',
-    icon: 'nearby',
-    matches: (pathname) => pathname.startsWith('/app/nearby'),
-  },
-  {
     href: '/app/rooms/jeju',
     label: '실시간방',
     icon: 'room',
     matches: (pathname) => pathname.startsWith('/app/rooms'),
+  },
+  {
+    href: '/app/community',
+    label: '커뮤니티',
+    icon: 'community',
+    matches: (pathname) => pathname.startsWith('/app/community'),
+  },
+  {
+    href: '/app/nearby',
+    label: '주변',
+    icon: 'nearby',
+    matches: (pathname) => pathname.startsWith('/app/nearby'),
   },
   {
     href: '/app/profile',

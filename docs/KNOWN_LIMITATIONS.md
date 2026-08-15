@@ -7,8 +7,9 @@
   destination locked.
 - No 1:1 matching, payment, reward, ranking, AI answer generation, translation,
   typing indicator, presence, or read receipts.
-- No external map SDK; place cards use user-confirmed names, addresses, and
-  coordinates.
+- Optional place sharing and nearby discovery use Google Maps/Places when keys
+  are configured; route guidance and destination-wide map exploration are not
+  provided.
 - No background Web Push. Browser notifications work only while the web app is
   open and connected.
 - No question editing/deletion by authors; moderation uses audited soft removal.
@@ -22,8 +23,10 @@
 - The private S3 implementation relies on bucket policy/IAM and server-side AES256
   encryption. Bucket creation, versioning, retention, backup, and credential
   rotation are external infrastructure responsibilities.
-- Demo reset is an idempotent re-seed of known accounts and the canonical waiting
-  topic, not a general-purpose production data deletion tool.
+- Demo reset is an idempotent refresh of managed accounts, their non-image Jeju
+  room messages, and the canonical waiting topic. It is not a general-purpose
+  production data deletion tool and preserves unrelated users' content outside
+  the canonical managed demo topic.
 
 ## Unverified release conditions
 

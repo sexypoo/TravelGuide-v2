@@ -6,8 +6,12 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('AppNavigation', () => {
-  it('promotes nearby discovery while keeping verification in the profile flow', () => {
+  it('promotes the real-time room while keeping nearby and verification available', () => {
     render(<AppNavigation />);
+
+    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual(
+      ['홈', '실시간방', '커뮤니티', '주변', '프로필'],
+    );
 
     expect(screen.getByRole('link', { name: '주변' })).toHaveAttribute(
       'href',
