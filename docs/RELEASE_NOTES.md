@@ -1,5 +1,8 @@
 # 여쭈어 (여JJU) release candidate notes
 
+- Next.js와 eslint-config-next를 Vercel 배포 차단 대상인 15.5.2에서 공식
+  Maintenance LTS 보안판 15.5.21로 올리고 전체 프론트엔드 검증을 통과했다.
+
 ## Candidate status
 
 Not released or tagged. Repository verification, including three consecutive

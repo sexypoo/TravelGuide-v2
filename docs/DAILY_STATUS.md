@@ -2,6 +2,15 @@
 
 ## 2026-08-15
 
+- 완료 Task: T28 Next.js 보안 유지보수판 적용
+- 변경: Next.js 및 eslint-config-next 15.5.2 → 15.5.21; Vercel 취약 버전
+  보호 우회 없음
+- 실행 명령: frontend next version, lint, format check, typecheck, Jest 전체,
+  production build
+- 테스트 결과: Next.js 15.5.21 확인, frontend 55 suites/128 tests 통과,
+  lint/typecheck/format check/build 성공
+- 배포 가능 여부: 취약 프레임워크 버전 차단 원인 제거; Vercel 재배포 필요
+
 - 완료 Task: T27 공개 사전예약 페이지와 PostgreSQL 실제 저장
 - 완료 acceptance IDs: E2E-029, INT-PRE-01; 이름·이메일 정규화, 필수 동의,
   중복 비공개 성공, 공개 목록 차단, 모바일 390px 무가로스크롤

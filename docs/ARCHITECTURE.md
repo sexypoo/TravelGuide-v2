@@ -26,7 +26,7 @@
 ```text
 Runtime           Node.js 20.x
 Package manager   Yarn 4.2.2, nodeLinker: node-modules
-Frontend          Next.js 15.5.2, React 19.1.1, TypeScript 5.8.3
+Frontend          Next.js 15.5.21, React 19.1.1, TypeScript 5.8.3
 Styling           Tailwind CSS 3.4.1
 Server state      TanStack Query 5.x
 Backend           NestJS 11.x

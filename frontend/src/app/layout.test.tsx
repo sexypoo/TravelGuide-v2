@@ -7,9 +7,9 @@ describe('RootLayout', () => {
     const body = layout.props.children;
 
     expect(layout.props['data-scroll-behavior']).toBe('smooth');
-    expect(
-      isValidElement<{ suppressHydrationWarning?: boolean }>(body),
-    ).toBe(true);
+    expect(isValidElement<{ suppressHydrationWarning?: boolean }>(body)).toBe(
+      true,
+    );
 
     if (!isValidElement<{ suppressHydrationWarning?: boolean }>(body)) {
       throw new Error('RootLayout must render a body element');
