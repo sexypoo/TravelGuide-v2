@@ -1,4 +1,4 @@
-# TravelGuide v2 release candidate notes
+# 여쭈어 (Yeojju / 여JJU) release candidate notes
 
 ## Candidate status
 

@@ -589,8 +589,26 @@ textarea:focus-visible {
   background: var(--gradient);
   box-shadow: 0 6px 18px rgba(145, 75, 165, 0.22);
   color: white;
-  font-size: 1rem;
+}
+
+.wordmark__mark > svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: currentColor;
+  transform: rotate(-8deg);
+}
+
+.wordmark__name {
+  white-space: nowrap;
+}
+
+.wordmark__name > b {
+  background: var(--display-gradient);
+  background-clip: text;
+  color: transparent;
   font-weight: 850;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .landingPage {

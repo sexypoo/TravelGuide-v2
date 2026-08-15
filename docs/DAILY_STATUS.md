@@ -1,4 +1,4 @@
-# TravelGuide v2 일일 상태
+# 여쭈어 (Yeojju / 여JJU) 일일 상태
 
 ## 2026-08-15
 

@@ -1,4 +1,4 @@
-# TravelGuide v2 인수 테스트 명세
+# 여쭈어 (Yeojju / 여JJU) 인수 테스트 명세
 
 - 목적: Codex와 사람이 같은 기준으로 P0 완료 여부를 판단한다.
 - 테스트 방식: 실제 PostgreSQL, 실제 API, 실제 Socket.io, 실제 브라우저

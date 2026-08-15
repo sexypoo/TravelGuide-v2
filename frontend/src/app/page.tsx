@@ -138,7 +138,7 @@ export default async function Home(): Promise<React.JSX.Element> {
             <AppIcon name="info" />
           </span>
           <p>
-            TravelGuide는 여행 판단을 돕는 서비스입니다. 긴급 구조나 의료 상담이
+            여쭈어는 여행 판단을 돕는 서비스입니다. 긴급 구조나 의료 상담이
             필요하면 119 등 공식 기관에 먼저 연락해 주세요.
           </p>
         </div>
@@ -147,7 +147,7 @@ export default async function Home(): Promise<React.JSX.Element> {
       <footer className="landingFooter">
         <Wordmark />
         <p>여행의 변수에, 사람들의 답.</p>
-        <span>© 2026 TravelGuide</span>
+        <span>© 2026 Yeojju</span>
       </footer>
     </main>
   );
