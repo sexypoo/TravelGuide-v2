@@ -16,6 +16,23 @@ export interface UserAvatarDownload {
   originalName: string;
 }
 
+function safeErrorSummary(error: unknown): string {
+  if (!(error instanceof Error)) return 'UnknownException';
+  const code =
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof error.code === 'string'
+      ? ` code=${error.code}`
+      : '';
+  const message = error.message
+    .replace(/postgres(?:ql)?:\/\/\S+/gi, '[redacted-database-url]')
+    .replace(/https?:\/\/[^\s@]+@/gi, 'https://[redacted]@')
+    .replace(/\s+/g, ' ')
+    .slice(0, 500);
+  return `${error.name}${code} message=${message}`;
+}
+
 @Injectable()
 export class UserAvatarsService {
   private readonly logger = new Logger(UserAvatarsService.name);
@@ -43,7 +60,14 @@ export class UserAvatarsService {
     }
 
     const objectKey = `profile-images/${userId}/${randomUUID()}`;
-    await this.storage.putPrivate({ objectKey, contents: file.buffer });
+    try {
+      await this.storage.putPrivate({ objectKey, contents: file.buffer });
+    } catch (error: unknown) {
+      this.logger.error(
+        `Profile avatar storage put failed: ${safeErrorSummary(error)}`,
+      );
+      throw error;
+    }
     try {
       await this.prisma.user.update({
         where: { id: userId },
@@ -55,6 +79,9 @@ export class UserAvatarsService {
         },
       });
     } catch (error: unknown) {
+      this.logger.error(
+        `Profile avatar database update failed: ${safeErrorSummary(error)}`,
+      );
       await this.deleteStoredObject(objectKey);
       throw error;
     }

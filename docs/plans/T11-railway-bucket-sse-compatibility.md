@@ -14,6 +14,8 @@ S3.
   endpoint or a custom S3-compatible endpoint.
 - `backend/src/storage/s3-storage.adapter.spec.ts`: cover Railway-compatible
   puts and the preserved AWS AES256 behavior.
+- `backend/src/users/user-avatars.service.ts`: retain a redacted stage-specific
+  diagnostic when production storage or the following database update fails.
 - `docs/DECISIONS.md`: record the compatibility refinement to ADR-024.
 - `docs/DEPLOYMENT.md` and `docs/KNOWN_LIMITATIONS.md`: document the effective
   encryption contract for Railway and AWS.
@@ -40,3 +42,5 @@ None. Database data and object keys are unchanged.
   custom endpoints use checksums only when the S3 operation requires one.
 - A production deploy is required before uploads recover; the code change alone
   does not alter the currently running Railway service.
+- Storage and database failures must remain distinguishable without logging
+  credentials, database URLs, image contents, or user profile fields.
