@@ -84,3 +84,65 @@ interest in PostgreSQL and is safe to demonstrate as a real end-to-end feature.
   list endpoint, and return an indistinguishable duplicate success response.
 - A migration applied while the API watcher is running may require Prisma client
   regeneration and an API restart before runtime verification.
+
+## Visual showcase enhancement — 2026-08-16
+
+### Goal
+
+- Use a curated subset of the supplied iPhone mockups to make `/preorder` feel
+  like a presentation-ready product page while keeping the existing preorder
+  flow and T27 data contract unchanged.
+- Make the real service flow legible: join through verification, ask in the live
+  room, compare current field answers, and make a decision.
+
+### Design direction
+
+- Color: retain ink `#302d39`, paper `#ffffff`, lilac `#f7f4ff`, magenta
+  `#cf426f`, plum `#914ba5`, and iris `#7068d8`, adding only a restrained mint
+  signal for live field information.
+- Type: retain the existing display/body stacks and use the compact utility
+  treatment only for states and section labels.
+- Layout: replace the code-made hero chat card with one prominent live-room
+  device image, then add a three-screen editorial product tour with captions.
+- Signature: the phone mockups sit on a continuous magenta-to-iris "signal
+  route" that visually connects verification, live conversation, and the final
+  field-informed decision.
+- Responsive behavior: desktop uses an overlapping editorial composition;
+  mobile uses a horizontal snap gallery so screenshots remain readable without
+  shrinking into decoration.
+- Self-critique: avoid a generic floating-device collage by assigning every
+  chosen screenshot a specific product claim and preserving a single clear CTA
+  hierarchy. Do not add ornamental metrics, testimonials, or unimplemented
+  promises.
+
+### Files
+
+- `frontend/public/preorder/*`: optimized local copies of the selected supplied
+  mockups with descriptive filenames.
+- `frontend/src/app/preorder/page.tsx`: hero showcase and product-flow gallery.
+- `frontend/src/app/globals.css`: responsive image composition, snap behavior,
+  focus/accessibility states, and reduced-motion handling.
+- `frontend/src/app/preorder/page.test.tsx`: update/add structure assertions if
+  the existing test setup supports the server page.
+
+### Migrations and dependencies
+
+- No database migration or dependency change.
+
+### Tests
+
+1. Frontend lint, format check, typecheck, and focused Jest tests.
+2. Frontend production build.
+3. Playwright visual verification at `390x844` and `1440x900`, including no
+   horizontal page overflow and a usable preorder form.
+
+### Risks
+
+- Large PNG assets can regress load time; create resized WebP derivatives and
+  use `next/image` responsive sizes.
+- Overlapping phone artwork can obscure copy or cause horizontal overflow;
+  cap artwork widths, isolate overflow inside the gallery, and verify both
+  required viewports.
+- Screenshots contain demo-only names and timestamps; use them solely as
+  product mockups and label the gallery as a service preview rather than live
+  production data.

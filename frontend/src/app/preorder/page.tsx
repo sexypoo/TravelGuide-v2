@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Wordmark } from '@/components/brand/wordmark';
 import { AppIcon, type AppIconName } from '@/components/common';
@@ -32,31 +33,36 @@ const problems: ReadonlyArray<{
   },
 ];
 
-const steps: ReadonlyArray<{
+const productMoments: ReadonlyArray<{
   label: string;
-  icon: AppIconName;
   title: string;
   description: string;
+  image: string;
+  alt: string;
 }> = [
   {
-    label: '01',
-    icon: 'shield',
-    title: '서로의 자격을 확인해요',
+    label: '01 · VERIFY',
+    title: '여행 일정을 확인하고 들어와요',
     description:
-      '여행 일정이나 지역 생활을 확인한 참여자만 도움방에 들어옵니다.',
+      '여행자와 현지인의 자격을 확인해, 누구의 답인지 분명한 도움방을 만듭니다.',
+    image: '/preorder/traveler-verification.webp',
+    alt: '제주 여행 일정과 증빙을 제출하는 여행자 인증 화면',
   },
   {
-    label: '02',
-    icon: 'topic',
-    title: '지금 필요한 상황을 물어요',
-    description: '검색으로 부족한 상황을 여행지 단체 도움방에 바로 남깁니다.',
+    label: '02 · ASK',
+    title: '한 사람을 기다리지 않고 물어요',
+    description:
+      '여행지 도움방에 상황을 남기면 여러 인증 참여자가 각자의 현장 경험으로 답합니다.',
+    image: '/preorder/field-answers.webp',
+    alt: '두 명의 인증 현지인이 현장 대기 상황을 답한 화면',
   },
   {
-    label: '03',
-    icon: 'check',
-    title: '근거가 다른 답을 비교해요',
+    label: '03 · DECIDE',
+    title: '모인 답을 보고 바로 결정해요',
     description:
-      '방금 경험과 현지 생활 추천을 함께 보고 내 상황에 맞게 결정합니다.',
+      '현장 답변을 종합한 대기 시간과 혼잡도처럼 지금 필요한 판단만 빠르게 확인합니다.',
+    image: '/preorder/live-result.webp',
+    alt: '현장 답변을 종합해 대기 시간과 혼잡도를 보여 주는 화면',
   },
 ];
 
@@ -103,71 +109,24 @@ export default function PreorderPage(): React.JSX.Element {
           </div>
         </div>
 
-        <div
-          className="preorderProduct"
-          aria-label="여쭈어 실시간 도움방 화면 예시"
-        >
-          <div className="preorderProduct__topbar">
-            <div aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
-            <strong>여행지 실시간 도움방</strong>
-            <span className="preorderLive">LIVE</span>
-          </div>
-          <div className="preorderProduct__body">
-            <div className="preorderQuestion">
-              <div className="preorderMessageMeta">
-                <span className="preorderAvatar preorderAvatar--traveler">
-                  여
-                </span>
-                <div>
-                  <strong>인증 여행자</strong>
-                  <span>방금 전</span>
-                </div>
-              </div>
-              <p>
-                갑자기 비가 오는데, 아이와 한두 시간 머물기 좋은 실내 장소가
-                있을까요?
-              </p>
-              <span className="preorderQuestion__tag">
-                지금 도움이 필요해요
-              </span>
-            </div>
-
-            <div className="preorderAnswer preorderAnswer--local">
-              <span className="preorderAnswer__line" aria-hidden="true" />
-              <div className="preorderMessageMeta">
-                <span className="preorderAvatar preorderAvatar--local">현</span>
-                <div>
-                  <strong>인증 현지인</strong>
-                  <span>생활 추천</span>
-                </div>
-              </div>
-              <p>
-                근처 어린이 도서관은 주차가 편하고 오늘 저녁 6시까지 열어요.
-              </p>
-            </div>
-
-            <div className="preorderAnswer preorderAnswer--traveler">
-              <span className="preorderAnswer__line" aria-hidden="true" />
-              <div className="preorderMessageMeta">
-                <span className="preorderAvatar preorderAvatar--traveler">
-                  여
-                </span>
-                <div>
-                  <strong>인증 여행자</strong>
-                  <span>방금 경험</span>
-                </div>
-              </div>
-              <p>지금 그쪽에 있는데 자리가 넉넉하고 유아 공간도 열려 있어요.</p>
-            </div>
-
-            <div className="preorderDecision">
-              <AppIcon name="check" />
-              <span>두 경험을 비교해 지금 결정</span>
-            </div>
+        <div className="preorderShowcase">
+          <span className="preorderShowcase__route" aria-hidden="true" />
+          <figure className="preorderShowcase__device">
+            <Image
+              src="/preorder/live-room.webp"
+              alt="제주 실시간 여행 도움방에서 여행자 질문과 답변 카드를 주고받는 화면"
+              width={900}
+              height={1855}
+              priority
+              sizes="(max-width: 560px) 76vw, (max-width: 900px) 420px, 390px"
+            />
+          </figure>
+          <div className="preorderShowcase__note">
+            <span>
+              <i aria-hidden="true" /> LIVE SIGNAL
+            </span>
+            <strong>질문이 현장 정보가 되는 순간</strong>
+            <p>대화 속 질문을 놓치지 않고, 답변의 근거와 해결 상태까지 봐요.</p>
           </div>
         </div>
       </section>
@@ -199,26 +158,43 @@ export default function PreorderPage(): React.JSX.Element {
       </section>
 
       <section
-        className="preorderHow preorderSection"
+        className="preorderJourney"
         id="how-it-works"
         aria-labelledby="how-title"
       >
-        <div className="preorderSectionHeading preorderSectionHeading--left">
-          <p>HOW IT WORKS</p>
-          <h2 id="how-title">질문에서 결정까지, 세 단계면 충분해요.</h2>
+        <div className="preorderJourney__heading">
+          <div className="preorderSectionHeading preorderSectionHeading--left">
+            <p>FROM QUESTION TO DECISION</p>
+            <h2 id="how-title">여행이 달라진 그 순간부터, 답을 얻을 때까지.</h2>
+          </div>
+          <p>
+            인증부터 현장 답변까지 하나의 흐름으로 이어집니다. 옆으로 넘겨 실제
+            서비스 화면을 확인해 보세요.
+          </p>
         </div>
-        <ol className="preorderSteps">
-          {steps.map((step) => (
-            <li key={step.label}>
-              <span className="preorderStepNumber">{step.label}</span>
-              <span className="preorderStepIcon" aria-hidden="true">
-                <AppIcon name={step.icon} />
-              </span>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
+        <ol className="preorderJourney__track">
+          {productMoments.map((moment) => (
+            <li key={moment.label}>
+              <div className="preorderJourney__visual">
+                <Image
+                  src={moment.image}
+                  alt={moment.alt}
+                  width={900}
+                  height={1855}
+                  sizes="(max-width: 560px) 72vw, (max-width: 900px) 320px, 330px"
+                />
+              </div>
+              <div className="preorderJourney__copy">
+                <span>{moment.label}</span>
+                <h3>{moment.title}</h3>
+                <p>{moment.description}</p>
+              </div>
             </li>
           ))}
         </ol>
+        <p className="preorderJourney__hint" aria-hidden="true">
+          화면을 옆으로 넘겨보세요 <AppIcon name="arrow-right" />
+        </p>
       </section>
 
       <section

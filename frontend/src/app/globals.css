@@ -757,92 +757,132 @@ textarea:focus-visible {
   border-radius: 1rem;
 }
 
-.preorderProduct {
-  overflow: hidden;
-  border: 1px solid #e8e3ed;
-  border-radius: 1.75rem;
-  background: #fff;
-  box-shadow: 0 32px 80px rgba(59, 51, 73, 0.16);
-  transform: rotate(1.4deg);
+.preorderShowcase {
+  position: relative;
+  min-height: 39rem;
+  isolation: isolate;
 }
 
-.preorderProduct__topbar {
-  display: grid;
-  min-height: 3.8rem;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding-inline: 1.15rem;
-  border-bottom: 1px solid #eeeaf2;
-  background: #fbfaff;
-}
-
-.preorderProduct__topbar > div {
-  display: flex;
-  gap: 0.34rem;
-}
-
-.preorderProduct__topbar > div span {
-  width: 0.48rem;
-  height: 0.48rem;
+.preorderShowcase::before {
+  position: absolute;
+  z-index: -2;
+  inset: 8% -18% 7% 0;
   border-radius: 50%;
-  background: #ded8e5;
-}
-
-.preorderProduct__topbar > div span:first-child {
-  background: #d45c83;
-}
-
-.preorderProduct__topbar strong {
-  font-size: 0.82rem;
-  letter-spacing: -0.02em;
-}
-
-.preorderLive {
-  justify-self: end;
-  color: var(--magenta);
-  font-size: 0.62rem;
-  font-weight: 850;
-  letter-spacing: 0.12em;
-}
-
-.preorderProduct__body {
-  display: grid;
-  gap: 0.9rem;
-  padding: 1.25rem;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.95)),
-    radial-gradient(circle at 20% 20%, #f1e9fa, transparent 20rem);
+    radial-gradient(
+      circle at 64% 42%,
+      rgba(112, 104, 216, 0.19),
+      transparent 31%
+    ),
+    radial-gradient(
+      circle at 28% 65%,
+      rgba(207, 66, 111, 0.14),
+      transparent 32%
+    );
+  filter: blur(1px);
+  content: '';
 }
 
-.preorderQuestion,
-.preorderAnswer {
-  border: 1px solid #ebe6f0;
-  border-radius: 1.1rem;
-  background: #fff;
+.preorderShowcase__route {
+  position: absolute;
+  z-index: -1;
+  top: 8.5rem;
+  right: -2rem;
+  bottom: 8.5rem;
+  left: 2.5rem;
+  border: 1px solid rgba(145, 75, 165, 0.24);
+  border-radius: 52% 48% 44% 56%;
+  transform: rotate(-8deg);
 }
 
-.preorderQuestion {
-  padding: 1rem;
+.preorderShowcase__route::before,
+.preorderShowcase__route::after {
+  position: absolute;
+  width: 0.72rem;
+  height: 0.72rem;
+  border: 0.23rem solid white;
+  border-radius: 50%;
+  background: var(--magenta);
+  box-shadow: 0 0 0 1px rgba(207, 66, 111, 0.25);
+  content: '';
 }
 
-.preorderMessageMeta {
+.preorderShowcase__route::before {
+  top: 18%;
+  left: -0.35rem;
+}
+
+.preorderShowcase__route::after {
+  right: 5%;
+  bottom: 8%;
+  background: var(--purple);
+}
+
+.preorderShowcase__device {
+  position: absolute;
+  top: -1rem;
+  left: 50%;
+  width: min(23rem, 76%);
+  margin: 0;
+  filter: drop-shadow(0 32px 30px rgba(50, 42, 61, 0.17));
+  transform: translateX(-50%) rotate(2.2deg);
+}
+
+.preorderShowcase__device img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.preorderShowcase__note {
+  position: absolute;
+  z-index: 2;
+  right: -1.25rem;
+  bottom: 3.25rem;
+  width: min(18.5rem, 62%);
+  padding: 1.15rem 1.25rem;
+  border: 1px solid rgba(112, 104, 216, 0.18);
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 50px rgba(53, 46, 66, 0.14);
+  backdrop-filter: blur(14px);
+}
+
+.preorderShowcase__note > span {
   display: flex;
-  gap: 0.7rem;
+  gap: 0.45rem;
   align-items: center;
+  color: var(--purple);
+  font-size: 0.61rem;
+  font-weight: 850;
+  letter-spacing: 0.13em;
 }
 
-.preorderMessageMeta > div {
-  display: grid;
-  gap: 0.04rem;
+.preorderShowcase__note i {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #11a995;
+  box-shadow: 0 0 0 0.32rem rgba(17, 169, 149, 0.12);
 }
 
-.preorderMessageMeta strong {
-  font-size: 0.77rem;
+.preorderShowcase__note strong,
+.preorderShowcase__note p {
+  display: block;
 }
 
-.preorderMessageMeta div > span {
-  color: #8b8493;
-  font-size: 0.66rem;
+.preorderShowcase__note strong {
+  margin-top: 0.65rem;
+  font-family: var(--display);
+  font-size: 0.95rem;
+  letter-spacing: -0.035em;
+}
+
+.preorderShowcase__note p {
+  margin: 0.4rem 0 0;
+  color: #777080;
+  font-size: 0.71rem;
+  line-height: 1.55;
 }
 
 .preorderAvatar {
@@ -864,62 +904,6 @@ textarea:focus-visible {
 .preorderAvatar--local {
   background: #ebeafd;
   color: #625bc4;
-}
-
-.preorderQuestion > p,
-.preorderAnswer > p {
-  margin: 0.75rem 0 0;
-  color: #45404d;
-  font-size: 0.78rem;
-  line-height: 1.6;
-}
-
-.preorderQuestion__tag {
-  display: inline-flex;
-  margin-top: 0.8rem;
-  padding: 0.32rem 0.55rem;
-  border-radius: 999px;
-  background: #fff0f4;
-  color: #b53461;
-  font-size: 0.63rem;
-  font-weight: 750;
-}
-
-.preorderAnswer {
-  position: relative;
-  margin-left: 1.5rem;
-  padding: 0.9rem 1rem;
-}
-
-.preorderAnswer__line {
-  position: absolute;
-  top: -1rem;
-  bottom: 50%;
-  left: -0.85rem;
-  width: 1px;
-  background: #dcd4e5;
-}
-
-.preorderAnswer--traveler {
-  margin-left: 3rem;
-}
-
-.preorderDecision {
-  display: flex;
-  gap: 0.55rem;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.65rem;
-  border-radius: 0.85rem;
-  background: #f4f0fb;
-  color: #625574;
-  font-size: 0.7rem;
-  font-weight: 750;
-}
-
-.preorderDecision svg {
-  width: 0.95rem;
-  height: 0.95rem;
 }
 
 .preorderProblem {
@@ -979,8 +963,7 @@ textarea:focus-visible {
   border-right: 0;
 }
 
-.preorderProblemGrid article > span,
-.preorderStepIcon {
+.preorderProblemGrid article > span {
   display: grid;
   width: 2.7rem;
   height: 2.7rem;
@@ -990,33 +973,23 @@ textarea:focus-visible {
   color: var(--plum);
 }
 
-.preorderProblemGrid svg,
-.preorderStepIcon svg {
+.preorderProblemGrid svg {
   width: 1.2rem;
   height: 1.2rem;
 }
 
-.preorderProblemGrid h3,
-.preorderSteps h3 {
+.preorderProblemGrid h3 {
   margin: 1.25rem 0 0;
   font-family: var(--display);
   font-size: 1.12rem;
   letter-spacing: -0.035em;
 }
 
-.preorderProblemGrid p,
-.preorderSteps p {
+.preorderProblemGrid p {
   margin: 0.65rem 0 0;
   color: #77717f;
   font-size: 0.86rem;
   line-height: 1.7;
-}
-
-.preorderHow {
-  width: 100%;
-  max-width: none;
-  padding: 8rem max(1.5rem, calc((100% - 1180px) / 2));
-  background: #f8f6fc;
 }
 
 .preorderSectionHeading--left {
@@ -1029,36 +1002,134 @@ textarea:focus-visible {
   font-size: clamp(2.1rem, 3.5vw, 3rem);
 }
 
-.preorderSteps {
+.preorderJourney {
+  position: relative;
+  width: 100%;
+  padding: 8rem max(1.5rem, calc((100% - 1180px) / 2));
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(207, 66, 111, 0.035) 1px, transparent 1px),
+    #f8f6fc;
+  background-size: min(8vw, 7rem) 100%;
+}
+
+.preorderJourney::before {
+  position: absolute;
+  top: 28rem;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--magenta),
+    var(--plum),
+    var(--purple)
+  );
+  opacity: 0.35;
+  content: '';
+}
+
+.preorderJourney__heading {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.38fr);
+  gap: 4rem;
+  align-items: end;
+}
+
+.preorderJourney__heading > p {
+  margin: 0 0 0.3rem;
+  color: #746d7d;
+  font-size: 0.88rem;
+  line-height: 1.75;
+}
+
+.preorderJourney__track {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin: 4rem 0 0;
+  gap: clamp(1rem, 3vw, 2.25rem);
+  margin: 4.5rem 0 0;
   padding: 0;
   list-style: none;
 }
 
-.preorderSteps li {
+.preorderJourney__track > li {
   position: relative;
-  min-height: 18rem;
-  padding: 2rem;
-  border: 1px solid #e7e1ec;
-  border-radius: 1.5rem;
-  background: #fff;
+  min-width: 0;
 }
 
-.preorderStepNumber {
+.preorderJourney__track > li:nth-child(2) {
+  padding-top: 4rem;
+}
+
+.preorderJourney__track > li:nth-child(3) {
+  padding-top: 8rem;
+}
+
+.preorderJourney__visual {
+  position: relative;
+  width: min(100%, 20rem);
+  margin-inline: auto;
+  filter: drop-shadow(0 28px 26px rgba(55, 47, 66, 0.14));
+}
+
+.preorderJourney__visual::before {
   position: absolute;
-  top: 2rem;
-  right: 2rem;
-  color: #c8c0d1;
-  font-size: 0.75rem;
-  font-weight: 800;
+  z-index: -1;
+  right: 10%;
+  bottom: 2%;
+  left: 10%;
+  height: 8%;
+  border-radius: 50%;
+  background: rgba(91, 76, 107, 0.22);
+  filter: blur(16px);
+  content: '';
+}
+
+.preorderJourney__visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.preorderJourney__copy {
+  position: relative;
+  max-width: 20rem;
+  margin: -1rem auto 0;
+  padding: 1.35rem 1.4rem 1.5rem;
+  border: 1px solid rgba(221, 214, 227, 0.9);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 16px 40px rgba(65, 54, 75, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.preorderJourney__copy > span {
+  color: var(--plum);
+  font-size: 0.65rem;
+  font-weight: 850;
   letter-spacing: 0.12em;
 }
 
-.preorderSteps h3 {
-  margin-top: 2.4rem;
+.preorderJourney__copy h3 {
+  margin: 0.62rem 0 0;
+  font-family: var(--display);
+  font-size: 1.08rem;
+  letter-spacing: -0.04em;
+}
+
+.preorderJourney__copy p {
+  margin: 0.55rem 0 0;
+  color: #77717f;
+  font-size: 0.79rem;
+  line-height: 1.65;
+}
+
+.preorderJourney__hint {
+  display: none;
 }
 
 .preorderTrust {
@@ -1376,7 +1447,7 @@ textarea:focus-visible {
     padding-block: 5rem 6rem;
   }
 
-  .preorderProduct {
+  .preorderShowcase {
     width: min(100%, 31rem);
     margin-inline: auto;
   }
@@ -1385,8 +1456,7 @@ textarea:focus-visible {
     padding-block: 6rem;
   }
 
-  .preorderProblemGrid,
-  .preorderSteps {
+  .preorderProblemGrid {
     grid-template-columns: 1fr;
   }
 
@@ -1400,13 +1470,61 @@ textarea:focus-visible {
     border-bottom: 0;
   }
 
-  .preorderHow {
-    width: 100%;
+  .preorderJourney {
     padding: 6rem max(1rem, calc((100% - 42rem) / 2));
   }
 
-  .preorderSteps li {
-    min-height: 15rem;
+  .preorderJourney::before {
+    top: 31rem;
+  }
+
+  .preorderJourney__heading {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .preorderJourney__heading > p {
+    max-width: 34rem;
+  }
+
+  .preorderJourney__track {
+    display: flex;
+    gap: 1rem;
+    margin-right: -1rem;
+    padding-right: 1rem;
+    padding-bottom: 1.5rem;
+    overflow-x: auto;
+    scroll-padding-left: 0;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .preorderJourney__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .preorderJourney__track > li,
+  .preorderJourney__track > li:nth-child(2),
+  .preorderJourney__track > li:nth-child(3) {
+    width: min(20rem, 80vw);
+    flex: 0 0 min(20rem, 80vw);
+    padding-top: 0;
+    scroll-snap-align: start;
+  }
+
+  .preorderJourney__hint {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0.35rem 0 0;
+    color: #817a88;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .preorderJourney__hint svg {
+    width: 0.9rem;
+    height: 0.9rem;
   }
 
   .preorderTrust {
@@ -1452,21 +1570,28 @@ textarea:focus-visible {
     justify-content: center;
   }
 
-  .preorderProduct {
-    transform: none;
+  .preorderShowcase {
+    min-height: 33rem;
   }
 
-  .preorderProduct__topbar strong {
-    font-size: 0.72rem;
+  .preorderShowcase__device {
+    top: 0;
+    width: min(20rem, 78%);
+    transform: translateX(-50%) rotate(1.2deg);
   }
 
-  .preorderProduct__body {
-    padding: 0.9rem;
+  .preorderShowcase__route {
+    top: 6.5rem;
+    right: 0;
+    bottom: 5rem;
+    left: 1rem;
   }
 
-  .preorderAnswer,
-  .preorderAnswer--traveler {
-    margin-left: 0.9rem;
+  .preorderShowcase__note {
+    right: 0;
+    bottom: 1rem;
+    width: min(16rem, 70%);
+    padding: 0.95rem 1rem;
   }
 
   .preorderSectionHeading h2,
@@ -1479,9 +1604,31 @@ textarea:focus-visible {
     margin-top: 3rem;
   }
 
-  .preorderProblemGrid article,
-  .preorderSteps li {
+  .preorderProblemGrid article {
     padding: 1.5rem;
+  }
+
+  .preorderJourney {
+    padding-block: 5rem;
+  }
+
+  .preorderJourney::before {
+    top: 28rem;
+  }
+
+  .preorderJourney__track {
+    margin-top: 3rem;
+  }
+
+  .preorderJourney__track > li,
+  .preorderJourney__track > li:nth-child(2),
+  .preorderJourney__track > li:nth-child(3) {
+    width: 78vw;
+    flex-basis: 78vw;
+  }
+
+  .preorderJourney__copy {
+    margin-top: -0.7rem;
   }
 
   .preorderSignup {
@@ -1502,6 +1649,16 @@ textarea:focus-visible {
 
   .preorderFooter p {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .preorderJourney__track {
+    scroll-behavior: auto;
   }
 }
 
