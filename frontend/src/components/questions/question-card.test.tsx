@@ -42,5 +42,9 @@ describe('QuestionCard topic evidence', () => {
     expect(
       screen.getByText('0').closest('.questionAnswerCount'),
     ).toHaveTextContent('답변 0');
+    expect(screen.queryByText('오늘 중')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('대기 현황').closest('.questionLeadRow'),
+    ).toHaveTextContent('대기 현황·진행 중');
   });
 });

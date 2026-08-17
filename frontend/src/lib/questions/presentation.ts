@@ -62,6 +62,33 @@ export function formatDateTime(value: string): string {
   }).format(new Date(value));
 }
 
+export function formatTopicCardTime(
+  value: string,
+  reference = new Date(),
+): string {
+  const timeZone = 'Asia/Seoul';
+  const calendarDay = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone,
+  });
+  const createdAt = new Date(value);
+  if (calendarDay.format(createdAt) === calendarDay.format(reference)) {
+    const time = new Intl.DateTimeFormat('ko-KR', {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone,
+    }).format(createdAt);
+    return `오늘 ${time}`;
+  }
+  return new Intl.DateTimeFormat('ko-KR', {
+    month: 'short',
+    day: 'numeric',
+    timeZone,
+  }).format(createdAt);
+}
+
 export function formatChatTime(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', {
     hour: '2-digit',

@@ -38,14 +38,17 @@ export function TopicShareButton({
         className="iconTextControl"
         type="button"
         disabled={mutation.isPending}
+        aria-label={
+          mutation.isPending
+            ? '채팅에 공유 중'
+            : sent
+              ? '채팅에 다시 공유하기'
+              : '채팅에 공유하기'
+        }
         onClick={() => mutation.mutate()}
       >
         <AppIcon name="send" />
-        {mutation.isPending
-          ? '공유 중'
-          : sent
-            ? '채팅에 다시 공유하기'
-            : '채팅에 공유하기'}
+        {mutation.isPending ? '공유 중' : sent ? '다시 공유' : '공유'}
       </button>
       {mutation.isError && (
         <span role="alert">

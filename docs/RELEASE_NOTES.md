@@ -6,8 +6,9 @@
   short conversations above the composer.
 - Replaced bordered signal-heavy text bubbles with neutral received bubbles and
   a single-color sent surface while preserving mobile readability minimums.
-- Rebuilt room topics as question-first white cards with one status pulse,
-  answer count, quiet metadata, and one full-width chat-share action.
+- Rebuilt room topics as question-first white cards with one sentence-like
+  context line, one byline/answer footer, and a compact secondary share action.
+  Normal urgency is omitted and same-day timestamps use a short `오늘` label.
 - Moved place selection into a document-level modal with search-first focus,
   focus containment, Escape and backdrop closing, map/result panes, and a
   selected-place footer on desktop and mobile.

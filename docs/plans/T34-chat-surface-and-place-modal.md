@@ -86,6 +86,46 @@ text bubbles and using one saturated violet sent surface. The surrounding room
 becomes quieter, and direction remains immediately clear through alignment and
 color rather than ornamental signal bars.
 
+## Feedback pass — one-glance topic preview
+
+The first neutral-card pass still read like a compact admin panel: status,
+answer count, category, urgency, author, time, and share each occupied a
+separate visual row. The revised subject is a live travel question preview for
+a traveler who needs to decide, in one glance, whether to open or share it.
+
+### Compact tokens and type
+
+- Decision Ink `#191f28`, Utility Gray `#6b7684`, Quiet Canvas `#f2f4f6`,
+  Surface White `#ffffff`, Live Green `#00a27a`, and Guide Violet `#6257d9`.
+- Wanted Sans carries the question at 16px/700; Pretendard carries the compact
+  context and author line; SUIT carries time and answer data at 12px.
+
+### Revised layout
+
+```text
+┌ 대기 현황 · ● 진행 중                    공유 ─┐
+│ 현재 제주공항 입장 대기 상황을 알려주세요 │
+│ 제주여행자 · 인증 여행자 · 오늘       답변 2 › │
+└─────────────────────────────────────────┘
+```
+
+The signature is a single sentence-like context line: category and live status
+read together before the question, rather than as separate badges. Normal
+urgency disappears because it carries no decision value; only urgent topics
+add an alert word. Share becomes a small quiet utility in the top corner and
+the answer count becomes the card's destination cue.
+
+The aesthetic risk is removing the full-width share footer entirely. This is
+appropriate here because opening the question remains the primary action and
+sharing is a secondary room utility. The critique also removes one more
+accessory—the dedicated status row—so the result is not merely a shorter version
+of the same card.
+
+User calibration after the first compact screenshot: keep the familiar clean
+rounded rectangle, but avoid the inflated soft-card look. The final room card
+therefore uses a 14px corner radius, 12px content padding, a 9px share-control
+radius, and tighter vertical rhythm instead of the earlier 19px/17px treatment.
+
 ## Files
 
 - `frontend/src/components/messages/message-timeline.tsx` and test: add a
@@ -98,8 +138,11 @@ color rather than ornamental signal bars.
   dialog is outside the composer layout.
 - `frontend/src/app/chat-room.css`: focused-room width, bubble, topic-card, and
   modal visual system.
+- `frontend/src/components/questions/question-card.tsx`, share button, and
+  presentation helper/tests: compress the feedback-pass card and shorten live
+  timestamps without losing accessible verification and share labels.
 - `frontend/e2e/critical-room.spec.ts`: desktop density and mobile modal
-  geometry regression checks.
+  geometry plus topic radius, padding, height, type, and clipping checks.
 - `docs/DECISIONS.md` and `docs/RELEASE_NOTES.md`: record the interaction and
   visual boundary.
 
@@ -134,10 +177,10 @@ color rather than ornamental signal bars.
 ## Results
 
 - Focused ESLint and TypeScript passed; 7 focused suites with 20 tests passed.
-- Complete `corepack yarn verify` passed: Prettier, ESLint, TypeScript, 55 Jest
-  suites with 133 tests, coverage gates, and the Next.js 15.5.21 production
+- Complete `corepack yarn verify` passed: Prettier, ESLint, TypeScript, 56 Jest
+  suites with 134 tests, coverage gates, and the Next.js 15.5.21 production
   build.
-- Complete real-stack Playwright passed: 4 tests in 2.2m against PostgreSQL,
+- Complete real-stack Playwright passed: 4 tests in 1.4m against PostgreSQL,
   the NestJS API, Next.js, and Socket.io. The focused room scenarios also passed
   together after restoring the 12px mobile metadata minimum. Cold Next.js
   compilation can take longer than the old navigation limits, so only the two
@@ -146,6 +189,10 @@ color rather than ornamental signal bars.
   mobile topics, and mobile place modal. The map preview's initial footer
   overlap and the first mobile metadata reduction were corrected before final
   verification.
+- The feedback-pass topic surface was re-inspected at 390x844 and 1440x900. Its
+  14px radius, 12px padding, maximum test-card height of 145px, 12px metadata,
+  compact same-day time, visible full author name, and secondary share control
+  are protected by the real-stack mobile regression.
 - Desktop room geometry leaves a 16px outer gutter at 1440x900; short message
   history settles above the composer. The modal is a direct body child, locks
   body overflow, receives search focus, and remains within 390x844.

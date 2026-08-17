@@ -29,3 +29,13 @@ topic cards, and turn place selection into a reliable viewport-level modal.
   with Escape or backdrop click, and remains usable at 390x844.
 - Existing message, topic, place search, selection, and send behavior passes.
 - Frontend verify and real-stack Playwright pass.
+
+## Feedback acceptance
+
+- A room topic uses only one compact context line, the question, and one footer
+  line; normal urgency does not consume a separate label.
+- Sharing is a small secondary control rather than a full-width card footer.
+- At 390px, two topic cards expose materially more question content without
+  sacrificing the 12px metadata minimum or hiding answer count and sharing.
+- The topic surface remains a clean rounded rectangle with at most 15px corner
+  radius and approximately 12px inner padding, not an oversized soft card.

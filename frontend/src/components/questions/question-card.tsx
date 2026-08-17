@@ -4,7 +4,7 @@ import { participantBadgeLabel } from '@/lib/api/participants';
 import type { Question } from '@/lib/api/questions';
 import {
   categoryLabels,
-  formatDateTime,
+  formatTopicCardTime,
   statusLabels,
   urgencyLabels,
 } from '@/lib/questions/presentation';
@@ -29,28 +29,30 @@ export function QuestionCard({
     <article
       className={`signalQuestionCard${question.urgency === 'URGENT' ? ' signalQuestionCard--urgent' : ''}`}
     >
-      <Link href={`/app/questions/${question.id}`}>
-        <div className="questionMetaRow">
+      <Link className="questionCardLink" href={`/app/questions/${question.id}`}>
+        <div className="questionLeadRow">
+          <span className="questionCategory">
+            {categoryLabels[question.category]}
+          </span>
+          <span className="questionLeadSeparator" aria-hidden="true">
+            ·
+          </span>
           <span
             className={`questionStatus questionStatus--${question.status.toLowerCase()}`}
           >
             <i aria-hidden="true" />
             {statusLabels[question.status]}
           </span>
-          <span className="questionAnswerCount">
-            답변 <strong>{question.answerCount}</strong>
-          </span>
-        </div>
-        <div className="questionContextRow">
-          <span className="questionCategory">
-            {categoryLabels[question.category]}
-          </span>
-          <span aria-hidden="true">·</span>
-          <span
-            className={`questionUrgency questionUrgency--${question.urgency.toLowerCase()}`}
-          >
-            {urgencyLabels[question.urgency]}
-          </span>
+          {question.urgency === 'URGENT' && (
+            <>
+              <span className="questionLeadSeparator" aria-hidden="true">
+                ·
+              </span>
+              <span className="questionUrgency questionUrgency--urgent">
+                {urgencyLabels.URGENT}
+              </span>
+            </>
+          )}
         </div>
         <p className="questionCardContent">{question.content}</p>
         {question.areaText !== null && (
@@ -70,13 +72,22 @@ export function QuestionCard({
           </div>
         )}
         <footer className="questionCardFooter">
-          <span className={`publicBadge publicBadge--${badgeKind}`}>
-            {question.author.nickname} ·{' '}
-            {participantBadgeLabel(question.author.badge)}
+          <span className="questionCardByline">
+            <span
+              className={`publicBadge publicBadge--${badgeKind}`}
+              aria-label={`${question.author.nickname} · ${participantBadgeLabel(question.author.badge)}`}
+            >
+              <span>{question.author.nickname}</span>
+              <AppIcon name="check" />
+            </span>
+            <time dateTime={question.createdAt}>
+              {formatTopicCardTime(question.createdAt)}
+            </time>
           </span>
-          <time dateTime={question.createdAt}>
-            {formatDateTime(question.createdAt)}
-          </time>
+          <span className="questionAnswerCount">
+            답변 <strong>{question.answerCount}</strong>
+            <AppIcon name="arrow-right" />
+          </span>
         </footer>
       </Link>
       {canShare && roomSlug && question.status !== 'REMOVED' && (

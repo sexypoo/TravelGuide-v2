@@ -51,11 +51,16 @@ describe('TopicShareButton', () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '채팅에 공유하기' }));
+    const shareButton = screen.getByRole('button', {
+      name: '채팅에 공유하기',
+    });
+    expect(shareButton).toHaveTextContent('공유');
+    fireEvent.click(shareButton);
     const resendButton = await screen.findByRole('button', {
       name: '채팅에 다시 공유하기',
     });
     expect(resendButton).toBeEnabled();
+    expect(resendButton).toHaveTextContent('다시 공유');
 
     fireEvent.click(resendButton);
     await waitFor(() => expect(shareTopicMessage).toHaveBeenCalledTimes(2));

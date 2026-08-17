@@ -904,14 +904,15 @@
 
 .appShell--room .topicRail .questionFeed {
   margin-top: 0.45rem;
-  gap: 0.65rem;
+  gap: 0.55rem;
 }
 
 .appShell--room .topicRail .signalQuestionCard,
 .appShell--room .topicRail .signalQuestionCard--urgent {
-  overflow: hidden;
+  position: relative;
+  overflow: visible;
   border: 0;
-  border-radius: 1rem;
+  border-radius: 0.9rem;
   background: #fff;
   box-shadow: none;
   transform: none;
@@ -919,18 +920,32 @@
 
 .appShell--room .topicRail .signalQuestionCard:hover {
   border: 0;
-  background: #fbfcfd;
+  background: #fff;
   box-shadow: none;
   transform: none;
 }
 
-.appShell--room .topicRail .signalQuestionCard > a {
-  padding: 1rem 1rem 0.9rem;
+.appShell--room .topicRail .signalQuestionCard > .questionCardLink {
+  padding: 0.75rem;
+  border-radius: inherit;
 }
 
-.appShell--room .topicRail .questionMetaRow {
-  min-height: 1.5rem;
-  gap: 0.5rem;
+.appShell--room .topicRail .questionLeadRow {
+  display: flex;
+  min-width: 0;
+  min-height: 1.8rem;
+  padding-right: 4rem;
+  align-items: center;
+  gap: 0.34rem;
+  color: #8b95a1;
+  font-family: var(--utility);
+  font-size: 0.75rem;
+  font-weight: 720;
+  line-height: 1.3;
+}
+
+.appShell--room .topicRail .questionLeadSeparator {
+  color: #d1d6db;
 }
 
 .appShell--room .topicRail .questionStatus {
@@ -939,41 +954,21 @@
   padding: 0;
   background: transparent;
   color: #00a27a;
-  font-size: 0.72rem;
-  font-weight: 760;
+  box-shadow: none;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .appShell--room .topicRail .questionStatus > i {
-  width: 0.42rem;
-  height: 0.42rem;
-  margin-right: 0.35rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  margin-right: 0.3rem;
   border-radius: 50%;
   background: currentColor;
 }
 
 .appShell--room .topicRail .questionStatus--resolved {
   color: #6b7684;
-}
-
-.appShell--room .topicRail .questionAnswerCount {
-  margin-left: auto;
-  color: #8b95a1;
-  font-family: var(--utility);
-  font-size: 0.7rem;
-  font-weight: 650;
-}
-
-.appShell--room .topicRail .questionAnswerCount strong {
-  color: #333d4b;
-  font-size: 0.76rem;
-}
-
-.appShell--room .topicRail .questionContextRow {
-  display: flex;
-  margin-top: 0.7rem;
-  gap: 0.35rem;
-  align-items: center;
-  color: #8b95a1;
 }
 
 .appShell--room .topicRail .questionCategory,
@@ -983,12 +978,9 @@
   border-radius: 0;
   background: transparent;
   color: #6b7684;
-  font-size: 0.7rem;
-  font-weight: 650;
-}
-
-.appShell--room .topicRail .questionCategory {
-  color: var(--room-live-magenta);
+  box-shadow: none;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .appShell--room .topicRail .questionCategory::before,
@@ -997,67 +989,159 @@
   content: none;
 }
 
+.appShell--room .topicRail .questionUrgency--urgent {
+  color: #d33a6f;
+}
+
 .appShell--room .topicRail .questionCardContent {
-  margin-top: 0.5rem;
+  margin-top: 0.45rem;
   color: #191f28;
-  font-size: 0.98rem;
-  font-weight: 720;
-  line-height: 1.52;
+  font-size: 1rem;
+  font-weight: 740;
+  line-height: 1.5;
   -webkit-line-clamp: 3;
 }
 
 .appShell--room .topicRail .questionArea {
-  margin-top: 0.6rem;
+  margin-top: 0.45rem;
   color: #6b7684;
   font-size: 0.72rem;
 }
 
 .appShell--room .topicRail .questionCardFooter {
-  margin-top: 0.85rem;
+  display: flex;
+  margin-top: 0.55rem;
   padding-top: 0;
   border: 0;
-  gap: 0.45rem;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.appShell--room .topicRail .questionCardByline {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.34rem;
+  overflow: hidden;
 }
 
 .appShell--room .topicRail .publicBadge {
+  display: inline-flex;
+  min-width: 0;
   padding: 0;
+  align-items: center;
+  gap: 0.2rem;
+  overflow: hidden;
   background: transparent;
   color: #6b7684;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
-.appShell--room .topicRail .questionCardFooter > time {
+.appShell--room .topicRail .publicBadge > span {
+  display: inline;
+  width: auto;
+  height: auto;
+  overflow: hidden;
+  border-radius: 0;
+  background: transparent;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appShell--room .topicRail .publicBadge > .appIcon {
+  display: block;
+  width: 0.78rem;
+  height: 0.78rem;
+  flex: 0 0 auto;
+  color: var(--room-guide-iris);
+  stroke-width: 2.5;
+}
+
+.appShell--room .topicRail .questionCardByline > time {
   flex: 0 0 auto;
   color: #8b95a1;
   font-family: var(--utility);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
+}
+
+.appShell--room .topicRail .questionCardByline > time::before {
+  margin-right: 0.34rem;
+  color: #d1d6db;
+  content: '·';
+}
+
+.appShell--room .topicRail .questionAnswerCount {
+  display: inline-flex;
+  min-height: auto;
+  margin-left: auto;
+  padding: 0;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 0.16rem;
+  color: #6b7684;
+  font-family: var(--utility);
+  font-size: 0.75rem;
+  font-weight: 680;
+}
+
+.appShell--room .topicRail .questionAnswerCount strong {
+  color: #333d4b;
+  font-size: 0.78rem;
+}
+
+.appShell--room .topicRail .questionAnswerCount > .appIcon {
+  width: 0.78rem;
+  height: 0.78rem;
+  margin-left: 0.08rem;
+  stroke-width: 2;
 }
 
 .appShell--room .topicRail .topicShareAction {
-  display: block;
+  position: absolute;
+  z-index: 1;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: flex;
   padding: 0;
-  border-top: 1px solid #f2f4f6;
-  background: #fff;
+  border: 0;
+  background: transparent;
 }
 
 .appShell--room .topicRail .topicShareAction button {
-  display: flex;
-  width: 100%;
-  min-height: 2.9rem;
-  justify-content: flex-start;
-  padding: 0 1rem;
+  width: auto;
+  min-height: 1.8rem;
+  padding: 0 0.52rem;
   border: 0;
-  border-radius: 0;
-  background: transparent;
+  border-radius: 0.55rem;
+  background: #f2f4f6;
   color: #4e5968;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 720;
 }
 
 .appShell--room .topicRail .topicShareAction button:hover {
-  background: #f7f8fa;
+  background: #ecebff;
   color: var(--room-guide-iris);
+}
+
+.appShell--room .topicRail .topicShareAction button > .appIcon {
+  width: 0.82rem;
+  height: 0.82rem;
+}
+
+.appShell--room .topicRail .topicShareAction > span {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  width: 12rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.7rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(25, 31, 40, 0.14);
+  color: #d33a6f;
+  font-size: 0.75rem;
+  line-height: 1.45;
 }
 
 .placePickerBackdrop {

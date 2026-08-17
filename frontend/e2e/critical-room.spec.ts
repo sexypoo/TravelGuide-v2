@@ -453,15 +453,38 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   ).toBe('row');
   const topicSurface = await topicCard.evaluate((element) => {
     const style = getComputedStyle(element);
+    const lead = element.querySelector<HTMLElement>('.questionLeadRow');
+    const byline = element.querySelector<HTMLElement>('.publicBadge');
+    const author = element.querySelector<HTMLElement>('.publicBadge > span');
+    const share = element.querySelector<HTMLElement>('.topicShareAction');
+    const link = element.querySelector<HTMLElement>('.questionCardLink');
     return {
       background: style.backgroundColor,
       borderWidth: style.borderWidth,
+      borderRadius: Number.parseFloat(style.borderRadius),
       boxShadow: style.boxShadow,
+      height: element.getBoundingClientRect().height,
+      paddingLeft: Number.parseFloat(getComputedStyle(link!).paddingLeft),
+      leadFont: Number.parseFloat(getComputedStyle(lead!).fontSize),
+      bylineFont: Number.parseFloat(getComputedStyle(byline!).fontSize),
+      authorClipped: author!.scrollWidth > author!.clientWidth + 0.5,
+      sharePosition: getComputedStyle(share!).position,
     };
   });
   expect(topicSurface.background).toBe('rgb(255, 255, 255)');
   expect(topicSurface.borderWidth).toBe('0px');
+  expect(topicSurface.borderRadius).toBeLessThanOrEqual(15);
   expect(topicSurface.boxShadow).toBe('none');
+  expect(topicSurface.height).toBeLessThanOrEqual(145);
+  expect(topicSurface.paddingLeft).toBeLessThanOrEqual(12.5);
+  expect(topicSurface.leadFont).toBeGreaterThanOrEqual(12);
+  expect(topicSurface.bylineFont).toBeGreaterThanOrEqual(12);
+  expect(topicSurface.authorClipped).toBe(false);
+  expect(topicSurface.sharePosition).toBe('absolute');
+  await expect(topicCard.getByText('오늘 중')).toHaveCount(0);
+  await expect(
+    topicCard.getByRole('button', { name: '채팅에 공유하기' }),
+  ).toBeVisible();
   await page.screenshot({
     path: 'test-results/chat-room-mobile-topics.png',
     fullPage: false,
