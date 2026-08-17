@@ -1574,3 +1574,176 @@
     font-size: 0.8rem;
   }
 }
+
+/* T34 correction — shared topics are compact chat attachments, not nested cards. */
+.appShell--room .chatMessage .chatBubble--topic {
+  display: grid;
+  width: min(22rem, 82vw);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #e5e8eb;
+  border-radius: 0.9rem;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(25, 31, 40, 0.05);
+  color: #191f28;
+  gap: 0;
+  text-align: left;
+  text-decoration: none;
+  transform: none;
+}
+
+.appShell--room .chatMessage .chatBubble--topic:hover {
+  border-color: #c9c5f6;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(25, 31, 40, 0.08);
+  transform: none;
+}
+
+.appShell--room .chatMessage .chatBubble--topic:focus-visible {
+  border-color: #6257d9;
+  outline: 3px solid rgba(98, 87, 217, 0.2);
+  outline-offset: 2px;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicHeader {
+  min-height: 1.6rem;
+  padding: 0.72rem 0.78rem 0;
+  gap: 0.65rem;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicCategory,
+.appShell--room .chatBubble--topic .sharedTopicStatus {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 0.75rem;
+  font-weight: 720;
+  line-height: 1.4;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicCategory {
+  gap: 0.34rem;
+  color: #6257d9;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicCategory > i {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #6257d9;
+  box-shadow: none;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicStatus {
+  color: #00a27a;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicStatus::before {
+  width: 0.38rem;
+  height: 0.38rem;
+  margin-right: 0.3rem;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+}
+
+.appShell--room .chatBubble--topic .sharedTopicStatus--resolved,
+.appShell--room .chatBubble--topic .sharedTopicStatus--expired,
+.appShell--room .chatBubble--topic .sharedTopicStatus--removed {
+  color: #6b7684;
+}
+
+.appShell--room .chatMessage .chatBubble--topic > strong {
+  padding: 0.5rem 0.78rem 0;
+  color: #191f28;
+  font-size: 1rem;
+  font-weight: 720;
+  letter-spacing: -0.025em;
+  line-height: 1.5;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicPlace {
+  padding: 0.36rem 0.78rem 0;
+  color: #6b7684;
+  font-size: 0.75rem;
+  font-weight: 620;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicPlace > .appIcon {
+  width: 0.76rem;
+  height: 0.76rem;
+  color: #6257d9;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicMeta {
+  display: flex;
+  margin: 0.58rem 0.78rem 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicMeta > span {
+  display: inline-flex;
+  min-width: 0;
+  padding: 0;
+  align-items: center;
+  gap: 0.22rem;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicMeta > span + span {
+  padding-left: 0.7rem;
+  border-left: 1px solid #e5e8eb;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicMeta small,
+.appShell--room .chatBubble--topic .sharedTopicMeta b {
+  color: #6b7684;
+  font-family: var(--utility);
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicMeta b {
+  color: #333d4b;
+  font-weight: 760;
+}
+
+.appShell--room .chatMessage .chatBubble--topic footer {
+  display: flex;
+  min-height: 2.65rem;
+  margin-top: 0.68rem;
+  padding: 0.62rem 0.78rem;
+  border-top: 1px solid #f2f4f6;
+  background: #f7f8fa;
+  color: #6257d9;
+  font-size: 0.78rem;
+  font-weight: 720;
+  line-height: 1.4;
+}
+
+.appShell--room .chatMessage .chatBubble--topic footer b {
+  display: block;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  color: #6257d9;
+}
+
+.appShell--room .chatMessage .chatBubble--topic footer .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+  stroke-width: 2;
+}
+
+@media (max-width: 600px) {
+  .appShell--room .chatMessage .chatBubble--topic {
+    width: min(20.5rem, 84vw);
+  }
+}

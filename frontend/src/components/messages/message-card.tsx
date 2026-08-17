@@ -130,16 +130,16 @@ export function MessageCard({
             )}
             <div className="sharedTopicMeta">
               <span>
-                <small>도착한 답변</small>
+                <small>답변</small>
                 <b>{message.sharedTopic.answerCount}개</b>
               </span>
               <span>
-                <small>답변 요청</small>
+                <small>요청</small>
                 <b>{urgencyLabels[message.sharedTopic.urgency]}</b>
               </span>
             </div>
             <footer>
-              <span>현장 답변과 최신 현황 보기</span>
+              <span>답변과 현황 보기</span>
               <b aria-hidden="true">
                 <AppIcon name="arrow-right" />
               </b>

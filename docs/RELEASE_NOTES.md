@@ -9,6 +9,9 @@
 - Rebuilt room topics as question-first white cards with one sentence-like
   context line, one byline/answer footer, and a compact secondary share action.
   Normal urgency is omitted and same-day timestamps use a short `오늘` label.
+- Rebuilt topic-share messages as compact white attachments: the lavender field
+  and nested statistic card are gone, answer cadence is inline, and the answer
+  CTA is integrated into one quiet footer.
 - Moved place selection into a document-level modal with search-first focus,
   focus containment, Escape and backdrop closing, map/result panes, and a
   selected-place footer on desktop and mobile.

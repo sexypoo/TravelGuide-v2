@@ -99,8 +99,9 @@ describe('MessageCard topic handoff', () => {
     expect(topicCard).toHaveAttribute('href', '/app/questions/topic-2');
     expect(topicCard).toHaveTextContent('대기 현황');
     expect(topicCard).toHaveTextContent('진행 중');
-    expect(topicCard).toHaveTextContent('도착한 답변3개');
-    expect(topicCard).toHaveTextContent('답변 요청1시간 내');
+    expect(topicCard).toHaveTextContent('답변3개');
+    expect(topicCard).toHaveTextContent('요청1시간 내');
+    expect(topicCard).toHaveTextContent('답변과 현황 보기');
     expect(topicCard).toHaveTextContent('성산일출봉 매표소');
   });
 

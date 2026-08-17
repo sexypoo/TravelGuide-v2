@@ -126,12 +126,52 @@ rounded rectangle, but avoid the inflated soft-card look. The final room card
 therefore uses a 14px corner radius, 12px content padding, a 9px share-control
 radius, and tighter vertical rhythm instead of the earlier 19px/17px treatment.
 
+## Correction pass — shared topic inside the conversation
+
+The supplied screenshot identified a separate target from the topic rail: the
+`TOPIC_SHARE` attachment rendered inside a chat message. Its large lavender
+field, nested two-column statistic box, and detached white CTA created three
+cards inside one card. The subject is a live field question handed from one
+traveler to another; the single job is to understand the question and open its
+latest answers.
+
+### Shared-card tokens and type
+
+- Answer Ink `#191f28`, Note Gray `#6b7684`, Hairline `#e5e8eb`, Quiet Fill
+  `#f7f8fa`, Guide Violet `#6257d9`, and Live Green `#00a27a`.
+- Wanted Sans carries the 16px/720 question; Pretendard carries the 12px
+  category, status, place, and action; SUIT carries the 12px answer cadence.
+
+### Revised attachment layout
+
+```text
+┌ 대기 현황                         ● 진행 중 ┐
+│ 성산일출봉 입장 대기가 얼마나 되나요? │
+│ ⌖ 성산일출봉 매표소                 │
+│ 답변 3개  ·  요청 1시간 내               │
+├────────────────────────────────────┤
+│ 답변과 현황 보기                     → │
+└────────────────────────────────────┘
+```
+
+The signature is the compact answer cadence (`답변 3개 · 요청 1시간 내`),
+which belongs specifically to a live travel handoff. The aesthetic risk is
+removing the lavender topic color field altogether; violet remains only on the
+category/action text, so the shared item reads as a useful attachment rather
+than a promotional card.
+
+Critique: a generic Toss imitation might replace the statistic box with two
+new pills. That would preserve the same hierarchy problem in a smaller form.
+The revision instead uses plain inline data and one quiet footer fill, with a
+14px outer radius and 12–13px body padding.
+
 ## Files
 
 - `frontend/src/components/messages/message-timeline.tsx` and test: add a
   bottom-settling content stack without changing scroll ownership.
 - `frontend/src/components/messages/message-card.tsx`: identify plain text
-  bubbles explicitly so rich cards keep their own surfaces.
+  bubbles explicitly and simplify the shared-topic labels/CTA so rich cards
+  keep useful but quiet surfaces.
 - `frontend/src/components/places/place-picker.tsx` and tests: document portal,
   modal behavior, focus management, and clearer result/selection regions.
 - `frontend/src/components/messages/message-composer.test.tsx`: prove the place
@@ -142,7 +182,8 @@ radius, and tighter vertical rhythm instead of the earlier 19px/17px treatment.
   presentation helper/tests: compress the feedback-pass card and shorten live
   timestamps without losing accessible verification and share labels.
 - `frontend/e2e/critical-room.spec.ts`: desktop density and mobile modal
-  geometry plus topic radius, padding, height, type, and clipping checks.
+  geometry plus topic-rail and shared-topic radius, padding, height, type, and
+  clipping checks.
 - `docs/DECISIONS.md` and `docs/RELEASE_NOTES.md`: record the interaction and
   visual boundary.
 
@@ -180,7 +221,7 @@ radius, and tighter vertical rhythm instead of the earlier 19px/17px treatment.
 - Complete `corepack yarn verify` passed: Prettier, ESLint, TypeScript, 56 Jest
   suites with 134 tests, coverage gates, and the Next.js 15.5.21 production
   build.
-- Complete real-stack Playwright passed: 4 tests in 1.4m against PostgreSQL,
+- Complete real-stack Playwright passed: 4 tests in 54.6s against PostgreSQL,
   the NestJS API, Next.js, and Socket.io. The focused room scenarios also passed
   together after restoring the 12px mobile metadata minimum. Cold Next.js
   compilation can take longer than the old navigation limits, so only the two
@@ -193,6 +234,10 @@ radius, and tighter vertical rhythm instead of the earlier 19px/17px treatment.
   14px radius, 12px padding, maximum test-card height of 145px, 12px metadata,
   compact same-day time, visible full author name, and secondary share control
   are protected by the real-stack mobile regression.
+- A real `TOPIC_SHARE` message was created through the API and inspected at
+  390x844 and 1440x900. The white surface, <=15px radius, <=210px height, 16px
+  question, transparent inline metadata, and integrated quiet footer are now
+  asserted in Playwright; the 390x640 composer remains fully visible.
 - Desktop room geometry leaves a 16px outer gutter at 1440x900; short message
   history settles above the composer. The modal is a direct body child, locks
   body overflow, receives search focus, and remains within 390x844.

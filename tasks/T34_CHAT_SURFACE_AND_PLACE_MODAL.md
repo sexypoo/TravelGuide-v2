@@ -39,3 +39,6 @@ topic cards, and turn place selection into a reliable viewport-level modal.
   sacrificing the 12px metadata minimum or hiding answer count and sharing.
 - The topic surface remains a clean rounded rectangle with at most 15px corner
   radius and approximately 12px inner padding, not an oversized soft card.
+- A `TOPIC_SHARE` message uses one white rounded attachment, plain inline answer
+  cadence, and one integrated footer; it has no lavender field or nested
+  statistics card and remains readable at 390px.

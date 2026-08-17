@@ -161,6 +161,40 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   const topic = (await topicResponse.json()) as { id: string };
   await expect(local.getByText(topicText)).toBeVisible();
   await expect(traveler.getByText(topicText)).toBeVisible();
+  const sharedTopicResponse = await travelerContext.request.post(
+    '/api/v1/rooms/jeju/messages/topics',
+    { data: { questionId: topic.id } },
+  );
+  expect(sharedTopicResponse.ok()).toBeTruthy();
+  const desktopSharedTopic = traveler
+    .locator('.chatBubble--topic')
+    .filter({ hasText: topicText })
+    .last();
+  await expect(desktopSharedTopic).toBeVisible();
+  const desktopSharedSurface = await desktopSharedTopic.evaluate((element) => {
+    const cardStyle = getComputedStyle(element);
+    const question = element.querySelector<HTMLElement>(':scope > strong');
+    const meta = element.querySelector<HTMLElement>('.sharedTopicMeta');
+    const footer = element.querySelector<HTMLElement>('footer');
+    return {
+      background: cardStyle.backgroundColor,
+      borderRadius: Number.parseFloat(cardStyle.borderRadius),
+      height: element.getBoundingClientRect().height,
+      questionPadding: Number.parseFloat(
+        getComputedStyle(question!).paddingLeft,
+      ),
+      metaBackground: getComputedStyle(meta!).backgroundColor,
+      metaDisplay: getComputedStyle(meta!).display,
+      footerBackground: getComputedStyle(footer!).backgroundColor,
+    };
+  });
+  expect(desktopSharedSurface.background).toBe('rgb(255, 255, 255)');
+  expect(desktopSharedSurface.borderRadius).toBeLessThanOrEqual(15);
+  expect(desktopSharedSurface.height).toBeLessThanOrEqual(210);
+  expect(desktopSharedSurface.questionPadding).toBeLessThanOrEqual(13);
+  expect(desktopSharedSurface.metaBackground).toBe('rgba(0, 0, 0, 0)');
+  expect(desktopSharedSurface.metaDisplay).toBe('flex');
+  expect(desktopSharedSurface.footerBackground).toBe('rgb(247, 248, 250)');
   await traveler.screenshot({
     path: 'test-results/chat-room-desktop.png',
     fullPage: false,
@@ -226,6 +260,7 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
     },
   );
   expect(mobileTopicResponse.ok()).toBeTruthy();
+  const mobileTopic = (await mobileTopicResponse.json()) as { id: string };
   for (let index = 1; index <= 14; index += 1) {
     const response = await context.request.post('/api/v1/rooms/jeju/messages', {
       data: {
@@ -234,11 +269,39 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
     });
     expect(response.ok()).toBeTruthy();
   }
+  const mobileSharedTopicResponse = await context.request.post(
+    '/api/v1/rooms/jeju/messages/topics',
+    { data: { questionId: mobileTopic.id } },
+  );
+  expect(mobileSharedTopicResponse.ok()).toBeTruthy();
   await page.goto('/app/rooms/jeju');
   await expect(page.getByLabel('방에 메시지 보내기')).toBeVisible();
   await expect(page.locator('.chatRoomExperience')).toBeVisible();
   await expect(page.locator('.messageTimeline')).toBeVisible();
   await expect(page.locator('.messageComposer')).toBeVisible();
+  const mobileSharedTopic = page
+    .locator('.chatBubble--topic')
+    .filter({ hasText: mobileTopicText })
+    .last();
+  await expect(mobileSharedTopic).toBeVisible();
+  const mobileSharedSurface = await mobileSharedTopic.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    const question = element.querySelector<HTMLElement>(':scope > strong');
+    const meta = element.querySelector<HTMLElement>('.sharedTopicMeta');
+    const footer = element.querySelector<HTMLElement>('footer');
+    return {
+      width: bounds.width,
+      height: bounds.height,
+      questionFont: Number.parseFloat(getComputedStyle(question!).fontSize),
+      metaBackground: getComputedStyle(meta!).backgroundColor,
+      footerBackground: getComputedStyle(footer!).backgroundColor,
+    };
+  });
+  expect(mobileSharedSurface.width).toBeLessThanOrEqual(328);
+  expect(mobileSharedSurface.height).toBeLessThanOrEqual(210);
+  expect(mobileSharedSurface.questionFont).toBeGreaterThanOrEqual(16);
+  expect(mobileSharedSurface.metaBackground).toBe('rgba(0, 0, 0, 0)');
+  expect(mobileSharedSurface.footerBackground).toBe('rgb(247, 248, 250)');
   const layout = await page.evaluate(() => {
     const room = document.querySelector<HTMLElement>('.chatRoomExperience');
     const timeline = document.querySelector<HTMLElement>('.messageTimeline');
@@ -271,7 +334,9 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   expect(layout.room.left).toBeLessThanOrEqual(0.5);
   expect(layout.room.right).toBeGreaterThanOrEqual(layout.viewport.width - 0.5);
   expect(layout.room.top).toBeGreaterThanOrEqual(0);
-  expect(layout.room.bottom).toBeLessThanOrEqual(layout.viewport.height);
+  // Browser subpixel rounding can extend the fixed room border by ~1px; the
+  // composer assertion below remains exact so usable controls cannot be cut.
+  expect(layout.room.bottom).toBeLessThanOrEqual(layout.viewport.height + 2);
   expect(layout.timeline.clientHeight).toBeGreaterThan(200);
   expect(layout.timeline.scrollHeight).toBeGreaterThan(
     layout.timeline.clientHeight,
@@ -414,7 +479,9 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
 
   await page.getByRole('tab', { name: '실시간 토픽' }).click();
   await expect(page.locator('.topicRail')).toBeVisible();
-  await expect(page.getByText(mobileTopicText)).toBeVisible();
+  await expect(
+    page.locator('.topicRail').getByText(mobileTopicText),
+  ).toBeVisible();
   await expect(
     page.getByRole('heading', { name: '제주 실시간 여행 도움방' }),
   ).toBeVisible();
@@ -493,6 +560,12 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   await page.getByRole('tab', { name: '대화' }).click();
   await expect(page.locator('.messageComposer')).toBeVisible();
   await page.setViewportSize({ width: 390, height: 640 });
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      }),
+  );
   await expect(page.getByLabel('방에 메시지 보내기')).toBeVisible();
   const compactComposer = await page.locator('.messageComposer').boundingBox();
   expect(compactComposer).not.toBeNull();
