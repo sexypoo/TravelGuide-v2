@@ -1,0 +1,445 @@
+/* T32 — readable field-transmission treatment for the focused room. */
+.appShell--room .chatRoomExperience {
+  --room-radio-ink: #282531;
+  --room-field-gray: #625c69;
+  --room-paper: #fff9fb;
+  --room-signal-white: #ffffff;
+  --room-live-magenta: #c73568;
+  --room-guide-iris: #675dda;
+  background: var(--room-paper);
+  color: var(--room-radio-ink);
+}
+
+.appShell--room .conversationRoomHeader {
+  border-color: rgba(98, 92, 105, 0.2);
+  background: var(--room-signal-white);
+  box-shadow: 0 10px 28px rgba(40, 37, 49, 0.06);
+}
+
+.appShell--room .conversationRoomHeader h1 {
+  color: var(--room-radio-ink);
+  font-weight: 800;
+}
+
+.appShell--room .conversationRoomHeader__copy > p,
+.appShell--room .roomTrustLine {
+  color: var(--room-field-gray);
+  font-size: 0.75rem;
+}
+
+.appShell--room .connectionPill,
+.appShell--room .roomNotificationControl > button,
+.appShell--room .roomRoleBadge {
+  font-size: 0.75rem;
+}
+
+.appShell--room .conversationWorkspace {
+  gap: 1.5rem;
+}
+
+.appShell--room .conversationStage {
+  border: 1px solid rgba(98, 92, 105, 0.18);
+  border-radius: 1.15rem;
+  background: var(--room-signal-white);
+  box-shadow: 0 16px 38px rgba(40, 37, 49, 0.06);
+}
+
+.appShell--room .messageTimelineFrame {
+  border-radius: 1.1rem 1.1rem 0 0;
+  background:
+    linear-gradient(90deg, rgba(199, 53, 104, 0.055) 0 2px, transparent 2px)
+      1.2rem 0 / 100% 100% no-repeat,
+    linear-gradient(180deg, rgba(255, 249, 251, 0.76), #ffffff 7rem);
+}
+
+.appShell--room .messageTimeline {
+  padding: 1rem 1.25rem 1.75rem 1.7rem;
+  scrollbar-color: rgba(103, 93, 218, 0.38) transparent;
+}
+
+.appShell--room .chatDateDivider {
+  margin: 0.8rem 0 1.15rem;
+  color: var(--room-field-gray);
+  font-family: var(--utility);
+  font-size: 0.75rem;
+  font-weight: 720;
+}
+
+.appShell--room .chatDateDivider::before,
+.appShell--room .chatDateDivider::after {
+  background: rgba(98, 92, 105, 0.2);
+}
+
+.appShell--room .chatMessage {
+  margin-top: 1.05rem;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: 0.7rem;
+}
+
+.appShell--room .chatMessage__avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-color: rgba(103, 93, 218, 0.3);
+  border-radius: 0.8rem;
+  background: rgba(103, 93, 218, 0.1);
+  color: var(--room-guide-iris);
+  font-size: 0.78rem;
+}
+
+.appShell--room .chatMessage__body {
+  max-width: min(82%, 36rem);
+}
+
+.appShell--room .chatMessage__body > header {
+  gap: 0.42rem;
+  margin-bottom: 0.42rem;
+  color: var(--room-field-gray);
+}
+
+.appShell--room .chatMessage__body > header::before {
+  width: 0.26rem;
+  height: 0.82rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--room-live-magenta);
+  box-shadow: 0 0 0 0.2rem rgba(199, 53, 104, 0.08);
+  content: '';
+}
+
+.appShell--room .chatMessage--own .chatMessage__body > header::before {
+  background: var(--room-guide-iris);
+  box-shadow: 0 0 0 0.2rem rgba(103, 93, 218, 0.08);
+}
+
+.appShell--room .chatMessage__body > header strong {
+  color: var(--room-radio-ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.appShell--room .chatMessage__body > header time {
+  color: var(--room-field-gray);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.appShell--room .miniVerifiedBadge {
+  min-height: 1.45rem;
+  padding-inline: 0.45rem;
+  font-size: 0.72rem;
+}
+
+.appShell--room .chatBubble {
+  padding: 0.88rem 1rem;
+  border-color: rgba(98, 92, 105, 0.28);
+  border-radius: 0.42rem 1rem 1rem;
+  background: var(--room-signal-white);
+  box-shadow: 0 6px 18px rgba(40, 37, 49, 0.055);
+}
+
+.appShell--room .chatMessage--own .chatBubble {
+  border-color: rgba(103, 93, 218, 0.38);
+  border-radius: 1rem 0.42rem 1rem 1rem;
+  background: rgba(103, 93, 218, 0.11);
+  box-shadow: 0 6px 18px rgba(103, 93, 218, 0.08);
+}
+
+.appShell--room .chatBubble p {
+  color: var(--room-radio-ink);
+  font-size: 0.97rem;
+  font-weight: 590;
+  letter-spacing: -0.012em;
+  line-height: 1.62;
+}
+
+.appShell--room .messagePromoteButton,
+.appShell--room .messageTopicLink {
+  min-height: 2.25rem;
+  color: var(--room-guide-iris);
+  font-size: 0.75rem;
+  font-weight: 780;
+}
+
+.appShell--room .olderMessagesButton,
+.appShell--room .newMessageShortcut {
+  min-height: 2.75rem;
+  font-size: 0.75rem;
+}
+
+.appShell--room .messageComposer {
+  padding: 0.8rem 0.85rem max(0.65rem, env(safe-area-inset-bottom));
+  border-color: rgba(98, 92, 105, 0.2);
+  border-radius: 0 0 1.1rem 1.1rem;
+  background: rgba(255, 249, 251, 0.96);
+  backdrop-filter: blur(18px);
+}
+
+.appShell--room .messageComposer > .messageComposer__inputRow {
+  padding: 0.35rem;
+  border-color: rgba(98, 92, 105, 0.32);
+  border-radius: 0.95rem;
+  background: var(--room-signal-white);
+  grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+  box-shadow: 0 7px 20px rgba(40, 37, 49, 0.07);
+}
+
+.appShell--room .messageComposer > .messageComposer__inputRow:focus-within {
+  border-color: var(--room-guide-iris);
+  box-shadow:
+    0 0 0 3px rgba(103, 93, 218, 0.13),
+    0 8px 22px rgba(40, 37, 49, 0.08);
+}
+
+.appShell--room .messageComposer textarea {
+  min-height: 2.75rem;
+  padding: 0.58rem 0.5rem;
+  color: var(--room-radio-ink);
+  font-size: 1rem;
+  font-weight: 560;
+  line-height: 1.55;
+}
+
+.appShell--room .messageComposer textarea::placeholder {
+  color: #716b77;
+  opacity: 1;
+}
+
+.appShell--room .messageComposer__inputRow > .messageAddButton,
+.appShell--room .messageComposer__inputRow > .messageSendButton {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.78rem;
+}
+
+.appShell--room .messageComposer__inputRow > .messageAddButton {
+  background: rgba(98, 92, 105, 0.1);
+  color: var(--room-radio-ink);
+}
+
+.appShell--room .messageComposer__inputRow > .messageSendButton {
+  background: var(--room-radio-ink);
+  box-shadow: 0 7px 16px rgba(40, 37, 49, 0.22);
+}
+
+.appShell--room .messageComposer > footer {
+  padding: 0.42rem 0.25rem 0;
+  color: var(--room-field-gray);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.appShell--room .messageActionMenu > header span,
+.appShell--room .messageActionMenu > button strong,
+.appShell--room .messageAttachmentTray > strong {
+  font-size: 0.8rem;
+}
+
+.appShell--room .messageActionMenu > header small,
+.appShell--room .messageActionMenu > button small,
+.appShell--room .messageAttachmentTray > p {
+  font-size: 0.75rem;
+}
+
+.appShell--room .messageComposer > .messageActionMenu > button,
+.appShell--room .attachmentSelectButton {
+  min-height: 2.75rem;
+}
+
+.appShell--room .topicRail {
+  scrollbar-color: rgba(103, 93, 218, 0.38) transparent;
+}
+
+.appShell--room .topicRail__header > div > span {
+  color: var(--room-live-magenta);
+  font-size: 0.75rem;
+}
+
+.appShell--room .topicRail__header h2 {
+  color: var(--room-radio-ink);
+  font-size: 1.25rem;
+}
+
+.appShell--room .topicRail__header > button,
+.appShell--room .roomTabs button {
+  min-height: 2.75rem;
+  font-size: 0.75rem;
+}
+
+.appShell--room .topicRail .signalQuestionCard {
+  border-color: rgba(98, 92, 105, 0.22);
+  background: var(--room-signal-white);
+  box-shadow: 0 8px 20px rgba(40, 37, 49, 0.055);
+}
+
+.appShell--room .topicRail .questionCardContent {
+  color: var(--room-radio-ink);
+  font-size: 0.94rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.appShell--room .topicRail .questionCardFooter,
+.appShell--room .topicRail .publicBadge,
+.appShell--room .topicRail .questionCardMeta {
+  color: var(--room-field-gray);
+  font-size: 0.75rem;
+}
+
+.appShell--room .chatBubble--topic > strong,
+.appShell--room .placeTicket__name {
+  color: var(--room-radio-ink);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+.appShell--room .placeTicket__address,
+.appShell--room .placeTicket__note,
+.appShell--room .sharedTopicPlace,
+.appShell--room .sharedTopicMeta small,
+.appShell--room .sharedTopicMeta b,
+.appShell--room .chatMessage .chatBubble--topic footer {
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.appShell--room :is(button, a, textarea):focus-visible {
+  outline: 3px solid rgba(103, 93, 218, 0.28);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .appShell--room .conversationStage {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .appShell--room .mobileRoomSwitcher {
+    position: relative;
+    min-height: 3rem;
+    padding: 0.2rem;
+    border: 1px solid rgba(98, 92, 105, 0.2);
+    border-radius: 0.85rem;
+    background: rgba(98, 92, 105, 0.08);
+  }
+
+  .appShell--room .mobileRoomSwitcher button {
+    position: relative;
+    min-height: 2.75rem;
+    border-radius: 0.68rem;
+    color: var(--room-field-gray);
+    font-size: 0.82rem;
+    font-weight: 780;
+  }
+
+  .appShell--room .mobileRoomSwitcher button[aria-selected='true'] {
+    color: var(--room-radio-ink);
+    box-shadow: 0 4px 12px rgba(40, 37, 49, 0.09);
+  }
+
+  .appShell--room .mobileRoomSwitcher button[aria-selected='true']::after {
+    position: absolute;
+    right: 26%;
+    bottom: 0.28rem;
+    left: 26%;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      var(--room-live-magenta),
+      var(--room-guide-iris)
+    );
+    content: '';
+  }
+}
+
+@media (max-width: 760px) {
+  .appShell--room .conversationRoomHeader {
+    min-height: 3.75rem;
+    padding: 0.4rem 0.1rem 0.55rem;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+  }
+
+  .appShell--room .conversationRoomHeader > .appBackLink,
+  .appShell--room .conversationRoomHeader .roomNotificationControl > button {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .appShell--room .conversationRoomHeader h1 {
+    font-size: 1.3rem;
+  }
+
+  .appShell--room .conversationWorkspace {
+    margin-top: 0.4rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .appShell--room .messageTimelineFrame {
+    background:
+      linear-gradient(90deg, rgba(199, 53, 104, 0.06) 0 2px, transparent 2px)
+        0.45rem 0 / 100% 100% no-repeat,
+      linear-gradient(180deg, rgba(255, 249, 251, 0.76), #ffffff 6rem);
+  }
+
+  .appShell--room .messageTimeline {
+    padding: 0.75rem 0.35rem 1.25rem 0.85rem;
+  }
+
+  .appShell--room .chatMessage {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.55rem;
+  }
+
+  .appShell--room .chatMessage__avatar {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .appShell--room .chatMessage__body {
+    max-width: 88%;
+  }
+
+  .appShell--room .miniVerifiedBadge {
+    display: inline-flex;
+  }
+
+  .appShell--room .chatBubble {
+    padding: 0.8rem 0.88rem;
+  }
+
+  .appShell--room .chatBubble p {
+    font-size: 0.95rem;
+  }
+
+  .appShell--room .messageComposer {
+    padding: 0.65rem 0.25rem max(0.35rem, env(safe-area-inset-bottom));
+  }
+
+  .appShell--room .messageComposer > footer > span:first-child {
+    display: inline;
+  }
+
+  .appShell--room .messageComposer > footer {
+    justify-content: space-between;
+  }
+
+  .appShell--room .topicRail {
+    padding-inline: 0.25rem;
+  }
+
+  .appShell--room .topicRail__header {
+    align-items: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appShell--room .mobileRoomSwitcher button::after,
+  .appShell--room .chatMessage__body > header::before {
+    animation: none;
+    transition: none;
+  }
+}

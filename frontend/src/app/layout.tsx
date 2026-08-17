@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import './mobile-app.css';
+import './chat-room.css';
 
 export const metadata: Metadata = {
   title: {

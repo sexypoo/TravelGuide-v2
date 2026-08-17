@@ -19,9 +19,14 @@ function useRoomViewportHeight(enabled: boolean): number | undefined {
     if (!enabled) return undefined;
     const viewport = window.visualViewport;
     const updateHeight = (): void => {
+      const visualHeight = viewport?.height;
       const nextHeight = Math.max(
         1,
-        Math.round(viewport?.height ?? window.innerHeight),
+        Math.round(
+          visualHeight === undefined
+            ? window.innerHeight
+            : Math.min(visualHeight, window.innerHeight),
+        ),
       );
       setHeight((current) => (current === nextHeight ? current : nextHeight));
     };

@@ -7,12 +7,13 @@ async function login(page: Page, email: string): Promise<void> {
   await page.getByLabel('이메일').fill(email);
   await page.getByLabel('비밀번호').fill(password);
   await page.getByRole('button', { name: '로그인' }).click();
-  await expect(page).toHaveURL(/\/app$/u);
+  await expect(page).toHaveURL(/\/app$/u, { timeout: 15_000 });
 }
 
 test('traveler and local exchange a topic and recover a missed answer', async ({
   browser,
 }) => {
+  test.setTimeout(60_000);
   const travelerContext = await browser.newContext({
     baseURL: 'http://127.0.0.1:3100',
     viewport: { width: 1440, height: 900 },
@@ -33,6 +34,62 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
     expect(traveler.getByText('실시간 연결됨')).toBeVisible(),
     expect(local.getByText('실시간 연결됨')).toBeVisible(),
   ]);
+  const travelerMessage = `여행자 E2E 현장 질문 ${Date.now()}`;
+  const localMessage = `현지인 E2E 안내 답변 ${Date.now()}`;
+  const [travelerMessageResponse, localMessageResponse] = await Promise.all([
+    travelerContext.request.post('/api/v1/rooms/jeju/messages', {
+      data: { content: travelerMessage },
+    }),
+    localContext.request.post('/api/v1/rooms/jeju/messages', {
+      data: { content: localMessage },
+    }),
+  ]);
+  expect(travelerMessageResponse.ok()).toBeTruthy();
+  expect(localMessageResponse.ok()).toBeTruthy();
+  await expect(traveler.getByText(travelerMessage)).toBeVisible();
+  await expect(traveler.getByText(localMessage)).toBeVisible();
+  const bubbleSurfaces = await traveler.evaluate(
+    ({ ownText, receivedText }) => {
+      const paragraphs = Array.from(
+        document.querySelectorAll<HTMLElement>('.chatBubble p'),
+      );
+      const surface = (content: string) => {
+        const paragraph = paragraphs.find(
+          (candidate) => candidate.textContent === content,
+        );
+        const bubble = paragraph?.closest<HTMLElement>('.chatBubble');
+        if (bubble === null || bubble === undefined) return null;
+        const style = getComputedStyle(bubble);
+        return {
+          background: style.backgroundColor,
+          border: style.borderColor,
+        };
+      };
+      return {
+        own: surface(ownText),
+        received: surface(receivedText),
+      };
+    },
+    { ownText: travelerMessage, receivedText: localMessage },
+  );
+  expect(bubbleSurfaces.own).not.toBeNull();
+  expect(bubbleSurfaces.received).not.toBeNull();
+  expect(bubbleSurfaces.own?.background).not.toBe(
+    bubbleSurfaces.received?.background,
+  );
+  expect(bubbleSurfaces.own?.border).not.toBe(bubbleSurfaces.received?.border);
+  const desktopRoom = await traveler
+    .locator('.chatRoomExperience')
+    .boundingBox();
+  expect(desktopRoom).not.toBeNull();
+  expect(desktopRoom?.y ?? -1).toBeGreaterThanOrEqual(0);
+  expect(
+    (desktopRoom?.y ?? 0) + (desktopRoom?.height ?? 0),
+  ).toBeLessThanOrEqual(900);
+  await traveler.screenshot({
+    path: 'test-results/chat-room-desktop.png',
+    fullPage: false,
+  });
 
   const topicText = `E2E 현재 제주공항 입장 대기 상황을 알려주세요 ${Date.now()}`;
   const topicResponse = await travelerContext.request.post(
@@ -145,6 +202,63 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   expect(layout.composer.top).toBeGreaterThanOrEqual(0);
   expect(layout.composer.bottom).toBeLessThanOrEqual(layout.viewport.height);
 
+  const readability = await page.evaluate(() => {
+    const message = document.querySelector<HTMLElement>('.chatBubble p');
+    const metadata = document.querySelector<HTMLElement>(
+      '.chatMessage__body > header time',
+    );
+    const textarea = document.querySelector<HTMLTextAreaElement>(
+      '.messageComposer textarea',
+    );
+    const add = document.querySelector<HTMLButtonElement>('.messageAddButton');
+    const send =
+      document.querySelector<HTMLButtonElement>('.messageSendButton');
+    const mode = document.querySelector<HTMLButtonElement>(
+      '.mobileRoomSwitcher button',
+    );
+    if (
+      message === null ||
+      metadata === null ||
+      textarea === null ||
+      add === null ||
+      send === null ||
+      mode === null
+    ) {
+      return null;
+    }
+    const targetSize = (element: HTMLElement) => {
+      const box = element.getBoundingClientRect();
+      return { width: box.width, height: box.height };
+    };
+    return {
+      messageFont: Number.parseFloat(getComputedStyle(message).fontSize),
+      messageLineHeight: Number.parseFloat(
+        getComputedStyle(message).lineHeight,
+      ),
+      metadataFont: Number.parseFloat(getComputedStyle(metadata).fontSize),
+      textareaFont: Number.parseFloat(getComputedStyle(textarea).fontSize),
+      add: targetSize(add),
+      send: targetSize(send),
+      mode: targetSize(mode),
+    };
+  });
+  expect(readability).not.toBeNull();
+  if (readability === null)
+    throw new Error('Readable room elements must exist');
+  expect(readability.messageFont).toBeGreaterThanOrEqual(15);
+  expect(readability.messageLineHeight).toBeGreaterThanOrEqual(24);
+  expect(readability.metadataFont).toBeGreaterThanOrEqual(12);
+  expect(readability.textareaFont).toBeGreaterThanOrEqual(16);
+  expect(readability.add.width).toBeGreaterThanOrEqual(44);
+  expect(readability.add.height).toBeGreaterThanOrEqual(44);
+  expect(readability.send.width).toBeGreaterThanOrEqual(44);
+  expect(readability.send.height).toBeGreaterThanOrEqual(44);
+  expect(readability.mode.height).toBeGreaterThanOrEqual(44);
+  await page.screenshot({
+    path: 'test-results/chat-room-mobile.png',
+    fullPage: false,
+  });
+
   const initialComposerTop = layout.composer.top;
   await page.locator('.messageTimeline').evaluate((element) => {
     element.scrollTop = 0;
@@ -175,5 +289,9 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
       .locator('.topicRail')
       .evaluate((element) => getComputedStyle(element).overflowY),
   ).toBe('auto');
+  await page.screenshot({
+    path: 'test-results/chat-room-mobile-topics.png',
+    fullPage: false,
+  });
   await context.close();
 });

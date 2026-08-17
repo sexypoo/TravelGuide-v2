@@ -53,6 +53,11 @@ describe('AppFrame', () => {
 
   it('tracks the visual viewport height while room focus mode is active', async () => {
     const originalViewport = window.visualViewport;
+    const originalInnerHeight = window.innerHeight;
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      value: 844,
+    });
     const viewport = new EventTarget();
     Object.defineProperty(viewport, 'height', {
       configurable: true,
@@ -81,7 +86,24 @@ describe('AppFrame', () => {
     });
     expect(shell).toHaveStyle({ height: '516px' });
 
+    Object.defineProperty(viewport, 'height', {
+      configurable: true,
+      value: 844,
+    });
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      value: 480,
+    });
+    await act(async () => {
+      window.dispatchEvent(new Event('resize'));
+    });
+    expect(shell).toHaveStyle({ height: '480px' });
+
     view.unmount();
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      value: originalInnerHeight,
+    });
     Object.defineProperty(window, 'visualViewport', {
       configurable: true,
       value: originalViewport,

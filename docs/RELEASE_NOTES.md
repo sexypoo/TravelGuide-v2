@@ -1,5 +1,19 @@
 # 여쭈어 (여JJU) release candidate notes
 
+## 2026-08-18 chat room readability
+
+- Reworked the focused room as a high-contrast field conversation with clear
+  sender/time rows, distinct sent and received surfaces, and readable 15px+
+  message copy.
+- Raised mobile room metadata, composer text, and touch targets to explicit
+  readability minimums while preserving the fixed composer and internal
+  message/topic scrolling.
+- Improved live-topic cards and mode switching with the same paper, ink,
+  magenta, and iris hierarchy used across the native-feeling app shell.
+- Hardened compact viewport resizing against a temporarily stale
+  `visualViewport.height` and added real-stack checks at 390x844, 390x640, and
+  1440x900.
+
 ## 2026-08-17 mobile app readability
 
 - Replaced the mobile floating navigation pill with a safe-area-aware,
