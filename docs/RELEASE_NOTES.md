@@ -1,5 +1,18 @@
 # 여쭈어 (여JJU) release candidate notes
 
+## 2026-08-17 mobile app readability
+
+- Replaced the mobile floating navigation pill with a safe-area-aware,
+  full-width route deck that stays flush with the viewport at either scroll
+  boundary.
+- Reduced excessive page-top whitespace and introduced a higher-contrast mobile
+  type scale for home, community, nearby, profile, verification, and saved-place
+  pages while preserving the room focus layout.
+- Raised primary mobile copy, utility labels, form controls, and touch targets to
+  explicit readability and accessibility minimums.
+- Added real-stack Playwright coverage for stable navigation geometry, content
+  reserve, readable copy, horizontal overflow, and the unchanged desktop shell.
+
 ## 2026-08-17 mobile room viewport
 
 - Fixed clipped chat/topic content and unstable document scrolling in mobile
