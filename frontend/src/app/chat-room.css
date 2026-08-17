@@ -1747,3 +1747,159 @@
     width: min(20.5rem, 84vw);
   }
 }
+
+/* T34 correction — shared places use the same quiet attachment family. */
+.appShell--room .chatMessage .placeTicket.chatBubble--place {
+  display: grid;
+  width: min(22rem, 82vw);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #e5e8eb;
+  border-radius: 0.9rem;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(25, 31, 40, 0.05);
+  color: #191f28;
+  gap: 0;
+}
+
+.appShell--room .chatBubble--place > .placeTicket__content {
+  display: grid;
+  min-width: 0;
+  padding: 0.72rem 0.78rem 0.7rem;
+  gap: 0;
+}
+
+.appShell--room .placeTicket__eyebrow {
+  min-height: 1.6rem;
+  margin: 0 0 0.42rem;
+  gap: 0.65rem;
+}
+
+.appShell--room .placeTicket__eyebrow > span,
+.appShell--room .placeTicket__eyebrow > small {
+  padding: 0;
+  background: transparent;
+  color: #6257d9;
+  font-size: 0.75rem;
+  font-weight: 720;
+  line-height: 1.4;
+}
+
+.appShell--room .placeTicket__eyebrow > small {
+  color: #8b95a1;
+  font-weight: 650;
+}
+
+.appShell--room .placeTicket__eyebrow > span > i {
+  display: block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: #6257d9;
+}
+
+.appShell--room .chatBubble--place .placeTicket__name {
+  color: #191f28;
+  font-size: 1rem;
+  font-weight: 760;
+  letter-spacing: -0.025em;
+  line-height: 1.45;
+}
+
+.appShell--room .chatBubble--place .placeTicket__address {
+  display: flex;
+  min-width: 0;
+  margin-top: 0.3rem;
+  align-items: center;
+  color: #6b7684;
+  font-size: 0.75rem;
+  font-weight: 620;
+  line-height: 1.45;
+  gap: 0.3rem;
+}
+
+.appShell--room .chatBubble--place .placeTicket__address > .appIcon {
+  width: 0.76rem;
+  height: 0.76rem;
+  flex: 0 0 auto;
+  color: #6257d9;
+}
+
+.appShell--room .chatBubble--place .placeTicket__note {
+  margin: 0.55rem 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #4e5968;
+  font-size: 0.78rem;
+  font-weight: 580;
+  line-height: 1.55;
+}
+
+.appShell--room .chatBubble--place .placeTicket__actions {
+  display: flex;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0 0.78rem;
+  border-top: 1px solid #f2f4f6;
+  background: #f7f8fa;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.appShell--room .chatBubble--place .placeTicket__actions > a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  color: #6257d9;
+  font-size: 0.78rem;
+  font-weight: 720;
+}
+
+.appShell--room .chatBubble--place .placeTicket__actions > a .appIcon {
+  width: 0.82rem;
+  height: 0.82rem;
+  margin-left: 0.3rem;
+}
+
+.appShell--room .chatBubble--place .placeFavoriteControl {
+  display: inline-grid;
+  align-items: stretch;
+}
+
+.appShell--room .chatBubble--place .placeFavoriteControl > button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #6b7684;
+  font-size: 0.75rem;
+  font-weight: 700;
+  gap: 0.3rem;
+}
+
+.appShell--room .chatBubble--place .placeFavoriteControl > button:hover,
+.appShell--room .chatBubble--place .placeFavoriteControl > button.isSaved {
+  border: 0;
+  background: transparent;
+  color: #d33a6f;
+}
+
+.appShell--room .chatBubble--place .placeFavoriteControl > button:focus-visible,
+.appShell--room .chatBubble--place .placeTicket__actions > a:focus-visible {
+  border-radius: 0.35rem;
+  outline: 3px solid rgba(98, 87, 217, 0.2);
+  outline-offset: -2px;
+}
+
+@media (max-width: 600px) {
+  .appShell--room .chatMessage .placeTicket.chatBubble--place {
+    width: min(20.5rem, 84vw);
+  }
+}

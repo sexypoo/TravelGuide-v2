@@ -127,7 +127,9 @@ describe('MessageCard topic handoff', () => {
 
     expect(screen.getByText('장소 추천')).toBeInTheDocument();
     expect(screen.getByText('동백식당')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /지도 보기/ })).toHaveAttribute(
+    expect(screen.getByText('제주시 바다로 1')).toBeInTheDocument();
+    expect(screen.getByText('고등어구이가 좋아요.')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /지도에서 보기/ })).toHaveAttribute(
       'href',
       expect.stringContaining('query_place_id=google-place-1'),
     );

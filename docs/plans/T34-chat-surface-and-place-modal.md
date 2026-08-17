@@ -165,13 +165,51 @@ new pills. That would preserve the same hierarchy problem in a smaller form.
 The revision instead uses plain inline data and one quiet footer fill, with a
 14px outer radius and 12–13px body padding.
 
+## Correction pass — shared place inside the conversation
+
+The topic correction exposed the same visual mismatch in the adjacent `PLACE`
+attachment: its gradient pin tile, boxed quotation, floating pill save control,
+and shadow made a recommendation look like several small widgets. The subject
+is a trusted place handoff between travelers; the single job is to recognize
+the place, understand why it was sent, and open or save it.
+
+### Shared-place tokens and type
+
+- Place Ink `#191f28`, Note Gray `#6b7684`, Hairline `#e5e8eb`, Quiet Fill
+  `#f7f8fa`, Guide Violet `#6257d9`, and Saved Berry `#d33a6f`.
+- Wanted Sans carries the 16px/760 place name; Pretendard carries the 12px
+  category, address, recommendation, and actions; SUIT carries utility state.
+
+### Revised attachment layout
+
+```text
+┌ ● 장소 추천                         공유된 장소 ┐
+│ 동백식당                                         │
+│ ⌖ 제주시 바다로 1                                │
+│ 고등어구이가 좋아요.                             │
+├──────────────────────────────────────────────────┤
+│ 지도에서 보기  →                         ♡ 찜하기 │
+└──────────────────────────────────────────────────┘
+```
+
+The signature is the address-led handoff: the map pin stays next to the actual
+location instead of becoming a decorative gradient tile. The place name is the
+only display-weight element, while the recommendation is plain supporting copy.
+
+Critique: copying the topic attachment exactly would erase the distinction
+between a live question and a destination. The revision shares its white
+single-surface shell, 14px radius, compact padding, and integrated footer, but
+uses location order and a saved-state berry accent. The deliberate aesthetic
+risk is removing both the quote box and the filled pin badge, leaving one small
+violet dot as the only category decoration.
+
 ## Files
 
 - `frontend/src/components/messages/message-timeline.tsx` and test: add a
   bottom-settling content stack without changing scroll ownership.
 - `frontend/src/components/messages/message-card.tsx`: identify plain text
-  bubbles explicitly and simplify the shared-topic labels/CTA so rich cards
-  keep useful but quiet surfaces.
+  bubbles explicitly and simplify the shared-topic and shared-place hierarchy
+  so rich cards keep useful but quiet single surfaces.
 - `frontend/src/components/places/place-picker.tsx` and tests: document portal,
   modal behavior, focus management, and clearer result/selection regions.
 - `frontend/src/components/messages/message-composer.test.tsx`: prove the place
@@ -238,6 +276,10 @@ The revision instead uses plain inline data and one quiet footer fill, with a
   390x844 and 1440x900. The white surface, <=15px radius, <=210px height, 16px
   question, transparent inline metadata, and integrated quiet footer are now
   asserted in Playwright; the 390x640 composer remains fully visible.
+- A real `PLACE` message was created through the API and inspected at 390x844
+  and 1440x900. The white surface, <=15px radius, <=210px height, 16px place
+  name, plain recommendation, small non-gradient category dot, borderless save
+  action, and integrated quiet footer are protected by Playwright.
 - Desktop room geometry leaves a 16px outer gutter at 1440x900; short message
   history settles above the composer. The modal is a direct body child, locks
   body overflow, receives search focus, and remains within 390x844.

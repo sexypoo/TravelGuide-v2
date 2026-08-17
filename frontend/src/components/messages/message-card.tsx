@@ -76,9 +76,7 @@ export function MessageCard({
             <div className="placeTicket__content">
               <header className="placeTicket__eyebrow">
                 <span>
-                  <i aria-hidden="true">
-                    <AppIcon name="pin" />
-                  </i>
+                  <i aria-hidden="true" />
                   장소 추천
                 </span>
                 <small>공유된 장소</small>
@@ -88,22 +86,23 @@ export function MessageCard({
               </strong>
               {message.place.address && (
                 <span className="placeTicket__address">
+                  <AppIcon name="pin" />
                   {message.place.address}
                 </span>
               )}
               {message.content && (
-                <p className="placeTicket__note">“{message.content}”</p>
+                <p className="placeTicket__note">{message.content}</p>
               )}
-              <span className="placeMessageActions placeTicket__actions">
-                <a href={placeMapUrl} target="_blank" rel="noopener noreferrer">
-                  지도 보기 <AppIcon name="external" />
-                </a>
-                <PlaceFavoriteButton
-                  messageId={message.id}
-                  placeName={message.place.name}
-                />
-              </span>
             </div>
+            <footer className="placeMessageActions placeTicket__actions">
+              <a href={placeMapUrl} target="_blank" rel="noopener noreferrer">
+                지도에서 보기 <AppIcon name="external" />
+              </a>
+              <PlaceFavoriteButton
+                messageId={message.id}
+                placeName={message.place.name}
+              />
+            </footer>
           </div>
         ) : message.type === 'TOPIC_SHARE' && message.sharedTopic !== null ? (
           <Link

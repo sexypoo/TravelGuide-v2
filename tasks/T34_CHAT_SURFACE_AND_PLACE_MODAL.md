@@ -42,3 +42,6 @@ topic cards, and turn place selection into a reliable viewport-level modal.
 - A `TOPIC_SHARE` message uses one white rounded attachment, plain inline answer
   cadence, and one integrated footer; it has no lavender field or nested
   statistics card and remains readable at 390px.
+- A `PLACE` message uses the same compact white attachment family with the place
+  name first, a plain address and recommendation, and one integrated map/save
+  footer; it has no gradient icon tile, nested quote card, or floating pill.

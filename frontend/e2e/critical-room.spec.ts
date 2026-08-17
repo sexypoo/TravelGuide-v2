@@ -195,6 +195,60 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   expect(desktopSharedSurface.metaBackground).toBe('rgba(0, 0, 0, 0)');
   expect(desktopSharedSurface.metaDisplay).toBe('flex');
   expect(desktopSharedSurface.footerBackground).toBe('rgb(247, 248, 250)');
+
+  const desktopPlaceName = `E2E 동백식당 ${Date.now()}`;
+  const desktopPlaceResponse = await travelerContext.request.post(
+    '/api/v1/rooms/jeju/messages/places',
+    {
+      data: {
+        googlePlaceId: 'e2e-dongbaek-place',
+        placeName: desktopPlaceName,
+        address: '제주시 바다로 1',
+        latitude: 33.5,
+        longitude: 126.5,
+        note: '고등어구이가 좋아요.',
+      },
+    },
+  );
+  expect(desktopPlaceResponse.ok()).toBeTruthy();
+  const desktopSharedPlace = traveler
+    .locator('.chatBubble--place')
+    .filter({ hasText: desktopPlaceName })
+    .last();
+  await expect(desktopSharedPlace).toBeVisible();
+  const desktopPlaceSurface = await desktopSharedPlace.evaluate((element) => {
+    const cardStyle = getComputedStyle(element);
+    const name = element.querySelector<HTMLElement>('.placeTicket__name');
+    const categoryDot = element.querySelector<HTMLElement>(
+      '.placeTicket__eyebrow i',
+    );
+    const note = element.querySelector<HTMLElement>('.placeTicket__note');
+    const footer = element.querySelector<HTMLElement>('.placeTicket__actions');
+    const saveButton = element.querySelector<HTMLElement>(
+      '.placeFavoriteControl > button',
+    );
+    return {
+      background: cardStyle.backgroundColor,
+      borderRadius: Number.parseFloat(cardStyle.borderRadius),
+      height: element.getBoundingClientRect().height,
+      nameFont: Number.parseFloat(getComputedStyle(name!).fontSize),
+      categoryDotWidth: categoryDot!.getBoundingClientRect().width,
+      categoryDotBackgroundImage: getComputedStyle(categoryDot!)
+        .backgroundImage,
+      noteBackground: getComputedStyle(note!).backgroundColor,
+      footerBackground: getComputedStyle(footer!).backgroundColor,
+      saveBorderWidth: getComputedStyle(saveButton!).borderWidth,
+    };
+  });
+  expect(desktopPlaceSurface.background).toBe('rgb(255, 255, 255)');
+  expect(desktopPlaceSurface.borderRadius).toBeLessThanOrEqual(15);
+  expect(desktopPlaceSurface.height).toBeLessThanOrEqual(210);
+  expect(desktopPlaceSurface.nameFont).toBeGreaterThanOrEqual(16);
+  expect(desktopPlaceSurface.categoryDotWidth).toBeLessThanOrEqual(8);
+  expect(desktopPlaceSurface.categoryDotBackgroundImage).toBe('none');
+  expect(desktopPlaceSurface.noteBackground).toBe('rgba(0, 0, 0, 0)');
+  expect(desktopPlaceSurface.footerBackground).toBe('rgb(247, 248, 250)');
+  expect(desktopPlaceSurface.saveBorderWidth).toBe('0px');
   await traveler.screenshot({
     path: 'test-results/chat-room-desktop.png',
     fullPage: false,
@@ -274,6 +328,21 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
     { data: { questionId: mobileTopic.id } },
   );
   expect(mobileSharedTopicResponse.ok()).toBeTruthy();
+  const mobilePlaceName = `모바일 동백식당 ${Date.now()}`;
+  const mobilePlaceResponse = await context.request.post(
+    '/api/v1/rooms/jeju/messages/places',
+    {
+      data: {
+        googlePlaceId: 'e2e-mobile-dongbaek-place',
+        placeName: mobilePlaceName,
+        address: '제주시 바다로 1',
+        latitude: 33.5,
+        longitude: 126.5,
+        note: '고등어구이가 좋아요.',
+      },
+    },
+  );
+  expect(mobilePlaceResponse.ok()).toBeTruthy();
   await page.goto('/app/rooms/jeju');
   await expect(page.getByLabel('방에 메시지 보내기')).toBeVisible();
   await expect(page.locator('.chatRoomExperience')).toBeVisible();
@@ -302,6 +371,29 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   expect(mobileSharedSurface.questionFont).toBeGreaterThanOrEqual(16);
   expect(mobileSharedSurface.metaBackground).toBe('rgba(0, 0, 0, 0)');
   expect(mobileSharedSurface.footerBackground).toBe('rgb(247, 248, 250)');
+  const mobileSharedPlace = page
+    .locator('.chatBubble--place')
+    .filter({ hasText: mobilePlaceName })
+    .last();
+  await expect(mobileSharedPlace).toBeVisible();
+  const mobilePlaceSurface = await mobileSharedPlace.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    const name = element.querySelector<HTMLElement>('.placeTicket__name');
+    const note = element.querySelector<HTMLElement>('.placeTicket__note');
+    const footer = element.querySelector<HTMLElement>('.placeTicket__actions');
+    return {
+      width: bounds.width,
+      height: bounds.height,
+      nameFont: Number.parseFloat(getComputedStyle(name!).fontSize),
+      noteBackground: getComputedStyle(note!).backgroundColor,
+      footerBackground: getComputedStyle(footer!).backgroundColor,
+    };
+  });
+  expect(mobilePlaceSurface.width).toBeLessThanOrEqual(328);
+  expect(mobilePlaceSurface.height).toBeLessThanOrEqual(210);
+  expect(mobilePlaceSurface.nameFont).toBeGreaterThanOrEqual(16);
+  expect(mobilePlaceSurface.noteBackground).toBe('rgba(0, 0, 0, 0)');
+  expect(mobilePlaceSurface.footerBackground).toBe('rgb(247, 248, 250)');
   const layout = await page.evaluate(() => {
     const room = document.querySelector<HTMLElement>('.chatRoomExperience');
     const timeline = document.querySelector<HTMLElement>('.messageTimeline');

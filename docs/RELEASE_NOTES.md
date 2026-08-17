@@ -87,6 +87,10 @@
 
 ## Candidate status
 
+- 채팅의 장소 추천 카드를 공유 토픽과 같은 흰색 단일 표면 계열로
+  정리하고, 장소명·주소·추천 문구·지도/찜 행동의 읽기 순서를 단순화했다.
+  그라데이션 핀 타일, 중첩 인용문 상자, 알약형 찜 버튼은 제거했다.
+
 Not released or tagged. Repository verification, including three consecutive
 browser E2E runs, is complete, but the real HTTPS deployment, physical mobile
 check, reboot recovery, backup recording, and three consecutive manual
