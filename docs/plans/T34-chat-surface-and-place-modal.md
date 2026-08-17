@@ -203,6 +203,37 @@ uses location order and a saved-state berry accent. The deliberate aesthetic
 risk is removing both the quote box and the filled pin badge, leaving one small
 violet dot as the only category decoration.
 
+## Distinction pass — live handoff versus place handoff
+
+The two corrected attachments became clean but visually interchangeable. This
+pass keeps their shared geometry while giving each message type one semantic
+signal that can be recognized before the copy is read.
+
+### Type signals and tokens
+
+- Topic Thread `#6257d9`, Topic Edge `#dedafa`, Topic Wash `#f8f7ff`.
+- Place Berry `#c93868`, Place Edge `#efd8e1`, Place Wash `#fff7fa`.
+- Shared Ink `#191f28`, Note Gray `#6b7684`, and Surface White `#ffffff`.
+- Wanted Sans remains the 16px content face; Pretendard and SUIT remain the
+  12px utility faces so distinction does not come from changing density.
+
+```text
+┌ ◇ 토픽 분류                     ● 진행 중 ┐
+│ 질문과 답변 cadence                         │
+├ violet answer action ───────────────────────┤
+
+┌ ⌖ 장소 추천                    공유된 장소 ┐
+│ 장소명 · 주소 · 추천 이유                   │
+├ berry map action ───────────────────────────┤
+```
+
+The signature is a paired message-type stamp: an unboxed conversation glyph
+for a topic and an unboxed map pin for a place. Topic edges/actions use a cool
+violet thread; place edges/actions use a warm berry route. The critique removes
+the tempting colored top bars and tinted card bodies because those would turn
+the distinction into decoration and repeat the large-color-field problem the
+user rejected. Only the hairline, glyph, and compact footer wash change.
+
 ## Files
 
 - `frontend/src/components/messages/message-timeline.tsx` and test: add a
@@ -278,8 +309,13 @@ violet dot as the only category decoration.
   asserted in Playwright; the 390x640 composer remains fully visible.
 - A real `PLACE` message was created through the API and inspected at 390x844
   and 1440x900. The white surface, <=15px radius, <=210px height, 16px place
-  name, plain recommendation, small non-gradient category dot, borderless save
+  name, plain recommendation, small unboxed category icon, borderless save
   action, and integrated quiet footer are protected by Playwright.
+- The paired attachments were re-inspected together after the distinction pass:
+  topic renders an unboxed conversation icon with `#6257d9` utility text and a
+  `#f8f7ff` footer, while place renders an unboxed pin with `#c93868` utility
+  text and a `#fff7fa` footer. Playwright asserts the independent type colors,
+  glyph size, and unchanged compact geometry.
 - Desktop room geometry leaves a 16px outer gutter at 1440x900; short message
   history settles above the composer. The modal is a direct body child, locks
   body overflow, receives search focus, and remains within 390x844.

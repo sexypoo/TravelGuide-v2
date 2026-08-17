@@ -1581,7 +1581,7 @@
   width: min(22rem, 82vw);
   padding: 0;
   overflow: hidden;
-  border: 1px solid #e5e8eb;
+  border: 1px solid #dedafa;
   border-radius: 0.9rem;
   background: #fff;
   box-shadow: 0 2px 8px rgba(25, 31, 40, 0.05);
@@ -1628,11 +1628,19 @@
 }
 
 .appShell--room .chatBubble--topic .sharedTopicCategory > i {
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 50%;
-  background: #6257d9;
+  display: grid;
+  width: 0.9rem;
+  height: 0.9rem;
+  place-items: center;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
+}
+
+.appShell--room .chatBubble--topic .sharedTopicCategory > i > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+  stroke-width: 2;
 }
 
 .appShell--room .chatBubble--topic .sharedTopicStatus {
@@ -1719,8 +1727,8 @@
   min-height: 2.65rem;
   margin-top: 0.68rem;
   padding: 0.62rem 0.78rem;
-  border-top: 1px solid #f2f4f6;
-  background: #f7f8fa;
+  border-top: 1px solid #eeecff;
+  background: #f8f7ff;
   color: #6257d9;
   font-size: 0.78rem;
   font-weight: 720;
@@ -1754,7 +1762,7 @@
   width: min(22rem, 82vw);
   padding: 0;
   overflow: hidden;
-  border: 1px solid #e5e8eb;
+  border: 1px solid #efd8e1;
   border-radius: 0.9rem;
   background: #fff;
   box-shadow: 0 2px 8px rgba(25, 31, 40, 0.05);
@@ -1779,7 +1787,7 @@
 .appShell--room .placeTicket__eyebrow > small {
   padding: 0;
   background: transparent;
-  color: #6257d9;
+  color: #c93868;
   font-size: 0.75rem;
   font-weight: 720;
   line-height: 1.4;
@@ -1791,11 +1799,18 @@
 }
 
 .appShell--room .placeTicket__eyebrow > span > i {
-  display: block;
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 50%;
-  background: #6257d9;
+  display: grid;
+  width: 0.9rem;
+  height: 0.9rem;
+  place-items: center;
+  border-radius: 0;
+  background: transparent;
+}
+
+.appShell--room .placeTicket__eyebrow > span > i > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+  stroke-width: 2;
 }
 
 .appShell--room .chatBubble--place .placeTicket__name {
@@ -1815,14 +1830,6 @@
   font-size: 0.75rem;
   font-weight: 620;
   line-height: 1.45;
-  gap: 0.3rem;
-}
-
-.appShell--room .chatBubble--place .placeTicket__address > .appIcon {
-  width: 0.76rem;
-  height: 0.76rem;
-  flex: 0 0 auto;
-  color: #6257d9;
 }
 
 .appShell--room .chatBubble--place .placeTicket__note {
@@ -1842,8 +1849,8 @@
   min-height: 2.75rem;
   margin: 0;
   padding: 0 0.78rem;
-  border-top: 1px solid #f2f4f6;
-  background: #f7f8fa;
+  border-top: 1px solid #fae9ef;
+  background: #fff7fa;
   align-items: stretch;
   justify-content: space-between;
   gap: 0.8rem;
@@ -1855,7 +1862,7 @@
   margin: 0;
   padding: 0;
   align-items: center;
-  color: #6257d9;
+  color: #c93868;
   font-size: 0.78rem;
   font-weight: 720;
 }
@@ -1888,13 +1895,13 @@
 .appShell--room .chatBubble--place .placeFavoriteControl > button.isSaved {
   border: 0;
   background: transparent;
-  color: #d33a6f;
+  color: #c93868;
 }
 
 .appShell--room .chatBubble--place .placeFavoriteControl > button:focus-visible,
 .appShell--room .chatBubble--place .placeTicket__actions > a:focus-visible {
   border-radius: 0.35rem;
-  outline: 3px solid rgba(98, 87, 217, 0.2);
+  outline: 3px solid rgba(201, 56, 104, 0.2);
   outline-offset: -2px;
 }
 

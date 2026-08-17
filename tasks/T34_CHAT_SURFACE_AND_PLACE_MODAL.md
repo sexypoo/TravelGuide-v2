@@ -45,3 +45,6 @@ topic cards, and turn place selection into a reliable viewport-level modal.
 - A `PLACE` message uses the same compact white attachment family with the place
   name first, a plain address and recommendation, and one integrated map/save
   footer; it has no gradient icon tile, nested quote card, or floating pill.
+- `TOPIC_SHARE` and `PLACE` stay in one compact attachment family but are
+  recognizable before reading: topic uses an unboxed conversation/violet
+  signal and place uses an unboxed pin/berry signal, without tinted card bodies.

@@ -90,6 +90,8 @@
 - 채팅의 장소 추천 카드를 공유 토픽과 같은 흰색 단일 표면 계열로
   정리하고, 장소명·주소·추천 문구·지도/찜 행동의 읽기 순서를 단순화했다.
   그라데이션 핀 타일, 중첩 인용문 상자, 알약형 찜 버튼은 제거했다.
+- 공유 토픽에는 대화 아이콘과 바이올렛 신호를, 장소 추천에는 핀 아이콘과
+  베리 신호를 적용해 본문을 읽기 전에도 두 채팅 유형을 구분할 수 있다.
 
 Not released or tagged. Repository verification, including three consecutive
 browser E2E runs, is complete, but the real HTTPS deployment, physical mobile

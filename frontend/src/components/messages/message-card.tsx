@@ -76,7 +76,9 @@ export function MessageCard({
             <div className="placeTicket__content">
               <header className="placeTicket__eyebrow">
                 <span>
-                  <i aria-hidden="true" />
+                  <i aria-hidden="true">
+                    <AppIcon name="pin" />
+                  </i>
                   장소 추천
                 </span>
                 <small>공유된 장소</small>
@@ -86,7 +88,6 @@ export function MessageCard({
               </strong>
               {message.place.address && (
                 <span className="placeTicket__address">
-                  <AppIcon name="pin" />
                   {message.place.address}
                 </span>
               )}
@@ -111,7 +112,9 @@ export function MessageCard({
           >
             <header className="sharedTopicHeader">
               <span className="sharedTopicCategory">
-                <i aria-hidden="true" />
+                <i aria-hidden="true">
+                  <AppIcon name="topic" />
+                </i>
                 {categoryLabels[message.sharedTopic.category]}
               </span>
               <span

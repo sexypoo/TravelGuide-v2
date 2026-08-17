@@ -71,7 +71,7 @@ describe('MessageCard topic handoff', () => {
   });
 
   it('shows a shared topic as a concise status card', () => {
-    render(
+    const { container } = render(
       <MessageCard
         message={{
           ...message,
@@ -103,10 +103,13 @@ describe('MessageCard topic handoff', () => {
     expect(topicCard).toHaveTextContent('요청1시간 내');
     expect(topicCard).toHaveTextContent('답변과 현황 보기');
     expect(topicCard).toHaveTextContent('성산일출봉 매표소');
+    expect(
+      container.querySelector('.sharedTopicCategory .appIcon'),
+    ).toBeInTheDocument();
   });
 
   it('presents shared places as a clear place ticket', () => {
-    render(
+    const { container } = render(
       <MessageCard
         message={{
           ...message,
@@ -135,6 +138,9 @@ describe('MessageCard topic handoff', () => {
     );
     expect(
       screen.getByRole('button', { name: '동백식당 찜하기' }),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('.placeTicket__eyebrow .appIcon'),
     ).toBeInTheDocument();
   });
 

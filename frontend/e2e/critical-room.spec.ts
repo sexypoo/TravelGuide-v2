@@ -174,6 +174,10 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   const desktopSharedSurface = await desktopSharedTopic.evaluate((element) => {
     const cardStyle = getComputedStyle(element);
     const question = element.querySelector<HTMLElement>(':scope > strong');
+    const category = element.querySelector<HTMLElement>('.sharedTopicCategory');
+    const typeIcon = element.querySelector<SVGElement>(
+      '.sharedTopicCategory .appIcon',
+    );
     const meta = element.querySelector<HTMLElement>('.sharedTopicMeta');
     const footer = element.querySelector<HTMLElement>('footer');
     return {
@@ -183,6 +187,8 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
       questionPadding: Number.parseFloat(
         getComputedStyle(question!).paddingLeft,
       ),
+      categoryColor: getComputedStyle(category!).color,
+      typeIconWidth: typeIcon!.getBoundingClientRect().width,
       metaBackground: getComputedStyle(meta!).backgroundColor,
       metaDisplay: getComputedStyle(meta!).display,
       footerBackground: getComputedStyle(footer!).backgroundColor,
@@ -192,9 +198,11 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   expect(desktopSharedSurface.borderRadius).toBeLessThanOrEqual(15);
   expect(desktopSharedSurface.height).toBeLessThanOrEqual(210);
   expect(desktopSharedSurface.questionPadding).toBeLessThanOrEqual(13);
+  expect(desktopSharedSurface.categoryColor).toBe('rgb(98, 87, 217)');
+  expect(desktopSharedSurface.typeIconWidth).toBeGreaterThanOrEqual(14);
   expect(desktopSharedSurface.metaBackground).toBe('rgba(0, 0, 0, 0)');
   expect(desktopSharedSurface.metaDisplay).toBe('flex');
-  expect(desktopSharedSurface.footerBackground).toBe('rgb(247, 248, 250)');
+  expect(desktopSharedSurface.footerBackground).toBe('rgb(248, 247, 255)');
 
   const desktopPlaceName = `E2E 동백식당 ${Date.now()}`;
   const desktopPlaceResponse = await travelerContext.request.post(
@@ -219,8 +227,11 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   const desktopPlaceSurface = await desktopSharedPlace.evaluate((element) => {
     const cardStyle = getComputedStyle(element);
     const name = element.querySelector<HTMLElement>('.placeTicket__name');
-    const categoryDot = element.querySelector<HTMLElement>(
-      '.placeTicket__eyebrow i',
+    const category = element.querySelector<HTMLElement>(
+      '.placeTicket__eyebrow > span',
+    );
+    const typeIcon = element.querySelector<SVGElement>(
+      '.placeTicket__eyebrow .appIcon',
     );
     const note = element.querySelector<HTMLElement>('.placeTicket__note');
     const footer = element.querySelector<HTMLElement>('.placeTicket__actions');
@@ -232,9 +243,9 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
       borderRadius: Number.parseFloat(cardStyle.borderRadius),
       height: element.getBoundingClientRect().height,
       nameFont: Number.parseFloat(getComputedStyle(name!).fontSize),
-      categoryDotWidth: categoryDot!.getBoundingClientRect().width,
-      categoryDotBackgroundImage: getComputedStyle(categoryDot!)
-        .backgroundImage,
+      categoryColor: getComputedStyle(category!).color,
+      typeIconWidth: typeIcon!.getBoundingClientRect().width,
+      typeIconBackgroundImage: getComputedStyle(typeIcon!).backgroundImage,
       noteBackground: getComputedStyle(note!).backgroundColor,
       footerBackground: getComputedStyle(footer!).backgroundColor,
       saveBorderWidth: getComputedStyle(saveButton!).borderWidth,
@@ -244,10 +255,11 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   expect(desktopPlaceSurface.borderRadius).toBeLessThanOrEqual(15);
   expect(desktopPlaceSurface.height).toBeLessThanOrEqual(210);
   expect(desktopPlaceSurface.nameFont).toBeGreaterThanOrEqual(16);
-  expect(desktopPlaceSurface.categoryDotWidth).toBeLessThanOrEqual(8);
-  expect(desktopPlaceSurface.categoryDotBackgroundImage).toBe('none');
+  expect(desktopPlaceSurface.categoryColor).toBe('rgb(201, 56, 104)');
+  expect(desktopPlaceSurface.typeIconWidth).toBeGreaterThanOrEqual(14);
+  expect(desktopPlaceSurface.typeIconBackgroundImage).toBe('none');
   expect(desktopPlaceSurface.noteBackground).toBe('rgba(0, 0, 0, 0)');
-  expect(desktopPlaceSurface.footerBackground).toBe('rgb(247, 248, 250)');
+  expect(desktopPlaceSurface.footerBackground).toBe('rgb(255, 247, 250)');
   expect(desktopPlaceSurface.saveBorderWidth).toBe('0px');
   await traveler.screenshot({
     path: 'test-results/chat-room-desktop.png',
@@ -356,12 +368,14 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   const mobileSharedSurface = await mobileSharedTopic.evaluate((element) => {
     const bounds = element.getBoundingClientRect();
     const question = element.querySelector<HTMLElement>(':scope > strong');
+    const category = element.querySelector<HTMLElement>('.sharedTopicCategory');
     const meta = element.querySelector<HTMLElement>('.sharedTopicMeta');
     const footer = element.querySelector<HTMLElement>('footer');
     return {
       width: bounds.width,
       height: bounds.height,
       questionFont: Number.parseFloat(getComputedStyle(question!).fontSize),
+      categoryColor: getComputedStyle(category!).color,
       metaBackground: getComputedStyle(meta!).backgroundColor,
       footerBackground: getComputedStyle(footer!).backgroundColor,
     };
@@ -369,8 +383,9 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   expect(mobileSharedSurface.width).toBeLessThanOrEqual(328);
   expect(mobileSharedSurface.height).toBeLessThanOrEqual(210);
   expect(mobileSharedSurface.questionFont).toBeGreaterThanOrEqual(16);
+  expect(mobileSharedSurface.categoryColor).toBe('rgb(98, 87, 217)');
   expect(mobileSharedSurface.metaBackground).toBe('rgba(0, 0, 0, 0)');
-  expect(mobileSharedSurface.footerBackground).toBe('rgb(247, 248, 250)');
+  expect(mobileSharedSurface.footerBackground).toBe('rgb(248, 247, 255)');
   const mobileSharedPlace = page
     .locator('.chatBubble--place')
     .filter({ hasText: mobilePlaceName })
@@ -379,12 +394,16 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   const mobilePlaceSurface = await mobileSharedPlace.evaluate((element) => {
     const bounds = element.getBoundingClientRect();
     const name = element.querySelector<HTMLElement>('.placeTicket__name');
+    const category = element.querySelector<HTMLElement>(
+      '.placeTicket__eyebrow > span',
+    );
     const note = element.querySelector<HTMLElement>('.placeTicket__note');
     const footer = element.querySelector<HTMLElement>('.placeTicket__actions');
     return {
       width: bounds.width,
       height: bounds.height,
       nameFont: Number.parseFloat(getComputedStyle(name!).fontSize),
+      categoryColor: getComputedStyle(category!).color,
       noteBackground: getComputedStyle(note!).backgroundColor,
       footerBackground: getComputedStyle(footer!).backgroundColor,
     };
@@ -392,8 +411,9 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   expect(mobilePlaceSurface.width).toBeLessThanOrEqual(328);
   expect(mobilePlaceSurface.height).toBeLessThanOrEqual(210);
   expect(mobilePlaceSurface.nameFont).toBeGreaterThanOrEqual(16);
+  expect(mobilePlaceSurface.categoryColor).toBe('rgb(201, 56, 104)');
   expect(mobilePlaceSurface.noteBackground).toBe('rgba(0, 0, 0, 0)');
-  expect(mobilePlaceSurface.footerBackground).toBe('rgb(247, 248, 250)');
+  expect(mobilePlaceSurface.footerBackground).toBe('rgb(255, 247, 250)');
   const layout = await page.evaluate(() => {
     const room = document.querySelector<HTMLElement>('.chatRoomExperience');
     const timeline = document.querySelector<HTMLElement>('.messageTimeline');
