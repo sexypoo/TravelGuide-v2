@@ -86,10 +86,9 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   expect(
     (desktopRoom?.y ?? 0) + (desktopRoom?.height ?? 0),
   ).toBeLessThanOrEqual(900);
-  await traveler.screenshot({
-    path: 'test-results/chat-room-desktop.png',
-    fullPage: false,
-  });
+  await expect(
+    traveler.getByRole('heading', { name: '실시간 대화' }),
+  ).toBeVisible();
 
   const topicText = `E2E 현재 제주공항 입장 대기 상황을 알려주세요 ${Date.now()}`;
   const topicResponse = await travelerContext.request.post(
@@ -101,6 +100,11 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
   expect(topicResponse.ok()).toBeTruthy();
   const topic = (await topicResponse.json()) as { id: string };
   await expect(local.getByText(topicText)).toBeVisible();
+  await expect(traveler.getByText(topicText)).toBeVisible();
+  await traveler.screenshot({
+    path: 'test-results/chat-room-desktop.png',
+    fullPage: false,
+  });
 
   await traveler.goto(`/app/questions/${topic.id}`);
   const firstAnswer = `현장 E2E 확인 답변 ${Date.now()}`;
@@ -192,6 +196,8 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   expect(layout.document.height).toBeLessThanOrEqual(layout.viewport.height);
   expect(layout.bodyHeight).toBeLessThanOrEqual(layout.viewport.height);
   expect(layout.windowScrollY).toBe(0);
+  expect(layout.room.left).toBeLessThanOrEqual(0.5);
+  expect(layout.room.right).toBeGreaterThanOrEqual(layout.viewport.width - 0.5);
   expect(layout.room.top).toBeGreaterThanOrEqual(0);
   expect(layout.room.bottom).toBeLessThanOrEqual(layout.viewport.height);
   expect(layout.timeline.clientHeight).toBeGreaterThan(200);
@@ -254,6 +260,16 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   expect(readability.send.width).toBeGreaterThanOrEqual(44);
   expect(readability.send.height).toBeGreaterThanOrEqual(44);
   expect(readability.mode.height).toBeGreaterThanOrEqual(44);
+  expect(
+    await page
+      .getByRole('tab', { name: '대화' })
+      .evaluate((element) => getComputedStyle(element, '::after').content),
+  ).toBe('none');
+  expect(
+    await page
+      .locator('.messageTimelineFrame')
+      .evaluate((element) => getComputedStyle(element).backgroundImage),
+  ).not.toContain('linear-gradient(90deg');
   await page.screenshot({
     path: 'test-results/chat-room-mobile.png',
     fullPage: false,
@@ -273,6 +289,48 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   expect(afterHistoryScroll.windowScrollY).toBe(0);
   expect(afterHistoryScroll.composerTop).toBeCloseTo(initialComposerTop, 1);
 
+  await page.getByRole('tab', { name: '실시간 토픽' }).click();
+  await expect(page.locator('.topicRail')).toBeVisible();
+  const topicModeViewport = await page.evaluate(() => ({
+    windowScrollY: scrollY,
+    header:
+      document
+        .querySelector<HTMLElement>('.conversationRoomHeader')
+        ?.getBoundingClientRect()
+        .toJSON() ?? null,
+  }));
+  expect(topicModeViewport.windowScrollY).toBe(0);
+  expect(topicModeViewport.header).not.toBeNull();
+  expect(topicModeViewport.header?.top ?? -1).toBeGreaterThanOrEqual(0);
+  expect(
+    await page
+      .getByRole('tab', { name: '실시간 토픽' })
+      .evaluate((element) => getComputedStyle(element, '::after').content),
+  ).toBe('none');
+  expect(
+    await page
+      .locator('.topicRail')
+      .evaluate((element) => getComputedStyle(element).overflowY),
+  ).toBe('auto');
+  const topicCard = page.locator('.topicRail .signalQuestionCard').first();
+  await expect(topicCard).toBeVisible();
+  expect(
+    await topicCard
+      .locator('.questionCategory')
+      .evaluate((element) => getComputedStyle(element).backgroundColor),
+  ).toBe('rgba(0, 0, 0, 0)');
+  expect(
+    await topicCard
+      .locator('.questionCardFooter')
+      .evaluate((element) => getComputedStyle(element).flexDirection),
+  ).toBe('row');
+  await page.screenshot({
+    path: 'test-results/chat-room-mobile-topics.png',
+    fullPage: false,
+  });
+
+  await page.getByRole('tab', { name: '대화' }).click();
+  await expect(page.locator('.messageComposer')).toBeVisible();
   await page.setViewportSize({ width: 390, height: 640 });
   await expect(page.getByLabel('방에 메시지 보내기')).toBeVisible();
   const compactComposer = await page.locator('.messageComposer').boundingBox();
@@ -281,17 +339,5 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
   expect(
     (compactComposer?.y ?? 0) + (compactComposer?.height ?? 0),
   ).toBeLessThanOrEqual(640);
-
-  await page.getByRole('tab', { name: '실시간 토픽' }).click();
-  await expect(page.locator('.topicRail')).toBeVisible();
-  expect(
-    await page
-      .locator('.topicRail')
-      .evaluate((element) => getComputedStyle(element).overflowY),
-  ).toBe('auto');
-  await page.screenshot({
-    path: 'test-results/chat-room-mobile-topics.png',
-    fullPage: false,
-  });
   await context.close();
 });

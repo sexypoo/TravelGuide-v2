@@ -127,6 +127,13 @@ export function RoomExperience({
           className="conversationStage"
           aria-label={`${room.destination.nameKo} 대화`}
         >
+          <header className="conversationStageHeader">
+            <div>
+              <span>LIVE CONVERSATION</span>
+              <h2>실시간 대화</h2>
+            </div>
+            <p>인증된 참여자의 현장 교신</p>
+          </header>
           {connectionState !== 'connected' && (
             <div className="connectionNotice" role="status" aria-live="polite">
               {connectionState === 'offline'

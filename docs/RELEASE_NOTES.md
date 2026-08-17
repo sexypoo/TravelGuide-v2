@@ -1,5 +1,16 @@
 # 여쭈어 (여JJU) release candidate notes
 
+## 2026-08-18 responsive room refinement
+
+- Removed the unexplained mobile chat gutter and decorative signal rail so the
+  focused room now fills the device without horizontal overflow.
+- Removed the generated purple underline from both mobile room modes while
+  preserving clear selected and keyboard-focus states.
+- Rebuilt live-topic cards around the question, one concise status, a ruled
+  metadata footer, and an attached share action instead of competing pills.
+- Gave desktop chat its own conversation heading, readable message measure, and
+  denser pointer-oriented composer rather than scaling up the mobile surface.
+
 ## 2026-08-18 chat room readability
 
 - Reworked the focused room as a high-contrast field conversation with clear

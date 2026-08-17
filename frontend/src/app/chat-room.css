@@ -39,21 +39,52 @@
 
 .appShell--room .conversationStage {
   border: 1px solid rgba(98, 92, 105, 0.18);
-  border-radius: 1.15rem;
+  border-radius: 0.9rem;
   background: var(--room-signal-white);
-  box-shadow: 0 16px 38px rgba(40, 37, 49, 0.06);
+  box-shadow: 0 12px 30px rgba(40, 37, 49, 0.045);
+}
+
+.appShell--room .conversationStageHeader {
+  display: flex;
+  min-height: 4.35rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.15rem;
+  border-bottom: 1px solid rgba(98, 92, 105, 0.16);
+  background: var(--room-signal-white);
+}
+
+.appShell--room .conversationStageHeader > div > span {
+  color: var(--room-live-magenta);
+  font-family: var(--utility);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.appShell--room .conversationStageHeader h2 {
+  margin: 0.2rem 0 0;
+  color: var(--room-radio-ink);
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.appShell--room .conversationStageHeader > p {
+  margin: 0;
+  color: var(--room-field-gray);
+  font-size: 0.75rem;
+  font-weight: 650;
 }
 
 .appShell--room .messageTimelineFrame {
-  border-radius: 1.1rem 1.1rem 0 0;
-  background:
-    linear-gradient(90deg, rgba(199, 53, 104, 0.055) 0 2px, transparent 2px)
-      1.2rem 0 / 100% 100% no-repeat,
-    linear-gradient(180deg, rgba(255, 249, 251, 0.76), #ffffff 7rem);
+  background: linear-gradient(180deg, var(--room-paper), #ffffff 7rem);
 }
 
 .appShell--room .messageTimeline {
-  padding: 1rem 1.25rem 1.75rem 1.7rem;
+  padding: 1rem 1.35rem 1.65rem;
   scrollbar-color: rgba(103, 93, 218, 0.38) transparent;
 }
 
@@ -87,7 +118,7 @@
 }
 
 .appShell--room .chatMessage__body {
-  max-width: min(82%, 36rem);
+  max-width: min(68%, 42rem);
 }
 
 .appShell--room .chatMessage__body > header {
@@ -130,18 +161,18 @@
 }
 
 .appShell--room .chatBubble {
-  padding: 0.88rem 1rem;
+  padding: 0.82rem 0.95rem;
   border-color: rgba(98, 92, 105, 0.28);
-  border-radius: 0.42rem 1rem 1rem;
+  border-radius: 0.35rem 0.78rem 0.78rem;
   background: var(--room-signal-white);
-  box-shadow: 0 6px 18px rgba(40, 37, 49, 0.055);
+  box-shadow: 0 4px 12px rgba(40, 37, 49, 0.04);
 }
 
 .appShell--room .chatMessage--own .chatBubble {
   border-color: rgba(103, 93, 218, 0.38);
-  border-radius: 1rem 0.42rem 1rem 1rem;
+  border-radius: 0.78rem 0.35rem 0.78rem 0.78rem;
   background: rgba(103, 93, 218, 0.11);
-  box-shadow: 0 6px 18px rgba(103, 93, 218, 0.08);
+  box-shadow: 0 4px 12px rgba(103, 93, 218, 0.06);
 }
 
 .appShell--room .chatBubble p {
@@ -167,20 +198,20 @@
 }
 
 .appShell--room .messageComposer {
-  padding: 0.8rem 0.85rem max(0.65rem, env(safe-area-inset-bottom));
+  padding: 0.6rem 0.75rem 0.5rem;
   border-color: rgba(98, 92, 105, 0.2);
-  border-radius: 0 0 1.1rem 1.1rem;
+  border-radius: 0 0 0.9rem 0.9rem;
   background: rgba(255, 249, 251, 0.96);
   backdrop-filter: blur(18px);
 }
 
 .appShell--room .messageComposer > .messageComposer__inputRow {
-  padding: 0.35rem;
+  padding: 0.3rem;
   border-color: rgba(98, 92, 105, 0.32);
   border-radius: 0.95rem;
   background: var(--room-signal-white);
-  grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
-  box-shadow: 0 7px 20px rgba(40, 37, 49, 0.07);
+  grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+  box-shadow: 0 5px 14px rgba(40, 37, 49, 0.055);
 }
 
 .appShell--room .messageComposer > .messageComposer__inputRow:focus-within {
@@ -191,10 +222,10 @@
 }
 
 .appShell--room .messageComposer textarea {
-  min-height: 2.75rem;
-  padding: 0.58rem 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.5rem;
   color: var(--room-radio-ink);
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 560;
   line-height: 1.55;
 }
@@ -206,8 +237,8 @@
 
 .appShell--room .messageComposer__inputRow > .messageAddButton,
 .appShell--room .messageComposer__inputRow > .messageSendButton {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 0.78rem;
 }
 
@@ -222,9 +253,9 @@
 }
 
 .appShell--room .messageComposer > footer {
-  padding: 0.42rem 0.25rem 0;
+  padding: 0.35rem 0.25rem 0;
   color: var(--room-field-gray);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 650;
 }
 
@@ -246,6 +277,8 @@
 }
 
 .appShell--room .topicRail {
+  padding-left: 1.15rem;
+  background: var(--room-paper);
   scrollbar-color: rgba(103, 93, 218, 0.38) transparent;
 }
 
@@ -265,24 +298,155 @@
   font-size: 0.75rem;
 }
 
-.appShell--room .topicRail .signalQuestionCard {
-  border-color: rgba(98, 92, 105, 0.22);
+.appShell--room .topicRail .roomTabs {
+  gap: 0.35rem;
+  border-bottom: 0;
+}
+
+.appShell--room .topicRail .roomTabs button {
+  min-height: 2.35rem;
+  padding: 0 0.75rem;
+  border: 1px solid rgba(98, 92, 105, 0.18);
+  border-radius: 999px;
   background: var(--room-signal-white);
-  box-shadow: 0 8px 20px rgba(40, 37, 49, 0.055);
+  color: var(--room-field-gray);
+}
+
+.appShell--room .topicRail .roomTabs button[aria-selected='true'] {
+  border-color: var(--room-radio-ink);
+  background: var(--room-radio-ink);
+  color: var(--room-signal-white);
+}
+
+.appShell--room .topicRail .roomTabs button::after {
+  content: none;
+}
+
+.appShell--room .topicRail .questionFeed {
+  gap: 0.75rem;
+}
+
+.appShell--room .topicRail .signalQuestionCard {
+  overflow: hidden;
+  border-color: rgba(98, 92, 105, 0.24);
+  border-radius: 0.82rem;
+  background: var(--room-signal-white);
+  box-shadow: 0 5px 14px rgba(40, 37, 49, 0.04);
+}
+
+.appShell--room .topicRail .signalQuestionCard > a {
+  padding: 1rem 1rem 0.85rem;
+}
+
+.appShell--room .topicRail .questionMetaRow {
+  min-height: 1.75rem;
+  gap: 0.45rem;
+}
+
+.appShell--room .topicRail .questionCategory {
+  min-height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--room-live-magenta);
+  font-family: var(--utility);
+  font-size: 0.72rem;
+  font-weight: 820;
+}
+
+.appShell--room .topicRail .questionCategory::before {
+  width: 0.42rem;
+  height: 0.42rem;
+  flex: 0 0 auto;
+  margin-right: 0.36rem;
+  border-radius: 50%;
+  background: var(--room-live-magenta);
+  content: '';
+}
+
+.appShell--room .topicRail .questionUrgency {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+  color: var(--room-field-gray);
+  font-size: 0.7rem;
+}
+
+.appShell--room .topicRail .questionUrgency::before {
+  margin-right: 0.42rem;
+  color: rgba(98, 92, 105, 0.45);
+  content: '·';
+}
+
+.appShell--room .topicRail .questionStatus {
+  min-height: 1.65rem;
+  margin-left: auto;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
 }
 
 .appShell--room .topicRail .questionCardContent {
+  margin-top: 0.75rem;
   color: var(--room-radio-ink);
-  font-size: 0.94rem;
-  font-weight: 600;
-  line-height: 1.6;
+  font-size: 0.96rem;
+  font-weight: 680;
+  line-height: 1.58;
+  -webkit-line-clamp: 3;
 }
 
-.appShell--room .topicRail .questionCardFooter,
-.appShell--room .topicRail .publicBadge,
-.appShell--room .topicRail .questionCardMeta {
+.appShell--room .topicRail .questionArea {
+  margin-top: 0.65rem;
   color: var(--room-field-gray);
   font-size: 0.75rem;
+}
+
+.appShell--room .topicRail .questionCardFooter {
+  align-items: center;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  flex-direction: row;
+  gap: 0.65rem;
+}
+
+.appShell--room .topicRail .publicBadge {
+  min-width: 0;
+  min-height: auto;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  color: var(--room-field-gray);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appShell--room .topicRail .publicBadge > .appIcon {
+  display: none;
+}
+
+.appShell--room .topicRail .questionCardFooter > span:last-child {
+  flex: 0 0 auto;
+  color: var(--room-field-gray);
+  font-size: 0.7rem;
+  text-align: right;
+}
+
+.appShell--room .topicRail .topicShareAction {
+  justify-content: flex-end;
+  padding: 0.65rem 1rem 0.72rem;
+  border-top: 1px solid rgba(98, 92, 105, 0.14);
+  background: rgba(250, 248, 250, 0.7);
+}
+
+.appShell--room .topicRail .topicShareAction button {
+  min-height: 2.25rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--room-guide-iris);
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .appShell--room .chatBubble--topic > strong,
@@ -315,6 +479,10 @@
     box-shadow: none;
   }
 
+  .appShell--room .conversationStageHeader {
+    display: none;
+  }
+
   .appShell--room .mobileRoomSwitcher {
     position: relative;
     min-height: 3rem;
@@ -339,25 +507,44 @@
   }
 
   .appShell--room .mobileRoomSwitcher button[aria-selected='true']::after {
-    position: absolute;
-    right: 26%;
-    bottom: 0.28rem;
-    left: 26%;
-    height: 2px;
-    border-radius: 999px;
-    background: linear-gradient(
-      90deg,
-      var(--room-live-magenta),
-      var(--room-guide-iris)
-    );
-    content: '';
+    content: none;
+  }
+
+  .appShell--room .messageComposer {
+    padding: 0.7rem 0.75rem max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .appShell--room .messageComposer > .messageComposer__inputRow {
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+  }
+
+  .appShell--room .messageComposer textarea {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+
+  .appShell--room .messageComposer__inputRow > .messageAddButton,
+  .appShell--room .messageComposer__inputRow > .messageSendButton {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .appShell--room .messageComposer > footer {
+    font-size: 0.75rem;
   }
 }
 
 @media (max-width: 760px) {
+  .appShell--room .appContent.appContent--room {
+    width: 100%;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
   .appShell--room .conversationRoomHeader {
     min-height: 3.75rem;
-    padding: 0.4rem 0.1rem 0.55rem;
+    padding: 0.4rem max(0.75rem, env(safe-area-inset-right)) 0.55rem
+      max(0.75rem, env(safe-area-inset-left));
     grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
   }
 
@@ -375,18 +562,20 @@
   .appShell--room .conversationWorkspace {
     margin-top: 0.4rem;
   }
+
+  .appShell--room .mobileRoomSwitcher {
+    margin-right: max(0.75rem, env(safe-area-inset-right));
+    margin-left: max(0.75rem, env(safe-area-inset-left));
+  }
 }
 
 @media (max-width: 520px) {
   .appShell--room .messageTimelineFrame {
-    background:
-      linear-gradient(90deg, rgba(199, 53, 104, 0.06) 0 2px, transparent 2px)
-        0.45rem 0 / 100% 100% no-repeat,
-      linear-gradient(180deg, rgba(255, 249, 251, 0.76), #ffffff 6rem);
+    background: linear-gradient(180deg, var(--room-paper), #ffffff 6rem);
   }
 
   .appShell--room .messageTimeline {
-    padding: 0.75rem 0.35rem 1.25rem 0.85rem;
+    padding: 0.75rem 0.75rem 1.25rem;
   }
 
   .appShell--room .chatMessage {
@@ -416,7 +605,9 @@
   }
 
   .appShell--room .messageComposer {
-    padding: 0.65rem 0.25rem max(0.35rem, env(safe-area-inset-bottom));
+    padding: 0.65rem max(0.75rem, env(safe-area-inset-right))
+      max(0.35rem, env(safe-area-inset-bottom))
+      max(0.75rem, env(safe-area-inset-left));
   }
 
   .appShell--room .messageComposer > footer > span:first-child {
@@ -428,7 +619,8 @@
   }
 
   .appShell--room .topicRail {
-    padding-inline: 0.25rem;
+    padding: 0.6rem max(0.75rem, env(safe-area-inset-right)) 1rem
+      max(0.75rem, env(safe-area-inset-left));
   }
 
   .appShell--room .topicRail__header {

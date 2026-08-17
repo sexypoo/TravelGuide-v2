@@ -55,9 +55,10 @@ describe('RoomExperience conversation and topics', () => {
     expect(
       within(roomHeader as HTMLElement).getByRole('link', { name: '홈으로' }),
     ).toHaveAttribute('href', '/app');
+    expect(within(conversation).getByText('LIVE CONVERSATION')).toBeVisible();
     expect(
-      within(conversation).queryByText('LIVE CONVERSATION'),
-    ).not.toBeInTheDocument();
+      within(conversation).getByRole('heading', { name: '실시간 대화' }),
+    ).toBeVisible();
     expect(within(conversation).getByText('실제 대화 타임라인')).toBeVisible();
     expect(screen.getByText('메시지 작성 폼')).toBeInTheDocument();
     expect(screen.queryByText('토픽 작성 폼')).not.toBeInTheDocument();
