@@ -61,6 +61,24 @@ export function MessageTimeline({
   }, []);
 
   useEffect(() => {
+    const timeline = timelineRef.current;
+    if (timeline === null || typeof ResizeObserver === 'undefined') {
+      return undefined;
+    }
+    let frame: number | undefined;
+    const observer = new ResizeObserver(() => {
+      if (!followingLatest.current) return;
+      if (frame !== undefined) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => moveToLatest('auto'));
+    });
+    observer.observe(timeline);
+    return () => {
+      if (frame !== undefined) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [moveToLatest]);
+
+  useEffect(() => {
     const newest = messages.at(-1);
     if (newest === undefined) return;
     const previousId = previousLastId.current;

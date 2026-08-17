@@ -1,5 +1,21 @@
 # Known limitations
 
+## Mobile store submission
+
+- `mobile/` produces an installable Android debug APK, an unsigned Play AAB, and
+  a verified iOS Simulator app. Production Android/iOS artifacts remain blocked
+  on owner-controlled signing credentials and developer-console accounts.
+- The product allows in-app account creation but does not yet provide account
+  deletion. Apple requires deletion initiation in-app; Google Play additionally
+  requires an external account-deletion request URL. Store production submission
+  must not proceed until both paths and the retention policy are implemented.
+- The Capacitor client uses the existing hosted Next.js origin. Apple may reject
+  a remote-content wrapper under minimum-functionality guideline 4.2; physical
+  device testing and additional native value remain release gates.
+- A public privacy-policy URL, support URL, store privacy/data-safety answers,
+  review/demo credentials, listing copy, and store screenshots are still owned
+  release inputs.
+
 ## Intentional MVP boundaries
 
 - Responsive Korean web only; no native iOS/Android/Flutter application.

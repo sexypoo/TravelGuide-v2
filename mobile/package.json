@@ -1,0 +1,29 @@
+{
+  "name": "travelguide-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Android and iOS store packaging for 여쭈어",
+  "packageManager": "yarn@4.2.2",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "sync": "cap sync",
+    "verify": "node scripts/verify-mobile-config.mjs",
+    "android:apk": "cap sync android && ./android/gradlew -p android assembleDebug",
+    "android:bundle": "cap sync android && ./android/gradlew -p android bundleRelease",
+    "ios:simulator": "cap sync ios && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath build/ios-simulator CODE_SIGNING_ALLOWED=NO build",
+    "ios:archive:unsigned": "cap sync ios && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS' -archivePath build/Yeojju.xcarchive CODE_SIGNING_ALLOWED=NO archive"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.0",
+    "@capacitor/core": "8.5.0",
+    "@capacitor/geolocation": "8.2.2",
+    "@capacitor/ios": "8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "8.5.0",
+    "typescript": "5.8.3"
+  }
+}

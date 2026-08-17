@@ -44,10 +44,26 @@ function dimensions(
 describe('MessageTimeline live follow behavior', () => {
   let messages: ChatMessage[];
   let scrollTo: jest.Mock;
+  let notifyResize: () => void;
+  const originalResizeObserver = globalThis.ResizeObserver;
 
   beforeEach(() => {
     messages = [message('one', 0)];
     scrollTo = jest.fn();
+    notifyResize = () => {};
+    class MockResizeObserver implements ResizeObserver {
+      constructor(callback: ResizeObserverCallback) {
+        notifyResize = () => callback([], this);
+      }
+
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    }
+    Object.defineProperty(globalThis, 'ResizeObserver', {
+      configurable: true,
+      value: MockResizeObserver,
+    });
     Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
       configurable: true,
       value: scrollTo,
@@ -72,6 +88,14 @@ describe('MessageTimeline live follow behavior', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    if (originalResizeObserver === undefined) {
+      Reflect.deleteProperty(globalThis, 'ResizeObserver');
+    } else {
+      Object.defineProperty(globalThis, 'ResizeObserver', {
+        configurable: true,
+        value: originalResizeObserver,
+      });
+    }
   });
 
   it('opens at the newest message and follows live messages from the bottom', () => {
@@ -182,5 +206,33 @@ describe('MessageTimeline live follow behavior', () => {
     expect(
       screen.queryByRole('button', { name: /최신 대화로 이동/ }),
     ).not.toBeInTheDocument();
+  });
+
+  it('follows viewport resizes only while the reader is at the latest message', () => {
+    render(
+      <MessageTimeline
+        roomSlug="jeju"
+        currentUserId="current-user"
+        onPromote={jest.fn()}
+      />,
+    );
+    const timeline = screen.getByLabelText('제주방 대화');
+    dimensions(timeline, {
+      scrollHeight: 1000,
+      clientHeight: 400,
+      scrollTop: 600,
+    });
+    fireEvent.scroll(timeline);
+    scrollTo.mockClear();
+
+    notifyResize();
+    expect(scrollTo).toHaveBeenCalledWith({ top: 1000, behavior: 'auto' });
+
+    timeline.scrollTop = 180;
+    fireEvent.scroll(timeline);
+    scrollTo.mockClear();
+    notifyResize();
+    expect(scrollTo).not.toHaveBeenCalled();
+    expect(timeline.scrollTop).toBe(180);
   });
 });

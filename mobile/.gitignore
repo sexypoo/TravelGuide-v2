@@ -1,0 +1,21 @@
+/node_modules
+/.yarn
+/build
+/dist
+*.log
+
+# Android local SDK and owner-managed signing material.
+/android/local.properties
+/android/keystore.properties
+*.jks
+*.keystore
+*.pem
+*.p12
+
+# Native generated build products and local IDE state.
+/android/.gradle
+/android/build
+/android/app/build
+/ios/App/DerivedData
+xcuserdata/
+*.xcuserstate

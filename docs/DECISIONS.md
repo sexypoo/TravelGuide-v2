@@ -376,6 +376,32 @@
 
 ---
 
+### ADR-033 기존 배포를 사용하는 Capacitor 모바일 패키징
+
+- 날짜: 2026-08-17
+- 상태: accepted
+- 문제: 이미 운영 중인 Next.js·NestJS·PostgreSQL·Socket.io 앱을 Android와 iOS 스토어에 제출할 수 있는 네이티브 산출물이 필요하지만, 서버 렌더링과 동일 출처 프록시 때문에 프런트엔드를 정적 파일로 내보낼 수 없다.
+- 선택지: React Native/Swift로 전면 재구현, Android TWA와 별도 iOS 구현, 또는 Capacitor 네이티브 셸에서 기존 HTTPS origin 사용.
+- 결정: `mobile/`에 Capacitor 8.5.0 기반 Android/iOS 프로젝트를 분리하고 기존 Vercel 프로덕션의 정식 커스텀 도메인 `https://www.travelguide.kr`을 고정 origin으로 사용한다. 표시명은 `여쭈어`, 초기 앱 식별자는 `app.yeojju.mobile`이다. Android/iOS 위치 권한과 iOS privacy manifest를 포함하며, 웹/API 배포는 변경하지 않는다.
+- 이유: 두 스토어용 프로젝트와 실제 빌드 산출물을 가장 작은 변경으로 만들면서 기존 인증 쿠키, 서버 렌더링, API 프록시와 Socket.io 계약을 유지할 수 있다. Capacitor 8의 Node 22+ 요구는 독립 `mobile/` 도구 체인에만 적용하고 기존 고정 Node 20 앱에는 적용하지 않는다.
+- 영향: Android debug APK와 미서명 AAB, iOS 시뮬레이터 앱은 계정 없이 빌드할 수 있다. Play 제출에는 소유자 upload key가, App Store 제출에는 Apple Developer Team·배포 인증서·App Store Connect 레코드가 필요하다. 원격 웹 콘텐츠 기반 앱은 Apple guideline 4.2의 최소 기능 심사 위험이 있으므로 실제 기기 검증과 네이티브 가치 보강이 제출 게이트다.
+- 되돌리는 조건: 스토어 심사 또는 오프라인·푸시·딥링크 요구가 네이티브 셸로 충족되지 않으면 공통 계약을 유지한 채 React Native 또는 플랫폼 네이티브 클라이언트로 교체한다.
+
+---
+
+### ADR-034 방 화면의 단일 내부 스크롤 경계
+
+- 날짜: 2026-08-17
+- 상태: accepted
+- 문제: 모바일 브라우저와 Capacitor WebView에서 긴 대화의 최소 콘텐츠 높이가 방 레이아웃을 밀어 입력창 일부를 화면 밖으로 내보냈고, 주소창이나 소프트 키보드로 visual viewport가 바뀔 때 문서와 대화 영역의 스크롤 경계가 흔들렸다.
+- 선택지: 문서 전체 스크롤 유지, 입력창을 fixed로 겹쳐 배치, 또는 방 화면을 현재 visual viewport에 고정하고 메시지·토픽 영역만 독립 스크롤로 지정.
+- 결정: 방 상세에서는 문서 스크롤을 잠그고 앱 셸 높이를 `visualViewport.height`에 동기화한다. 그 안에서 헤더·모바일 전환 탭·입력창은 고정된 레이아웃 행으로 두고, 메시지 타임라인 또는 토픽 레일만 `minmax(0, 1fr)` 경계 안에서 스크롤한다. `interactive-widget=resizes-content`를 요청하며, 크기 변경 후에도 최신 대화를 보던 사용자만 하단을 계속 따라간다.
+- 이유: 입력창을 콘텐츠 위에 겹치지 않고도 브라우저 UI·키보드·safe area 변화에 대응하며, 과거 메시지를 읽는 사용자의 위치를 보존할 수 있다.
+- 영향: 방 상세에서는 브라우저 문서가 아니라 선택된 대화/토픽 영역이 유일한 세로 스크롤 소유자다. 나머지 앱 화면의 기존 문서 스크롤은 바뀌지 않는다.
+- 되돌리는 조건: 네이티브 전용 화면으로 교체하거나 지원 WebView가 visual viewport를 일관되게 리사이즈하지 않는 것으로 확인되면 플랫폼별 키보드 inset 브리지를 검토한다.
+
+---
+
 ## 신규 결정 템플릿
 
 ```md

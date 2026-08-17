@@ -1,7 +1,11 @@
 import { isValidElement } from 'react';
-import RootLayout from './layout';
+import RootLayout, { viewport } from './layout';
 
 describe('RootLayout', () => {
+  it('asks mobile browsers to resize content above the software keyboard', () => {
+    expect(viewport.interactiveWidget).toBe('resizes-content');
+  });
+
   it('ignores attributes injected onto the body before hydration', () => {
     const layout = RootLayout({ children: <main>content</main> });
     const body = layout.props.children;
