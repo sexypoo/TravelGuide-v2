@@ -29,6 +29,16 @@ const message: ChatMessage = {
 };
 
 describe('MessageCard topic handoff', () => {
+  it('marks a plain message as a text bubble without changing its copy', () => {
+    const { container } = render(
+      <MessageCard message={message} own={false} onPromote={jest.fn()} />,
+    );
+
+    expect(container.querySelector('.chatBubble--text')).toHaveTextContent(
+      message.content,
+    );
+  });
+
   it('lets only an eligible own message start promotion', () => {
     const onPromote = jest.fn();
     const { rerender } = render(

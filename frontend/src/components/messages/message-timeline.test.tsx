@@ -107,6 +107,9 @@ describe('MessageTimeline live follow behavior', () => {
       />,
     );
     const timeline = screen.getByLabelText('제주방 대화');
+    expect(
+      timeline.querySelector('.messageTimeline__content'),
+    ).toBeInTheDocument();
     dimensions(timeline, {
       scrollHeight: 1000,
       clientHeight: 400,

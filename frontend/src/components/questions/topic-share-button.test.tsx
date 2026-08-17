@@ -51,11 +51,9 @@ describe('TopicShareButton', () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.click(
-      screen.getByRole('button', { name: '채팅방에 카드로 보내기' }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: '채팅에 공유하기' }));
     const resendButton = await screen.findByRole('button', {
-      name: '채팅방에 다시 보내기',
+      name: '채팅에 다시 공유하기',
     });
     expect(resendButton).toBeEnabled();
 

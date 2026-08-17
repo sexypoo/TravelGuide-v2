@@ -1,5 +1,17 @@
 # 여쭈어 (여JJU) release candidate notes
 
+## 2026-08-18 chat surface and place modal
+
+- Expanded the desktop room to a compact 16px outer gutter and bottom-settled
+  short conversations above the composer.
+- Replaced bordered signal-heavy text bubbles with neutral received bubbles and
+  a single-color sent surface while preserving mobile readability minimums.
+- Rebuilt room topics as question-first white cards with one status pulse,
+  answer count, quiet metadata, and one full-width chat-share action.
+- Moved place selection into a document-level modal with search-first focus,
+  focus containment, Escape and backdrop closing, map/result panes, and a
+  selected-place footer on desktop and mobile.
+
 ## 2026-08-18 responsive room refinement
 
 - Removed the unexplained mobile chat gutter and decorative signal rail so the

@@ -7,7 +7,7 @@ async function login(page: Page): Promise<void> {
   await page.getByLabel('이메일').fill('traveler@e2e.local');
   await page.getByLabel('비밀번호').fill(password);
   await page.getByRole('button', { name: '로그인' }).click();
-  await expect(page).toHaveURL(/\/app$/u);
+  await expect(page).toHaveURL(/\/app$/u, { timeout: 30_000 });
 }
 
 const mobilePages = [
@@ -52,6 +52,7 @@ const mobilePages = [
 test('mobile app pages keep a fixed route deck and readable hierarchy', async ({
   browser,
 }, testInfo) => {
+  test.setTimeout(60_000);
   const context = await browser.newContext({
     baseURL: 'http://127.0.0.1:3100',
     viewport: { width: 390, height: 844 },

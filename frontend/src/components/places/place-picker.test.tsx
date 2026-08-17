@@ -61,4 +61,28 @@ describe('PlacePicker', () => {
     fireEvent.click(screen.getByRole('button', { name: '장소 선택 닫기' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('renders at the document level and closes from Escape or the backdrop', () => {
+    const onClose = jest.fn();
+    const view = render(
+      <form data-testid="composer-host">
+        <PlacePicker onClose={onClose} onSelect={jest.fn()} />
+      </form>,
+    );
+
+    const dialog = screen.getByRole('dialog', { name: '장소 보내기' });
+    expect(dialog.closest('form')).toBeNull();
+    expect(document.body.style.overflow).toBe('hidden');
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    const backdrop = dialog.closest('.placePickerBackdrop');
+    expect(backdrop).not.toBeNull();
+    if (backdrop !== null) fireEvent.mouseDown(backdrop);
+    expect(onClose).toHaveBeenCalledTimes(2);
+
+    view.unmount();
+    expect(document.body.style.overflow).toBe('');
+  });
 });

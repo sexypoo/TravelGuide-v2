@@ -145,50 +145,52 @@ export function MessageTimeline({
         aria-label="제주방 대화"
         onScroll={handleScroll}
       >
-        {query.hasNextPage && (
-          <button
-            className="olderMessagesButton"
-            type="button"
-            disabled={query.isFetchingNextPage}
-            onClick={() => void query.fetchNextPage()}
-          >
-            {query.isFetchingNextPage
-              ? '이전 대화 불러오는 중'
-              : '이전 대화 보기'}
-          </button>
-        )}
-        {messages.length === 0 ? (
-          <div className="chatEmptyState">
-            <span aria-hidden="true">
-              <AppIcon name="live" />
-            </span>
-            <strong>제주의 첫 대화를 시작해 보세요</strong>
-            <p>
-              지금 보고 들은 짧은 정보도 누군가의 다음 결정을 도울 수 있어요.
-            </p>
-          </div>
-        ) : (
-          messages.map((message, index) => {
-            const previous = messages[index - 1];
-            const showDate =
-              previous === undefined ||
-              dateKey(previous.createdAt) !== dateKey(message.createdAt);
-            return (
-              <div key={message.id}>
-                {showDate && (
-                  <div className="chatDateDivider">
-                    <span>{formatChatDate(message.createdAt)}</span>
-                  </div>
-                )}
-                <MessageCard
-                  message={message}
-                  own={message.author.id === currentUserId}
-                  onPromote={onPromote}
-                />
-              </div>
-            );
-          })
-        )}
+        <div className="messageTimeline__content">
+          {query.hasNextPage && (
+            <button
+              className="olderMessagesButton"
+              type="button"
+              disabled={query.isFetchingNextPage}
+              onClick={() => void query.fetchNextPage()}
+            >
+              {query.isFetchingNextPage
+                ? '이전 대화 불러오는 중'
+                : '이전 대화 보기'}
+            </button>
+          )}
+          {messages.length === 0 ? (
+            <div className="chatEmptyState">
+              <span aria-hidden="true">
+                <AppIcon name="live" />
+              </span>
+              <strong>제주의 첫 대화를 시작해 보세요</strong>
+              <p>
+                지금 보고 들은 짧은 정보도 누군가의 다음 결정을 도울 수 있어요.
+              </p>
+            </div>
+          ) : (
+            messages.map((message, index) => {
+              const previous = messages[index - 1];
+              const showDate =
+                previous === undefined ||
+                dateKey(previous.createdAt) !== dateKey(message.createdAt);
+              return (
+                <div key={message.id}>
+                  {showDate && (
+                    <div className="chatDateDivider">
+                      <span>{formatChatDate(message.createdAt)}</span>
+                    </div>
+                  )}
+                  <MessageCard
+                    message={message}
+                    own={message.author.id === currentUserId}
+                    onPromote={onPromote}
+                  />
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
       {unreadCount > 0 && (
         <button

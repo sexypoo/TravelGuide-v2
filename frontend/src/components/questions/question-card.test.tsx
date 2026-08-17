@@ -38,5 +38,9 @@ describe('QuestionCard topic evidence', () => {
       screen.getByRole('img', { name: '제주공항 토픽 첨부 사진' }),
     ).toHaveAttribute('src', question.image?.url);
     expect(screen.getByText('현장 사진')).toBeInTheDocument();
+    expect(screen.getByText('진행 중')).toBeInTheDocument();
+    expect(
+      screen.getByText('0').closest('.questionAnswerCount'),
+    ).toHaveTextContent('답변 0');
   });
 });

@@ -29,21 +29,27 @@ export function QuestionCard({
     <article
       className={`signalQuestionCard${question.urgency === 'URGENT' ? ' signalQuestionCard--urgent' : ''}`}
     >
-      <span className="signalQuestionCard__node" aria-hidden="true" />
       <Link href={`/app/questions/${question.id}`}>
         <div className="questionMetaRow">
+          <span
+            className={`questionStatus questionStatus--${question.status.toLowerCase()}`}
+          >
+            <i aria-hidden="true" />
+            {statusLabels[question.status]}
+          </span>
+          <span className="questionAnswerCount">
+            답변 <strong>{question.answerCount}</strong>
+          </span>
+        </div>
+        <div className="questionContextRow">
           <span className="questionCategory">
             {categoryLabels[question.category]}
           </span>
+          <span aria-hidden="true">·</span>
           <span
             className={`questionUrgency questionUrgency--${question.urgency.toLowerCase()}`}
           >
             {urgencyLabels[question.urgency]}
-          </span>
-          <span
-            className={`questionStatus questionStatus--${question.status.toLowerCase()}`}
-          >
-            {statusLabels[question.status]}
           </span>
         </div>
         <p className="questionCardContent">{question.content}</p>
@@ -65,13 +71,12 @@ export function QuestionCard({
         )}
         <footer className="questionCardFooter">
           <span className={`publicBadge publicBadge--${badgeKind}`}>
-            <AppIcon name="external" />
             {question.author.nickname} ·{' '}
             {participantBadgeLabel(question.author.badge)}
           </span>
-          <span>
-            답변 {question.answerCount} · {formatDateTime(question.createdAt)}
-          </span>
+          <time dateTime={question.createdAt}>
+            {formatDateTime(question.createdAt)}
+          </time>
         </footer>
       </Link>
       {canShare && roomSlug && question.status !== 'REMOVED' && (

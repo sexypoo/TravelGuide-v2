@@ -38,6 +38,7 @@ export function MessageComposer({
 }): React.JSX.Element {
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
+  const messageInput = useRef<HTMLTextAreaElement>(null);
   const actionMenu = useRef<HTMLDivElement>(null);
   const addButton = useRef<HTMLButtonElement>(null);
   const [content, setContent] = useState('');
@@ -112,6 +113,11 @@ export function MessageComposer({
       return setClientError('공유할 내용을 입력해 주세요.');
     setClientError('');
     mutation.mutate();
+  }
+
+  function closePlacePicker(): void {
+    setPlacePickerOpen(false);
+    window.requestAnimationFrame(() => addButton.current?.focus());
   }
 
   const error =
@@ -267,6 +273,7 @@ export function MessageComposer({
           <AppIcon name="add" />
         </button>
         <textarea
+          ref={messageInput}
           id="room-message"
           value={content}
           maxLength={500}
@@ -310,12 +317,13 @@ export function MessageComposer({
       )}
       {placePickerOpen && (
         <PlacePicker
-          onClose={() => setPlacePickerOpen(false)}
+          onClose={closePlacePicker}
           onSelect={(place) => {
             setSelectedPlace(place);
             setAttachment('place');
             setPlacePickerOpen(false);
             setClientError('');
+            window.requestAnimationFrame(() => messageInput.current?.focus());
           }}
         />
       )}

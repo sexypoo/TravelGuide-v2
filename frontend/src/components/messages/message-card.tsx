@@ -146,7 +146,7 @@ export function MessageCard({
             </footer>
           </Link>
         ) : (
-          <div className="chatBubble">
+          <div className="chatBubble chatBubble--text">
             <p>{message.content}</p>
           </div>
         )}

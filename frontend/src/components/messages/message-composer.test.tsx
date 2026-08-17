@@ -53,9 +53,9 @@ describe('MessageComposer action menu', () => {
     );
     fireEvent.click(screen.getByRole('menuitem', { name: /장소/ }));
 
-    expect(
-      screen.getByRole('dialog', { name: '장소 보내기' }),
-    ).toBeInTheDocument();
+    const dialog = screen.getByRole('dialog', { name: '장소 보내기' });
+    expect(dialog).toBeInTheDocument();
+    expect(dialog.closest('form')).toBeNull();
     expect(
       screen.getByText('지도 API 키를 설정하면 지도가 표시됩니다.'),
     ).toBeInTheDocument();

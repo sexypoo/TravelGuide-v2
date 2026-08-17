@@ -42,10 +42,10 @@ export function TopicShareButton({
       >
         <AppIcon name="send" />
         {mutation.isPending
-          ? '보내는 중'
+          ? '공유 중'
           : sent
-            ? '채팅방에 다시 보내기'
-            : '채팅방에 카드로 보내기'}
+            ? '채팅에 다시 공유하기'
+            : '채팅에 공유하기'}
       </button>
       {mutation.isError && (
         <span role="alert">
