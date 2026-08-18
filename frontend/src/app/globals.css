@@ -5340,6 +5340,459 @@ textarea:focus-visible {
   }
 }
 
+/* T35 — the public route is a signed-out service home, not a campaign page. */
+html:has(.guestHome),
+body:has(.guestHome) {
+  background: #f4f6f8;
+}
+
+.guestHome {
+  display: grid;
+  min-height: 100svh;
+  background: #f4f6f8;
+  color: #191f28;
+  grid-template-rows: auto 1fr auto;
+}
+
+.guestHome__header,
+.guestHome__body,
+.guestHome__footer {
+  width: min(100% - 3rem, 70rem);
+  margin-inline: auto;
+}
+
+.guestHome__header {
+  display: flex;
+  min-height: 5rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e8eb;
+}
+
+.guestHome__headerLogin {
+  display: inline-flex;
+  min-width: 4.6rem;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dfe3e7;
+  border-radius: 0.8rem;
+  background: white;
+  color: #333d4b;
+  font-size: 0.88rem;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+.guestHome__headerLogin:hover {
+  border-color: #cbc6f4;
+  color: #6257d9;
+}
+
+.guestHome__body {
+  display: grid;
+  padding: clamp(2.5rem, 6vh, 4.5rem) 0;
+  grid-template-columns: minmax(0, 0.82fr) minmax(24rem, 1.18fr);
+  align-items: start;
+  gap: clamp(2rem, 4vw, 3.5rem);
+}
+
+.guestHome__welcome {
+  max-width: 33rem;
+}
+
+.guestHome__eyebrow,
+.guestHome__access > header p {
+  margin: 0;
+  color: #6257d9;
+  font-family: var(--utility);
+  font-size: 0.75rem;
+  font-weight: 780;
+  letter-spacing: 0.08em;
+}
+
+.guestHome__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.guestHome__eyebrow > span {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: #00a27a;
+}
+
+.guestHome__welcome h1 {
+  margin: 1rem 0 0;
+  font-family: var(--display);
+  font-size: clamp(2.25rem, 3.25vw, 2.75rem);
+  font-weight: 780;
+  letter-spacing: -0.065em;
+  line-height: 1.16;
+  word-break: keep-all;
+}
+
+.guestHome__description {
+  margin: 1rem 0 0;
+  color: #6b7684;
+  font-size: 1rem;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.guestHome__actions {
+  display: flex;
+  margin-top: 2rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.guestHome__primary {
+  display: inline-flex;
+  min-width: 11rem;
+  min-height: 3.25rem;
+  padding: 0 1.15rem;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 0.9rem;
+  background: #6257d9;
+  box-shadow: 0 8px 20px rgba(98, 87, 217, 0.18);
+  color: white;
+  font-size: 0.94rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.guestHome__primary:hover {
+  background: #554ac9;
+  transform: translateY(-1px);
+}
+
+.guestHome__primary > .appIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.guestHome__register {
+  min-height: 2.75rem;
+  color: #8b95a1;
+  font-size: 0.84rem;
+  line-height: 2.75rem;
+  text-decoration: none;
+}
+
+.guestHome__register strong {
+  margin-left: 0.2rem;
+  color: #333d4b;
+  font-weight: 750;
+}
+
+.guestHome__register:hover strong {
+  color: #6257d9;
+}
+
+.guestHome__flow {
+  display: flex;
+  width: min(100%, 22rem);
+  margin: 2rem 0 0;
+  padding: 0;
+  align-items: center;
+  list-style: none;
+}
+
+.guestHome__flow > li {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  color: #6b7684;
+  font-family: var(--utility);
+  font-size: 0.75rem;
+  font-weight: 700;
+  gap: 0.45rem;
+}
+
+.guestHome__flow > li:not(:last-child)::after {
+  width: auto;
+  height: 1px;
+  flex: 1 1 auto;
+  margin-right: 0.55rem;
+  background: #d7dbe0;
+  content: '';
+}
+
+.guestHome__flow > li > span {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  border: 2px solid #6257d9;
+  border-radius: 50%;
+  background: #f4f6f8;
+}
+
+.guestHome__flow > li > strong {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.guestHome__flow > li:first-child > span {
+  background: #6257d9;
+}
+
+.guestHome__access {
+  overflow: hidden;
+  border: 1px solid #e5e8eb;
+  border-radius: 1.35rem;
+  background: white;
+  box-shadow: 0 10px 30px rgba(25, 31, 40, 0.06);
+}
+
+.guestHome__access > header {
+  padding: 1.5rem 1.5rem 1rem;
+}
+
+.guestHome__access > header p {
+  color: #8b95a1;
+  letter-spacing: 0;
+}
+
+.guestHome__access > header h2 {
+  margin: 0.35rem 0 0;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 760;
+  letter-spacing: -0.04em;
+}
+
+.guestHome__access nav {
+  display: grid;
+}
+
+.guestHome__entry {
+  display: grid;
+  min-height: 5rem;
+  padding: 0.8rem 1.25rem;
+  border-top: 1px solid #f0f2f4;
+  align-items: center;
+  color: #191f28;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  text-decoration: none;
+  gap: 0.85rem;
+}
+
+.guestHome__entry:hover {
+  background: #f8f7ff;
+}
+
+.guestHome__entryIcon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 0.8rem;
+  background: #f0efff;
+  color: #6257d9;
+}
+
+.guestHome__entryIcon > .appIcon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.guestHome__entryCopy {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.guestHome__entryCopy strong {
+  font-size: 0.93rem;
+  font-weight: 740;
+}
+
+.guestHome__entryCopy small {
+  overflow: hidden;
+  color: #6b7684;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.guestHome__entry > .appIcon {
+  width: 0.95rem;
+  height: 0.95rem;
+  color: #b0b8c1;
+}
+
+.guestHome__entry:hover > .appIcon {
+  color: #6257d9;
+}
+
+.guestHome__footer {
+  display: grid;
+  padding: 0 0 1.5rem;
+  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.guestHome__footer .apiStatus {
+  min-height: 3rem;
+  border-color: #e5e8eb;
+  border-radius: 0.9rem;
+  box-shadow: none;
+}
+
+.guestHome__safety {
+  display: flex;
+  min-height: 3rem;
+  padding: 0.55rem 0.8rem;
+  align-items: center;
+  border: 1px solid #e5e8eb;
+  border-radius: 0.9rem;
+  background: transparent;
+  color: #6b7684;
+  gap: 0.55rem;
+}
+
+.guestHome__safety > span {
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #8b95a1;
+}
+
+.guestHome__safety > span > .appIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.guestHome__safety p {
+  margin: 0;
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .guestHome__header,
+  .guestHome__body,
+  .guestHome__footer {
+    width: min(100% - 2rem, 34rem);
+  }
+
+  .guestHome__header {
+    min-height: 4rem;
+  }
+
+  .guestHome__body {
+    padding: 1.15rem 0 1rem;
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+  }
+
+  .guestHome__welcome {
+    max-width: none;
+  }
+
+  .guestHome__eyebrow,
+  .guestHome__access > header p {
+    font-size: 0.72rem;
+  }
+
+  .guestHome__welcome h1 {
+    margin-top: 0.65rem;
+    font-size: clamp(1.95rem, 8.8vw, 2.2rem);
+    line-height: 1.16;
+  }
+
+  .guestHome__description {
+    margin-top: 0.65rem;
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .guestHome__actions {
+    margin-top: 1rem;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .guestHome__primary {
+    width: 100%;
+    min-height: 3rem;
+  }
+
+  .guestHome__register {
+    min-height: 2.5rem;
+    text-align: center;
+    line-height: 2.5rem;
+  }
+
+  .guestHome__flow {
+    width: 100%;
+    margin-top: 0.8rem;
+  }
+
+  .guestHome__access {
+    border-radius: 1rem;
+  }
+
+  .guestHome__access > header {
+    padding: 0.85rem 1rem 0.65rem;
+  }
+
+  .guestHome__access > header h2 {
+    margin-top: 0.2rem;
+    font-size: 1.05rem;
+  }
+
+  .guestHome__entry {
+    min-height: 4rem;
+    padding: 0.5rem 0.9rem;
+  }
+
+  .guestHome__entryIcon {
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 0.7rem;
+  }
+
+  .guestHome__entryCopy strong {
+    font-size: 0.86rem;
+  }
+
+  .guestHome__entryCopy small {
+    font-size: 0.72rem;
+  }
+
+  .guestHome__footer {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+  }
+
+  .guestHome__footer .apiStatus,
+  .guestHome__safety {
+    min-height: 2.75rem;
+  }
+
+  .guestHome__footer .apiStatus {
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guestHome__primary:hover {
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .roomExperience,
   .questionDetailPage,

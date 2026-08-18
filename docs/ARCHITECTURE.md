@@ -367,7 +367,7 @@ interface StorageService {
 
 ### 10.1 App Router
 
-- `(public)`: landing, auth
+- `(public)`: signed-out service home, auth
 - `(app)`: 인증된 사용자 layout
 - `admin`: 관리자 layout
 
