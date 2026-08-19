@@ -146,3 +146,46 @@ interest in PostgreSQL and is safe to demonstrate as a real end-to-end feature.
 - Screenshots contain demo-only names and timestamps; use them solely as
   product mockups and label the gallery as a service preview rather than live
   production data.
+
+## Mockup refresh — 2026-08-19
+
+### Goal
+
+- Replace the four preorder showcase images with the user's updated iPhone
+  captures while preserving the existing service story and preorder form.
+- Keep the sequence focused on the implemented flow: live room, traveler
+  verification, participant field answers, and the resulting live summary.
+
+### Files
+
+- `frontend/public/preorder/live-room-20260819.webp`: updated live conversation
+  capture with a cache-busting asset name.
+- `frontend/public/preorder/traveler-verification-20260819.webp`: updated traveler
+  verification capture.
+- `frontend/public/preorder/field-answers-20260819.webp`: updated participant answer
+  timeline.
+- `frontend/public/preorder/live-result-20260819.webp`: updated synthesized live
+  result.
+- `frontend/src/app/preorder/page.tsx`: point the existing showcase slots to the
+  versioned assets so the Next.js image cache cannot retain the previous set.
+
+### Migrations and dependencies
+
+- No migration, API contract, application dependency, or route change.
+
+### Tests
+
+1. Confirm all four WebP assets decode at the existing `900x1855` dimensions.
+2. Run frontend format check, lint, typecheck, focused tests, and production
+   build.
+3. Verify `/preorder` at `390x844` and `1440x900` with Playwright, including no
+   horizontal page overflow and readable mockup placement.
+
+### Risks
+
+- Full-resolution PNGs are large; generate local WebP derivatives instead of
+  shipping the originals.
+- Device screenshots contain demo account names and timestamps; keep them
+  labeled as product previews and do not treat them as production data.
+- New device-frame geometry could alter the visual scale; preserve the current
+  aspect ratio and inspect both required viewports before completion.
