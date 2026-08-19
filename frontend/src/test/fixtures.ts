@@ -33,6 +33,7 @@ export const profilePayload = {
   profileImageUrl: null,
   role: 'USER',
   isAdmin: false,
+  hasPassword: true,
   createdAt: '2026-07-30T12:00:00.000Z',
   updatedAt: '2026-07-30T12:30:00.000Z',
   passwordHash: 'must-not-survive',

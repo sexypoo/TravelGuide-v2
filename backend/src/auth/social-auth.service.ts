@@ -11,6 +11,7 @@ import {
 import { ProblemException } from '../common/http/problem.exception';
 import type { Environment } from '../config/environment';
 import { type AuthUserRecord, UsersService } from '../users/users.service';
+import { OAuthCredentialCipher } from './oauth-credential-cipher';
 
 const OAUTH_STATE_TTL_SECONDS = 10 * 60;
 
@@ -29,11 +30,13 @@ interface SocialProfile {
   email: string;
   emailVerified: boolean;
   nickname?: string;
+  refreshToken?: string;
 }
 
 interface TokenResponse {
   access_token?: unknown;
   id_token?: unknown;
+  refresh_token?: unknown;
 }
 
 function socialFailure(detail: string): ProblemException {
@@ -80,6 +83,7 @@ export class SocialAuthService {
     private readonly users: UsersService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService<Environment, true>,
+    private readonly credentialCipher: OAuthCredentialCipher,
   ) {}
 
   capabilities(): PublicProvider[] {
@@ -176,6 +180,10 @@ export class SocialAuthService {
       email: normalizeEmail(profile.email),
       nicknameHint: profile.nickname,
       allowCreate: state.mode === 'register',
+      refreshTokenCiphertext:
+        profile.refreshToken === undefined
+          ? undefined
+          : this.credentialCipher.encrypt(profile.refreshToken),
     });
     return { user, nextPath: state.nextPath };
   }
@@ -275,7 +283,8 @@ export class SocialAuthService {
       }),
     );
     const idToken = stringValue(token.id_token);
-    if (idToken === null)
+    const refreshToken = stringValue(token.refresh_token);
+    if (idToken === null || refreshToken === null)
       throw socialFailure('Apple 인증 응답이 올바르지 않습니다.');
     const claims = await this.verifyAppleIdToken(idToken);
     const providerUserId = stringValue(claims.sub);
@@ -288,7 +297,37 @@ export class SocialAuthService {
     ) {
       throw socialFailure('Apple 계정 정보를 확인할 수 없습니다.');
     }
-    return { providerUserId, email, emailVerified: true };
+    return { providerUserId, email, emailVerified: true, refreshToken };
+  }
+
+  async revokeAppleRefreshToken(ciphertext: string): Promise<void> {
+    this.assertConfigured('apple');
+    let refreshToken: string;
+    try {
+      refreshToken = this.credentialCipher.decrypt(ciphertext);
+    } catch {
+      throw this.appleRevocationFailure();
+    }
+
+    let response: Response;
+    try {
+      response = await fetch('https://appleid.apple.com/auth/revoke', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: new URLSearchParams({
+          client_id: this.required('APPLE_OAUTH_CLIENT_ID'),
+          client_secret: this.appleClientSecret(),
+          token: refreshToken,
+          token_type_hint: 'refresh_token',
+        }),
+      });
+    } catch {
+      throw this.appleRevocationFailure();
+    }
+    if (!response.ok) throw this.appleRevocationFailure();
   }
 
   private async verifyState(
@@ -496,7 +535,16 @@ export class SocialAuthService {
       this.has('APPLE_OAUTH_CLIENT_ID') &&
       this.has('APPLE_OAUTH_TEAM_ID') &&
       this.has('APPLE_OAUTH_KEY_ID') &&
-      this.has('APPLE_OAUTH_PRIVATE_KEY')
+      this.has('APPLE_OAUTH_PRIVATE_KEY') &&
+      this.has('OAUTH_TOKEN_ENCRYPTION_KEY')
+    );
+  }
+
+  private appleRevocationFailure(): ProblemException {
+    return new ProblemException(
+      'ACCOUNT_DELETION_PROVIDER_FAILED',
+      'Apple 계정 연결을 해제하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+      HttpStatus.SERVICE_UNAVAILABLE,
     );
   }
 

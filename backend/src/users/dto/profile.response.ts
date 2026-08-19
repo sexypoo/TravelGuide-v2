@@ -11,6 +11,7 @@ export interface OwnProfileResponse {
   profileImageUrl: string | null;
   role: UserRole;
   isAdmin: boolean;
+  hasPassword: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -47,6 +48,7 @@ export function toOwnProfileResponse(
       user.avatarObjectKey === null ? null : `/api/v1/users/${user.id}/avatar`,
     role: user.role,
     isAdmin: user.role === 'ADMIN',
+    hasPassword: user.hasPassword,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   };

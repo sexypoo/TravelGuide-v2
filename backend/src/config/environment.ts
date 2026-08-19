@@ -27,6 +27,7 @@ export interface Environment {
   APPLE_OAUTH_TEAM_ID?: string;
   APPLE_OAUTH_KEY_ID?: string;
   APPLE_OAUTH_PRIVATE_KEY?: string;
+  OAUTH_TOKEN_ENCRYPTION_KEY?: string;
 }
 
 const nodeEnvironments: readonly NodeEnvironment[] = [
@@ -289,6 +290,10 @@ export function validateEnvironment(
     config,
     'APPLE_OAUTH_PRIVATE_KEY',
   );
+  const oauthTokenEncryptionKey = readOptionalString(
+    config,
+    'OAUTH_TOKEN_ENCRYPTION_KEY',
+  );
 
   requireCompleteGroup({ RESEND_API_KEY: resendApiKey, EMAIL_FROM: emailFrom });
   requireCompleteGroup({
@@ -304,7 +309,17 @@ export function validateEnvironment(
     APPLE_OAUTH_TEAM_ID: appleOauthTeamId,
     APPLE_OAUTH_KEY_ID: appleOauthKeyId,
     APPLE_OAUTH_PRIVATE_KEY: appleOauthPrivateKey,
+    OAUTH_TOKEN_ENCRYPTION_KEY: oauthTokenEncryptionKey,
   });
+
+  if (
+    oauthTokenEncryptionKey !== undefined &&
+    !/^[0-9a-f]{64}$/iu.test(oauthTokenEncryptionKey)
+  ) {
+    throw new Error(
+      'OAUTH_TOKEN_ENCRYPTION_KEY must be exactly 64 hexadecimal characters',
+    );
+  }
 
   if (storageDriver !== 'local' && storageDriver !== 's3') {
     throw new Error('STORAGE_DRIVER must be local or s3');
@@ -373,5 +388,6 @@ export function validateEnvironment(
     APPLE_OAUTH_TEAM_ID: appleOauthTeamId,
     APPLE_OAUTH_KEY_ID: appleOauthKeyId,
     APPLE_OAUTH_PRIVATE_KEY: appleOauthPrivateKey?.replace(/\\n/g, '\n'),
+    OAUTH_TOKEN_ENCRYPTION_KEY: oauthTokenEncryptionKey,
   };
 }

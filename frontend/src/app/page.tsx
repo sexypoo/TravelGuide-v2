@@ -116,6 +116,10 @@ export default async function Home(): Promise<React.JSX.Element> {
             긴급 구조나 의료 상담이 필요하면 119 등 공식 기관에 먼저 연락해
             주세요.
           </p>
+          <nav className="guestHome__legal" aria-label="정책 안내">
+            <Link href="/privacy">개인정보 처리방침</Link>
+            <Link href="/account-deletion">계정 삭제</Link>
+          </nav>
         </div>
       </footer>
     </main>

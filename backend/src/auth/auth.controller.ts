@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -35,6 +36,8 @@ import { RateLimit } from '../common/rate-limit/rate-limit.decorator';
 import { RateLimitGuard } from '../common/rate-limit/rate-limit.guard';
 import { PasswordRecoveryService } from './password-recovery.service';
 import { SocialAuthService } from './social-auth.service';
+import { AccountDeletionService } from './account-deletion.service';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -42,6 +45,7 @@ export class AuthController {
     private readonly auth: AuthService,
     private readonly passwordRecovery: PasswordRecoveryService,
     private readonly socialAuth: SocialAuthService,
+    private readonly accountDeletion: AccountDeletionService,
     private readonly config: ConfigService<Environment, true>,
   ) {}
 
@@ -71,6 +75,21 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   logout(@Res({ passthrough: true }) response: Response): void {
+    response.clearCookie(
+      AUTH_COOKIE_NAME,
+      createClearCookieOptions(this.nodeEnvironment),
+    );
+  }
+
+  @Delete('account')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  async deleteAccount(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() input: DeleteAccountDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    await this.accountDeletion.deleteAccount(user.id, input);
     response.clearCookie(
       AUTH_COOKIE_NAME,
       createClearCookieOptions(this.nodeEnvironment),

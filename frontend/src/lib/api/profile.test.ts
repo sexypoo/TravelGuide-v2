@@ -1,6 +1,7 @@
 import {
   parseOwnProfile,
   parsePublicContributorProfile,
+  deleteOwnAccount,
   removeOwnProfileImage,
   updateOwnProfile,
   updateOwnProfileImage,
@@ -35,6 +36,7 @@ describe('profile contract', () => {
       nickname: '제주여행자',
       bio: '제주 여행을 준비하고 있어요.',
       travelStyles: ['SLOW_TRAVEL', 'FOOD_EXPLORER'],
+      hasPassword: true,
     });
     expect(JSON.stringify(profile)).not.toContain('passwordHash');
   });
@@ -142,6 +144,31 @@ describe('profile contract', () => {
     expect(fetchMock).toHaveBeenLastCalledWith(
       '/api/v1/users/me/avatar',
       expect.objectContaining({ method: 'DELETE', credentials: 'include' }),
+    );
+  });
+
+  it('sends account deletion as an authenticated JSON DELETE', async () => {
+    fetchMock.mockResolvedValue(response(null, 204));
+
+    await expect(
+      deleteOwnAccount({
+        confirmation: '계정 삭제',
+        password: 'password123',
+      }),
+    ).resolves.toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/auth/account',
+      expect.objectContaining({
+        method: 'DELETE',
+        credentials: 'include',
+        headers: expect.objectContaining({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify({
+          confirmation: '계정 삭제',
+          password: 'password123',
+        }),
+      }),
     );
   });
 });

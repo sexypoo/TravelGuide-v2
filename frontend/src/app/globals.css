@@ -9066,6 +9066,542 @@ body:has(.guestHome) {
   opacity: 0.6;
 }
 
+/* T40 — accountable account closure and public privacy ledger */
+.accountManagement {
+  width: min(100%, 48rem);
+  margin: 2rem auto 0;
+  padding: 1.35rem;
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background: var(--surface);
+}
+
+.accountManagement > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.accountManagement > header p,
+.accountManagement > header h2,
+.accountManagement > header span {
+  margin: 0;
+}
+
+.accountManagement > header p {
+  color: var(--purple);
+  font-family: var(--utility);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.accountManagement > header h2 {
+  margin-top: 0.35rem;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 1.05rem;
+  letter-spacing: -0.035em;
+}
+
+.accountManagement > header span {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.accountManagement > header nav {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.75rem;
+}
+
+.accountManagement > header nav a,
+.accountDeletion__actions button,
+.accountManagement__open {
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.accountManagement > header nav a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
+}
+
+.accountManagement__open {
+  display: inline-flex;
+  min-height: 2.6rem;
+  margin-top: 1.2rem;
+  align-items: center;
+  padding: 0 0.9rem;
+  border: 1px solid #f0c9cb;
+  border-radius: 0.75rem;
+  background: white;
+  color: #b4232a;
+  cursor: pointer;
+}
+
+.accountDeletion {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.accountDeletion__scope {
+  padding: 1rem;
+  border-radius: 0.9rem;
+  background: #fafafa;
+}
+
+.accountDeletion__scope strong {
+  color: var(--ink);
+  font-size: 0.83rem;
+}
+
+.accountDeletion__scope p,
+.accountDeletion__socialNotice {
+  margin: 0.4rem 0 0;
+  color: var(--muted);
+  font-size: 0.73rem;
+  line-height: 1.65;
+}
+
+.accountDeletion__scope ol {
+  display: flex;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  align-items: center;
+  list-style: none;
+}
+
+.accountDeletion__scope li {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  color: var(--muted);
+  font-family: var(--utility);
+  font-size: 0.65rem;
+  font-weight: 750;
+  gap: 0.5rem;
+}
+
+.accountDeletion__scope li:not(:last-child)::after {
+  height: 1px;
+  flex: 1 1 auto;
+  background: var(--line-strong);
+  content: '';
+}
+
+.accountDeletion > label {
+  display: grid;
+  margin-top: 1rem;
+  color: #4e5968;
+  font-size: 0.74rem;
+  font-weight: 700;
+  gap: 0.5rem;
+}
+
+.accountDeletion > label b {
+  color: #b4232a;
+}
+
+.accountDeletion > label input {
+  width: 100%;
+  height: 3rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.8rem;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.accountDeletion > label input:focus {
+  border-color: var(--purple);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(112, 104, 216, 0.1);
+  outline: none;
+}
+
+.accountDeletion__socialNotice {
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid var(--purple);
+  background: var(--iris-soft);
+}
+
+.accountDeletion__error {
+  margin: 0.8rem 0 0;
+  color: #b4232a;
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.accountDeletion__actions {
+  display: flex;
+  margin-top: 1.15rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.accountDeletion__actions button {
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border-radius: 0.8rem;
+  cursor: pointer;
+}
+
+.accountDeletion__actions button:first-child {
+  background: transparent;
+  color: var(--muted);
+}
+
+.accountDeletion__actions button:last-child {
+  background: var(--danger);
+  color: white;
+}
+
+.accountDeletion__actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.guestHome__legal {
+  display: flex;
+  flex: 0 0 auto;
+  margin-left: auto;
+  gap: 0.65rem;
+}
+
+.guestHome__legal a {
+  color: #6b7684;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.16rem;
+  white-space: nowrap;
+}
+
+html:has(.legalPage),
+body:has(.legalPage) {
+  background: #f4f6f8;
+}
+
+.legalPage {
+  min-height: 100svh;
+  padding-bottom: 4rem;
+  background: #f4f6f8;
+  color: #191f28;
+}
+
+.legalPage__nav,
+.legalDocument {
+  width: min(100% - 3rem, 54rem);
+  margin-inline: auto;
+}
+
+.legalPage__nav {
+  display: flex;
+  min-height: 5rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e8eb;
+}
+
+.legalPage__nav > a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.legalPage__nav nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.legalPage__nav nav a {
+  color: #6b7684;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.legalPage__nav nav a:hover,
+.legalDocument__inline:hover {
+  color: #6257d9;
+}
+
+.legalDocument {
+  margin-top: 2rem;
+  overflow: hidden;
+  border: 1px solid #e5e8eb;
+  border-radius: 1.3rem;
+  background: white;
+  box-shadow: 0 12px 36px rgba(25, 31, 40, 0.05);
+}
+
+.legalDocument__intro {
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-bottom: 1px solid #edf0f2;
+}
+
+.legalDocument__intro > p {
+  margin: 0;
+  color: #6257d9;
+  font-family: var(--utility);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.legalDocument__intro h1 {
+  margin: 0.75rem 0 0;
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  letter-spacing: -0.055em;
+  line-height: 1.18;
+}
+
+.legalDocument__intro > span {
+  display: block;
+  max-width: 40rem;
+  margin-top: 0.8rem;
+  color: #6b7684;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.legalDocument > section {
+  padding: 1.6rem clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.legalDocument > section + section {
+  border-top: 1px solid #edf0f2;
+}
+
+.legalDocument section h2 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: -0.025em;
+}
+
+.legalDocument section > p {
+  margin: 0.75rem 0 0;
+  color: #4e5968;
+  font-size: 0.82rem;
+  line-height: 1.85;
+  word-break: keep-all;
+}
+
+.privacyLedger {
+  display: grid;
+  margin: 1rem 0 0;
+  border-top: 1px solid #e5e8eb;
+}
+
+.privacyLedger > div {
+  display: grid;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid #edf0f2;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.privacyLedger dt {
+  color: #333d4b;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.privacyLedger dd {
+  margin: 0;
+  color: #6b7684;
+  font-size: 0.76rem;
+  line-height: 1.65;
+}
+
+.legalDocument__inline {
+  display: inline-block;
+  margin-top: 0.8rem;
+  color: #6257d9;
+  font-size: 0.76rem;
+  font-weight: 750;
+}
+
+.deletionSteps {
+  display: grid;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  gap: 0.65rem;
+}
+
+.deletionSteps li {
+  display: grid;
+  padding: 0.85rem;
+  border: 1px solid #e5e8eb;
+  border-radius: 0.85rem;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.deletionSteps li > span {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 0.7rem;
+  background: #f0efff;
+  color: #6257d9;
+  font-family: var(--utility);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.deletionSteps strong,
+.deletionSteps p {
+  display: block;
+  margin: 0;
+}
+
+.deletionSteps strong {
+  font-size: 0.8rem;
+}
+
+.deletionSteps p {
+  margin-top: 0.2rem;
+  color: #6b7684;
+  font-size: 0.73rem;
+  line-height: 1.55;
+}
+
+.legalDocument__primary,
+.legalDocument__complete a {
+  display: inline-flex;
+  min-height: 3rem;
+  margin-top: 1rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.1rem;
+  border-radius: 0.85rem;
+  background: #6257d9;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.deletionRoute {
+  display: flex;
+  margin-top: 1rem;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.deletionRoute span {
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.7rem;
+  background: #f4f6f8;
+  color: #4e5968;
+  font-family: var(--utility);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.deletionRoute i {
+  color: #b0b8c1;
+  font-style: normal;
+}
+
+.legalDocument__complete {
+  text-align: center;
+}
+
+.legalDocument__complete strong {
+  color: #08795b;
+  font-size: 1rem;
+}
+
+@media (max-width: 760px) {
+  .accountManagement > header {
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .accountManagement > header nav {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .accountDeletion__scope li {
+    font-size: 0.58rem;
+  }
+
+  .accountDeletion__actions {
+    display: grid;
+    grid-template-columns: 0.7fr 1.3fr;
+  }
+
+  .guestHome__safety {
+    flex-wrap: wrap;
+  }
+
+  .guestHome__legal {
+    width: 100%;
+    margin: 0 0 0 1.8rem;
+  }
+
+  .legalPage {
+    padding-bottom: max(2rem, env(safe-area-inset-bottom));
+  }
+
+  .legalPage__nav,
+  .legalDocument {
+    width: min(100% - 2rem, 34rem);
+  }
+
+  .legalPage__nav {
+    min-height: 4rem;
+  }
+
+  .legalPage__nav nav {
+    gap: 0.7rem;
+  }
+
+  .legalPage__nav nav a {
+    font-size: 0.66rem;
+  }
+
+  .legalPage__nav nav a:first-child {
+    display: none;
+  }
+
+  .legalDocument {
+    margin-top: 1rem;
+    border-radius: 1rem;
+  }
+
+  .privacyLedger > div {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .deletionRoute {
+    gap: 0.35rem;
+  }
+
+  .deletionRoute span {
+    padding-inline: 0.5rem;
+    font-size: 0.58rem;
+  }
+
+  .legalDocument__primary {
+    width: 100%;
+  }
+}
+
 .appError {
   padding: 4rem 1.5rem;
   border: 1px solid var(--line);

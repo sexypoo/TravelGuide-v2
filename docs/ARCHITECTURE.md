@@ -485,6 +485,7 @@ APPLE_OAUTH_CLIENT_ID=
 APPLE_OAUTH_TEAM_ID=
 APPLE_OAUTH_KEY_ID=
 APPLE_OAUTH_PRIVATE_KEY=
+OAUTH_TOKEN_ENCRYPTION_KEY=
 ```
 
 규칙:
@@ -492,6 +493,15 @@ APPLE_OAUTH_PRIVATE_KEY=
 - 앱 시작 시 필수 환경 변수를 검증하고 누락 시 즉시 종료
 - `JWT_SECRET=change-me`는 production에서 거부
 - 로그에 환경 변수 값을 출력하지 않음
+- Apple 로그인을 설정하면 `OAUTH_TOKEN_ENCRYPTION_KEY`도 64자리 hex로 함께 설정하며 refresh token은 AES-256-GCM으로 암호화
+
+### 12.1 계정 삭제 경계
+
+- `DELETE /auth/account`는 JWT 인증 뒤 비밀번호 계정의 현재 비밀번호와 정확한 확인 문구를 검증한다.
+- 사용자의 콘텐츠 ID와 연쇄 삭제될 답변·댓글 ID를 같은 Prisma 트랜잭션에서 수집하고, 대상 신고·동일 이메일 사전예약·사용자를 삭제한다.
+- 질문·게시물 cascade가 다른 작성자의 답변·댓글을 제거할 수 있으므로 해당 이미지 키와 신고 대상도 삭제 전 수집한다.
+- 커밋 후 공유 `PrivateObjectLifecycleService`를 통해 아바타, 증빙, 질문·답변·채팅 파일을 중복 없이 정리한다.
+- Apple refresh token 폐기는 로컬 자격증명 삭제 전에 수행한다. 원격 제공자와 PostgreSQL은 원자적 트랜잭션을 공유하지 않으므로 실패 시 로컬 삭제를 시작하지 않고 재시도 가능 상태로 둔다.
 
 ---
 

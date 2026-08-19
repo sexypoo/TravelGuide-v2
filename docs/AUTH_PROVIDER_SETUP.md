@@ -53,6 +53,10 @@ https://www.travelguide.kr/api/v1/auth/oauth/apple/callback
   `APPLE_OAUTH_TEAM_ID`, `APPLE_OAUTH_KEY_ID`, and
   `APPLE_OAUTH_PRIVATE_KEY`. An environment value may encode line breaks as
   `\\n`.
+- Generate `OAUTH_TOKEN_ENCRYPTION_KEY` with `openssl rand -hex 32` and store it
+  as a sealed backend variable. It is required with the Apple group so refresh
+  tokens can be encrypted at rest and revoked during account deletion. Losing
+  this key prevents decrypting already stored Apple refresh tokens.
 
 ## Release order
 
@@ -62,3 +66,5 @@ https://www.travelguide.kr/api/v1/auth/oauth/apple/callback
 4. Confirm `/api/v1/auth/capabilities` lists only the intended providers.
 5. Exercise login and registration once for every provider on web, Android,
    and iOS before store submission.
+6. Delete one disposable account for every enabled provider and confirm the
+   session, local account, and provider connection are removed.

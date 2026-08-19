@@ -42,6 +42,7 @@ export interface OwnProfileRecord {
   travelStyles: TravelStyle[];
   avatarObjectKey: string | null;
   role: UserRole;
+  hasPassword: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -244,6 +245,7 @@ export class UsersService {
     email: string;
     nicknameHint?: string;
     allowCreate: boolean;
+    refreshTokenCiphertext?: string;
   }): Promise<AuthUserRecord> {
     return this.prisma.$transaction(async (transaction) => {
       const linked = await transaction.authIdentity.findUnique({
@@ -253,9 +255,17 @@ export class UsersService {
             providerUserId: input.providerUserId,
           },
         },
-        select: { user: { select: authUserSelect } },
+        select: { id: true, user: { select: authUserSelect } },
       });
-      if (linked !== null) return linked.user;
+      if (linked !== null) {
+        if (input.refreshTokenCiphertext !== undefined) {
+          await transaction.authIdentity.update({
+            where: { id: linked.id },
+            data: { refreshTokenCiphertext: input.refreshTokenCiphertext },
+          });
+        }
+        return linked.user;
+      }
 
       let user = await transaction.user.findUnique({
         where: { email: input.email },
@@ -287,6 +297,7 @@ export class UsersService {
           userId: user.id,
           provider: input.provider,
           providerUserId: input.providerUserId,
+          refreshTokenCiphertext: input.refreshTokenCiphertext,
         },
       });
       return user;
@@ -336,6 +347,7 @@ export class UsersService {
         bio: true,
         travelStyles: true,
         avatarObjectKey: true,
+        passwordHash: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -350,8 +362,10 @@ export class UsersService {
       );
     }
 
+    const { passwordHash, ...profile } = user;
     return {
-      ...user,
+      ...profile,
+      hasPassword: passwordHash !== null,
       travelStyles: normalizeTravelStyles(user.travelStyles),
     };
   }
@@ -447,13 +461,16 @@ export class UsersService {
           bio: true,
           travelStyles: true,
           avatarObjectKey: true,
+          passwordHash: true,
           role: true,
           createdAt: true,
           updatedAt: true,
         },
       });
+      const { passwordHash, ...profile } = user;
       return {
-        ...user,
+        ...profile,
+        hasPassword: passwordHash !== null,
         travelStyles: normalizeTravelStyles(user.travelStyles),
       };
     } catch (error: unknown) {

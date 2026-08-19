@@ -130,6 +130,16 @@ describe('environment validation hardening', () => {
         APPLE_OAUTH_KEY_ID: 'key',
       }),
     ).toThrow('APPLE_OAUTH_PRIVATE_KEY');
+    expect(() =>
+      validateEnvironment({
+        ...validProduction,
+        APPLE_OAUTH_CLIENT_ID: 'apple-client',
+        APPLE_OAUTH_TEAM_ID: 'team',
+        APPLE_OAUTH_KEY_ID: 'key',
+        APPLE_OAUTH_PRIVATE_KEY: 'private-key',
+        OAUTH_TOKEN_ENCRYPTION_KEY: 'too-short',
+      }),
+    ).toThrow('exactly 64 hexadecimal characters');
   });
 
   it('normalizes escaped Apple private-key newlines', () => {
@@ -140,6 +150,7 @@ describe('environment validation hardening', () => {
         APPLE_OAUTH_TEAM_ID: 'team',
         APPLE_OAUTH_KEY_ID: 'key',
         APPLE_OAUTH_PRIVATE_KEY: 'line-one\\nline-two',
+        OAUTH_TOKEN_ENCRYPTION_KEY: 'a'.repeat(64),
       }).APPLE_OAUTH_PRIVATE_KEY,
     ).toBe('line-one\nline-two');
   });

@@ -437,6 +437,30 @@ When state가 변조·만료되거나 이메일이 검증되지 않았다
 Then 계정과 세션을 만들지 않고 로그인 화면에 실패 안내를 표시한다
 ```
 
+### E2E-033 계정 삭제와 공개 개인정보 안내
+
+```gherkin
+Given 비밀번호 계정으로 로그인한 일반 사용자가 프로필의 계정 관리를 연다
+When 잘못된 현재 비밀번호 또는 다른 확인 문구를 제출한다
+Then 계정과 세션 및 연결 데이터는 유지된다
+
+When 정확한 현재 비밀번호와 "계정 삭제"를 제출한다
+Then 계정, 소유·연쇄 콘텐츠, 대상 신고, 같은 이메일의 사전예약 정보가 삭제된다
+And 아바타·인증 증빙·질문·답변·채팅의 비공개 파일이 삭제된다
+And 인증 쿠키가 제거되고 이전 세션은 거부된다
+
+Given 소셜 전용 일반 사용자로 로그인했다
+When 정확한 확인 문구로 삭제한다
+Then 비밀번호 입력 없이 계정이 삭제된다
+
+Given 관리자 계정으로 로그인했다
+When 공개 계정 삭제 API를 호출한다
+Then 403과 ADMIN_ACCOUNT_DELETION_NOT_ALLOWED를 반환하고 계정은 유지된다
+
+Given 로그인하지 않은 사용자가 /privacy 또는 /account-deletion을 연다
+Then 모바일과 데스크톱에서 처리 정보, 보관·삭제 범위와 웹 로그인 삭제 경로를 읽을 수 있다
+```
+
 ---
 
 ## 3. 백엔드 통합 테스트 세부 목록
@@ -456,6 +480,7 @@ Then 계정과 세션을 만들지 않고 로그인 화면에 실패 안내를 �
 | INT-REP-01 | report | target exists, unique, own content |
 | INT-ADM-01 | remove | soft delete, public DTO redaction |
 | INT-PRE-01 | preorder | normalize, consent, idempotent unique email, no list |
+| INT-AUTH-03 | account deletion | reauth, admin block, cascade/report/object cleanup, cookie clear |
 
 ---
 

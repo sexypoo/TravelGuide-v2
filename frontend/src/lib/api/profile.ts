@@ -1,5 +1,5 @@
 import type { UserRole } from './auth-contract';
-import { requestForm, requestJson } from './client';
+import { requestForm, requestJson, requestVoid } from './client';
 import { isIsoDate, isRecord } from './runtime';
 
 export const TRAVEL_STYLES = [
@@ -52,6 +52,7 @@ export interface OwnProfile {
   profileImageUrl: string | null;
   role: UserRole;
   isAdmin: boolean;
+  hasPassword: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -102,6 +103,7 @@ export function parseOwnProfile(value: unknown): OwnProfile {
     !value.travelStyles.every(isTravelStyle) ||
     (value.role !== 'USER' && value.role !== 'ADMIN') ||
     typeof value.isAdmin !== 'boolean' ||
+    typeof value.hasPassword !== 'boolean' ||
     typeof value.createdAt !== 'string' ||
     typeof value.updatedAt !== 'string' ||
     !isIsoDate(value.createdAt) ||
@@ -120,6 +122,7 @@ export function parseOwnProfile(value: unknown): OwnProfile {
     profileImageUrl: value.profileImageUrl,
     role: value.role,
     isAdmin: value.isAdmin,
+    hasPassword: value.hasPassword,
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
   };
@@ -213,4 +216,15 @@ export async function removeOwnProfileImage(): Promise<OwnProfile> {
     method: 'DELETE',
   });
   return parseOwnProfile(value);
+}
+
+export async function deleteOwnAccount(input: {
+  confirmation: string;
+  password?: string;
+}): Promise<void> {
+  await requestVoid('/api/v1/auth/account', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
 }

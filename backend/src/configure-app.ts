@@ -45,7 +45,7 @@ export function configureApp(app: INestApplication): void {
   app.enableCors({
     credentials: true,
     origin: allowOrigin,
-    methods: ['GET', 'POST', 'PATCH', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Accept', 'Content-Type', 'X-Request-Id'],
   });
   app.useGlobalFilters(new ProblemDetailsFilter());

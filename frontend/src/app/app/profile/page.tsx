@@ -3,6 +3,7 @@ import { ProfileForm } from '@/components/profile/profile-form';
 import { TravelRecordsPanel } from '@/components/profile/travel-records-panel';
 import { getOwnProfile } from '@/lib/api/profile.server';
 import { AppIcon } from '@/components/common';
+import { AccountDeletionPanel } from '@/components/profile/account-deletion-panel';
 
 function formatJoinDate(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', {
@@ -79,6 +80,7 @@ export default async function ProfilePage(): Promise<React.JSX.Element> {
       </section>
 
       <TravelRecordsPanel />
+      <AccountDeletionPanel hasPassword={profile.hasPassword} />
     </div>
   );
 }
