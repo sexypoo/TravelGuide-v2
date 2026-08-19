@@ -15,6 +15,7 @@ const BCRYPT_COST = 12;
 interface JwtPayload {
   sub: string;
   role: UserRole;
+  sessionVersion: number;
 }
 
 export interface AuthResult {
@@ -45,6 +46,7 @@ function isJwtPayload(value: unknown): value is JwtPayload {
   const payload = value as Record<string, unknown>;
   return (
     typeof payload.sub === 'string' &&
+    Number.isInteger(payload.sessionVersion) &&
     (payload.role === UserRole.USER || payload.role === UserRole.ADMIN)
   );
 }
@@ -65,10 +67,7 @@ export class AuthService {
       passwordHash,
     });
 
-    return {
-      user,
-      token: await this.issueToken(user),
-    };
+    return this.createSession(user);
   }
 
   async login(input: LoginDto): Promise<AuthResult> {
@@ -80,6 +79,7 @@ export class AuthService {
       throw invalidCredentials();
     }
 
+    if (user.passwordHash === null) throw invalidCredentials();
     const passwordMatches = await bcrypt.compare(
       input.password,
       user.passwordHash,
@@ -88,10 +88,7 @@ export class AuthService {
       throw invalidCredentials();
     }
 
-    return {
-      user,
-      token: await this.issueToken(user),
-    };
+    return this.createSession(user);
   }
 
   async authenticateToken(token: string): Promise<AuthenticatedUser> {
@@ -110,13 +107,19 @@ export class AuthService {
     if (user === null) {
       throw invalidSession();
     }
+    if (user.sessionVersion !== payload.sessionVersion) throw invalidSession();
     return user;
+  }
+
+  async createSession(user: AuthUserRecord): Promise<AuthResult> {
+    return { user, token: await this.issueToken(user) };
   }
 
   private async issueToken(user: AuthUserRecord): Promise<string> {
     const payload: JwtPayload = {
       sub: user.id,
       role: user.role,
+      sessionVersion: user.sessionVersion,
     };
 
     return this.jwt.signAsync(payload, {

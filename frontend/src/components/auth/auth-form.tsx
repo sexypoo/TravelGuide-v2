@@ -2,13 +2,17 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AppIcon } from '@/components/common';
 import {
+  getAuthCapabilities,
   login,
   register,
+  socialLoginUrl,
+  type AuthCapabilities,
   type LoginInput,
   type RegisterInput,
+  type SocialProvider,
 } from '@/lib/api/auth-client';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import {
@@ -20,6 +24,7 @@ import {
 interface AuthFormProps {
   mode: 'login' | 'register';
   nextPath?: string;
+  socialError?: boolean;
 }
 
 function hasErrors(errors: AuthFieldErrors): boolean {
@@ -30,7 +35,6 @@ function errorMessage(error: unknown): string {
   if (!(error instanceof ApiProblem)) {
     return '연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.';
   }
-
   const messages: Readonly<Record<string, string>> = {
     EMAIL_ALREADY_EXISTS: '이미 가입된 이메일입니다. 로그인해 주세요.',
     NICKNAME_ALREADY_EXISTS:
@@ -38,7 +42,6 @@ function errorMessage(error: unknown): string {
     INVALID_CREDENTIALS: '이메일 또는 비밀번호가 올바르지 않습니다.',
     VALIDATION_FAILED: '입력한 내용을 다시 확인해 주세요.',
   };
-
   return (
     messages[error.code] ??
     actionableErrorMessage(
@@ -87,37 +90,82 @@ function Field({
   );
 }
 
+function providerContent(provider: SocialProvider): {
+  mark: string;
+  label: string;
+} {
+  if (provider === 'google') return { mark: 'G', label: 'Google로 계속하기' };
+  if (provider === 'kakao') return { mark: 'K', label: '카카오로 계속하기' };
+  return { mark: '●', label: 'Apple로 계속하기' };
+}
+
 export function AuthForm({
   mode,
   nextPath = '/app',
+  socialError = false,
 }: AuthFormProps): React.JSX.Element {
   const router = useRouter();
   const [errors, setErrors] = useState<AuthFieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [capabilities, setCapabilities] = useState<AuthCapabilities | null>(
+    null,
+  );
   const isRegister = mode === 'register';
+
+  useEffect(() => {
+    let active = true;
+    void getAuthCapabilities()
+      .then((value) => {
+        if (active) setCapabilities(value);
+      })
+      .catch(() => {
+        if (active) {
+          setCapabilities({ passwordReset: false, socialProviders: [] });
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  function startSocialLogin(provider: SocialProvider): void {
+    if (isRegister && !termsAgreed) {
+      setErrors((current) => ({
+        ...current,
+        termsAgreed: '필수 약관에 동의해 주세요.',
+      }));
+      return;
+    }
+    window.location.assign(
+      socialLoginUrl({ provider, mode, nextPath, termsAgreed }),
+    );
+  }
 
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     event.preventDefault();
     setFormError(null);
-
     const form = new FormData(event.currentTarget);
     const email = String(form.get('email') ?? '')
       .trim()
       .toLowerCase();
     const password = String(form.get('password') ?? '');
     const nickname = String(form.get('nickname') ?? '').trim();
-    const termsAgreed = form.get('termsAgreed') === 'on';
+    const submittedTermsAgreed = form.get('termsAgreed') === 'on';
     const validationErrors = isRegister
-      ? validateRegistration({ email, password, nickname, termsAgreed })
+      ? validateRegistration({
+          email,
+          password,
+          nickname,
+          termsAgreed: submittedTermsAgreed,
+        })
       : validateLogin({ email, password });
 
     setErrors(validationErrors);
-    if (hasErrors(validationErrors)) {
-      return;
-    }
+    if (hasErrors(validationErrors)) return;
 
     setIsSubmitting(true);
     try {
@@ -133,7 +181,6 @@ export function AuthForm({
         const input: LoginInput = { email, password };
         await login(input);
       }
-
       router.replace(nextPath);
       router.refresh();
     } catch (error: unknown) {
@@ -183,6 +230,16 @@ export function AuthForm({
             <input
               name="termsAgreed"
               type="checkbox"
+              checked={termsAgreed}
+              onChange={(event) => {
+                setTermsAgreed(event.currentTarget.checked);
+                if (event.currentTarget.checked) {
+                  setErrors((current) => ({
+                    ...current,
+                    termsAgreed: undefined,
+                  }));
+                }
+              }}
               aria-describedby={
                 errors.termsAgreed === undefined ? undefined : 'terms-help'
               }
@@ -200,12 +257,15 @@ export function AuthForm({
         </div>
       )}
 
-      {formError !== null && (
+      {(formError !== null || socialError) && (
         <div className="formAlert" role="alert">
           <span aria-hidden="true">
             <AppIcon name="alert" />
           </span>
-          <p>{formError}</p>
+          <p>
+            {formError ??
+              '소셜 로그인을 완료하지 못했습니다. 다시 시도하거나 다른 방법을 이용해 주세요.'}
+          </p>
         </div>
       )}
 
@@ -221,10 +281,36 @@ export function AuthForm({
         )}
       </button>
 
-      {!isRegister && (
+      {capabilities !== null && capabilities.socialProviders.length > 0 && (
+        <div className="socialAuth">
+          <div className="authDivider" aria-hidden="true">
+            <span>또는 간편하게</span>
+          </div>
+          <div className="socialAuth__buttons" aria-label="소셜 로그인">
+            {capabilities.socialProviders.map((provider) => {
+              const content = providerContent(provider);
+              return (
+                <button
+                  className={`socialButton socialButton--${provider}`}
+                  type="button"
+                  key={provider}
+                  onClick={() => startSocialLogin(provider)}
+                >
+                  <span className="socialButton__mark" aria-hidden="true">
+                    {content.mark}
+                  </span>
+                  {content.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {!isRegister && capabilities?.passwordReset === true && (
         <p className="authHelp">
-          로그인에 문제가 있나요? 비밀번호 재설정은 아직 제공하지 않습니다.{' '}
-          <Link href="/">서비스 안내 보기</Link>
+          비밀번호가 기억나지 않나요?{' '}
+          <Link href="/auth/forgot-password">비밀번호 재설정</Link>
         </p>
       )}
       <p className="submitStatus" aria-live="polite">

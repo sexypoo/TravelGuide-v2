@@ -108,7 +108,7 @@ describe('T07A room chat and topics', () => {
     const secret = process.env.JWT_SECRET;
     if (secret === undefined) throw new Error('JWT_SECRET is required');
     const token = await jwt.signAsync(
-      { sub: user.id, role },
+      { sub: user.id, role, sessionVersion: user.sessionVersion },
       { expiresIn: 3600, secret },
     );
     return { id: user.id, agent, cookie: `${AUTH_COOKIE_NAME}=${token}` };

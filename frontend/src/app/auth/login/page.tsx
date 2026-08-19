@@ -5,7 +5,10 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { safeNextPath } from '@/lib/auth/safe-next-path';
 
 interface LoginPageProps {
-  searchParams: Promise<{ next?: string | string[] }>;
+  searchParams: Promise<{
+    next?: string | string[];
+    socialError?: string | string[];
+  }>;
 }
 
 export default async function LoginPage({
@@ -16,7 +19,8 @@ export default async function LoginPage({
     redirect(user.isAdmin ? '/admin' : '/app');
   }
 
-  const nextPath = safeNextPath((await searchParams).next);
+  const parameters = await searchParams;
+  const nextPath = safeNextPath(parameters.next);
   return (
     <AuthShell
       eyebrow="다시 만나서 반가워요"
@@ -26,7 +30,11 @@ export default async function LoginPage({
       alternatePrompt="아직 계정이 없나요?"
       alternateLabel="계정 만들기"
     >
-      <AuthForm mode="login" nextPath={nextPath} />
+      <AuthForm
+        mode="login"
+        nextPath={nextPath}
+        socialError={parameters.socialError === 'failed'}
+      />
     </AuthShell>
   );
 }

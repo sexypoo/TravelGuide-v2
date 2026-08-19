@@ -111,4 +111,36 @@ describe('environment validation hardening', () => {
       S3_BUCKET: 'legacy-private-bucket',
     });
   });
+
+  it('requires complete email and social provider secret groups', () => {
+    expect(() =>
+      validateEnvironment({ ...validProduction, RESEND_API_KEY: 're_test' }),
+    ).toThrow('RESEND_API_KEY, EMAIL_FROM');
+    expect(() =>
+      validateEnvironment({
+        ...validProduction,
+        GOOGLE_OAUTH_CLIENT_ID: 'google-client',
+      }),
+    ).toThrow('GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET');
+    expect(() =>
+      validateEnvironment({
+        ...validProduction,
+        APPLE_OAUTH_CLIENT_ID: 'apple-client',
+        APPLE_OAUTH_TEAM_ID: 'team',
+        APPLE_OAUTH_KEY_ID: 'key',
+      }),
+    ).toThrow('APPLE_OAUTH_PRIVATE_KEY');
+  });
+
+  it('normalizes escaped Apple private-key newlines', () => {
+    expect(
+      validateEnvironment({
+        ...validProduction,
+        APPLE_OAUTH_CLIENT_ID: 'apple-client',
+        APPLE_OAUTH_TEAM_ID: 'team',
+        APPLE_OAUTH_KEY_ID: 'key',
+        APPLE_OAUTH_PRIVATE_KEY: 'line-one\\nline-two',
+      }).APPLE_OAUTH_PRIVATE_KEY,
+    ).toBe('line-one\nline-two');
+  });
 });

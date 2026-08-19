@@ -114,7 +114,7 @@ Codex는 다음 우선순위를 따른다.
 - 전문 가이드 자격 심사 체계
 - 지도 탐색, 경로 안내
 - SNS 피드, 갤러리, 북마크
-- 소셜 로그인, 이메일 인증, 비밀번호 재설정
+- 이메일 인증
 - 푸시 알림 서버
 - 마이크로서비스, 메시지 큐, 이벤트 소싱
 
@@ -310,6 +310,20 @@ Codex는 다음 우선순위를 따른다.
 - 비로그인 사용자가 보호 페이지에 접근하면 로그인으로 이동한다.
 - 관리자 페이지는 일반 사용자에게 렌더링하지 않는다.
 - 프론트엔드 가드는 UX 목적이고, 최종 권한 검사는 API에서 수행한다.
+
+### AUTH-004 비밀번호 재설정 — P1
+
+- 가입 여부를 노출하지 않는 동일 응답으로 재설정 메일을 요청한다.
+- 재설정 토큰은 원문을 저장하지 않고 30분 만료·1회 사용으로 제한한다.
+- 새 비밀번호는 회원가입과 같은 정책을 적용하며 성공 시 기존 세션을 무효화한다.
+- 메일은 검증된 발신 도메인의 트랜잭션 메일 API로 전송하고 토큰을 로그에 남기지 않는다.
+
+### AUTH-005 소셜 로그인 — P1
+
+- Google, Kakao, Apple authorization-code 로그인을 제공한다.
+- 제공자가 검증한 이메일만 사용하고 같은 이메일의 기존 계정에 안전하게 연결한다.
+- 제공자 비밀값과 Apple 개인 키는 서버 환경변수에만 저장한다.
+- 설정이 완전한 제공자만 로그인 화면에 노출하며 서명·만료된 state로 콜백을 검증한다.
 
 ### PROF-001 기본 프로필 — P0
 
@@ -692,6 +706,8 @@ admin max width: 1200px
 /                         비로그인 서비스 홈
 /auth/login               로그인
 /auth/register            회원가입
+/auth/forgot-password     비밀번호 재설정 메일 요청
+/auth/reset-password      새 비밀번호 저장
 /app                      사용자 홈
 /app/verifications        내 인증 현황
 /app/verifications/traveler 여행자 인증 신청
@@ -942,6 +958,12 @@ POST   /auth/register
 POST   /auth/login
 POST   /auth/logout
 GET    /auth/me
+GET    /auth/capabilities
+POST   /auth/password/forgot
+POST   /auth/password/reset
+GET    /auth/oauth/:provider/start
+GET    /auth/oauth/:provider/callback
+POST   /auth/oauth/:provider/callback
 ```
 
 ### POST /auth/register

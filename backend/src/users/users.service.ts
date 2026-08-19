@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { Prisma, type UserRole } from '@prisma/client';
+import { type AuthProvider, Prisma, type UserRole } from '@prisma/client';
+import { createHash } from 'node:crypto';
 import { ProblemException } from '../common/http/problem.exception';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UpdateProfileDto } from './dto/update-profile.dto';
@@ -14,11 +15,22 @@ export interface CreateUserInput {
 export interface AuthUserRecord {
   id: string;
   email: string;
-  passwordHash: string;
+  passwordHash: string | null;
   nickname: string;
   role: UserRole;
+  sessionVersion: number;
   createdAt: Date;
 }
+
+const authUserSelect = {
+  id: true,
+  email: true,
+  passwordHash: true,
+  nickname: true,
+  role: true,
+  sessionVersion: true,
+  createdAt: true,
+} as const;
 
 export type UserIdentityRecord = Omit<AuthUserRecord, 'passwordHash'>;
 
@@ -112,6 +124,7 @@ export class UsersService {
           passwordHash: true,
           nickname: true,
           role: true,
+          sessionVersion: true,
           createdAt: true,
         },
       });
@@ -139,6 +152,7 @@ export class UsersService {
         passwordHash: true,
         nickname: true,
         role: true,
+        sessionVersion: true,
         createdAt: true,
       },
     });
@@ -152,9 +166,164 @@ export class UsersService {
         email: true,
         nickname: true,
         role: true,
+        sessionVersion: true,
         createdAt: true,
       },
     });
+  }
+
+  async createPasswordResetToken(
+    email: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ): Promise<{ email: string } | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, passwordHash: true },
+    });
+    if (user === null || user.passwordHash === null) return null;
+
+    await this.prisma.$transaction([
+      this.prisma.passwordResetToken.updateMany({
+        where: { userId: user.id, usedAt: null },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.passwordResetToken.create({
+        data: { userId: user.id, tokenHash, expiresAt },
+      }),
+    ]);
+    return { email: user.email };
+  }
+
+  async consumePasswordResetToken(
+    tokenHash: string,
+    passwordHash: string,
+    now: Date,
+  ): Promise<boolean> {
+    return this.prisma.$transaction(async (transaction) => {
+      const token = await transaction.passwordResetToken.findUnique({
+        where: { tokenHash },
+        select: { id: true, userId: true, expiresAt: true, usedAt: true },
+      });
+      if (
+        token === null ||
+        token.usedAt !== null ||
+        token.expiresAt.getTime() <= now.getTime()
+      ) {
+        return false;
+      }
+
+      const consumed = await transaction.passwordResetToken.updateMany({
+        where: { id: token.id, usedAt: null, expiresAt: { gt: now } },
+        data: { usedAt: now },
+      });
+      if (consumed.count !== 1) return false;
+
+      await transaction.user.update({
+        where: { id: token.userId },
+        data: { passwordHash, sessionVersion: { increment: 1 } },
+      });
+      await transaction.passwordResetToken.updateMany({
+        where: { userId: token.userId, usedAt: null },
+        data: { usedAt: now },
+      });
+      return true;
+    });
+  }
+
+  async invalidatePasswordResetToken(tokenHash: string): Promise<void> {
+    await this.prisma.passwordResetToken.updateMany({
+      where: { tokenHash, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+  }
+
+  async findOrCreateSocialUser(input: {
+    provider: AuthProvider;
+    providerUserId: string;
+    email: string;
+    nicknameHint?: string;
+    allowCreate: boolean;
+  }): Promise<AuthUserRecord> {
+    return this.prisma.$transaction(async (transaction) => {
+      const linked = await transaction.authIdentity.findUnique({
+        where: {
+          provider_providerUserId: {
+            provider: input.provider,
+            providerUserId: input.providerUserId,
+          },
+        },
+        select: { user: { select: authUserSelect } },
+      });
+      if (linked !== null) return linked.user;
+
+      let user = await transaction.user.findUnique({
+        where: { email: input.email },
+        select: authUserSelect,
+      });
+      if (user === null) {
+        if (!input.allowCreate) {
+          throw new ProblemException(
+            'SOCIAL_ACCOUNT_NOT_FOUND',
+            '연결된 계정이 없습니다. 먼저 계정을 만들어 주세요.',
+            HttpStatus.NOT_FOUND,
+          );
+        }
+        user = await transaction.user.create({
+          data: {
+            email: input.email,
+            nickname: await this.availableSocialNickname(
+              transaction,
+              input.nicknameHint,
+              input.providerUserId,
+            ),
+          },
+          select: authUserSelect,
+        });
+      }
+
+      await transaction.authIdentity.create({
+        data: {
+          userId: user.id,
+          provider: input.provider,
+          providerUserId: input.providerUserId,
+        },
+      });
+      return user;
+    });
+  }
+
+  private async availableSocialNickname(
+    transaction: Prisma.TransactionClient,
+    hint: string | undefined,
+    providerUserId: string,
+  ): Promise<string> {
+    const normalized = hint?.replace(/\s+/g, ' ').trim().slice(0, 20) ?? '';
+    const base = normalized.length >= 2 ? normalized : '제주여행자';
+    const first = await transaction.user.findUnique({
+      where: { nickname: base },
+      select: { id: true },
+    });
+    if (first === null) return base;
+
+    const fingerprint = createHash('sha256')
+      .update(providerUserId)
+      .digest('hex')
+      .slice(0, 4);
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const suffix = attempt === 0 ? fingerprint : `${fingerprint}${attempt}`;
+      const candidate = `${base.slice(0, 20 - suffix.length)}${suffix}`;
+      const conflict = await transaction.user.findUnique({
+        where: { nickname: candidate },
+        select: { id: true },
+      });
+      if (conflict === null) return candidate;
+    }
+    throw new ProblemException(
+      'SOCIAL_NICKNAME_UNAVAILABLE',
+      '계정을 만들 수 없습니다. 잠시 후 다시 시도해 주세요.',
+      HttpStatus.CONFLICT,
+    );
   }
 
   async getOwnProfile(id: string): Promise<OwnProfileRecord> {

@@ -35,6 +35,9 @@ describe('AuthForm', () => {
     replaceMock.mockReset();
     refreshMock.mockReset();
     fetchMock.mockReset();
+    fetchMock.mockResolvedValue(
+      response({ passwordReset: true, socialProviders: [] }, 200),
+    );
     Object.defineProperty(globalThis, 'fetch', {
       configurable: true,
       value: fetchMock,
@@ -42,8 +45,15 @@ describe('AuthForm', () => {
     });
   });
 
-  it('validates registration fields before making a request', () => {
+  it('validates registration fields before making a request', async () => {
     render(<AuthForm mode="register" />);
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/v1/auth/capabilities',
+        expect.anything(),
+      ),
+    );
 
     fireEvent.click(screen.getByRole('button', { name: '계정 만들기' }));
 
@@ -56,11 +66,18 @@ describe('AuthForm', () => {
     expect(
       screen.getByText('서비스 이용을 위해 필수 약관에 동의해 주세요.'),
     ).toBeInTheDocument();
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      '/api/v1/auth/register',
+      expect.anything(),
+    );
   });
 
   it('submits normalized registration data and enters the app', async () => {
-    fetchMock.mockResolvedValue(response(currentUser, 201));
+    fetchMock
+      .mockResolvedValueOnce(
+        response({ passwordReset: true, socialProviders: [] }, 200),
+      )
+      .mockResolvedValueOnce(response(currentUser, 201));
     render(<AuthForm mode="register" />);
 
     fireEvent.change(screen.getByLabelText('이메일'), {
@@ -92,19 +109,23 @@ describe('AuthForm', () => {
   });
 
   it('shows a recoverable duplicate nickname message from Problem Details', async () => {
-    fetchMock.mockResolvedValue(
-      response(
-        {
-          type: 'about:blank',
-          title: 'Conflict',
-          status: 409,
-          code: 'NICKNAME_ALREADY_EXISTS',
-          detail: '이미 사용 중인 닉네임입니다.',
-          requestId: 'req-duplicate',
-        },
-        409,
-      ),
-    );
+    fetchMock
+      .mockResolvedValueOnce(
+        response({ passwordReset: true, socialProviders: [] }, 200),
+      )
+      .mockResolvedValueOnce(
+        response(
+          {
+            type: 'about:blank',
+            title: 'Conflict',
+            status: 409,
+            code: 'NICKNAME_ALREADY_EXISTS',
+            detail: '이미 사용 중인 닉네임입니다.',
+            requestId: 'req-duplicate',
+          },
+          409,
+        ),
+      );
     render(<AuthForm mode="register" />);
 
     fireEvent.change(screen.getByLabelText('이메일'), {

@@ -33,7 +33,7 @@ export class RateLimitGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
     const principal =
-      category === 'LOGIN'
+      category === 'LOGIN' || category === 'PASSWORD_RESET'
         ? (request.ip ?? 'unknown')
         : (request.user?.id ?? request.ip ?? 'unknown');
     const result = this.limiter.consume(category, principal);

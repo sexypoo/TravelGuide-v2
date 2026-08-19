@@ -126,7 +126,11 @@ describe('T06 answers and realtime', () => {
       throw new Error('JWT_SECRET is required');
     }
     const token = await jwt.signAsync(
-      { sub: user.id, role: user.role },
+      {
+        sub: user.id,
+        role: user.role,
+        sessionVersion: user.sessionVersion,
+      },
       { expiresIn: 3600, secret },
     );
     return { id: user.id, agent, cookie: `${AUTH_COOKIE_NAME}=${token}` };

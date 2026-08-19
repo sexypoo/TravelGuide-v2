@@ -7,7 +7,7 @@ interface AuthShellProps {
   eyebrow: string;
   title: string;
   description: string;
-  alternateHref: '/auth/login' | '/auth/register';
+  alternateHref: '/auth/login' | '/auth/register' | '/auth/forgot-password';
   alternateLabel: string;
   alternatePrompt: string;
   children: React.ReactNode;

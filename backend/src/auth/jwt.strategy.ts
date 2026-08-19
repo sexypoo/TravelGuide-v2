@@ -13,6 +13,7 @@ import type { AuthenticatedUser } from './authenticated-user';
 interface JwtPayload {
   sub: string;
   role: UserRole;
+  sessionVersion: number;
 }
 
 function extractJwtFromCookie(request: Request): string | null {
@@ -34,6 +35,7 @@ function isJwtPayload(value: unknown): value is JwtPayload {
   const payload = value as Record<string, unknown>;
   return (
     typeof payload.sub === 'string' &&
+    Number.isInteger(payload.sessionVersion) &&
     (payload.role === UserRole.USER || payload.role === UserRole.ADMIN)
   );
 }
@@ -62,6 +64,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const user = await this.users.findById(payload.sub);
     if (user === null) {
+      throw new ProblemException(
+        'INVALID_SESSION',
+        '유효하지 않은 로그인 세션입니다.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    if (user.sessionVersion !== payload.sessionVersion) {
       throw new ProblemException(
         'INVALID_SESSION',
         '유효하지 않은 로그인 세션입니다.',

@@ -7,11 +7,22 @@ import { AuthService } from './auth.service';
 import { AdminGuard } from './guards/admin.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtStrategy } from './jwt.strategy';
+import { PasswordEmailService } from './password-email.service';
+import { PasswordRecoveryService } from './password-recovery.service';
+import { SocialAuthService } from './social-auth.service';
 
 @Module({
   imports: [UsersModule, PassportModule, JwtModule.register({})],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtAuthGuard, AdminGuard],
+  providers: [
+    AuthService,
+    PasswordEmailService,
+    PasswordRecoveryService,
+    SocialAuthService,
+    JwtStrategy,
+    JwtAuthGuard,
+    AdminGuard,
+  ],
   exports: [AuthService, JwtAuthGuard, AdminGuard],
 })
 export class AuthModule {}

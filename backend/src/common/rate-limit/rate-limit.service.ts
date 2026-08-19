@@ -13,6 +13,7 @@ interface LimitDefinition {
 
 const limits: Readonly<Record<RateLimitCategory, LimitDefinition>> = {
   LOGIN: { limit: 5, windowMs: 60 * 1000 },
+  PASSWORD_RESET: { limit: 3, windowMs: 15 * 60 * 1000 },
   TOPIC: { limit: 5, windowMs: 10 * 60 * 1000 },
   ANSWER: { limit: 20, windowMs: 10 * 60 * 1000 },
   REPORT: { limit: 10, windowMs: 60 * 60 * 1000 },

@@ -17,6 +17,16 @@ export interface Environment {
   S3_ACCESS_KEY_ID?: string;
   S3_SECRET_ACCESS_KEY?: string;
   GOOGLE_PLACES_API_KEY?: string;
+  RESEND_API_KEY?: string;
+  EMAIL_FROM?: string;
+  GOOGLE_OAUTH_CLIENT_ID?: string;
+  GOOGLE_OAUTH_CLIENT_SECRET?: string;
+  KAKAO_OAUTH_CLIENT_ID?: string;
+  KAKAO_OAUTH_CLIENT_SECRET?: string;
+  APPLE_OAUTH_CLIENT_ID?: string;
+  APPLE_OAUTH_TEAM_ID?: string;
+  APPLE_OAUTH_KEY_ID?: string;
+  APPLE_OAUTH_PRIVATE_KEY?: string;
 }
 
 const nodeEnvironments: readonly NodeEnvironment[] = [
@@ -59,6 +69,19 @@ function readFirstOptionalString(
     if (value !== undefined) return value;
   }
   return undefined;
+}
+
+function requireCompleteGroup(
+  values: Readonly<Record<string, string | undefined>>,
+): void {
+  const configured = Object.values(values).filter(
+    (value) => value !== undefined,
+  ).length;
+  if (configured !== 0 && configured !== Object.keys(values).length) {
+    throw new Error(
+      `${Object.keys(values).join(', ')} must be provided together`,
+    );
+  }
 }
 
 function parseNodeEnvironment(value: unknown): NodeEnvironment {
@@ -238,6 +261,50 @@ export function validateEnvironment(
     config,
     'GOOGLE_PLACES_API_KEY',
   );
+  const resendApiKey = readOptionalString(config, 'RESEND_API_KEY');
+  const emailFrom = readOptionalString(config, 'EMAIL_FROM');
+  const googleOauthClientId = readOptionalString(
+    config,
+    'GOOGLE_OAUTH_CLIENT_ID',
+  );
+  const googleOauthClientSecret = readOptionalString(
+    config,
+    'GOOGLE_OAUTH_CLIENT_SECRET',
+  );
+  const kakaoOauthClientId = readOptionalString(
+    config,
+    'KAKAO_OAUTH_CLIENT_ID',
+  );
+  const kakaoOauthClientSecret = readOptionalString(
+    config,
+    'KAKAO_OAUTH_CLIENT_SECRET',
+  );
+  const appleOauthClientId = readOptionalString(
+    config,
+    'APPLE_OAUTH_CLIENT_ID',
+  );
+  const appleOauthTeamId = readOptionalString(config, 'APPLE_OAUTH_TEAM_ID');
+  const appleOauthKeyId = readOptionalString(config, 'APPLE_OAUTH_KEY_ID');
+  const appleOauthPrivateKey = readOptionalString(
+    config,
+    'APPLE_OAUTH_PRIVATE_KEY',
+  );
+
+  requireCompleteGroup({ RESEND_API_KEY: resendApiKey, EMAIL_FROM: emailFrom });
+  requireCompleteGroup({
+    GOOGLE_OAUTH_CLIENT_ID: googleOauthClientId,
+    GOOGLE_OAUTH_CLIENT_SECRET: googleOauthClientSecret,
+  });
+  requireCompleteGroup({
+    KAKAO_OAUTH_CLIENT_ID: kakaoOauthClientId,
+    KAKAO_OAUTH_CLIENT_SECRET: kakaoOauthClientSecret,
+  });
+  requireCompleteGroup({
+    APPLE_OAUTH_CLIENT_ID: appleOauthClientId,
+    APPLE_OAUTH_TEAM_ID: appleOauthTeamId,
+    APPLE_OAUTH_KEY_ID: appleOauthKeyId,
+    APPLE_OAUTH_PRIVATE_KEY: appleOauthPrivateKey,
+  });
 
   if (storageDriver !== 'local' && storageDriver !== 's3') {
     throw new Error('STORAGE_DRIVER must be local or s3');
@@ -296,5 +363,15 @@ export function validateEnvironment(
     S3_ACCESS_KEY_ID: s3AccessKeyId,
     S3_SECRET_ACCESS_KEY: s3SecretAccessKey,
     GOOGLE_PLACES_API_KEY: googlePlacesApiKey,
+    RESEND_API_KEY: resendApiKey,
+    EMAIL_FROM: emailFrom,
+    GOOGLE_OAUTH_CLIENT_ID: googleOauthClientId,
+    GOOGLE_OAUTH_CLIENT_SECRET: googleOauthClientSecret,
+    KAKAO_OAUTH_CLIENT_ID: kakaoOauthClientId,
+    KAKAO_OAUTH_CLIENT_SECRET: kakaoOauthClientSecret,
+    APPLE_OAUTH_CLIENT_ID: appleOauthClientId,
+    APPLE_OAUTH_TEAM_ID: appleOauthTeamId,
+    APPLE_OAUTH_KEY_ID: appleOauthKeyId,
+    APPLE_OAUTH_PRIVATE_KEY: appleOauthPrivateKey?.replace(/\\n/g, '\n'),
   };
 }

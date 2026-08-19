@@ -255,6 +255,15 @@ maxAge    24 hours
 - 연결 인증과 room join 권한은 별개로 검사한다.
 - 인증 만료 후 재연결이 실패하면 UI는 로그인 만료 상태를 표시한다.
 
+### 6.4 계정 복구와 외부 인증
+
+- 비밀번호 재설정 원문 토큰은 메일에만 전달하고 DB에는 SHA-256 해시만 저장한다.
+- 비밀번호 변경 시 `sessionVersion`을 증가시키며 JWT·REST·Socket 인증에서 동일 값을 검사한다.
+- 소셜 계정은 `(provider, providerUserId)`로 식별하고 제공자가 검증한 이메일로만 기존 계정과 연결한다.
+- OAuth state는 JWT로 서명하고 제공자·nonce·내부 next 경로·10분 만료를 포함한다.
+- Google·Kakao는 공식 userinfo, Apple은 JWKS로 검증한 ID token만 신뢰한다.
+- 재설정 메일은 Resend HTTPS API를 사용하며 API 키·토큰·Apple 개인 키를 로그에 남기지 않는다.
+
 ---
 
 ## 7. 데이터 일관성
@@ -466,6 +475,16 @@ S3_REGION=
 S3_BUCKET=
 S3_ACCESS_KEY_ID=
 S3_SECRET_ACCESS_KEY=
+RESEND_API_KEY=
+EMAIL_FROM=
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+KAKAO_OAUTH_CLIENT_ID=
+KAKAO_OAUTH_CLIENT_SECRET=
+APPLE_OAUTH_CLIENT_ID=
+APPLE_OAUTH_TEAM_ID=
+APPLE_OAUTH_KEY_ID=
+APPLE_OAUTH_PRIVATE_KEY=
 ```
 
 규칙:
