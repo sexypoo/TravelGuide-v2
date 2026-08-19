@@ -493,6 +493,19 @@
 
 ---
 
+### ADR-042 비공개 객체 저장과 DB 반영의 보상 경계 통합
+
+- 날짜: 2026-08-19
+- 상태: accepted
+- 문제: 질문·답변·채팅 이미지, 인증 증빙, 프로필 이미지가 각각 비공개 객체를 먼저 저장하고 DB 반영 실패 시 삭제했지만, 보상 삭제와 실패 로그 구현이 기능 서비스마다 달라 원래 오류가 가려지거나 고아 객체 처리 방식이 달라질 위험이 있었다.
+- 선택지: 각 서비스의 `try/catch` 유지, 저장소와 DB를 하나의 repository로 감싸기, 또는 storage 모듈에 업로드 후 persistence callback과 best-effort 삭제만 담당하는 작은 생명주기 서비스를 추가.
+- 결정: `PrivateObjectLifecycleService`가 비공개 업로드 성공 후 persistence callback을 실행하고, callback 실패 시 새 객체를 best-effort로 삭제한 뒤 원래 오류를 그대로 다시 던진다. 검증, Prisma 트랜잭션, `P2002` 변환, 권한과 실시간 발행은 기존 기능 서비스가 계속 소유한다.
+- 이유: 실제로 반복되던 보상 로직만 제거하면서 controller→service→Prisma/storage 의존성 방향과 모듈러 모놀리스 경계를 유지할 수 있다. 삭제 실패를 별도 큐나 repository로 확대하지 않아 MVP 범위를 지킨다.
+- 영향: 저장 키, 비공개 다운로드, DTO, REST·Socket 계약과 데이터베이스는 바뀌지 않는다. 프로필의 이전 객체 삭제도 동일한 best-effort 경계를 사용하고, 원본 파일 내용·키·DB 연결 정보는 로그에 남기지 않는다.
+- 되돌리는 조건: 객체와 DB 레코드의 장기적 정합성 보장이 필요해지면 현재 서비스의 호출 지점은 유지하고 cleanup ledger 또는 주기적 orphan reconciliation으로 내부 구현을 확장한다.
+
+---
+
 ## 신규 결정 템플릿
 
 ```md

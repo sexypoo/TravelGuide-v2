@@ -72,6 +72,7 @@ function expiryService(updatedCount: number): {
       {} as never,
       publisher as never,
       {} as never,
+      {} as never,
     ),
     prisma,
     transaction,

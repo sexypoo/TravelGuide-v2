@@ -1,6 +1,7 @@
 import { AnswerSourceType, UserRole } from '@prisma/client';
 import { Readable } from 'node:stream';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
+import { PrivateObjectLifecycleService } from '../storage/private-object-lifecycle.service';
 import { AnswersService } from './answers.service';
 
 const user: AuthenticatedUser = {
@@ -61,6 +62,7 @@ function serviceWith(input: { answer?: unknown; transaction?: jest.Mock }): {
       roomAccess as never,
       publisher as never,
       storage,
+      new PrivateObjectLifecycleService(storage),
     ),
     roomAccess,
     storage,

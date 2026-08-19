@@ -2,6 +2,7 @@ import type { Destination } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { Readable } from 'node:stream';
 import { PrismaService } from '../prisma/prisma.service';
+import { PrivateObjectLifecycleService } from '../storage/private-object-lifecycle.service';
 import type {
   PrivateUpload,
   StorageService,
@@ -51,7 +52,10 @@ function destination(): Destination {
 describe('VerificationsService storage consistency', () => {
   const prisma = new PrismaService();
   const storage = new CleanupTrackingStorage();
-  const service = new VerificationsService(prisma, storage);
+  const service = new VerificationsService(
+    prisma,
+    new PrivateObjectLifecycleService(storage),
+  );
 
   beforeEach(() => {
     jest.restoreAllMocks();

@@ -4,6 +4,7 @@ import { basename } from 'node:path';
 import type { Readable } from 'node:stream';
 import { ProblemException } from '../common/http/problem.exception';
 import { PrismaService } from '../prisma/prisma.service';
+import { PrivateObjectLifecycleService } from '../storage/private-object-lifecycle.service';
 import {
   STORAGE_SERVICE,
   type StorageService,
@@ -40,6 +41,7 @@ export class UserAvatarsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
+    private readonly privateObjects: PrivateObjectLifecycleService,
   ) {}
 
   async update(
@@ -60,34 +62,30 @@ export class UserAvatarsService {
     }
 
     const objectKey = `profile-images/${userId}/${randomUUID()}`;
-    try {
-      await this.storage.putPrivate({ objectKey, contents: file.buffer });
-    } catch (error: unknown) {
-      this.logger.error(
-        `Profile avatar storage put failed: ${safeErrorSummary(error)}`,
-      );
-      throw error;
-    }
-    try {
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          avatarObjectKey: objectKey,
-          avatarOriginalName: basename(file.originalname).slice(0, 255),
-          avatarMimeType: file.mimetype,
-          avatarSizeBytes: file.size,
-        },
-      });
-    } catch (error: unknown) {
-      this.logger.error(
-        `Profile avatar database update failed: ${safeErrorSummary(error)}`,
-      );
-      await this.deleteStoredObject(objectKey);
-      throw error;
-    }
+    await this.privateObjects.storeThenPersist(
+      { objectKey, contents: file.buffer },
+      async () => {
+        try {
+          await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+              avatarObjectKey: objectKey,
+              avatarOriginalName: basename(file.originalname).slice(0, 255),
+              avatarMimeType: file.mimetype,
+              avatarSizeBytes: file.size,
+            },
+          });
+        } catch (error: unknown) {
+          this.logger.error(
+            `Profile avatar database update failed: ${safeErrorSummary(error)}`,
+          );
+          throw error;
+        }
+      },
+    );
 
     if (previous.avatarObjectKey !== null) {
-      await this.deleteStoredObject(previous.avatarObjectKey);
+      await this.privateObjects.deleteBestEffort(previous.avatarObjectKey);
     }
   }
 
@@ -113,7 +111,7 @@ export class UserAvatarsService {
       },
     });
     if (previous.avatarObjectKey !== null) {
-      await this.deleteStoredObject(previous.avatarObjectKey);
+      await this.privateObjects.deleteBestEffort(previous.avatarObjectKey);
     }
   }
 
@@ -145,13 +143,5 @@ export class UserAvatarsService {
       mimeType: user.avatarMimeType,
       originalName: user.avatarOriginalName,
     };
-  }
-
-  private async deleteStoredObject(objectKey: string): Promise<void> {
-    try {
-      await this.storage.delete(objectKey);
-    } catch {
-      this.logger.warn('Failed to clean an old profile image');
-    }
   }
 }

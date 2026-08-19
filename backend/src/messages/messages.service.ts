@@ -12,6 +12,7 @@ import {
   STORAGE_SERVICE,
   type StorageService,
 } from '../storage/storage.service';
+import { PrivateObjectLifecycleService } from '../storage/private-object-lifecycle.service';
 import type { CreateImageMessageDto } from './dto/create-image-message.dto';
 import type { CreateMessageDto } from './dto/create-message.dto';
 import type { CreatePlaceMessageDto } from './dto/create-place-message.dto';
@@ -71,6 +72,7 @@ export class MessagesService {
     private readonly roomAccess: RoomAccessService,
     private readonly publisher: RealtimePublisher,
     @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
+    private readonly privateObjects: PrivateObjectLifecycleService,
   ) {}
 
   async list(
@@ -206,32 +208,26 @@ export class MessagesService {
     );
     validateMessageImage(file);
     const objectKey = `room-media/${room.id}/${randomUUID()}`;
-    await this.storage.putPrivate({ objectKey, contents: file.buffer });
-    try {
-      const message = await this.prisma.chatMessage.create({
-        data: {
-          roomId: room.id,
-          authorId: user.id,
-          authorKind: capability.kind,
-          type: 'IMAGE',
-          content: input.caption?.trim() || '사진을 공유했습니다.',
-          imageObjectKey: objectKey,
-          imageOriginalName: basename(file.originalname).slice(0, 255),
-          imageMimeType: file.mimetype,
-          imageSizeBytes: file.size,
-          createdAt: now,
-        },
-        include: messageInclude,
-      });
-      return this.publish(room.id, roomSlug, message, now);
-    } catch (error: unknown) {
-      try {
-        await this.storage.delete(objectKey);
-      } catch {
-        this.logger.warn('Failed to clean an orphaned room image');
-      }
-      throw error;
-    }
+    const message = await this.privateObjects.storeThenPersist(
+      { objectKey, contents: file.buffer },
+      () =>
+        this.prisma.chatMessage.create({
+          data: {
+            roomId: room.id,
+            authorId: user.id,
+            authorKind: capability.kind,
+            type: 'IMAGE',
+            content: input.caption?.trim() || '사진을 공유했습니다.',
+            imageObjectKey: objectKey,
+            imageOriginalName: basename(file.originalname).slice(0, 255),
+            imageMimeType: file.mimetype,
+            imageSizeBytes: file.size,
+            createdAt: now,
+          },
+          include: messageInclude,
+        }),
+    );
+    return this.publish(room.id, roomSlug, message, now);
   }
 
   async getImage(

@@ -1,13 +1,10 @@
-import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma, VerificationStatus, VerificationType } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { basename } from 'node:path';
 import { ProblemException } from '../common/http/problem.exception';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  STORAGE_SERVICE,
-  type StorageService,
-} from '../storage/storage.service';
+import { PrivateObjectLifecycleService } from '../storage/private-object-lifecycle.service';
 import { haversineDistanceKm } from './distance';
 import type { CreateLocalVerificationDto } from './dto/create-local-verification.dto';
 import type { CreateTravelerVerificationDto } from './dto/create-traveler-verification.dto';
@@ -23,11 +20,9 @@ const responseInclude = {
 
 @Injectable()
 export class VerificationsService {
-  private readonly logger = new Logger(VerificationsService.name);
-
   constructor(
     private readonly prisma: PrismaService,
-    @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
+    private readonly privateObjects: PrivateObjectLifecycleService,
   ) {}
 
   async createTraveler(
@@ -220,27 +215,23 @@ export class VerificationsService {
     >,
   ): Promise<VerificationResponse> {
     const objectKey = `verification/${userId}/${randomUUID()}`;
-    await this.storage.putPrivate({ objectKey, contents: file.buffer });
-
     try {
-      const verification = await this.prisma.verification.create({
-        data: {
-          ...data,
-          proofObjectKey: objectKey,
-          proofOriginalName: basename(file.originalname).slice(0, 255),
-          proofMimeType: file.mimetype,
-          proofSizeBytes: file.size,
-        },
-        include: responseInclude,
-      });
+      const verification = await this.privateObjects.storeThenPersist(
+        { objectKey, contents: file.buffer },
+        () =>
+          this.prisma.verification.create({
+            data: {
+              ...data,
+              proofObjectKey: objectKey,
+              proofOriginalName: basename(file.originalname).slice(0, 255),
+              proofMimeType: file.mimetype,
+              proofSizeBytes: file.size,
+            },
+            include: responseInclude,
+          }),
+      );
       return toVerificationResponse(verification);
     } catch (error: unknown) {
-      try {
-        await this.storage.delete(objectKey);
-      } catch {
-        this.logger.warn(`Failed to clean private object ${objectKey}`);
-      }
-
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'

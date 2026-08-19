@@ -17,6 +17,7 @@ import {
   STORAGE_SERVICE,
   type StorageService,
 } from '../storage/storage.service';
+import { PrivateObjectLifecycleService } from '../storage/private-object-lifecycle.service';
 import type { CreateQuestionDto } from './dto/create-question.dto';
 import type { ListQuestionsDto } from './dto/list-questions.dto';
 import {
@@ -55,6 +56,7 @@ export class QuestionsService {
     private readonly roomAccess: RoomAccessService,
     private readonly publisher: RealtimePublisher,
     @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
+    private readonly privateObjects: PrivateObjectLifecycleService,
   ) {}
 
   async list(
@@ -157,18 +159,17 @@ export class QuestionsService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    let imageObjectKey: string | null = null;
-    if (image !== undefined) {
-      validateMessageImage(image);
-      imageObjectKey = `question-media/${room.id}/${randomUUID()}`;
-      await this.storage.putPrivate({
-        objectKey: imageObjectKey,
-        contents: image.buffer,
-      });
-    }
-    let question: QuestionRecord;
-    try {
-      question = await this.prisma.$transaction(async (transaction) => {
+    const imageUpload =
+      image === undefined
+        ? null
+        : {
+            objectKey: `question-media/${room.id}/${randomUUID()}`,
+            contents: image.buffer,
+          };
+    if (image !== undefined) validateMessageImage(image);
+    const imageObjectKey = imageUpload?.objectKey ?? null;
+    const persistQuestion = (): Promise<QuestionRecord> =>
+      this.prisma.$transaction(async (transaction) => {
         const lockKey = `${user.id}:${room.id}`;
         await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
         let content = input.content;
@@ -264,12 +265,13 @@ export class QuestionsService {
           include: questionInclude,
         });
       });
-    } catch (error: unknown) {
-      if (imageObjectKey !== null) {
-        await this.storage.delete(imageObjectKey).catch(() => undefined);
-      }
-      throw error;
-    }
+    const question =
+      imageUpload === null
+        ? await persistQuestion()
+        : await this.privateObjects.storeThenPersist(
+            imageUpload,
+            persistQuestion,
+          );
     const response = toQuestionResponse(question, now);
     try {
       this.publisher.publishQuestionCreated(room.id, roomSlug, response, now);

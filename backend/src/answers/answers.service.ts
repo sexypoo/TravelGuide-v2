@@ -15,12 +15,14 @@ import {
   STORAGE_SERVICE,
   type StorageService,
 } from '../storage/storage.service';
+import { PrivateObjectLifecycleService } from '../storage/private-object-lifecycle.service';
 import type { CreateAnswerDto } from './dto/create-answer.dto';
 import { toAnswerResponse, type AnswerResponse } from './dto/answer.response';
 
 const answerInclude = {
   author: { select: { id: true, nickname: true } },
 } satisfies Prisma.AnswerInclude;
+type AnswerRecord = Prisma.AnswerGetPayload<{ include: typeof answerInclude }>;
 
 export function normalizeSourceUrl(input: CreateAnswerDto): string | null {
   const value = input.sourceUrl;
@@ -65,6 +67,7 @@ export class AnswersService {
     private readonly roomAccess: RoomAccessService,
     private readonly publisher: RealtimePublisher,
     @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
+    private readonly privateObjects: PrivateObjectLifecycleService,
   ) {}
 
   async create(
@@ -125,18 +128,17 @@ export class AnswersService {
       );
     }
 
-    let imageObjectKey: string | null = null;
-    if (image !== undefined) {
-      validateMessageImage(image);
-      imageObjectKey = `answer-media/${initialQuestion.room.id}/${randomUUID()}`;
-      await this.storage.putPrivate({
-        objectKey: imageObjectKey,
-        contents: image.buffer,
-      });
-    }
-    let answer;
-    try {
-      answer = await this.prisma.$transaction(async (transaction) => {
+    const imageUpload =
+      image === undefined
+        ? null
+        : {
+            objectKey: `answer-media/${initialQuestion.room.id}/${randomUUID()}`,
+            contents: image.buffer,
+          };
+    if (image !== undefined) validateMessageImage(image);
+    const imageObjectKey = imageUpload?.objectKey ?? null;
+    const persistAnswer = (): Promise<AnswerRecord> =>
+      this.prisma.$transaction(async (transaction) => {
         const lockKey = `answer:${user.id}:${questionId}`;
         await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
         const question = await transaction.question.findUnique({
@@ -206,12 +208,13 @@ export class AnswersService {
           include: answerInclude,
         });
       });
-    } catch (error: unknown) {
-      if (imageObjectKey !== null) {
-        await this.storage.delete(imageObjectKey).catch(() => undefined);
-      }
-      throw error;
-    }
+    const answer =
+      imageUpload === null
+        ? await persistAnswer()
+        : await this.privateObjects.storeThenPersist(
+            imageUpload,
+            persistAnswer,
+          );
     const response = toAnswerResponse(answer, capability.verifiedAt);
     try {
       this.publisher.publishAnswerCreated(
