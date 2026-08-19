@@ -1,7 +1,7 @@
-import { QuestionsService } from './questions.service';
+import { QuestionExpiryService } from './question-expiry.service';
 
 function expiryService(updatedCount: number): {
-  service: QuestionsService;
+  service: QuestionExpiryService;
   prisma: {
     question: { findMany: jest.Mock };
     $transaction: jest.Mock;
@@ -66,12 +66,9 @@ function expiryService(updatedCount: number): {
     publishQuestionUpdated: jest.fn(() => order.push('publish')),
   };
   return {
-    service: new QuestionsService(
+    service: new QuestionExpiryService(
       prisma as never,
-      {} as never,
-      {} as never,
       publisher as never,
-      {} as never,
       {} as never,
     ),
     prisma,

@@ -2,7 +2,8 @@ import { UserRole } from '@prisma/client';
 import { Readable } from 'node:stream';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
 import { PrivateObjectLifecycleService } from '../storage/private-object-lifecycle.service';
-import { QuestionsService } from './questions.service';
+import { QuestionCommandService } from './question-command.service';
+import { QuestionQueryService } from './question-query.service';
 
 const user: AuthenticatedUser = {
   id: 'traveler-id',
@@ -12,8 +13,9 @@ const user: AuthenticatedUser = {
   createdAt: new Date('2026-08-01T00:00:00.000Z'),
 };
 
-function serviceWith(answer: unknown = null): {
-  service: QuestionsService;
+function servicesWith(answer: unknown = null): {
+  commands: QuestionCommandService;
+  queries: QuestionQueryService;
   roomAccess: {
     assertCanParticipate: jest.Mock;
     assertCanViewContent: jest.Mock;
@@ -48,15 +50,22 @@ function serviceWith(answer: unknown = null): {
     getPrivateDownload: jest.fn().mockResolvedValue(Readable.from('image')),
     delete: jest.fn().mockResolvedValue(undefined),
   };
+  const queries = new QuestionQueryService(
+    prisma as never,
+    rooms as never,
+    roomAccess as never,
+    storage,
+  );
   return {
-    service: new QuestionsService(
+    commands: new QuestionCommandService(
       prisma as never,
       rooms as never,
       roomAccess as never,
       publisher as never,
-      storage,
       new PrivateObjectLifecycleService(storage),
+      queries,
     ),
+    queries,
     roomAccess,
     storage,
   };
@@ -64,7 +73,7 @@ function serviceWith(answer: unknown = null): {
 
 describe('question image access and cleanup', () => {
   it('authorizes the room before resolving a private image', async () => {
-    const { service, roomAccess, storage } = serviceWith({
+    const { queries, roomAccess, storage } = servicesWith({
       status: 'OPEN',
       removedAt: null,
       imageObjectKey: 'question-media/room-id/image-id',
@@ -72,7 +81,7 @@ describe('question image access and cleanup', () => {
       imageOriginalName: '현장.png',
       room: { destinationId: 'destination-id' },
     });
-    const download = await service.getImage('question-id', user);
+    const download = await queries.getImage('question-id', user);
     expect(download.stream).toBeInstanceOf(Readable);
     expect(download).toMatchObject({
       mimeType: 'image/png',
@@ -89,7 +98,7 @@ describe('question image access and cleanup', () => {
   });
 
   it('denies image reads after the topic is removed', async () => {
-    const { service, roomAccess, storage } = serviceWith({
+    const { queries, roomAccess, storage } = servicesWith({
       status: 'REMOVED',
       removedAt: new Date('2026-08-01T00:30:00.000Z'),
       imageObjectKey: 'question-media/room-id/image-id',
@@ -97,7 +106,7 @@ describe('question image access and cleanup', () => {
       imageOriginalName: '현장.png',
       room: { destinationId: 'destination-id' },
     });
-    await expect(service.getImage('question-id', user)).rejects.toMatchObject({
+    await expect(queries.getImage('question-id', user)).rejects.toMatchObject({
       code: 'QUESTION_IMAGE_NOT_FOUND',
     });
     expect(roomAccess.assertCanViewContent).not.toHaveBeenCalled();
@@ -105,7 +114,7 @@ describe('question image access and cleanup', () => {
   });
 
   it('deletes the upload when topic persistence fails', async () => {
-    const { service, storage } = serviceWith();
+    const { commands, storage } = servicesWith();
     const image = {
       originalname: '현장.png',
       mimetype: 'image/png',
@@ -113,7 +122,7 @@ describe('question image access and cleanup', () => {
       buffer: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     };
     await expect(
-      service.create(
+      commands.create(
         'jeju',
         user,
         {

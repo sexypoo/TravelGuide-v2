@@ -26,7 +26,8 @@ import type {
   QuestionListResponse,
   QuestionResponse,
 } from './dto/question.response';
-import { QuestionsService } from './questions.service';
+import { QuestionCommandService } from './question-command.service';
+import { QuestionQueryService } from './question-query.service';
 
 const questionImageUpload = FileInterceptor('image', {
   limits: { fileSize: MAX_MESSAGE_IMAGE_BYTES },
@@ -35,7 +36,10 @@ const questionImageUpload = FileInterceptor('image', {
 @Controller('rooms/:slug/questions')
 @UseGuards(JwtAuthGuard)
 export class RoomQuestionsController {
-  constructor(private readonly questions: QuestionsService) {}
+  constructor(
+    private readonly queries: QuestionQueryService,
+    private readonly commands: QuestionCommandService,
+  ) {}
 
   @Get()
   list(
@@ -43,7 +47,7 @@ export class RoomQuestionsController {
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ListQuestionsDto,
   ): Promise<QuestionListResponse> {
-    return this.questions.list(slug, user, query);
+    return this.queries.list(slug, user, query);
   }
 
   @Post()
@@ -54,7 +58,7 @@ export class RoomQuestionsController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() input: CreateQuestionDto,
   ): Promise<QuestionResponse> {
-    return this.questions.create(slug, user, input);
+    return this.commands.create(slug, user, input);
   }
 
   @Post('images')
@@ -68,6 +72,6 @@ export class RoomQuestionsController {
     @UploadedFile() image: MessageImageFile | undefined,
   ): Promise<QuestionResponse> {
     validateMessageImage(image);
-    return this.questions.create(slug, user, input, new Date(), image);
+    return this.commands.create(slug, user, input, new Date(), image);
   }
 }

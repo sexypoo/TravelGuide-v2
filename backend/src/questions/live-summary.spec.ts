@@ -1,5 +1,5 @@
 import type { AnswerResponse } from '../answers/dto/answer.response';
-import { buildLiveSummary } from './questions.service';
+import { buildLiveSummary } from './question-live-summary';
 
 function answer(
   id: string,
