@@ -21,6 +21,12 @@ import {
 import { queryKeys } from '@/lib/query/keys';
 import { deliverRealtimeNotification } from '@/lib/notifications/browser-notifications';
 import {
+  parseRealtimeEnvelope,
+  parseRemovedContentTarget,
+  type RealtimeClientEvents,
+  type RealtimeServerEvents,
+} from '@/lib/realtime/protocol';
+import {
   incrementFeedAnswerCount,
   markMessagePromoted,
   markMessageRemoved,
@@ -40,81 +46,7 @@ interface RealtimeContextValue {
   retainRoom: (roomSlug: string) => () => void;
 }
 
-interface EventEnvelope {
-  eventId: string;
-  roomSlug: string;
-  occurredAt: string;
-  payload: unknown;
-}
-
-interface ServerEvents {
-  'room.message.created': (event: unknown) => void;
-  'room.question.created': (event: unknown) => void;
-  'room.answer.created': (event: unknown) => void;
-  'room.question.updated': (event: unknown) => void;
-  'room.content.removed': (event: unknown) => void;
-}
-
-interface MembershipResult {
-  ok: boolean;
-  code?: string;
-}
-
-interface ClientEvents {
-  'room.join': (
-    input: { roomSlug: string },
-    acknowledge?: (result: MembershipResult) => void,
-  ) => void;
-  'room.leave': (input: { roomSlug: string }) => void;
-}
-
 const RealtimeContext = createContext<RealtimeContextValue | null>(null);
-
-function parseEnvelope(value: unknown): EventEnvelope {
-  if (
-    typeof value !== 'object' ||
-    value === null ||
-    !('eventId' in value) ||
-    !('roomSlug' in value) ||
-    !('occurredAt' in value) ||
-    !('payload' in value) ||
-    typeof value.eventId !== 'string' ||
-    typeof value.roomSlug !== 'string' ||
-    typeof value.occurredAt !== 'string'
-  ) {
-    throw new Error('실시간 이벤트 형식이 올바르지 않습니다.');
-  }
-  return {
-    eventId: value.eventId,
-    roomSlug: value.roomSlug,
-    occurredAt: value.occurredAt,
-    payload: value.payload,
-  };
-}
-
-function parseRemovedTarget(value: unknown): {
-  targetType: 'MESSAGE' | 'QUESTION' | 'ANSWER';
-  targetId: string;
-  questionId: string | null;
-} {
-  if (
-    typeof value !== 'object' ||
-    value === null ||
-    !('targetType' in value) ||
-    !('targetId' in value) ||
-    !('questionId' in value) ||
-    !['MESSAGE', 'QUESTION', 'ANSWER'].includes(String(value.targetType)) ||
-    typeof value.targetId !== 'string' ||
-    (value.questionId !== null && typeof value.questionId !== 'string')
-  ) {
-    throw new Error('콘텐츠 제거 이벤트 형식이 올바르지 않습니다.');
-  }
-  return {
-    targetType: value.targetType as 'MESSAGE' | 'QUESTION' | 'ANSWER',
-    targetId: value.targetId,
-    questionId: value.questionId,
-  };
-}
 
 export function RealtimeProvider({
   children,
@@ -124,7 +56,10 @@ export function RealtimeProvider({
   currentUserId: string;
 }>): React.JSX.Element {
   const queryClient = useQueryClient();
-  const socketRef = useRef<Socket<ServerEvents, ClientEvents> | null>(null);
+  const socketRef = useRef<Socket<
+    RealtimeServerEvents,
+    RealtimeClientEvents
+  > | null>(null);
   const roomCounts = useRef(new Map<string, number>());
   const seenEvents = useRef(new Set<string>());
   const seenAnswers = useRef(new Set<string>());
@@ -134,7 +69,7 @@ export function RealtimeProvider({
   const [announcement, setAnnouncement] = useState('');
 
   useEffect(() => {
-    const socket: Socket<ServerEvents, ClientEvents> = io({
+    const socket: Socket<RealtimeServerEvents, RealtimeClientEvents> = io({
       path: '/socket.io',
       addTrailingSlash: false,
       withCredentials: true,
@@ -171,7 +106,7 @@ export function RealtimeProvider({
     socket.on('connect_error', () => setConnectionState('offline'));
     socket.on('room.message.created', (value) => {
       try {
-        const event = parseEnvelope(value);
+        const event = parseRealtimeEnvelope(value);
         if (seenEvents.current.has(event.eventId)) return;
         seenEvents.current.add(event.eventId);
         const message = parseMessage(event.payload);
@@ -204,7 +139,7 @@ export function RealtimeProvider({
     });
     socket.on('room.question.created', (value) => {
       try {
-        const event = parseEnvelope(value);
+        const event = parseRealtimeEnvelope(value);
         if (seenEvents.current.has(event.eventId)) return;
         seenEvents.current.add(event.eventId);
         const question = parseQuestion(event.payload);
@@ -231,7 +166,7 @@ export function RealtimeProvider({
     });
     socket.on('room.answer.created', (value) => {
       try {
-        const event = parseEnvelope(value);
+        const event = parseRealtimeEnvelope(value);
         if (seenEvents.current.has(event.eventId)) return;
         seenEvents.current.add(event.eventId);
         const answer = parseAnswer(event.payload);
@@ -269,7 +204,7 @@ export function RealtimeProvider({
     });
     socket.on('room.question.updated', (value) => {
       try {
-        const event = parseEnvelope(value);
+        const event = parseRealtimeEnvelope(value);
         if (seenEvents.current.has(event.eventId)) return;
         seenEvents.current.add(event.eventId);
         const question = parseQuestion(event.payload);
@@ -304,10 +239,10 @@ export function RealtimeProvider({
     });
     socket.on('room.content.removed', (value) => {
       try {
-        const event = parseEnvelope(value);
+        const event = parseRealtimeEnvelope(value);
         if (seenEvents.current.has(event.eventId)) return;
         seenEvents.current.add(event.eventId);
-        const target = parseRemovedTarget(event.payload);
+        const target = parseRemovedContentTarget(event.payload);
         if (target.targetType === 'MESSAGE') {
           queryClient.setQueryData<InfiniteData<MessagePage>>(
             queryKeys.roomMessages(event.roomSlug),

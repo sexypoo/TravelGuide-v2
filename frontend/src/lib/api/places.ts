@@ -1,8 +1,5 @@
-import { problemFromResponse } from './problem-details';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
+import { requestJson } from './client';
+import { isRecord } from './runtime';
 
 export interface GooglePlace {
   id: string;
@@ -36,12 +33,7 @@ function parsePlace(value: unknown): GooglePlace {
 }
 
 async function get(path: string): Promise<GooglePlace[]> {
-  const response = await fetch(path, {
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-  });
-  if (!response.ok) throw await problemFromResponse(response);
-  const value: unknown = await response.json();
+  const value = await requestJson(path);
   if (!isRecord(value) || !Array.isArray(value.items)) {
     throw new Error('장소 검색 목록 형식이 올바르지 않습니다.');
   }

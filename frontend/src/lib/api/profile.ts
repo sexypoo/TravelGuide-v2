@@ -1,5 +1,6 @@
-import { problemFromResponse } from './problem-details';
 import type { UserRole } from './auth-contract';
+import { requestForm, requestJson } from './client';
+import { isIsoDate, isRecord } from './runtime';
 
 export const TRAVEL_STYLES = [
   'FOOD_EXPLORER',
@@ -41,15 +42,6 @@ export const travelStyleEmojis: Readonly<Record<TravelStyle, string>> = {
   SOLO: '🎒',
   FAMILY: '👨‍👩‍👧',
 };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function isIsoDate(value: string): boolean {
-  const date = new Date(value);
-  return !Number.isNaN(date.getTime()) && date.toISOString() === value;
-}
 
 export interface OwnProfile {
   id: string;
@@ -200,42 +192,25 @@ export function parsePublicContributorProfile(
 export async function updateOwnProfile(
   input: UpdateProfileInput,
 ): Promise<OwnProfile> {
-  const response = await fetch('/api/v1/users/me', {
+  const value = await requestJson('/api/v1/users/me', {
     method: 'PATCH',
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify(input),
   });
-
-  if (!response.ok) {
-    throw await problemFromResponse(response);
-  }
-
-  return parseOwnProfile(await response.json());
+  return parseOwnProfile(value);
 }
 
 export async function updateOwnProfileImage(image: File): Promise<OwnProfile> {
   const body = new FormData();
   body.set('image', image);
-  const response = await fetch('/api/v1/users/me/avatar', {
+  const value = await requestForm('/api/v1/users/me/avatar', body, {
     method: 'POST',
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-    body,
   });
-  if (!response.ok) throw await problemFromResponse(response);
-  return parseOwnProfile(await response.json());
+  return parseOwnProfile(value);
 }
 
 export async function removeOwnProfileImage(): Promise<OwnProfile> {
-  const response = await fetch('/api/v1/users/me/avatar', {
+  const value = await requestJson('/api/v1/users/me/avatar', {
     method: 'DELETE',
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
   });
-  if (!response.ok) throw await problemFromResponse(response);
-  return parseOwnProfile(await response.json());
+  return parseOwnProfile(value);
 }

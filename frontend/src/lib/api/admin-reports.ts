@@ -1,5 +1,6 @@
-import { problemFromResponse } from './problem-details';
+import { requestVoid } from './client';
 import type { ReportReason, ReportTargetType } from './reports';
+import { isRecord } from './runtime';
 
 export type ReportStatus = 'PENDING' | 'REVIEWED' | 'RESOLVED' | 'DISMISSED';
 export type ReportReviewDecision = 'KEEP' | 'REMOVE' | 'DISMISS';
@@ -26,15 +27,12 @@ export interface AdminReport {
   updatedAt: string;
 }
 
-function record(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
 function nullableString(value: unknown): value is string | null {
   return value === null || typeof value === 'string';
 }
 function person(value: unknown): value is { id: string; nickname: string } {
   return (
-    record(value) &&
+    isRecord(value) &&
     typeof value.id === 'string' &&
     typeof value.nickname === 'string'
   );
@@ -42,7 +40,7 @@ function person(value: unknown): value is { id: string; nickname: string } {
 
 export function parseAdminReport(value: unknown): AdminReport {
   if (
-    !record(value) ||
+    !isRecord(value) ||
     typeof value.id !== 'string' ||
     !person(value.reporter) ||
     ![
@@ -54,7 +52,7 @@ export function parseAdminReport(value: unknown): AdminReport {
       'USER',
     ].includes(String(value.targetType)) ||
     typeof value.targetId !== 'string' ||
-    !record(value.target) ||
+    !isRecord(value.target) ||
     !person(value.target.author) ||
     !nullableString(value.target.content) ||
     typeof value.target.removed !== 'boolean' ||
@@ -114,17 +112,12 @@ export async function reviewReport(
   id: string,
   input: { decision: ReportReviewDecision; note?: string },
 ): Promise<void> {
-  const response = await fetch(
-    `/api/v1/admin/reports/${encodeURIComponent(id)}/review`,
-    {
-      method: 'PATCH',
-      credentials: 'include',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(input),
+  await requestVoid(`/api/v1/admin/reports/${encodeURIComponent(id)}/review`, {
+    method: 'PATCH',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
     },
-  );
-  if (!response.ok) throw await problemFromResponse(response);
+    body: JSON.stringify(input),
+  });
 }

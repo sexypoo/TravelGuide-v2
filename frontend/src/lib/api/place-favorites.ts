@@ -1,14 +1,5 @@
-import { problemFromResponse } from './problem-details';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function isIsoDate(value: unknown): value is string {
-  if (typeof value !== 'string') return false;
-  const parsed = new Date(value);
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === value;
-}
+import { requestJson } from './client';
+import { isIsoDate, isRecord } from './runtime';
 
 export interface PlaceFavorite {
   id: string;
@@ -45,24 +36,8 @@ function parseFavorite(value: unknown): PlaceFavorite {
   };
 }
 
-async function apiJson(path: string, init?: RequestInit): Promise<unknown> {
-  const response = await fetch(path, {
-    ...init,
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json',
-      ...(init?.body === undefined
-        ? {}
-        : { 'Content-Type': 'application/json' }),
-      ...init?.headers,
-    },
-  });
-  if (!response.ok) throw await problemFromResponse(response);
-  return response.json() as Promise<unknown>;
-}
-
 export async function getPlaceFavorites(): Promise<PlaceFavorite[]> {
-  const value = await apiJson('/api/v1/place-favorites');
+  const value = await requestJson('/api/v1/place-favorites');
   if (!isRecord(value) || !Array.isArray(value.items)) {
     throw new Error('찜한 장소 목록 형식이 올바르지 않습니다.');
   }
@@ -73,7 +48,7 @@ export async function savePlaceFavorite(
   messageId: string,
 ): Promise<PlaceFavorite> {
   return parseFavorite(
-    await apiJson('/api/v1/place-favorites', {
+    await requestJson('/api/v1/place-favorites', {
       method: 'POST',
       body: JSON.stringify({ messageId }),
     }),
@@ -81,7 +56,7 @@ export async function savePlaceFavorite(
 }
 
 export async function removePlaceFavorite(favoriteId: string): Promise<void> {
-  await apiJson(
+  await requestJson(
     `/api/v1/place-favorites/${encodeURIComponent(favoriteId)}/remove`,
     { method: 'POST' },
   );

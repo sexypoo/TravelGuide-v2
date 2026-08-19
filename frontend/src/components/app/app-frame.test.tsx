@@ -109,4 +109,43 @@ describe('AppFrame', () => {
       value: originalViewport,
     });
   });
+
+  it('rounds fractional visual viewport heights down to keep controls visible', () => {
+    const originalViewport = window.visualViewport;
+    const originalInnerHeight = window.innerHeight;
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      value: 845,
+    });
+    const viewport = new EventTarget();
+    Object.defineProperty(viewport, 'height', {
+      configurable: true,
+      value: 844.93,
+    });
+    Object.defineProperty(window, 'visualViewport', {
+      configurable: true,
+      value: viewport,
+    });
+    mockedUsePathname.mockReturnValue('/app/rooms/jeju');
+
+    const view = render(
+      <AppFrame chrome={<nav aria-label="앱 메뉴">메뉴</nav>}>
+        <p>제주 실시간방</p>
+      </AppFrame>,
+    );
+
+    expect(screen.getByText('제주 실시간방').closest('.appShell')).toHaveStyle({
+      height: '844px',
+    });
+
+    view.unmount();
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      value: originalInnerHeight,
+    });
+    Object.defineProperty(window, 'visualViewport', {
+      configurable: true,
+      value: originalViewport,
+    });
+  });
 });

@@ -1,10 +1,8 @@
+import { isIsoDate, isRecord } from './runtime';
+
 export interface HealthResponse {
   status: 'ok';
   timestamp: string;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
 }
 
 function parseHealthResponse(value: unknown): HealthResponse {
@@ -16,11 +14,7 @@ function parseHealthResponse(value: unknown): HealthResponse {
     throw new Error('API health response is invalid');
   }
 
-  const parsedTimestamp = new Date(value.timestamp);
-  if (
-    Number.isNaN(parsedTimestamp.getTime()) ||
-    parsedTimestamp.toISOString() !== value.timestamp
-  ) {
+  if (!isIsoDate(value.timestamp)) {
     throw new Error('API health timestamp is invalid');
   }
 

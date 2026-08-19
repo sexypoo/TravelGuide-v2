@@ -22,7 +22,7 @@ function useRoomViewportHeight(enabled: boolean): number | undefined {
       const visualHeight = viewport?.height;
       const nextHeight = Math.max(
         1,
-        Math.round(
+        Math.floor(
           visualHeight === undefined
             ? window.innerHeight
             : Math.min(visualHeight, window.innerHeight),

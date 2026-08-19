@@ -1,4 +1,5 @@
-import { problemFromResponse } from './problem-details';
+import { requestBlob, requestVoid } from './client';
+import { isRecord } from './runtime';
 import type {
   LocalProofType,
   VerificationStatus,
@@ -27,21 +28,18 @@ export interface AdminVerification {
   createdAt: string;
 }
 
-function record(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
 function nullableString(value: unknown): value is string | null {
   return value === null || typeof value === 'string';
 }
 
 export function parseAdminVerification(value: unknown): AdminVerification {
   if (
-    !record(value) ||
+    !isRecord(value) ||
     typeof value.id !== 'string' ||
-    !record(value.applicant) ||
+    !isRecord(value.applicant) ||
     typeof value.applicant.id !== 'string' ||
     typeof value.applicant.nickname !== 'string' ||
-    !record(value.destination) ||
+    !isRecord(value.destination) ||
     typeof value.destination.id !== 'string' ||
     typeof value.destination.slug !== 'string' ||
     typeof value.destination.nameKo !== 'string' ||
@@ -66,7 +64,7 @@ export function parseAdminVerification(value: unknown): AdminVerification {
   let gpsSummary: AdminVerification['gpsSummary'] = null;
   if (value.gpsSummary !== null) {
     if (
-      !record(value.gpsSummary) ||
+      !isRecord(value.gpsSummary) ||
       typeof value.gpsSummary.accuracyMeters !== 'number' ||
       typeof value.gpsSummary.capturedAt !== 'string' ||
       value.gpsSummary.withinDestinationRadius !== true
@@ -111,11 +109,10 @@ export async function reviewVerification(
   id: string,
   input: { decision: 'APPROVE' | 'REJECT'; reason: string | null },
 ): Promise<void> {
-  const response = await fetch(
+  await requestVoid(
     `/api/v1/admin/verifications/${encodeURIComponent(id)}/review`,
     {
       method: 'PATCH',
-      credentials: 'include',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
@@ -123,20 +120,16 @@ export async function reviewVerification(
       body: JSON.stringify(input),
     },
   );
-  if (!response.ok) throw await problemFromResponse(response);
 }
 
 export async function openVerificationEvidence(id: string): Promise<void> {
-  const response = await fetch(
+  const blob = await requestBlob(
     `/api/v1/admin/verifications/${encodeURIComponent(id)}/evidence`,
     {
-      credentials: 'include',
       headers: { Accept: 'image/jpeg,image/png,application/pdf' },
       cache: 'no-store',
     },
   );
-  if (!response.ok) throw await problemFromResponse(response);
-  const blob = await response.blob();
   const url = URL.createObjectURL(blob);
   const extension =
     blob.type === 'application/pdf'

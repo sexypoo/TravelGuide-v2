@@ -1,4 +1,5 @@
-import { problemFromResponse } from './problem-details';
+import { requestVoid } from './client';
+import { isRecord } from './runtime';
 
 export type VerificationType = 'TRAVELER' | 'LOCAL';
 export type VerificationStatus =
@@ -22,10 +23,6 @@ export interface Verification {
   rejectionReason: string | null;
   expiresAt: string | null;
   createdAt: string;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
 }
 
 function optionalString(value: unknown): value is string | null {
@@ -90,15 +87,11 @@ async function submit(
   path: 'traveler' | 'local',
   data: FormData,
 ): Promise<void> {
-  const response = await fetch(`/api/v1/verifications/${path}`, {
+  await requestVoid(`/api/v1/verifications/${path}`, {
     method: 'POST',
-    credentials: 'include',
     headers: { Accept: 'application/json' },
     body: data,
   });
-  if (!response.ok) {
-    throw await problemFromResponse(response);
-  }
 }
 
 export function submitTravelerVerification(data: FormData): Promise<void> {

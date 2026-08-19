@@ -1,15 +1,6 @@
-import { problemFromResponse } from './problem-details';
+import { requestForm, requestJson } from './client';
 import { isParticipantBadge, type PublicParticipant } from './participants';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function isIsoDate(value: unknown): value is string {
-  if (typeof value !== 'string') return false;
-  const date = new Date(value);
-  return !Number.isNaN(date.getTime()) && date.toISOString() === value;
-}
+import { isIsoDate, isRecord } from './runtime';
 
 export const questionCategories = [
   'WEATHER',
@@ -345,22 +336,6 @@ export function parseQuestionPage(value: unknown): QuestionPage {
   };
 }
 
-async function apiJson(path: string, init?: RequestInit): Promise<unknown> {
-  const response = await fetch(path, {
-    ...init,
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json',
-      ...(init?.body === undefined
-        ? {}
-        : { 'Content-Type': 'application/json' }),
-      ...init?.headers,
-    },
-  });
-  if (!response.ok) throw await problemFromResponse(response);
-  return response.json() as Promise<unknown>;
-}
-
 export async function getQuestionPage(
   roomSlug: string,
   status: QuestionListStatus,
@@ -371,7 +346,7 @@ export async function getQuestionPage(
   if (category !== undefined) query.set('category', category);
   if (cursor !== undefined) query.set('cursor', cursor);
   return parseQuestionPage(
-    await apiJson(
+    await requestJson(
       `/api/v1/rooms/${encodeURIComponent(roomSlug)}/questions?${query.toString()}`,
     ),
   );
@@ -382,10 +357,13 @@ export async function createQuestion(
   input: CreateQuestionInput,
 ): Promise<Question> {
   return parseQuestion(
-    await apiJson(`/api/v1/rooms/${encodeURIComponent(roomSlug)}/questions`, {
-      method: 'POST',
-      body: JSON.stringify(input),
-    }),
+    await requestJson(
+      `/api/v1/rooms/${encodeURIComponent(roomSlug)}/questions`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    ),
   );
 }
 
@@ -400,22 +378,18 @@ export async function createQuestionWithImage(
   body.set('urgency', input.urgency);
   if (input.content) body.set('content', input.content);
   if (input.areaText) body.set('areaText', input.areaText);
-  const response = await fetch(
-    `/api/v1/rooms/${encodeURIComponent(roomSlug)}/questions/images`,
-    {
-      method: 'POST',
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
+  return parseQuestion(
+    await requestForm(
+      `/api/v1/rooms/${encodeURIComponent(roomSlug)}/questions/images`,
       body,
-    },
+      { method: 'POST' },
+    ),
   );
-  if (!response.ok) throw await problemFromResponse(response);
-  return parseQuestion(await response.json());
 }
 
 export async function getQuestion(questionId: string): Promise<QuestionDetail> {
   return parseQuestionDetail(
-    await apiJson(`/api/v1/questions/${encodeURIComponent(questionId)}`),
+    await requestJson(`/api/v1/questions/${encodeURIComponent(questionId)}`),
   );
 }
 
@@ -424,7 +398,7 @@ export async function createAnswer(
   input: CreateAnswerInput,
 ): Promise<Answer> {
   return parseAnswer(
-    await apiJson(
+    await requestJson(
       `/api/v1/questions/${encodeURIComponent(questionId)}/answers`,
       { method: 'POST', body: JSON.stringify(input) },
     ),
@@ -446,17 +420,13 @@ export async function createAnswerWithImage(
   if (input.crowdLevel) body.set('crowdLevel', input.crowdLevel);
   if (input.entryStatus) body.set('entryStatus', input.entryStatus);
   if (input.observedAt) body.set('observedAt', input.observedAt);
-  const response = await fetch(
-    `/api/v1/questions/${encodeURIComponent(questionId)}/answers/images`,
-    {
-      method: 'POST',
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
+  return parseAnswer(
+    await requestForm(
+      `/api/v1/questions/${encodeURIComponent(questionId)}/answers/images`,
       body,
-    },
+      { method: 'POST' },
+    ),
   );
-  if (!response.ok) throw await problemFromResponse(response);
-  return parseAnswer(await response.json());
 }
 
 export async function acceptAnswer(
@@ -464,7 +434,7 @@ export async function acceptAnswer(
   answerId: string,
 ): Promise<QuestionDetail> {
   return parseQuestionDetail(
-    await apiJson(
+    await requestJson(
       `/api/v1/questions/${encodeURIComponent(questionId)}/accept-answer`,
       { method: 'PATCH', body: JSON.stringify({ answerId }) },
     ),
@@ -475,7 +445,7 @@ export async function resolveQuestion(
   questionId: string,
 ): Promise<QuestionDetail> {
   return parseQuestionDetail(
-    await apiJson(
+    await requestJson(
       `/api/v1/questions/${encodeURIComponent(questionId)}/resolve`,
       { method: 'PATCH', body: JSON.stringify({}) },
     ),

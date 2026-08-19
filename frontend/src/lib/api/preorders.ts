@@ -1,4 +1,4 @@
-import { problemFromResponse } from './problem-details';
+import { requestJson } from './client';
 
 export interface PreorderInput {
   name: string;
@@ -25,15 +25,9 @@ function parsePreorderResponse(value: unknown): PreorderResponse {
 export async function registerPreorder(
   input: PreorderInput,
 ): Promise<PreorderResponse> {
-  const response = await fetch('/api/v1/preorders', {
+  const value = await requestJson('/api/v1/preorders', {
     method: 'POST',
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify(input),
   });
-  if (!response.ok) throw await problemFromResponse(response);
-  return parsePreorderResponse(await response.json());
+  return parsePreorderResponse(value);
 }

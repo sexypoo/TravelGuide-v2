@@ -1,4 +1,5 @@
-import { problemFromResponse } from './problem-details';
+import { requestJson } from './client';
+import { isRecord } from './runtime';
 
 export const communityCategories = [
   'TRAVEL_TIP',
@@ -47,13 +48,9 @@ export interface CommunityPage {
   nextCursor: string | null;
 }
 
-function record(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
 function author(value: unknown): CommunityAuthor {
   if (
-    !record(value) ||
+    !isRecord(value) ||
     typeof value.id !== 'string' ||
     typeof value.nickname !== 'string'
   )
@@ -63,7 +60,7 @@ function author(value: unknown): CommunityAuthor {
 
 export function parseCommunityPost(value: unknown): CommunityPost {
   if (
-    !record(value) ||
+    !isRecord(value) ||
     typeof value.id !== 'string' ||
     !communityCategories.includes(value.category as CommunityCategory) ||
     (value.areaText !== null && typeof value.areaText !== 'string') ||
@@ -91,7 +88,7 @@ export function parseCommunityPost(value: unknown): CommunityPost {
 
 function parseComment(value: unknown): CommunityComment {
   if (
-    !record(value) ||
+    !isRecord(value) ||
     typeof value.id !== 'string' ||
     typeof value.postId !== 'string' ||
     typeof value.content !== 'string' ||
@@ -118,14 +115,9 @@ export async function getCommunityPage(
   const search = new URLSearchParams({ limit: '20' });
   if (category !== undefined) search.set('category', category);
   if (cursor !== undefined) search.set('cursor', cursor);
-  const response = await fetch(`/api/v1/community/posts?${search}`, {
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-  });
-  if (!response.ok) throw await problemFromResponse(response);
-  const value: unknown = await response.json();
+  const value = await requestJson(`/api/v1/community/posts?${search}`);
   if (
-    !record(value) ||
+    !isRecord(value) ||
     !Array.isArray(value.items) ||
     (value.nextCursor !== null && typeof value.nextCursor !== 'string')
   ) {
@@ -143,29 +135,20 @@ export async function createCommunityPost(input: {
   title: string;
   content: string;
 }): Promise<CommunityPost> {
-  const response = await fetch('/api/v1/community/posts', {
+  const value = await requestJson('/api/v1/community/posts', {
     method: 'POST',
-    credentials: 'include',
-    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
-  if (!response.ok) throw await problemFromResponse(response);
-  return parseCommunityPost(await response.json());
+  return parseCommunityPost(value);
 }
 
 export async function getCommunityPost(
   id: string,
 ): Promise<CommunityPostDetail> {
-  const response = await fetch(
+  const value = await requestJson(
     `/api/v1/community/posts/${encodeURIComponent(id)}`,
-    {
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-    },
   );
-  if (!response.ok) throw await problemFromResponse(response);
-  const value: unknown = await response.json();
-  if (!record(value) || !Array.isArray(value.comments)) {
+  if (!isRecord(value) || !Array.isArray(value.comments)) {
     throw new Error('커뮤니티 상세 응답 형식이 올바르지 않습니다.');
   }
   return {
@@ -178,18 +161,12 @@ export async function createCommunityComment(
   postId: string,
   content: string,
 ): Promise<CommunityComment> {
-  const response = await fetch(
+  const value = await requestJson(
     `/api/v1/community/posts/${encodeURIComponent(postId)}/comments`,
     {
       method: 'POST',
-      credentials: 'include',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ content }),
     },
   );
-  if (!response.ok) throw await problemFromResponse(response);
-  return parseComment(await response.json());
+  return parseComment(value);
 }

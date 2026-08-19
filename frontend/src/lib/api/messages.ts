@@ -1,21 +1,12 @@
+import { requestForm, requestJson } from './client';
 import { isParticipantBadge, type PublicParticipant } from './participants';
-import { problemFromResponse } from './problem-details';
+import { isIsoDate, isRecord } from './runtime';
 import {
   questionCategories,
   type QuestionCategory,
   type QuestionStatus,
   type QuestionUrgency,
 } from './questions';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function isIsoDate(value: unknown): value is string {
-  if (typeof value !== 'string') return false;
-  const date = new Date(value);
-  return !Number.isNaN(date.getTime()) && date.toISOString() === value;
-}
 
 export interface ChatMessage {
   id: string;
@@ -171,33 +162,6 @@ export function parseMessagePage(value: unknown): MessagePage {
   };
 }
 
-async function apiJson(path: string, init?: RequestInit): Promise<unknown> {
-  const response = await fetch(path, {
-    ...init,
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json',
-      ...(init?.body === undefined
-        ? {}
-        : { 'Content-Type': 'application/json' }),
-      ...init?.headers,
-    },
-  });
-  if (!response.ok) throw await problemFromResponse(response);
-  return response.json() as Promise<unknown>;
-}
-
-async function apiForm(path: string, body: FormData): Promise<unknown> {
-  const response = await fetch(path, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-    body,
-  });
-  if (!response.ok) throw await problemFromResponse(response);
-  return response.json() as Promise<unknown>;
-}
-
 export async function getMessagePage(
   roomSlug: string,
   cursor?: string,
@@ -205,7 +169,7 @@ export async function getMessagePage(
   const query = new URLSearchParams({ limit: '50' });
   if (cursor !== undefined) query.set('cursor', cursor);
   return parseMessagePage(
-    await apiJson(
+    await requestJson(
       `/api/v1/rooms/${encodeURIComponent(roomSlug)}/messages?${query.toString()}`,
     ),
   );
@@ -216,10 +180,13 @@ export async function createMessage(
   content: string,
 ): Promise<ChatMessage> {
   return parseMessage(
-    await apiJson(`/api/v1/rooms/${encodeURIComponent(roomSlug)}/messages`, {
-      method: 'POST',
-      body: JSON.stringify({ content }),
-    }),
+    await requestJson(
+      `/api/v1/rooms/${encodeURIComponent(roomSlug)}/messages`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      },
+    ),
   );
 }
 
@@ -232,9 +199,10 @@ export async function createImageMessage(
   body.set('image', file);
   if (caption.trim()) body.set('caption', caption.trim());
   return parseMessage(
-    await apiForm(
+    await requestForm(
       `/api/v1/rooms/${encodeURIComponent(roomSlug)}/messages/images`,
       body,
+      { method: 'POST' },
     ),
   );
 }
@@ -251,7 +219,7 @@ export async function createPlaceMessage(
   },
 ): Promise<ChatMessage> {
   return parseMessage(
-    await apiJson(
+    await requestJson(
       `/api/v1/rooms/${encodeURIComponent(roomSlug)}/messages/places`,
       { method: 'POST', body: JSON.stringify(input) },
     ),
@@ -263,7 +231,7 @@ export async function shareTopicMessage(
   questionId: string,
 ): Promise<ChatMessage> {
   return parseMessage(
-    await apiJson(
+    await requestJson(
       `/api/v1/rooms/${encodeURIComponent(roomSlug)}/messages/topics`,
       { method: 'POST', body: JSON.stringify({ questionId }) },
     ),

@@ -1,3 +1,5 @@
+import { isRecord } from './runtime';
+
 export interface ProblemDetails {
   type: string;
   title: string;
@@ -5,10 +7,6 @@ export interface ProblemDetails {
   code: string;
   detail: string;
   requestId: string;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
 }
 
 export function parseProblemDetails(

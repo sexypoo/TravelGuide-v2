@@ -1,8 +1,5 @@
-import { problemFromResponse } from './problem-details';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
+import { requestJson, requestVoid } from './client';
+import { isRecord } from './runtime';
 
 function isDateOnly(value: unknown): value is string {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/u.test(value);
@@ -58,23 +55,15 @@ async function mutate(
   method: 'POST' | 'PATCH',
   input: SaveTravelRecordInput,
 ): Promise<TravelRecord> {
-  const response = await fetch(path, {
+  const value = await requestJson(path, {
     method,
-    credentials: 'include',
-    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
-  if (!response.ok) throw await problemFromResponse(response);
-  return parseTravelRecord(await response.json());
+  return parseTravelRecord(value);
 }
 
 export async function listTravelRecords(): Promise<TravelRecord[]> {
-  const response = await fetch('/api/v1/travel-records', {
-    credentials: 'include',
-    headers: { Accept: 'application/json' },
-  });
-  if (!response.ok) throw await problemFromResponse(response);
-  const value: unknown = await response.json();
+  const value = await requestJson('/api/v1/travel-records');
   if (!isRecord(value) || !Array.isArray(value.items)) {
     throw new Error('여행 기록 목록 형식이 올바르지 않습니다.');
   }
@@ -99,13 +88,8 @@ export function updateTravelRecord(
 }
 
 export async function deleteTravelRecord(id: string): Promise<void> {
-  const response = await fetch(
-    `/api/v1/travel-records/${encodeURIComponent(id)}`,
-    {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-    },
-  );
-  if (!response.ok) throw await problemFromResponse(response);
+  await requestVoid(`/api/v1/travel-records/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { Accept: 'application/json' },
+  });
 }

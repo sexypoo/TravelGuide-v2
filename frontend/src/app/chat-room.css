@@ -6,6 +6,7 @@
   --room-signal-white: #ffffff;
   --room-live-magenta: #c73568;
   --room-guide-iris: #675dda;
+  animation: none;
   background: var(--room-paper);
   color: var(--room-radio-ink);
 }

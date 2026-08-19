@@ -1,4 +1,4 @@
-import { problemFromResponse } from './problem-details';
+import { requestVoid } from './client';
 
 export const reportReasons = [
   'SPAM',
@@ -26,11 +26,9 @@ export interface CreateReportInput {
 }
 
 export async function createReport(input: CreateReportInput): Promise<void> {
-  const response = await fetch('/api/v1/reports', {
+  await requestVoid('/api/v1/reports', {
     method: 'POST',
-    credentials: 'include',
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   });
-  if (!response.ok) throw await problemFromResponse(response);
 }
