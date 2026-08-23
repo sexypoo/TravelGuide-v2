@@ -7314,8 +7314,10 @@ body:has(.guestHome) {
   display: grid;
   margin-top: 1rem;
   gap: 1rem;
+  min-width: 0;
 }
 .formSection {
+  min-width: 0;
   padding: 1.4rem;
   border: 1px solid var(--line);
   border-radius: 1.3rem;
@@ -7350,13 +7352,14 @@ body:has(.guestHome) {
 .dateFieldGrid {
   display: grid;
   margin-top: 1.4rem;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
 }
 .dateFieldGrid label,
 .stackField {
   position: relative;
   display: grid;
+  min-width: 0;
   gap: 0.5rem;
   color: #4e5968;
   font-size: 0.78rem;
@@ -7366,6 +7369,8 @@ body:has(.guestHome) {
 .stackField select,
 .stackField textarea {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 0.9rem 1rem;
   border: 1px solid var(--line);
   border-radius: 0.9rem;
