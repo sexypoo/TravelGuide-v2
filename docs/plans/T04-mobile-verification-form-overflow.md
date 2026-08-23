@@ -10,7 +10,8 @@ Prevent the traveler verification form from exceeding the viewport width on a
 - `frontend/src/app/globals.css`: allow the form, section, grid items, and
   date controls to shrink within their containing card. Render the visible
   date-field surface on a clipped wrapper so WKWebView native control metrics
-  cannot escape the card.
+  cannot escape the card, and left-align WebKit's internal date value with the
+  field label.
 - `frontend/src/components/verifications/traveler-verification-form.tsx`: wrap
   native date controls in the constrained visual frame.
 - `frontend/src/app/mobile-app.css`: keep scrolled page content from painting

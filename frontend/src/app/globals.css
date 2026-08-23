@@ -7399,6 +7399,11 @@ body:has(.guestHome) {
   border-radius: 0;
   background: transparent;
   outline: 0;
+  text-align: left;
+}
+.dateInputFrame input::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
 }
 .stackField {
   margin-top: 1rem;

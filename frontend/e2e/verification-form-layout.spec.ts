@@ -39,6 +39,9 @@ test('traveler verification form stays within a 390px viewport', async ({
         bounds: frame.getBoundingClientRect().toJSON(),
         overflow: getComputedStyle(frame).overflow,
       })),
+      dateTextAlignment: dateInputs.map(
+        (input) => getComputedStyle(input).textAlign,
+      ),
     };
   });
 
@@ -52,6 +55,7 @@ test('traveler verification form stays within a 390px viewport', async ({
     expect(frame.bounds.right).toBeLessThanOrEqual(layout.form.right);
     expect(frame.overflow).toBe('hidden');
   }
+  expect(layout.dateTextAlignment).toEqual(['left', 'left']);
 
   await context.close();
 });
