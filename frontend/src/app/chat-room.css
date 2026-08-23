@@ -1910,4 +1910,30 @@
   .appShell--room .chatMessage .placeTicket.chatBubble--place {
     width: min(20.5rem, 84vw);
   }
+
+  .appShell--room .appContent.appContent--room:has(.lockedRoomPage) {
+    width: min(calc(100% - 2rem), 45rem);
+    padding: 1.25rem 0 calc(2rem + env(safe-area-inset-bottom));
+    background: transparent;
+  }
+
+  .appShell--room .lockedRoomPage {
+    min-width: 0;
+  }
+
+  .appShell--room .lockedRoomPage .roomHeader > div {
+    min-width: 0;
+  }
+
+  .appShell--room .lockedRoomPage .roomHeader h1 {
+    max-width: 100%;
+    font-size: clamp(2rem, 9vw, 2.25rem);
+    line-height: 1.14;
+    overflow-wrap: anywhere;
+  }
+
+  .appShell--room .lockedRoomPage .roomContext {
+    margin-top: 2rem;
+    padding: 1.1rem;
+  }
 }
