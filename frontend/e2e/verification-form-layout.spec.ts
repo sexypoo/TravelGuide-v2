@@ -25,12 +25,20 @@ test('traveler verification form stays within a 390px viewport', async ({
     const dateInputs = Array.from(
       document.querySelectorAll<HTMLInputElement>('.dateFieldGrid input'),
     );
-    if (form === null || dateInputs.length !== 2) return null;
+    const dateFrames = Array.from(
+      document.querySelectorAll<HTMLElement>('.dateInputFrame'),
+    );
+    if (form === null || dateInputs.length !== 2 || dateFrames.length !== 2)
+      return null;
     return {
       documentWidth: document.documentElement.scrollWidth,
       viewportWidth: innerWidth,
       form: form.getBoundingClientRect().toJSON(),
       dates: dateInputs.map((input) => input.getBoundingClientRect().toJSON()),
+      frames: dateFrames.map((frame) => ({
+        bounds: frame.getBoundingClientRect().toJSON(),
+        overflow: getComputedStyle(frame).overflow,
+      })),
     };
   });
 
@@ -39,9 +47,10 @@ test('traveler verification form stays within a 390px viewport', async ({
   expect(layout.documentWidth).toBeLessThanOrEqual(layout.viewportWidth);
   expect(layout.form.left).toBeGreaterThanOrEqual(0);
   expect(layout.form.right).toBeLessThanOrEqual(layout.viewportWidth);
-  for (const date of layout.dates) {
-    expect(date.left).toBeGreaterThanOrEqual(layout.form.left);
-    expect(date.right).toBeLessThanOrEqual(layout.form.right);
+  for (const frame of layout.frames) {
+    expect(frame.bounds.left).toBeGreaterThanOrEqual(layout.form.left);
+    expect(frame.bounds.right).toBeLessThanOrEqual(layout.form.right);
+    expect(frame.overflow).toBe('hidden');
   }
 
   await context.close();

@@ -7377,6 +7377,29 @@ body:has(.guestHome) {
   background: var(--canvas);
   color: var(--ink);
 }
+.dateInputFrame {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  background: var(--canvas);
+}
+.dateInputFrame:focus-within {
+  outline: 3px solid rgba(112, 104, 216, 0.34);
+  outline-offset: 3px;
+}
+.dateInputFrame input {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  outline: 0;
+}
 .stackField {
   margin-top: 1rem;
 }

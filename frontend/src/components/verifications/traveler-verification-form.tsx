@@ -73,21 +73,25 @@ export function TravelerVerificationForm({
         <div className="dateFieldGrid">
           <label>
             시작일
-            <input
-              type="date"
-              min={today}
-              value={startsAt}
-              onChange={(e) => setStartsAt(e.target.value)}
-            />
+            <span className="dateInputFrame">
+              <input
+                type="date"
+                min={today}
+                value={startsAt}
+                onChange={(e) => setStartsAt(e.target.value)}
+              />
+            </span>
           </label>
           <label>
             종료일
-            <input
-              type="date"
-              min={startsAt || today}
-              value={endsAt}
-              onChange={(e) => setEndsAt(e.target.value)}
-            />
+            <span className="dateInputFrame">
+              <input
+                type="date"
+                min={startsAt || today}
+                value={endsAt}
+                onChange={(e) => setEndsAt(e.target.value)}
+              />
+            </span>
           </label>
         </div>
       </section>

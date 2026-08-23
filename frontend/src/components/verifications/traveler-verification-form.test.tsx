@@ -8,6 +8,16 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('TravelerVerificationForm', () => {
+  it('contains native date controls in clipped visual frames', () => {
+    const { container } = render(
+      <TravelerVerificationForm destinationId="destination-jeju" />,
+    );
+    expect(container.querySelectorAll('.dateInputFrame')).toHaveLength(2);
+    for (const input of container.querySelectorAll('input[type="date"]')) {
+      expect(input.parentElement).toHaveClass('dateInputFrame');
+    }
+  });
+
   it('directs the user to complete dates before uploading', () => {
     render(<TravelerVerificationForm destinationId="destination-jeju" />);
     fireEvent.click(

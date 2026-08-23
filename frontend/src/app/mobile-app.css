@@ -54,6 +54,17 @@
     backdrop-filter: blur(18px) saturate(1.15);
   }
 
+  .appShell:not(.appShell--room) .appHeader::before {
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    left: 0;
+    height: 6rem;
+    background: #fff9fb;
+    content: '';
+    pointer-events: none;
+  }
+
   .appShell:not(.appShell--room) .wordmark {
     font-size: 1rem;
     font-weight: 800;
