@@ -24,7 +24,7 @@ If documents conflict, `MVP_FUNCTIONAL_SPEC.md` wins. Do not invent features out
 
 ## Fixed stack
 
-- Node.js 20.x
+- Node.js 24.x
 - Yarn 4.2.2 with `nodeLinker: node-modules`
 - Next.js 15.5.2, React 19.1.1, TypeScript 5.8.3
 - Tailwind CSS 3.4.1

@@ -4,7 +4,7 @@ NestJS API scaffold for TravelGuide v2. Product features start in later tasks.
 
 ## Prerequisites
 
-- Node.js 20.x
+- Node.js 24.x
 - Corepack
 - Docker Desktop with Docker Compose
 
@@ -280,14 +280,14 @@ docker compose exec postgres createdb -U travelguide travelguide_test
 ## Troubleshooting
 
 - If Yarn reports version 1.x, use `corepack yarn --version` and confirm it prints
-  `4.2.2`. Node 20 installations normally include Corepack.
+  `4.2.2`. Node 24 installations include Corepack.
 - If port 5432 is occupied, change `POSTGRES_PORT` and update the port in
   `DATABASE_URL` to match.
 - If the database is unhealthy, inspect it with `docker compose ps` and
   `docker compose logs postgres`.
 - If Prisma cannot connect, confirm the container is healthy and `.env` uses
   `localhost` when commands run on the host.
-- Prisma 5.22 is validated on the required Node 20 runtime. Newer unsupported Node
-  majors can fail in the schema engine even when application TypeScript succeeds.
+- Prisma 5.22 is validated on the required Node 24 runtime. Other Node majors
+  can fail in the schema engine even when application TypeScript succeeds.
 - Delete `node_modules` only as a last resort; first rerun `yarn install --immutable`
   so the committed lockfile remains the source of truth.

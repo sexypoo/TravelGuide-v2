@@ -24,7 +24,7 @@
 가능하면 아래 버전을 고정하고, 설치 충돌이 없는 한 임의 업그레이드하지 않는다.
 
 ```text
-Runtime           Node.js 20.x
+Runtime           Node.js 24.x
 Package manager   Yarn 4.2.2, nodeLinker: node-modules
 Frontend          Next.js 15.5.21, React 19.1.1, TypeScript 5.8.3
 Styling           Tailwind CSS 3.4.1
