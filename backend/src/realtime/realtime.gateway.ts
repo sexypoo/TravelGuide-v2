@@ -55,15 +55,7 @@ function membershipFailure(error: unknown): RoomMembershipResult {
       };
 }
 
-@WebSocketGateway({
-  cors: {
-    credentials: true,
-    origin:
-      process.env.WEB_ORIGIN ??
-      process.env.FRONTEND_URL ??
-      'http://localhost:3000',
-  },
-})
+@WebSocketGateway()
 export class RealtimeGateway implements OnGatewayInit {
   @WebSocketServer()
   private server!: RealtimeServer;

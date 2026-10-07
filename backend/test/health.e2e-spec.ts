@@ -64,4 +64,22 @@ describe('Health endpoint', () => {
       .expect(200);
     expect(denied.headers['access-control-allow-origin']).toBeUndefined();
   });
+
+  it('applies the same CORS origin to the Socket.io handshake', async () => {
+    const server = app.getHttpServer() as Server;
+    const handshake = '/socket.io/?EIO=4&transport=polling';
+    const allowed = await request(server)
+      .get(handshake)
+      .set('Origin', 'http://localhost:3000')
+      .expect(200);
+    expect(allowed.headers['access-control-allow-origin']).toBe(
+      'http://localhost:3000',
+    );
+    expect(allowed.headers['access-control-allow-credentials']).toBe('true');
+    const denied = await request(server)
+      .get(handshake)
+      .set('Origin', 'https://evil.example')
+      .expect(200);
+    expect(denied.headers['access-control-allow-origin']).toBeUndefined();
+  });
 });
