@@ -1,10 +1,10 @@
-import { AppIcon } from '@/components/common';
 import type { QuestionDetail } from '@/lib/api/questions';
 import {
   crowdLabels,
   entryLabels,
   formatDateTime,
 } from '@/lib/questions/presentation';
+import styles from './live-status-board.module.css';
 
 export function LiveStatusBoard({
   question,
@@ -21,78 +21,53 @@ export function LiveStatusBoard({
 
   return (
     <section
-      className={`liveStatusBoard${stale ? ' liveStatusBoard--stale' : ''}`}
+      className={styles.board}
+      data-freshness={stale ? 'stale' : 'live'}
       aria-labelledby="live-status-title"
     >
-      <header>
-        <span className="liveStatusClock" aria-hidden="true">
-          <AppIcon name="clock" />
-        </span>
-        <div>
-          <p>
-            {stale
-              ? '마지막 현장 정보 · 업데이트 필요'
-              : '현장 답변을 종합한 최신 정보'}
-          </p>
-          <h2 id="live-status-title">{headline}</h2>
-          <span>
-            현장 확인 {summary.responseCount}명 중{' '}
-            <strong>{summary.agreementCount}명</strong> 의견이 비슷해요 · 마지막
-            확인 {formatDateTime(summary.lastObservedAt)}
-          </span>
-        </div>
-      </header>
-      <p className="liveStatusDescription">{summary.description}</p>
+      <div className={styles.state}>
+        <span className={styles.dot} aria-hidden="true" />
+        {stale ? '지난 현장 정보' : '실시간 현장 정보'} ·{' '}
+        {formatDateTime(summary.lastObservedAt)} 확인
+      </div>
+      <h2 id="live-status-title" className={styles.headline}>
+        {headline}
+      </h2>
+      <div className={styles.description}>{summary.description}</div>
+      <div className={styles.agreement}>
+        현장 확인 {summary.responseCount}명 중{' '}
+        <strong>{summary.agreementCount}명</strong>의 의견이 비슷해요
+      </div>
       {stale && (
-        <div className="liveStatusStaleNotice" role="status">
-          <strong>30분 이상 새 확인이 없어요</strong>
-          <span>아래 답변에서 지금 상태를 새로 알려주세요.</span>
+        <div className={styles.staleNotice} role="status">
+          <strong>30분 이상 새 확인이 없어요.</strong> 아래 답변에서 지금 상태를
+          새로 알려주세요.
         </div>
       )}
-      <div className="liveStatusMetrics">
+      <dl className={styles.facts}>
+        {wait === null && (
+          <div>
+            <dt>현재 대기</dt>
+            <dd>확인 중</dd>
+          </div>
+        )}
         <div>
-          <span aria-hidden="true">
-            <AppIcon name="clock" />
-          </span>
-          <small>현재 대기</small>
-          <strong>{wait ? `${wait.min}~${wait.max}분` : '확인 중'}</strong>
-        </div>
-        <div>
-          <span aria-hidden="true">
-            <AppIcon name="crowd" />
-          </span>
-          <small>현장 혼잡</small>
-          <strong>
+          <dt>현장 혼잡</dt>
+          <dd>
             {summary.crowdLevel ? crowdLabels[summary.crowdLevel] : '확인 중'}
-          </strong>
+          </dd>
         </div>
         <div>
-          <span aria-hidden="true">
-            <AppIcon name="door" />
-          </span>
-          <small>입장 상태</small>
-          <strong>
+          <dt>입장 상태</dt>
+          <dd>
             {summary.entryStatus ? entryLabels[summary.entryStatus] : '확인 중'}
-          </strong>
+          </dd>
         </div>
         <div>
-          <span aria-hidden="true">
-            <AppIcon name="refresh" />
-          </span>
-          <small>다시 확인</small>
-          <strong>{formatDateTime(summary.recommendedRecheckAt)}</strong>
+          <dt>다시 확인</dt>
+          <dd>{formatDateTime(summary.recommendedRecheckAt)}</dd>
         </div>
-      </div>
-      <footer>
-        <span>
-          <AppIcon name={stale ? 'clock' : 'live'} />
-          {stale ? '지난 정보' : '실시간'}
-        </span>
-        <span>
-          <AppIcon name="check" /> 현장 답변 기반
-        </span>
-        <span>답변에 현장 사진을 바로 첨부할 수 있어요</span>
-      </footer>
+      </dl>
     </section>
   );
 }

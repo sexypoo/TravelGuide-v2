@@ -133,7 +133,6 @@ export function QuestionComposer({
   return (
     <form className="questionComposer" onSubmit={submit} noValidate>
       <header>
-        <span>LIVE TOPIC</span>
         <h2>
           {sourceMessage === undefined
             ? '새 토픽 만들기'

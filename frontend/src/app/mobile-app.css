@@ -215,7 +215,6 @@
   .appShell:not(.appShell--room)
     :where(
       .pageHeading > p,
-      .communityHero > div > p,
       .nearbyExplorer__hero p,
       .travelRecords > header p
     ) {
