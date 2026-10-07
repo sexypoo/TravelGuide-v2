@@ -1,6 +1,10 @@
 'use client';
 
-import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
+import {
+  useQueryClient,
+  type InfiniteData,
+  type QueryKey,
+} from '@tanstack/react-query';
 import {
   createContext,
   useCallback,
@@ -24,8 +28,10 @@ import {
   parseRealtimeEnvelope,
   parseRemovedContentTarget,
   type RealtimeClientEvents,
+  type RealtimeEventEnvelope,
   type RealtimeServerEvents,
 } from '@/lib/realtime/protocol';
+import { createRecentIds } from '@/lib/realtime/recent-ids';
 import {
   incrementFeedAnswerCount,
   markMessagePromoted,
@@ -37,6 +43,8 @@ import {
   mergeQuestionUpdateIntoDetail,
   removeQuestionFromFeed,
 } from '@/lib/query/realtime-cache';
+
+const RECENT_ID_CAPACITY = 500;
 
 type ConnectionState = 'connecting' | 'connected' | 'reconnecting' | 'offline';
 
@@ -61,8 +69,8 @@ export function RealtimeProvider({
     RealtimeClientEvents
   > | null>(null);
   const roomCounts = useRef(new Map<string, number>());
-  const seenEvents = useRef(new Set<string>());
-  const seenAnswers = useRef(new Set<string>());
+  const seenEvents = useRef(createRecentIds(RECENT_ID_CAPACITY));
+  const seenAnswers = useRef(createRecentIds(RECENT_ID_CAPACITY));
   const connectedOnce = useRef(false);
   const [connectionState, setConnectionState] =
     useState<ConnectionState>('connecting');
@@ -104,179 +112,150 @@ export function RealtimeProvider({
     socket.io.on('reconnect_attempt', () => setConnectionState('reconnecting'));
     socket.on('disconnect', () => setConnectionState('reconnecting'));
     socket.on('connect_error', () => setConnectionState('offline'));
-    socket.on('room.message.created', (value) => {
-      try {
-        const event = parseRealtimeEnvelope(value);
-        if (seenEvents.current.has(event.eventId)) return;
-        seenEvents.current.add(event.eventId);
-        const message = parseMessage(event.payload);
+
+    function onRoomEvent(
+      name: keyof RealtimeServerEvents,
+      fallbackQueryKey: QueryKey,
+      apply: (event: RealtimeEventEnvelope) => void,
+    ): void {
+      socket.on(name, (value: unknown) => {
+        try {
+          const event = parseRealtimeEnvelope(value);
+          if (!seenEvents.current.markSeen(event.eventId)) return;
+          apply(event);
+        } catch {
+          void queryClient.invalidateQueries({ queryKey: fallbackQueryKey });
+        }
+      });
+    }
+
+    onRoomEvent('room.message.created', queryKeys.roomRoot, (event) => {
+      const message = parseMessage(event.payload);
+      queryClient.setQueryData<InfiniteData<MessagePage>>(
+        queryKeys.roomMessages(event.roomSlug),
+        (current) => mergeMessageIntoTimeline(current, message),
+      );
+      setAnnouncement(
+        `${message.author.nickname}님의 새 메시지가 도착했습니다.`,
+      );
+      deliverRealtimeNotification({
+        authorId: message.author.id,
+        currentUserId,
+        title: `${message.author.nickname}님의 새 메시지`,
+        body:
+          message.content ||
+          (message.type === 'IMAGE'
+            ? '현장 사진을 공유했어요.'
+            : message.type === 'PLACE'
+              ? '장소를 공유했어요.'
+              : '토픽을 공유했어요.'),
+        tag: `room-message:${message.id}`,
+        url: `/app/rooms/${event.roomSlug}`,
+      });
+    });
+    onRoomEvent('room.question.created', queryKeys.questionRoot, (event) => {
+      const question = parseQuestion(event.payload);
+      queryClient.setQueryData<InfiniteData<QuestionPage>>(
+        queryKeys.roomQuestions(event.roomSlug, 'OPEN'),
+        (current) => mergeQuestionIntoFeed(current, question),
+      );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.roomQuestionsRoot(event.roomSlug),
+      });
+      const sourceMessageId = question.sourceMessageId;
+      if (sourceMessageId !== null) {
         queryClient.setQueryData<InfiniteData<MessagePage>>(
           queryKeys.roomMessages(event.roomSlug),
-          (current) => mergeMessageIntoTimeline(current, message),
+          (current) =>
+            markMessagePromoted(current, sourceMessageId, question.id),
+        );
+      }
+    });
+    onRoomEvent('room.answer.created', queryKeys.questionRoot, (event) => {
+      const answer = parseAnswer(event.payload);
+      const isNewAnswer = seenAnswers.current.markSeen(answer.id);
+      queryClient.setQueryData<QuestionDetail>(
+        queryKeys.question(answer.questionId),
+        (current) => mergeAnswerIntoDetail(current, answer),
+      );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.question(answer.questionId),
+      });
+      if (isNewAnswer) {
+        queryClient.setQueriesData<InfiniteData<QuestionPage>>(
+          { queryKey: queryKeys.roomQuestionsRoot(event.roomSlug) },
+          (current) => incrementFeedAnswerCount(current, answer.questionId),
         );
         setAnnouncement(
-          `${message.author.nickname}님의 새 메시지가 도착했습니다.`,
+          `${answer.author.nickname}님의 새 답변이 도착했습니다.`,
         );
         deliverRealtimeNotification({
-          authorId: message.author.id,
+          authorId: answer.author.id,
           currentUserId,
-          title: `${message.author.nickname}님의 새 메시지`,
-          body:
-            message.content ||
-            (message.type === 'IMAGE'
-              ? '현장 사진을 공유했어요.'
-              : message.type === 'PLACE'
-                ? '장소를 공유했어요.'
-                : '토픽을 공유했어요.'),
-          tag: `room-message:${message.id}`,
-          url: `/app/rooms/${event.roomSlug}`,
-        });
-      } catch {
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.roomRoot,
+          title: `${answer.author.nickname}님의 새 토픽 답변`,
+          body: answer.content,
+          tag: `topic-answer:${answer.id}`,
+          url: `/app/questions/${answer.questionId}`,
         });
       }
     });
-    socket.on('room.question.created', (value) => {
-      try {
-        const event = parseRealtimeEnvelope(value);
-        if (seenEvents.current.has(event.eventId)) return;
-        seenEvents.current.add(event.eventId);
-        const question = parseQuestion(event.payload);
-        queryClient.setQueryData<InfiniteData<QuestionPage>>(
-          queryKeys.roomQuestions(event.roomSlug, 'OPEN'),
-          (current) => mergeQuestionIntoFeed(current, question),
-        );
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.roomQuestionsRoot(event.roomSlug),
-        });
-        const sourceMessageId = question.sourceMessageId;
-        if (sourceMessageId !== null) {
-          queryClient.setQueryData<InfiniteData<MessagePage>>(
-            queryKeys.roomMessages(event.roomSlug),
-            (current) =>
-              markMessagePromoted(current, sourceMessageId, question.id),
-          );
-        }
-      } catch {
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.questionRoot,
-        });
-      }
+    onRoomEvent('room.question.updated', queryKeys.questionRoot, (event) => {
+      const question = parseQuestion(event.payload);
+      queryClient.setQueryData<QuestionDetail>(
+        queryKeys.question(question.id),
+        (current) => mergeQuestionUpdateIntoDetail(current, question),
+      );
+      queryClient.setQueryData<InfiniteData<QuestionPage>>(
+        queryKeys.roomQuestions(event.roomSlug, 'OPEN'),
+        (current) => removeQuestionFromFeed(current, question.id),
+      );
+      queryClient.setQueryData<InfiniteData<QuestionPage>>(
+        queryKeys.roomQuestions(event.roomSlug, 'RESOLVED'),
+        (current) =>
+          question.status === 'RESOLVED'
+            ? mergeQuestionIntoFeed(current, question)
+            : removeQuestionFromFeed(current, question.id),
+      );
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.roomQuestionsRoot(event.roomSlug),
+      });
+      setAnnouncement(
+        question.status === 'EXPIRED'
+          ? '마감 시간이 지나 토픽이 종료되었습니다.'
+          : '토픽이 해결됨으로 변경되었습니다.',
+      );
     });
-    socket.on('room.answer.created', (value) => {
-      try {
-        const event = parseRealtimeEnvelope(value);
-        if (seenEvents.current.has(event.eventId)) return;
-        seenEvents.current.add(event.eventId);
-        const answer = parseAnswer(event.payload);
-        const alreadySeen = seenAnswers.current.has(answer.id);
-        seenAnswers.current.add(answer.id);
-        queryClient.setQueryData<QuestionDetail>(
-          queryKeys.question(answer.questionId),
-          (current) => mergeAnswerIntoDetail(current, answer),
+    onRoomEvent('room.content.removed', queryKeys.questionRoot, (event) => {
+      const target = parseRemovedContentTarget(event.payload);
+      if (target.targetType === 'MESSAGE') {
+        queryClient.setQueryData<InfiniteData<MessagePage>>(
+          queryKeys.roomMessages(event.roomSlug),
+          (current) => markMessageRemoved(current, target.targetId),
         );
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.question(answer.questionId),
-        });
-        if (!alreadySeen) {
-          queryClient.setQueriesData<InfiniteData<QuestionPage>>(
-            { queryKey: queryKeys.roomQuestionsRoot(event.roomSlug) },
-            (current) => incrementFeedAnswerCount(current, answer.questionId),
-          );
-          setAnnouncement(
-            `${answer.author.nickname}님의 새 답변이 도착했습니다.`,
-          );
-          deliverRealtimeNotification({
-            authorId: answer.author.id,
-            currentUserId,
-            title: `${answer.author.nickname}님의 새 토픽 답변`,
-            body: answer.content,
-            tag: `topic-answer:${answer.id}`,
-            url: `/app/questions/${answer.questionId}`,
-          });
-        }
-      } catch {
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.questionRoot,
-        });
+        setAnnouncement('운영 정책에 따라 메시지가 숨김 처리되었습니다.');
+        return;
       }
-    });
-    socket.on('room.question.updated', (value) => {
-      try {
-        const event = parseRealtimeEnvelope(value);
-        if (seenEvents.current.has(event.eventId)) return;
-        seenEvents.current.add(event.eventId);
-        const question = parseQuestion(event.payload);
-        queryClient.setQueryData<QuestionDetail>(
-          queryKeys.question(question.id),
-          (current) => mergeQuestionUpdateIntoDetail(current, question),
-        );
-        queryClient.setQueryData<InfiniteData<QuestionPage>>(
-          queryKeys.roomQuestions(event.roomSlug, 'OPEN'),
-          (current) => removeQuestionFromFeed(current, question.id),
-        );
-        queryClient.setQueryData<InfiniteData<QuestionPage>>(
-          queryKeys.roomQuestions(event.roomSlug, 'RESOLVED'),
+      if (target.questionId === null) throw new Error('Question id missing');
+      const questionTarget = {
+        targetType: target.targetType as 'QUESTION' | 'ANSWER',
+        targetId: target.targetId,
+        questionId: target.questionId,
+      };
+      queryClient.setQueryData<QuestionDetail>(
+        queryKeys.question(target.questionId),
+        (current) => markRemovedContent(current, questionTarget),
+      );
+      if (target.targetType === 'QUESTION') {
+        queryClient.setQueriesData<InfiniteData<QuestionPage>>(
+          { queryKey: queryKeys.roomQuestionsRoot(event.roomSlug) },
           (current) =>
-            question.status === 'RESOLVED'
-              ? mergeQuestionIntoFeed(current, question)
-              : removeQuestionFromFeed(current, question.id),
+            removeQuestionFromFeed(current, questionTarget.questionId),
         );
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.roomQuestionsRoot(event.roomSlug),
-        });
-        setAnnouncement(
-          question.status === 'EXPIRED'
-            ? '마감 시간이 지나 토픽이 종료되었습니다.'
-            : '토픽이 해결됨으로 변경되었습니다.',
-        );
-      } catch {
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.questionRoot,
-        });
       }
-    });
-    socket.on('room.content.removed', (value) => {
-      try {
-        const event = parseRealtimeEnvelope(value);
-        if (seenEvents.current.has(event.eventId)) return;
-        seenEvents.current.add(event.eventId);
-        const target = parseRemovedContentTarget(event.payload);
-        if (target.targetType === 'MESSAGE') {
-          queryClient.setQueryData<InfiniteData<MessagePage>>(
-            queryKeys.roomMessages(event.roomSlug),
-            (current) => markMessageRemoved(current, target.targetId),
-          );
-          setAnnouncement('운영 정책에 따라 메시지가 숨김 처리되었습니다.');
-          return;
-        }
-        if (target.questionId === null) throw new Error('Question id missing');
-        const questionTarget = {
-          targetType: target.targetType as 'QUESTION' | 'ANSWER',
-          targetId: target.targetId,
-          questionId: target.questionId,
-        };
-        queryClient.setQueryData<QuestionDetail>(
-          queryKeys.question(target.questionId),
-          (current) => markRemovedContent(current, questionTarget),
-        );
-        if (target.targetType === 'QUESTION') {
-          queryClient.setQueriesData<InfiniteData<QuestionPage>>(
-            { queryKey: queryKeys.roomQuestionsRoot(event.roomSlug) },
-            (current) =>
-              removeQuestionFromFeed(current, questionTarget.questionId),
-          );
-        }
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.question(target.questionId),
-        });
-        setAnnouncement('운영 정책에 따라 콘텐츠가 숨김 처리되었습니다.');
-      } catch {
-        void queryClient.invalidateQueries({
-          queryKey: queryKeys.questionRoot,
-        });
-      }
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.question(target.questionId),
+      });
+      setAnnouncement('운영 정책에 따라 콘텐츠가 숨김 처리되었습니다.');
     });
 
     return () => {

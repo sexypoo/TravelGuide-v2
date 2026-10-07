@@ -128,7 +128,6 @@ export function AnswerForm({
   return (
     <form className="answerComposer" onSubmit={submit} noValidate>
       <header>
-        <span>FIELD REPLY</span>
         <h2>이 질문에 근거 있는 답을 남겨주세요</h2>
         <p>
           직접 확인한 범위와 정보의 시점을 분명하게 적으면 여행자가 판단하기

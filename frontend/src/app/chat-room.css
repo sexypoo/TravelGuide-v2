@@ -56,14 +56,6 @@
   background: var(--room-signal-white);
 }
 
-.appShell--room .conversationStageHeader > div > span {
-  color: var(--room-live-magenta);
-  font-family: var(--utility);
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-}
-
 .appShell--room .conversationStageHeader h2 {
   margin: 0.2rem 0 0;
   color: var(--room-radio-ink);
@@ -281,11 +273,6 @@
   padding-left: 1.15rem;
   background: var(--room-paper);
   scrollbar-color: rgba(103, 93, 218, 0.38) transparent;
-}
-
-.appShell--room .topicRail__header > div > span {
-  color: var(--room-live-magenta);
-  font-size: 0.75rem;
 }
 
 .appShell--room .topicRail__header h2 {
@@ -684,11 +671,6 @@
   border-color: #e5e8eb;
 }
 
-.appShell--room .conversationStageHeader > div > span {
-  font-size: 0.66rem;
-  letter-spacing: 0.08em;
-}
-
 .appShell--room .conversationStageHeader h2 {
   margin-top: 0.12rem;
   font-size: 1rem;
@@ -840,11 +822,6 @@
   padding: 0 0.1rem 0.55rem;
 }
 
-.appShell--room .topicRail__header > div > span {
-  color: var(--room-live-magenta);
-  font-size: 0.68rem;
-}
-
 .appShell--room .topicRail__header h2 {
   margin-top: 0.15rem;
   font-size: 1.15rem;
@@ -853,7 +830,7 @@
 .appShell--room .topicRail__header > button {
   min-height: 2.5rem;
   border-radius: 0.8rem;
-  background: var(--room-guide-iris);
+  background: #282531;
   font-size: 0.72rem;
 }
 

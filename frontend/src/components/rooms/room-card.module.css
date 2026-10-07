@@ -1,0 +1,140 @@
+/* T42 — the destination name leads; everything else is quiet. */
+
+.room {
+  --room-ink: #282531;
+  --room-muted: #625c69;
+  --room-line: rgba(40, 37, 49, 0.12);
+  --room-iris: #675dda;
+  --room-magenta: #c73568;
+  display: grid;
+  padding: 1.5rem 1.25rem 1.25rem;
+  border: 1px solid var(--room-line);
+  border-radius: 1.25rem;
+  background: #ffffff;
+  color: var(--room-ink);
+}
+
+.access {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  margin: 0;
+  color: var(--room-magenta);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.room[data-access='locked'] .access {
+  color: var(--room-muted);
+}
+
+.access :global(.accessIcon) {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.liveDot {
+  position: relative;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.liveDot::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: currentColor;
+  content: '';
+  animation: live 2.4s ease-out infinite;
+}
+
+@keyframes live {
+  from {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+.place {
+  margin: 0.75rem 0 0;
+  font-family: var(--display);
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.title {
+  margin: 0.75rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.summary {
+  max-width: 32rem;
+  margin: 0.4rem 0 0;
+  color: var(--room-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.enter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  margin-top: 1.5rem;
+  border-radius: 0.9rem;
+  background: var(--room-ink);
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.enter:hover {
+  background: #3b3746;
+}
+
+.enter:focus-visible {
+  outline: 2px solid var(--room-iris);
+  outline-offset: 3px;
+}
+
+.room[data-access='locked'] .enter {
+  border: 1px solid var(--room-line);
+  background: transparent;
+  color: var(--room-ink);
+}
+
+@media (min-width: 761px) {
+  .room {
+    padding: 2rem 2rem 1.75rem;
+  }
+
+  .place {
+    font-size: 4.5rem;
+  }
+
+  .enter {
+    width: fit-content;
+    min-width: 12rem;
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liveDot::after {
+    animation: none;
+  }
+}

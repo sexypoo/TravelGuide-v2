@@ -59,12 +59,10 @@
 }
 
 .resolutionActions > header {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
+  display: grid;
+  gap: 0.25rem;
 }
 
-.resolutionActions > header > span,
 .reportSheet header > span {
   padding-top: 0.2rem;
   color: var(--purple);
@@ -369,11 +367,6 @@
     display: block;
   }
 
-  .resolutionActions > header > span {
-    display: block;
-    margin-bottom: 0.45rem;
-  }
-
   .resolutionActions__choices,
   .resolutionActions__choices button {
     width: 100%;
@@ -454,6 +447,10 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+time {
+  font-variant-numeric: tabular-nums;
+}
+
 a,
 button,
 input,
@@ -512,8 +509,6 @@ textarea {
 .appBackLink > .appIcon,
 .communityHero > button > .appIcon,
 .communityCard__meta .appIcon,
-.communityLane > strong > .appIcon,
-.qualificationGrid div > span > .appIcon,
 .verificationChoiceGrid b > .appIcon {
   width: 1rem;
   height: 1rem;
@@ -521,8 +516,6 @@ textarea {
 
 .communityHero > button,
 .communityCard__meta mark,
-.communityLane > strong,
-.qualificationGrid div > span,
 .verificationChoiceGrid b {
   display: inline-flex;
   gap: 0.38rem;
@@ -542,7 +535,6 @@ textarea {
 }
 
 .safetyNote > span > .appIcon,
-.qualificationSummary > span > .appIcon,
 .verificationGuide__notice > span > .appIcon,
 .formAlert > span > .appIcon {
   width: 0.82rem;
@@ -3878,122 +3870,6 @@ textarea:focus-visible {
   font-size: 0.6rem;
 }
 
-.liveStatusBoard {
-  margin-top: 1.25rem;
-  padding: 1.5rem;
-  border: 1px solid rgba(15, 159, 153, 0.24);
-  border-radius: 1.35rem;
-  background: linear-gradient(145deg, #f9fffe, #fffafd 78%);
-  box-shadow: 0 14px 36px rgba(23, 101, 97, 0.08);
-}
-.liveStatusBoard > header {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-.liveStatusClock {
-  display: grid;
-  width: 3.6rem;
-  height: 3.6rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #0f9f99, #37c9bd);
-  box-shadow: 0 10px 24px rgba(15, 159, 153, 0.2);
-  color: #fff;
-  font-size: 1.7rem;
-}
-
-.liveStatusClock > .appIcon {
-  width: 1.65rem;
-  height: 1.65rem;
-}
-.liveStatusBoard header p {
-  margin: 0;
-  color: #4d7c78;
-  font-size: 0.65rem;
-  font-weight: 750;
-}
-.liveStatusBoard h2 {
-  margin: 0.18rem 0;
-  color: #0b948e;
-  font-family: var(--display);
-  font-size: clamp(1.6rem, 5vw, 2.45rem);
-  letter-spacing: -0.045em;
-}
-.liveStatusBoard header > div > span {
-  color: var(--muted);
-  font-size: 0.68rem;
-}
-.liveStatusBoard header > div > span strong {
-  color: #07867f;
-}
-.liveStatusDescription {
-  margin: 1.15rem 0;
-  color: #39434f;
-  font-size: 0.8rem;
-  line-height: 1.7;
-}
-.liveStatusMetrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.55rem;
-}
-.liveStatusMetrics > div {
-  display: grid;
-  min-width: 0;
-  min-height: 5.5rem;
-  place-items: center;
-  align-content: center;
-  padding: 0.65rem 0.35rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.86);
-  text-align: center;
-}
-.liveStatusMetrics > div > span {
-  color: #14a49e;
-  font-size: 0.8rem;
-}
-
-.liveStatusMetrics > div > span > .appIcon {
-  width: 1.05rem;
-  height: 1.05rem;
-}
-.liveStatusMetrics small {
-  margin-top: 0.3rem;
-  color: var(--muted);
-  font-size: 0.58rem;
-}
-.liveStatusMetrics strong {
-  margin-top: 0.18rem;
-  color: #137f7a;
-  font-size: 0.75rem;
-  line-height: 1.3;
-}
-.liveStatusBoard > footer {
-  display: flex;
-  margin-top: 0.8rem;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-}
-.liveStatusBoard > footer span {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.28rem 0.55rem;
-  border-radius: 999px;
-  background: #e8faf7;
-  color: #087b76;
-  font-size: 0.58rem;
-  font-weight: 720;
-  gap: 0.25rem;
-}
-
-.liveStatusBoard > footer .appIcon {
-  width: 0.72rem;
-  height: 0.72rem;
-}
-
 .fieldObservationFields {
   display: grid;
   margin: 1.2rem 0 0;
@@ -4069,34 +3945,6 @@ textarea:focus-visible {
   margin-left: auto;
   color: var(--subtle);
   font-size: 0.56rem;
-}
-
-.liveStatusBoard--stale {
-  border-color: #ecd4a6;
-  background: linear-gradient(145deg, #fffaf0, #fffafd 78%);
-}
-
-.liveStatusBoard--stale .liveStatusClock {
-  background: linear-gradient(145deg, #c98213, #eba93f);
-  box-shadow: 0 10px 24px rgba(201, 130, 19, 0.18);
-}
-
-.liveStatusBoard--stale h2,
-.liveStatusBoard--stale .liveStatusMetrics strong {
-  color: #9b6718;
-}
-
-.liveStatusStaleNotice {
-  display: flex;
-  margin: 0 0 1rem;
-  padding: 0.75rem 0.85rem;
-  border-radius: 0.8rem;
-  background: #fff0d4;
-  color: #7c561d;
-  gap: 0.35rem 0.8rem;
-  align-items: baseline;
-  flex-wrap: wrap;
-  font-size: 0.65rem;
 }
 
 .answerEvidenceImage {
@@ -4234,19 +4082,6 @@ textarea:focus-visible {
   .fieldObservationFields {
     grid-template-columns: 1fr;
   }
-  .liveStatusBoard {
-    padding: 1rem;
-  }
-  .liveStatusBoard > header {
-    gap: 0.7rem;
-  }
-  .liveStatusClock {
-    width: 3rem;
-    height: 3rem;
-  }
-  .liveStatusMetrics {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .fieldObservationFields > p {
     grid-column: 1;
   }
@@ -4254,7 +4089,7 @@ textarea:focus-visible {
 
 /* T07 — Jeju live signal room */
 :root {
-  --utility: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --utility: var(--body);
 }
 
 .srOnly {
@@ -4273,7 +4108,6 @@ textarea:focus-visible {
   width: min(100% - 11rem, 1000px);
 }
 
-.appHome,
 .lockedRoomPage,
 .verificationGuide,
 .verificationOverview,
@@ -4347,11 +4181,7 @@ textarea:focus-visible {
   margin-bottom: 0.6rem;
 }
 
-.liveRoomEyebrow > span:first-child,
-.roomFeedToolbar > div > p,
-.answerThread__heading p,
-.questionComposer header > span,
-.answerComposer header > span {
+.roomFeedToolbar > div > p {
   margin: 0;
   color: var(--purple);
   font-family: var(--utility);
@@ -6012,7 +5842,7 @@ body:has(.guestHome) {
   display: grid;
   min-height: 5.25rem;
   padding: 0.7rem 0.85rem;
-  grid-template-columns: auto 3.15rem minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 0.85rem;
   align-items: center;
   border: 1px solid var(--line);
@@ -6031,36 +5861,6 @@ body:has(.guestHome) {
   border-radius: 0.78rem;
   background: rgba(255, 255, 255, 0.82);
   white-space: nowrap;
-}
-
-.conversationRoomHeader__signal {
-  position: relative;
-  display: grid;
-  width: 2.9rem;
-  height: 2.9rem;
-  place-items: center;
-  border: 1px solid #e9e2ed;
-  border-radius: 0.9rem;
-  background: white;
-  box-shadow: 0 10px 26px rgba(73, 70, 83, 0.08);
-}
-
-.conversationRoomHeader__signal svg {
-  width: 2rem;
-  fill: var(--ink);
-}
-
-.conversationRoomHeader__signal > span {
-  position: absolute;
-  top: 0.42rem;
-  right: 0.42rem;
-  width: 0.55rem;
-  height: 0.55rem;
-  border: 2px solid white;
-  border-radius: 50%;
-  background: var(--gradient);
-  box-shadow: 0 0 0 0.25rem rgba(211, 75, 120, 0.1);
-  animation: signalPulse 2.2s ease-out infinite;
 }
 
 .conversationRoomHeader h1 {
@@ -6209,14 +6009,6 @@ body:has(.guestHome) {
   gap: 1rem;
   align-items: center;
   justify-content: space-between;
-}
-
-.topicRail__header > div > span {
-  color: var(--purple);
-  font-family: var(--utility);
-  font-size: 0.61rem;
-  font-weight: 750;
-  letter-spacing: 0.08em;
 }
 
 .topicRail__header h2 {
@@ -6897,10 +6689,6 @@ body:has(.guestHome) {
     stroke-width: 2.15;
   }
 
-  .conversationRoomHeader__signal {
-    display: none;
-  }
-
   .conversationRoomHeader__copy {
     min-width: 0;
     grid-column: 2;
@@ -7030,7 +6818,6 @@ body:has(.guestHome) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .conversationRoomHeader__signal > span,
   .roomNotificationControl--enabled > button,
   .messageTimelineSkeleton span,
   .newMessageShortcut {
@@ -7962,20 +7749,12 @@ body:has(.guestHome) {
   stroke-width: 1.8;
 }
 
-.appHome,
 .lockedRoomPage,
 .verificationGuide,
 .profilePage {
   animation: riseIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.homeGreeting {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.homeGreeting > div:first-child > p,
-.homeSection__heading p,
 .pageHeading > p,
 .roomHeader > div > p,
 .roomContext > div:last-child > p,
@@ -7986,7 +7765,6 @@ body:has(.guestHome) {
   font-weight: 750;
 }
 
-.homeGreeting h1,
 .pageHeading h1,
 .roomHeader h1 {
   margin: 0;
@@ -7998,17 +7776,6 @@ body:has(.guestHome) {
   word-break: keep-all;
 }
 
-.qualificationSummary {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-  padding: 1rem 1.1rem;
-  border: 1px solid #ebe6fa;
-  border-radius: 1rem;
-  background: #f6f3ff;
-}
-
-.qualificationSummary > span,
 .verificationGuide__notice > span {
   display: grid;
   width: 1.35rem;
@@ -8022,124 +7789,12 @@ body:has(.guestHome) {
   font-weight: 800;
 }
 
-.qualificationSummary strong {
-  display: block;
-  font-size: 0.84rem;
-}
-
-.qualificationSummary p {
-  margin: 0.3rem 0 0;
-  color: var(--muted);
-  font-size: 0.78rem;
-  line-height: 1.5;
-}
-
-.homeSection {
-  margin-top: 4.5rem;
-}
-
-.homeSection__heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 1.25rem;
-}
-
-.homeSection__heading h2,
 .profileEdit > div > h2 {
   margin: 0;
   font-family: var(--display);
   font-size: 1.55rem;
   font-weight: 740;
   letter-spacing: -0.05em;
-}
-
-.homeSection__heading > span {
-  padding-bottom: 0.15rem;
-  color: var(--subtle);
-  font-size: 0.75rem;
-}
-
-.roomList {
-  display: grid;
-  gap: 1rem;
-}
-
-.roomCard {
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 1.5rem;
-  background: white;
-  box-shadow: var(--shadow-card);
-}
-
-.roomCard__visual {
-  position: relative;
-  display: grid;
-  min-height: 14rem;
-  place-items: center;
-  overflow: hidden;
-  background:
-    radial-gradient(
-      circle at 48% 52%,
-      rgba(255, 255, 255, 0.88),
-      transparent 7rem
-    ),
-    linear-gradient(145deg, #fff0f5 0%, #f6eff9 52%, #efefff 100%);
-}
-
-.roomCard__visual::before,
-.roomCard__visual::after {
-  position: absolute;
-  border: 1px solid rgba(112, 104, 216, 0.12);
-  border-radius: 50%;
-  content: '';
-}
-
-.roomCard__visual::before {
-  width: 18rem;
-  height: 18rem;
-}
-
-.roomCard__visual::after {
-  width: 12rem;
-  height: 12rem;
-  border-color: rgba(211, 75, 120, 0.14);
-}
-
-.jejuRoomSignal {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  width: 7.5rem;
-  height: 7.5rem;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 2.35rem;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 18px 44px rgba(145, 75, 165, 0.18);
-  transform: rotate(-3deg);
-}
-
-.jejuRoomSignal svg {
-  width: 4.8rem;
-  fill: var(--ink);
-}
-
-.jejuRoomSignal > span {
-  position: absolute;
-  right: -0.2rem;
-  bottom: 0.2rem;
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border: 3px solid white;
-  border-radius: 0.75rem;
-  background: var(--gradient);
-  color: white;
-  font-size: 0.85rem;
-  font-weight: 850;
 }
 
 .accessIcon {
@@ -8150,15 +7805,6 @@ body:has(.guestHome) {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
-}
-
-.jejuRoomSignal > span .accessIcon {
-  width: 1.05rem;
-  height: 1.05rem;
-}
-
-.jejuRoomSignal--locked {
-  filter: saturate(0.78);
 }
 
 .accessBadge {
@@ -8173,13 +7819,6 @@ body:has(.guestHome) {
   white-space: nowrap;
 }
 
-.roomCard__visual > .accessBadge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 2;
-}
-
 .accessBadge--locked {
   background: rgba(255, 255, 255, 0.88);
   color: #58616d;
@@ -8191,35 +7830,6 @@ body:has(.guestHome) {
   color: #008f68;
 }
 
-.roomCard__body {
-  padding: 1.5rem;
-}
-
-.roomCard__body > p {
-  margin: 0 0 0.45rem;
-  color: var(--purple);
-  font-size: 0.74rem;
-  font-weight: 750;
-}
-
-.roomCard__body h2 {
-  margin: 0;
-  font-family: var(--display);
-  font-size: 1.45rem;
-  font-weight: 740;
-  letter-spacing: -0.045em;
-}
-
-.roomCard__body > span {
-  display: block;
-  margin-top: 0.65rem;
-  color: var(--muted);
-  font-size: 0.85rem;
-  line-height: 1.55;
-  word-break: keep-all;
-}
-
-.roomCard dl,
 .roomContext dl {
   display: grid;
   margin: 1.4rem 0 0;
@@ -8227,45 +7837,22 @@ body:has(.guestHome) {
   gap: 0.75rem;
 }
 
-.roomCard dl > div,
 .roomContext dl > div {
   padding: 0.85rem;
   border-radius: 0.85rem;
   background: var(--canvas);
 }
 
-.roomCard dt,
 .roomContext dt {
   color: var(--subtle);
   font-size: 0.67rem;
 }
 
-.roomCard dd,
 .roomContext dd {
   margin: 0.3rem 0 0;
   color: #4e5968;
   font-size: 0.78rem;
   font-weight: 700;
-}
-
-.roomCard__body > a {
-  display: flex;
-  min-height: 3.25rem;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 1.25rem;
-  padding: 0 1rem;
-  border-radius: 0.95rem;
-  background: var(--ink);
-  color: white;
-  font-size: 0.84rem;
-  font-weight: 750;
-  text-decoration: none;
-}
-
-.roomCard__body > a > .appIcon {
-  width: 0.95rem;
-  height: 0.95rem;
 }
 
 .emptyState {
@@ -8291,39 +7878,6 @@ body:has(.guestHome) {
   font-size: 0.8rem;
 }
 
-.qualificationGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.85rem;
-}
-
-.qualificationGrid > a {
-  display: flex;
-  min-height: 12rem;
-  gap: 1rem;
-  padding: 1.25rem;
-  border: 1px solid var(--line);
-  border-radius: 1.25rem;
-  background: white;
-  color: inherit;
-  text-decoration: none;
-}
-
-.qualificationPending {
-  opacity: 0.72;
-}
-
-.qualificationGrid > a.qualificationApproved {
-  border-color: rgba(43, 151, 132, 0.24);
-  background: #f6fffc;
-}
-
-.qualificationGrid > a:hover {
-  border-color: #d9cefa;
-  box-shadow: var(--shadow-card);
-  transform: translateY(-1px);
-}
-
 .qualificationIcon {
   display: grid;
   width: 2.5rem;
@@ -8343,28 +7897,6 @@ body:has(.guestHome) {
 .qualificationIcon--local {
   background: #f1ecff;
   color: var(--purple);
-}
-
-.qualificationGrid strong {
-  display: block;
-  margin-top: 0.15rem;
-  font-size: 0.9rem;
-}
-
-.qualificationGrid p {
-  margin: 0.55rem 0 0;
-  color: var(--muted);
-  font-size: 0.77rem;
-  line-height: 1.55;
-  word-break: keep-all;
-}
-
-.qualificationGrid div > span {
-  display: block;
-  margin-top: 1.1rem;
-  color: var(--purple);
-  font-size: 0.75rem;
-  font-weight: 750;
 }
 
 .appBackLink {
@@ -9785,25 +9317,14 @@ body:has(.legalPage) {
     padding-inline: 0.65rem;
   }
 
-  .homeGreeting h1,
   .pageHeading h1,
   .roomHeader h1 {
     font-size: 2.35rem;
   }
 
-  .homeSection {
-    margin-top: 3.5rem;
-  }
-
-  .roomCard dl,
   .roomContext dl,
-  .qualificationGrid,
   .verificationGuide__grid {
     grid-template-columns: 1fr;
-  }
-
-  .qualificationGrid > a {
-    min-height: auto;
   }
 
   .roomHeader {
@@ -9843,7 +9364,6 @@ body:has(.legalPage) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .appHome,
   .lockedRoomPage,
   .verificationGuide,
   .profilePage,
@@ -10311,94 +9831,6 @@ body:has(.legalPage) {
   animation: riseIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.communityLane {
-  position: relative;
-  display: grid;
-  min-height: 11rem;
-  margin-top: 3rem;
-  padding: 1.7rem 1.8rem;
-  overflow: hidden;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 1.25rem;
-  align-items: center;
-  border: 1px solid rgba(207, 66, 111, 0.18);
-  border-radius: 1.6rem;
-  background:
-    radial-gradient(
-      circle at 92% 12%,
-      rgba(112, 104, 216, 0.2),
-      transparent 10rem
-    ),
-    linear-gradient(135deg, #fff4f7, #f8f2ff 58%, #f0efff);
-  box-shadow: 0 16px 42px rgba(145, 75, 165, 0.1);
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.communityLane::after {
-  position: absolute;
-  right: -1.5rem;
-  bottom: -3.5rem;
-  width: 11rem;
-  height: 11rem;
-  border: 1px dashed rgba(145, 75, 165, 0.22);
-  border-radius: 50%;
-  content: '';
-}
-
-.communityLane__stamp {
-  display: grid;
-  width: 4rem;
-  height: 4rem;
-  place-items: center;
-  border: 1px dashed rgba(207, 66, 111, 0.45);
-  border-radius: 50%;
-  color: var(--magenta);
-  font-family: var(--utility);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  transform: rotate(-8deg);
-}
-
-.communityLane p,
-.communityLane h2,
-.communityLane span {
-  margin: 0;
-}
-
-.communityLane p,
-.communityHero > div > p {
-  color: var(--magenta);
-  font-family: var(--display);
-  font-size: 0.64rem;
-  font-weight: 850;
-  letter-spacing: 0.14em;
-}
-
-.communityLane h2 {
-  margin-top: 0.35rem;
-  font-family: var(--display);
-  font-size: 1.55rem;
-  letter-spacing: -0.05em;
-}
-
-.communityLane div > span {
-  display: block;
-  margin-top: 0.45rem;
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.55;
-}
-
-.communityLane > strong {
-  position: relative;
-  z-index: 1;
-  color: var(--purple-dark);
-  font-size: 0.8rem;
-  white-space: nowrap;
-}
-
 .communityHero {
   display: flex;
   gap: 1.5rem;
@@ -10432,12 +9864,18 @@ body:has(.legalPage) {
   padding: 0 1rem;
   border: 0;
   border-radius: 0.9rem;
-  background: var(--gradient);
+  background: #282531;
   color: white;
   font: inherit;
   font-size: 0.8rem;
   font-weight: 760;
   cursor: pointer;
+}
+
+.communityMore {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: #282531;
 }
 
 .communityComposer {
@@ -10644,8 +10082,7 @@ body:has(.legalPage) {
 }
 
 .communityEmpty {
-  padding: 3.5rem 1rem;
-  border: 1px dashed var(--line-strong);
+  padding: 3rem 1rem;
   color: var(--muted);
   text-align: center;
 }
@@ -10755,15 +10192,6 @@ body:has(.legalPage) {
 }
 
 @media (max-width: 600px) {
-  .communityLane {
-    padding: 1.4rem;
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .communityLane > strong {
-    grid-column: 2;
-  }
-
   .communityHero {
     align-items: stretch;
     flex-direction: column;

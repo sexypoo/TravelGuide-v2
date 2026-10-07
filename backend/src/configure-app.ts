@@ -13,6 +13,7 @@ import { requestIdMiddleware } from './common/http/request-id.middleware';
 import { securityHeadersMiddleware } from './common/http/security-headers.middleware';
 import { StructuredLogger } from './common/logging/structured-logger';
 import type { Environment } from './config/environment';
+import { ConfiguredIoAdapter } from './realtime/configured-io.adapter';
 
 function firstValidationMessage(errors: ValidationError[]): string {
   for (const error of errors) {
@@ -48,6 +49,7 @@ export function configureApp(app: INestApplication): void {
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Accept', 'Content-Type', 'X-Request-Id'],
   });
+  app.useWebSocketAdapter(new ConfiguredIoAdapter(app, allowOrigin));
   app.useGlobalFilters(new ProblemDetailsFilter());
   app.useGlobalPipes(
     new ValidationPipe({

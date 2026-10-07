@@ -205,12 +205,7 @@
   }
 
   .appShell:not(.appShell--room)
-    :where(
-      .homeGreeting h1,
-      .pageHeading h1,
-      .communityHero h1,
-      .nearbyExplorer__hero h1
-    ) {
+    :where(.pageHeading h1, .communityHero h1, .nearbyExplorer__hero h1) {
     font-size: clamp(2rem, 9vw, 2.35rem);
     font-weight: 800;
     letter-spacing: -0.055em;
@@ -219,11 +214,7 @@
 
   .appShell:not(.appShell--room)
     :where(
-      .homeGreeting > div:first-child > p,
-      .homeSection__heading p,
       .pageHeading > p,
-      .communityHero > div > p,
-      .communityLane p,
       .nearbyExplorer__hero p,
       .travelRecords > header p
     ) {
@@ -249,8 +240,6 @@
 
   .appShell:not(.appShell--room)
     :where(
-      .roomCard,
-      .qualificationGrid > a,
       .communityCard,
       .communityDetailCard,
       .communityCommentForm,
@@ -310,157 +299,10 @@
     line-height: 1.6;
   }
 
-  /* Home */
-  .appShell:not(.appShell--room) .homeGreeting {
-    gap: 1.15rem;
-  }
-
-  .appShell:not(.appShell--room) .qualificationSummary {
-    padding: 1rem;
-    border-color: rgba(103, 93, 218, 0.18);
-    background: rgba(103, 93, 218, 0.075);
-  }
-
-  .appShell:not(.appShell--room) .qualificationSummary strong {
-    font-size: 0.9375rem;
-  }
-
-  .appShell:not(.appShell--room) .qualificationSummary p {
-    margin-top: 0.3rem;
-    color: var(--muted);
-    font-size: 0.875rem;
-    line-height: 1.55;
-  }
-
-  .appShell:not(.appShell--room) .homeSection {
-    margin-top: 2.8rem;
-  }
-
-  .appShell:not(.appShell--room) .homeSection__heading {
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(.homeSection__heading h2, .profileEdit > div > h2) {
+  .appShell:not(.appShell--room) :where(.profileEdit > div > h2) {
     font-size: 1.4rem;
     font-weight: 780;
     line-height: 1.25;
-  }
-
-  .appShell:not(.appShell--room) .homeSection__heading > span {
-    flex: 0 0 auto;
-    color: var(--muted);
-    font-size: 0.75rem;
-  }
-
-  .appShell:not(.appShell--room) .roomCard {
-    border-radius: 1.25rem;
-  }
-
-  .appShell:not(.appShell--room) .roomCard__visual {
-    min-height: 10.5rem;
-  }
-
-  .appShell:not(.appShell--room) .jejuRoomSignal {
-    width: 6.25rem;
-    height: 6.25rem;
-    border-radius: 1.9rem;
-  }
-
-  .appShell:not(.appShell--room) .jejuRoomSignal svg {
-    width: 3.9rem;
-  }
-
-  .appShell:not(.appShell--room) .roomCard__body {
-    padding: 1.25rem;
-  }
-
-  .appShell:not(.appShell--room) .roomCard__body > p {
-    margin-bottom: 0.4rem;
-    font-size: 0.75rem;
-    font-weight: 800;
-    line-height: 1.35;
-  }
-
-  .appShell:not(.appShell--room) .roomCard__body h2 {
-    font-size: 1.4rem;
-  }
-
-  .appShell:not(.appShell--room) .roomCard__body > span {
-    font-size: 0.9375rem;
-    line-height: 1.6;
-  }
-
-  .appShell:not(.appShell--room) .roomCard dl {
-    margin-top: 1.1rem;
-  }
-
-  .appShell:not(.appShell--room) .roomCard dt {
-    color: var(--muted);
-    font-size: 0.75rem;
-  }
-
-  .appShell:not(.appShell--room) .roomCard dd {
-    color: var(--ink);
-    font-size: 0.875rem;
-  }
-
-  .appShell:not(.appShell--room) .roomCard__body > a {
-    min-height: 3.25rem;
-    font-size: 0.9375rem;
-  }
-
-  .appShell:not(.appShell--room) .communityLane {
-    min-height: 0;
-    margin-top: 2rem;
-    padding: 1.35rem;
-    border-radius: 1.25rem;
-    grid-template-columns: 2.75rem minmax(0, 1fr);
-    gap: 0.9rem;
-  }
-
-  .appShell:not(.appShell--room) .communityLane__stamp {
-    width: 2.75rem;
-    height: 2.75rem;
-    font-size: 0.62rem;
-  }
-
-  .appShell:not(.appShell--room) .communityLane h2 {
-    font-size: 1.35rem;
-  }
-
-  .appShell:not(.appShell--room) .communityLane div > span {
-    font-size: 0.875rem;
-    line-height: 1.55;
-  }
-
-  .appShell:not(.appShell--room) .communityLane > strong {
-    min-height: 2.75rem;
-    align-items: center;
-    grid-column: 2;
-    font-size: 0.8125rem;
-  }
-
-  .appShell:not(.appShell--room) .qualificationGrid > a {
-    min-height: 0;
-    padding: 1.15rem;
-  }
-
-  .appShell:not(.appShell--room) .qualificationGrid strong {
-    font-size: 1rem;
-  }
-
-  .appShell:not(.appShell--room) .qualificationGrid p {
-    font-size: 0.875rem;
-    line-height: 1.6;
-  }
-
-  .appShell:not(.appShell--room) .qualificationGrid div > span {
-    min-height: 2.75rem;
-    align-items: center;
-    margin-top: 0.65rem;
-    font-size: 0.8125rem;
   }
 
   /* Community */

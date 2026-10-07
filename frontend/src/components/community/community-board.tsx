@@ -129,7 +129,6 @@ export function CommunityBoard({
     <div className="communityPage">
       <header className="communityHero">
         <div>
-          <p>OPEN TRAVEL DESK</p>
           <h1>여행자 커뮤니티</h1>
           <span>인증 전에도 여행 정보를 편하게 묻고 나눌 수 있어요.</span>
         </div>

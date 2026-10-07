@@ -55,7 +55,9 @@ describe('RoomExperience conversation and topics', () => {
     expect(
       within(roomHeader as HTMLElement).getByRole('link', { name: '홈으로' }),
     ).toHaveAttribute('href', '/app');
-    expect(within(conversation).getByText('LIVE CONVERSATION')).toBeVisible();
+    expect(
+      within(conversation).getByRole('heading', { name: '실시간 대화' }),
+    ).toBeVisible();
     expect(
       within(conversation).getByRole('heading', { name: '실시간 대화' }),
     ).toBeVisible();

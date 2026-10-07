@@ -14,8 +14,8 @@ const mobilePages = [
   {
     name: 'home',
     path: '/app',
-    heading: '.homeGreeting h1',
-    body: '.roomCard__body > span',
+    heading: '#welcome-title',
+    body: '[data-room-summary]',
   },
   {
     name: 'community',

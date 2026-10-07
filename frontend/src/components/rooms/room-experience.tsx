@@ -68,15 +68,8 @@ export function RoomExperience({
         <Link className="appBackLink" href="/app">
           <AppIcon name="arrow-left" /> 홈으로
         </Link>
-        <div className="conversationRoomHeader__signal" aria-hidden="true">
-          <span />
-          <svg viewBox="0 0 96 70">
-            <path d="M81 30c4 11-3 23-18 29-18 8-43 4-50-8-7-11 5-26 24-34 17-7 38-8 44 3Z" />
-          </svg>
-        </div>
         <div className="conversationRoomHeader__copy">
           <div className="liveRoomEyebrow">
-            <span>TRAVEL LIVE ROOM</span>
             <span
               className={`connectionPill connectionPill--${connectionState}`}
             >
@@ -128,10 +121,7 @@ export function RoomExperience({
           aria-label={`${room.destination.nameKo} 대화`}
         >
           <header className="conversationStageHeader">
-            <div>
-              <span>LIVE CONVERSATION</span>
-              <h2>실시간 대화</h2>
-            </div>
+            <h2>실시간 대화</h2>
             <p>인증된 참여자의 현장 교신</p>
           </header>
           {connectionState !== 'connected' && (
@@ -158,10 +148,7 @@ export function RoomExperience({
 
         <aside className="topicRail" aria-labelledby="topic-rail-title">
           <header className="topicRail__header">
-            <div>
-              <span>LIVE TOPICS</span>
-              <h2 id="topic-rail-title">지금 이어지는 토픽</h2>
-            </div>
+            <h2 id="topic-rail-title">지금 이어지는 토픽</h2>
             {room.access.canCreateTopic && (
               <button
                 className="iconTextControl"

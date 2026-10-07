@@ -17,4 +17,32 @@ describe('RoomCard', () => {
       '/app/rooms/jeju',
     );
   });
+
+  it('labels an enterable room by its heading and links straight in', () => {
+    render(
+      <RoomCard
+        room={parseRoom({
+          ...lockedRoomPayload,
+          access: {
+            ...lockedRoomPayload.access,
+            status: 'AVAILABLE',
+            labelKo: '입장 가능',
+            canViewContent: true,
+            canChat: true,
+            canCreateTopic: true,
+            participantKind: 'TRAVELER',
+          },
+        })}
+      />,
+    );
+
+    expect(
+      screen.getByRole('article', { name: '제주 실시간 여행 도움방' }),
+    ).toHaveAttribute('data-access', 'open');
+    expect(screen.getByText('입장 가능')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '방으로 이동' })).toHaveAttribute(
+      'href',
+      '/app/rooms/jeju',
+    );
+  });
 });

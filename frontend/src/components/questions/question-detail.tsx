@@ -192,12 +192,9 @@ export function QuestionDetailView({
 
       <section className="answerThread" aria-labelledby="answer-thread-title">
         <div className="answerThread__heading">
-          <div>
-            <p>LOCAL SIGNALS</p>
-            <h2 id="answer-thread-title">
-              참여자 답변 {question.answers.length}
-            </h2>
-          </div>
+          <h2 id="answer-thread-title">
+            참여자 답변 {question.answers.length}
+          </h2>
           <span>먼저 도착한 순서</span>
         </div>
         {question.answers.length === 0 ? (

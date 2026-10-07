@@ -65,11 +65,8 @@ export function TopicResolutionActions({
   return (
     <section className="resolutionActions" aria-label="토픽 해결 결정">
       <header>
-        <span>YOUR DECISION</span>
-        <div>
-          <h2>도움이 됐다면 해결을 남겨주세요</h2>
-          <p>채택은 한 번만 가능하며 이후에는 새 답변을 받을 수 없어요.</p>
-        </div>
+        <h2>도움이 됐다면 해결을 남겨주세요</h2>
+        <p>채택은 한 번만 가능하며 이후에는 새 답변을 받을 수 없어요.</p>
       </header>
       {decision === undefined ? (
         <div className="resolutionActions__choices">
