@@ -8,6 +8,13 @@ import {
   type AdminVerification,
 } from '@/lib/api/admin-verifications';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
+import {
+  localProofTypeLabels,
+  verificationStatusLabels,
+  verificationStatusTones,
+  verificationTypeLabels,
+} from './admin-labels';
+import styles from './admin.module.css';
 
 function formatDate(value: string | null): string {
   return value === null
@@ -62,21 +69,18 @@ export function VerificationReviewPanel({
   }
 
   return (
-    <section className="reviewPanel" aria-label="인증 신청 상세">
-      <div className="reviewPanel__title">
-        <div>
-          <p>
-            {verification.type === 'TRAVELER' ? '여행자 신청' : '현지인 신청'}
-          </p>
-          <h2>{verification.applicant.nickname}</h2>
-        </div>
+    <section className={styles.panel} aria-label="인증 신청 상세">
+      <header className={styles.panelTitle}>
+        <p>{verificationTypeLabels[verification.type]} 신청</p>
+        <h2>{verification.applicant.nickname}</h2>
         <span
-          className={`adminStatus adminStatus--${verification.status.toLowerCase()}`}
+          className={styles.status}
+          data-tone={verificationStatusTones[verification.status]}
         >
-          {verification.status}
+          {verificationStatusLabels[verification.status]}
         </span>
-      </div>
-      <dl className="reviewFacts">
+      </header>
+      <dl className={styles.facts}>
         <div>
           <dt>여행지</dt>
           <dd>{verification.destination.nameKo}</dd>
@@ -100,46 +104,60 @@ export function VerificationReviewPanel({
           <>
             <div>
               <dt>연고 유형</dt>
-              <dd>{verification.localProofType}</dd>
+              <dd>
+                {verification.localProofType === null
+                  ? '—'
+                  : localProofTypeLabels[verification.localProofType]}
+              </dd>
             </div>
             <div>
-              <dt>GPS 요약</dt>
+              <dt>위치 확인</dt>
               <dd>
                 {verification.gpsSummary === null
                   ? '—'
-                  : `제주 내부 · 정확도 ${verification.gpsSummary.accuracyMeters}m`}
+                  : `${verification.destination.nameKo} 안, 정확도 ${verification.gpsSummary.accuracyMeters}m`}
               </dd>
             </div>
           </>
         )}
       </dl>
       {verification.note !== null && (
-        <div className="reviewNote">
+        <div className={styles.block}>
           <strong>신청 메모</strong>
           <p>{verification.note}</p>
         </div>
       )}
-      <button
-        className="evidenceButton"
-        type="button"
-        onClick={() => void evidence()}
-      >
-        비공개 증빙 다운로드 ↓
-      </button>
+      <div>
+        <button
+          className={styles.button}
+          type="button"
+          onClick={() => void evidence()}
+        >
+          비공개 증빙 다운로드
+        </button>
+      </div>
       {verification.status === 'PENDING' ? (
-        <div className="reviewActions">
+        <div className={styles.decision}>
           <p>처리 후에는 되돌릴 수 없습니다.</p>
           {decision === undefined ? (
-            <div>
-              <button type="button" onClick={() => setDecision('APPROVE')}>
+            <div className={styles.actions}>
+              <button
+                className={styles.button}
+                type="button"
+                onClick={() => setDecision('APPROVE')}
+              >
                 승인 검토
               </button>
-              <button type="button" onClick={() => setDecision('REJECT')}>
+              <button
+                className={styles.button}
+                type="button"
+                onClick={() => setDecision('REJECT')}
+              >
                 반려 검토
               </button>
             </div>
           ) : (
-            <div className="reviewConfirm">
+            <>
               <strong>
                 {decision === 'APPROVE'
                   ? '이 신청을 승인할까요?'
@@ -147,15 +165,18 @@ export function VerificationReviewPanel({
               </strong>
               {decision === 'REJECT' && (
                 <textarea
+                  className={styles.textarea}
                   rows={4}
                   maxLength={300}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="신청자에게 보일 사유를 10자 이상 입력"
+                  placeholder="신청자에게 보일 사유를 10자 이상 입력해 주세요."
+                  aria-label="반려 사유"
                 />
               )}
-              <div>
+              <div className={styles.confirmActions}>
                 <button
+                  className={styles.cancel}
                   type="button"
                   onClick={() => setDecision(undefined)}
                   disabled={pending}
@@ -163,6 +184,11 @@ export function VerificationReviewPanel({
                   취소
                 </button>
                 <button
+                  className={
+                    decision === 'APPROVE'
+                      ? styles.confirm
+                      : styles.confirmDanger
+                  }
                   type="button"
                   onClick={() => void confirm()}
                   disabled={pending}
@@ -174,18 +200,18 @@ export function VerificationReviewPanel({
                       : '반려 확정'}
                 </button>
               </div>
-            </div>
+            </>
           )}
         </div>
       ) : (
-        <div className="reviewComplete">
+        <p className={styles.done}>
           {verification.reviewedAt === null
             ? '처리 완료'
             : `${formatDate(verification.reviewedAt)} 처리됨`}
-        </div>
+        </p>
       )}
       {message !== undefined && (
-        <p className="adminMessage" role="alert">
+        <p className={styles.message} role="alert">
           {message}
         </p>
       )}

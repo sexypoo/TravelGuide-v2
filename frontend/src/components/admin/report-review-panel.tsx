@@ -8,6 +8,13 @@ import {
   type ReportReviewDecision,
 } from '@/lib/api/admin-reports';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
+import { reportReasonLabels } from '@/components/reports/report-reason-labels';
+import {
+  reportStatusLabels,
+  reportStatusTones,
+  reportTargetLabels,
+} from './admin-labels';
+import styles from './admin.module.css';
 
 const decisionLabels: Record<ReportReviewDecision, string> = {
   KEEP: '콘텐츠 유지',
@@ -46,19 +53,18 @@ export function ReportReviewPanel({
   }
 
   return (
-    <section className="reviewPanel reportReviewPanel" aria-label="신고 상세">
-      <div className="reviewPanel__title">
-        <div>
-          <p>{report.targetType} REPORT</p>
-          <h2>{report.target.author.nickname}</h2>
-        </div>
+    <section className={styles.panel} aria-label="신고 상세">
+      <header className={styles.panelTitle}>
+        <p>{reportTargetLabels[report.targetType]} 신고</p>
+        <h2>{report.target.author.nickname}</h2>
         <span
-          className={`adminStatus adminStatus--${report.status.toLowerCase()}`}
+          className={styles.status}
+          data-tone={reportStatusTones[report.status]}
         >
-          {report.status}
+          {reportStatusLabels[report.status]}
         </span>
-      </div>
-      <dl className="reviewFacts">
+      </header>
+      <dl className={styles.facts}>
         <div>
           <dt>신고자</dt>
           <dd>{report.reporter.nickname}</dd>
@@ -69,57 +75,70 @@ export function ReportReviewPanel({
         </div>
         <div>
           <dt>대상</dt>
-          <dd>{report.targetType}</dd>
+          <dd>{reportTargetLabels[report.targetType]}</dd>
         </div>
         <div>
           <dt>사유</dt>
-          <dd>{report.reason}</dd>
+          <dd>{reportReasonLabels[report.reason]}</dd>
         </div>
       </dl>
       {report.target.content !== null && (
-        <div className="reportedContent">
+        <div className={`${styles.block} ${styles.quote}`}>
           <strong>신고된 원문</strong>
           <p>{report.target.content}</p>
           {report.target.removed && <span>현재 공개 화면에서 숨김 처리됨</span>}
         </div>
       )}
       {report.detail !== null && (
-        <div className="reviewNote">
+        <div className={styles.block}>
           <strong>신고 상세</strong>
           <p>{report.detail}</p>
         </div>
       )}
       {report.status === 'PENDING' ? (
-        <div className="reviewActions reportReviewActions">
+        <div className={styles.decision}>
           <p>원문과 신고 사유를 비교한 뒤 한 가지 결정을 선택하세요.</p>
           {decision === undefined ? (
-            <div>
-              <button type="button" onClick={() => setDecision('KEEP')}>
+            <div className={styles.actions}>
+              <button
+                className={styles.button}
+                type="button"
+                onClick={() => setDecision('KEEP')}
+              >
                 유지 검토
               </button>
               {report.targetType !== 'USER' && (
-                <button type="button" onClick={() => setDecision('REMOVE')}>
+                <button
+                  className={styles.button}
+                  type="button"
+                  onClick={() => setDecision('REMOVE')}
+                >
                   숨김 검토
                 </button>
               )}
-              <button type="button" onClick={() => setDecision('DISMISS')}>
+              <button
+                className={styles.button}
+                type="button"
+                onClick={() => setDecision('DISMISS')}
+              >
                 기각 검토
               </button>
             </div>
           ) : (
-            <div
-              className={`reviewConfirm${decision === 'REMOVE' ? ' reviewConfirm--danger' : ''}`}
-            >
+            <>
               <strong>{decisionLabels[decision]}으로 처리할까요?</strong>
               <textarea
+                className={styles.textarea}
                 rows={4}
                 maxLength={300}
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
-                placeholder="처리 근거 메모 · 선택"
+                placeholder="처리 근거 메모 (선택)"
+                aria-label="처리 근거 메모"
               />
-              <div>
+              <div className={styles.confirmActions}>
                 <button
+                  className={styles.cancel}
                   type="button"
                   onClick={() => setDecision(undefined)}
                   disabled={pending}
@@ -127,6 +146,11 @@ export function ReportReviewPanel({
                   취소
                 </button>
                 <button
+                  className={
+                    decision === 'REMOVE'
+                      ? styles.confirmDanger
+                      : styles.confirm
+                  }
                   type="button"
                   onClick={() => void confirm()}
                   disabled={pending}
@@ -134,11 +158,11 @@ export function ReportReviewPanel({
                   {pending ? '처리 중…' : `${decisionLabels[decision]} 확정`}
                 </button>
               </div>
-            </div>
+            </>
           )}
         </div>
       ) : (
-        <div className="reviewComplete">
+        <div className={styles.done}>
           {report.reviewedBy === null
             ? '처리 완료'
             : `${report.reviewedBy.nickname} 관리자가 처리함`}
@@ -146,7 +170,7 @@ export function ReportReviewPanel({
         </div>
       )}
       {message !== undefined && (
-        <p className="adminMessage" role="alert">
+        <p className={styles.message} role="alert">
           {message}
         </p>
       )}
