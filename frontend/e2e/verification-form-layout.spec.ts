@@ -17,16 +17,18 @@ test('traveler verification form stays within a 390px viewport', async ({
 
   await page.goto('/app/verifications/traveler');
   await expect(
-    page.getByRole('heading', { name: '여행 기간만큼 제주 도움방을 열어요' }),
+    page.getByRole('heading', { name: '여행자 인증 신청' }),
   ).toBeVisible();
 
   const layout = await page.evaluate(() => {
-    const form = document.querySelector<HTMLElement>('.verificationForm');
+    const form = document.querySelector<HTMLElement>(
+      '[data-verification-form]',
+    );
     const dateInputs = Array.from(
-      document.querySelectorAll<HTMLInputElement>('.dateFieldGrid input'),
+      document.querySelectorAll<HTMLInputElement>('[data-date-frame] input'),
     );
     const dateFrames = Array.from(
-      document.querySelectorAll<HTMLElement>('.dateInputFrame'),
+      document.querySelectorAll<HTMLElement>('[data-date-frame]'),
     );
     if (form === null || dateInputs.length !== 2 || dateFrames.length !== 2)
       return null;

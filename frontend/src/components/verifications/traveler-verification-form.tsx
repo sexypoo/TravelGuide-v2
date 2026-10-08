@@ -9,6 +9,7 @@ import {
   localDateToIso,
   proofError,
 } from './verification-form-utils';
+import styles from './verification.module.css';
 
 export function TravelerVerificationForm({
   destinationId,
@@ -58,22 +59,20 @@ export function TravelerVerificationForm({
 
   return (
     <form
-      className="verificationForm"
+      className={styles.form}
       onSubmit={(event) => void submit(event)}
       noValidate
+      data-verification-form
     >
-      <section className="formSection">
-        <div className="formSection__heading">
-          <span>1</span>
-          <div>
-            <h2>여행 일정</h2>
-            <p>방을 이용할 날짜를 확인해요.</p>
-          </div>
-        </div>
-        <div className="dateFieldGrid">
-          <label>
+      <section className={styles.formSection}>
+        <header>
+          <h2>여행 일정</h2>
+          <p>도움방을 이용할 날짜를 골라 주세요.</p>
+        </header>
+        <div className={styles.dates}>
+          <label className={styles.field}>
             시작일
-            <span className="dateInputFrame">
+            <span className={styles.dateFrame} data-date-frame>
               <input
                 type="date"
                 min={today}
@@ -82,9 +81,9 @@ export function TravelerVerificationForm({
               />
             </span>
           </label>
-          <label>
+          <label className={styles.field}>
             종료일
-            <span className="dateInputFrame">
+            <span className={styles.dateFrame} data-date-frame>
               <input
                 type="date"
                 min={startsAt || today}
@@ -95,31 +94,31 @@ export function TravelerVerificationForm({
           </label>
         </div>
       </section>
-      <section className="formSection">
-        <div className="formSection__heading">
-          <span>2</span>
-          <div>
-            <h2>여행 증빙</h2>
-            <p>항공권이나 숙소 예약 내역을 준비해 주세요.</p>
-          </div>
-        </div>
-        <label className="proofDrop">
+      <section className={styles.formSection}>
+        <header>
+          <h2>여행 증빙</h2>
+          <p>항공권이나 숙소 예약 내역을 올려 주세요.</p>
+        </header>
+        <label className={styles.upload}>
           증빙 파일 선택
           <input
             type="file"
             accept="image/jpeg,image/png,application/pdf"
             onChange={(e) => setProof(e.target.files?.[0])}
           />
-          <span>{proof?.name ?? 'JPEG, PNG, PDF · 최대 5MB'}</span>
+          <span>{proof?.name ?? 'JPEG, PNG, PDF 파일, 최대 5MB'}</span>
         </label>
-        <label className="stackField">
-          관리자에게 남길 메모 <span>{note.length}/300</span>
+        <label className={styles.field}>
+          <span className={styles.fieldLabel}>
+            관리자에게 남길 메모 (선택) <span>{note.length}/300</span>
+          </span>
           <textarea
+            className={styles.control}
             maxLength={300}
             rows={4}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="확인에 도움이 되는 내용을 적어 주세요. (선택)"
+            placeholder="확인에 도움이 되는 내용을 적어 주세요."
           />
         </label>
       </section>
@@ -132,7 +131,7 @@ export function TravelerVerificationForm({
           <p>{error}</p>
         </div>
       )}
-      <button className="verificationSubmit" disabled={pending}>
+      <button className={styles.submit} disabled={pending}>
         {pending ? (
           <>
             <span className="buttonSpinner" /> 신청 보내는 중
@@ -153,7 +152,7 @@ function Consent({
   onChange: (value: boolean) => void;
 }): React.JSX.Element {
   return (
-    <label className="verificationConsent">
+    <label className={styles.consent}>
       <input
         type="checkbox"
         checked={checked}

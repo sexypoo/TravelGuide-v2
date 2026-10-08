@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import type { Verification } from '@/lib/api/verifications';
+import type { Verification, VerificationStatus } from '@/lib/api/verifications';
+import styles from './verification.module.css';
 
 const labels = {
   PENDING: '심사 중',
@@ -9,11 +10,31 @@ const labels = {
   EXPIRED: '기간 만료',
 } as const;
 
+const tones: Readonly<Record<VerificationStatus, string>> = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  REVOKED: 'inactive',
+  EXPIRED: 'inactive',
+};
+
+type StepState = 'done' | 'current' | 'upcoming';
+
 function date(value: string | null): string | null {
   if (value === null) return null;
   return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' }).format(
     new Date(value),
   );
+}
+
+function steps(
+  status: VerificationStatus,
+): ReadonlyArray<{ label: string; state: StepState }> {
+  return [
+    { label: '제출', state: 'done' },
+    { label: '심사', state: status === 'PENDING' ? 'current' : 'done' },
+    { label: '참여', state: status === 'APPROVED' ? 'done' : 'upcoming' },
+  ];
 }
 
 export function VerificationStatusCard({
@@ -29,35 +50,33 @@ export function VerificationStatusCard({
       : `${date(verification.expiresAt)}까지 유효`;
 
   return (
-    <article
-      className={`verificationPass verificationPass--${verification.status.toLowerCase()}`}
-    >
-      <div className="verificationPass__edge" aria-hidden="true" />
-      <div className="verificationPass__top">
-        <span>{isTraveler ? 'TRAVELER PASS' : 'LOCAL PASS'}</span>
-        <strong>{labels[verification.status]}</strong>
-      </div>
-      <h2>
+    <article className={styles.status} data-status={verification.status}>
+      <h3>
         {verification.destination.nameKo} {isTraveler ? '여행자' : '현지인'}{' '}
         인증
-      </h2>
-      <p>{validity}</p>
-      <ol aria-label="인증 진행 상태">
-        <li className="isDone">제출</li>
-        <li
-          className={verification.status !== 'PENDING' ? 'isDone' : 'isCurrent'}
-        >
-          심사
-        </li>
-        <li
-          className={verification.status === 'APPROVED' ? 'isDone' : undefined}
-        >
-          참여
-        </li>
+      </h3>
+      <strong
+        className={styles.statusLabel}
+        data-tone={tones[verification.status]}
+      >
+        {labels[verification.status]}
+      </strong>
+      <p className={styles.validity}>{validity}</p>
+      <ol className={styles.progress} aria-label="인증 진행 상태">
+        {steps(verification.status).map((step) => (
+          <li
+            key={step.label}
+            data-state={step.state}
+            aria-current={step.state === 'current' ? 'step' : undefined}
+          >
+            <span aria-hidden="true" />
+            {step.label}
+          </li>
+        ))}
       </ol>
       {verification.status === 'REJECTED' &&
         verification.rejectionReason !== null && (
-          <div className="verificationPass__reason">
+          <div className={styles.reason}>
             <strong>다시 확인할 내용</strong>
             <p>{verification.rejectionReason}</p>
             <Link
@@ -68,9 +87,7 @@ export function VerificationStatusCard({
           </div>
         )}
       {verification.status === 'REVOKED' && (
-        <p className="verificationPass__support">
-          자격 관련 문의는 운영팀에 알려 주세요.
-        </p>
+        <p className={styles.support}>자격 관련 문의는 운영팀에 알려 주세요.</p>
       )}
     </article>
   );

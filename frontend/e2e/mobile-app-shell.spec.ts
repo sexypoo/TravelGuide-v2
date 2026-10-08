@@ -38,8 +38,8 @@ const mobilePages = [
   {
     name: 'verifications',
     path: '/app/verifications',
-    heading: '.pageHeading h1',
-    body: '.pageHeading > span',
+    heading: '#verifications-title',
+    body: '#verifications-lede',
   },
   {
     name: 'saved-places',

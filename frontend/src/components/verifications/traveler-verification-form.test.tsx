@@ -12,9 +12,9 @@ describe('TravelerVerificationForm', () => {
     const { container } = render(
       <TravelerVerificationForm destinationId="destination-jeju" />,
     );
-    expect(container.querySelectorAll('.dateInputFrame')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-date-frame]')).toHaveLength(2);
     for (const input of container.querySelectorAll('input[type="date"]')) {
-      expect(input.parentElement).toHaveClass('dateInputFrame');
+      expect(input.parentElement).toHaveAttribute('data-date-frame');
     }
   });
 

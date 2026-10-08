@@ -228,9 +228,6 @@
       .profileSavedPlacesLink,
       .profileEdit,
       .travelRecords,
-      .verificationPass,
-      .verificationChoiceGrid > a,
-      .verificationGuide__grid article,
       .savedPlaceCard
     ) {
     border-color: var(--line);
@@ -249,7 +246,6 @@
       .travelRecordForm footer button,
       .savedPlaceCard footer a,
       .savedPlaceCard footer button,
-      .verificationSubmit,
       .appError button
     ) {
     min-height: 2.75rem;
@@ -424,7 +420,7 @@
     font-size: 0.8125rem;
   }
 
-  /* Profile, verification, saved places */
+  /* Profile and saved places */
   .appShell:not(.appShell--room) .profileIdentity {
     margin-top: 1.5rem;
     padding: 1.15rem;
@@ -521,41 +517,6 @@
     font-size: 0.75rem;
   }
 
-  .appShell:not(.appShell--room) .verificationPassList,
-  .appShell:not(.appShell--room) .verificationChoices {
-    margin-top: 1.5rem;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(
-      .verificationPass > p,
-      .verificationPass ol li,
-      .verificationPass__reason p,
-      .verificationChoiceGrid p,
-      .verificationGuide__grid li,
-      .verificationGuide__notice p
-    ) {
-    font-size: 0.875rem;
-    line-height: 1.6;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(
-      .verificationPass h2,
-      .verificationChoices h2,
-      .verificationChoiceGrid strong,
-      .verificationGuide__grid h2
-    ) {
-    font-size: 1.2rem;
-    line-height: 1.35;
-  }
-
-  .appShell:not(.appShell--room) .verificationChoiceGrid > a,
-  .appShell:not(.appShell--room) .verificationGuide__grid article {
-    padding: 1.2rem;
-  }
-
-  .appShell:not(.appShell--room) .verificationChoiceGrid b,
   .appShell:not(.appShell--room) .guideStatus {
     min-height: 2.75rem;
     align-items: center;

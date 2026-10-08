@@ -6,6 +6,7 @@ import { AppIcon } from '@/components/common';
 import type { LocalProofType } from '@/lib/api/verifications';
 import { submitLocalVerification } from '@/lib/api/verifications';
 import { applicationError, proofError } from './verification-form-utils';
+import styles from './verification.module.css';
 
 interface CapturedLocation {
   latitude: number;
@@ -42,6 +43,7 @@ export function LocalVerificationForm({
 }: {
   destination: {
     id: string;
+    nameKo: string;
     center: { latitude: number; longitude: number };
     radiusKm: number;
   };
@@ -88,7 +90,7 @@ export function LocalVerificationForm({
         }
         setLocation(captured);
         setLocationMessage(
-          `제주 안에서 확인했어요 · 정확도 ${Math.round(captured.accuracy)}m`,
+          `제주 안에서 확인했어요. 정확도 ${Math.round(captured.accuracy)}m`,
         );
       },
       (positionError) => {
@@ -134,20 +136,21 @@ export function LocalVerificationForm({
 
   return (
     <form
-      className="verificationForm"
+      className={styles.form}
       onSubmit={(event) => void submit(event)}
       noValidate
+      data-verification-form
     >
-      <section className="formSection">
-        <div className="formSection__heading">
-          <span>1</span>
-          <div>
-            <h2>현재 위치</h2>
-            <p>GPS는 제주 안에 있다는 보조 확인에만 사용해요.</p>
-          </div>
-        </div>
+      <section className={styles.formSection}>
+        <header>
+          <h2>현재 위치</h2>
+          <p>
+            {destination.nameKo} 중심 반경 {destination.radiusKm}km 안에
+            있는지만 확인해요. 좌표는 화면에 표시하지 않아요.
+          </p>
+        </header>
         <button
-          className="locationButton"
+          className={styles.locate}
           type="button"
           onClick={captureLocation}
           disabled={locating}
@@ -160,27 +163,24 @@ export function LocalVerificationForm({
         </button>
         {locationMessage !== undefined && (
           <div
-            className={`locationResult${location === undefined ? ' locationResult--error' : ''}`}
+            className={styles.locationResult}
+            data-tone={location === undefined ? 'error' : 'success'}
             role="status"
           >
-            <span aria-hidden="true">
-              <AppIcon name={location === undefined ? 'alert' : 'check'} />
-            </span>
-            {locationMessage}
+            <AppIcon name={location === undefined ? 'alert' : 'check'} />
+            <span>{locationMessage}</span>
           </div>
         )}
       </section>
-      <section className="formSection">
-        <div className="formSection__heading">
-          <span>2</span>
-          <div>
-            <h2>제주와의 연결</h2>
-            <p>관리자가 확인할 수 있도록 구체적으로 알려 주세요.</p>
-          </div>
-        </div>
-        <label className="stackField">
+      <section className={styles.formSection}>
+        <header>
+          <h2>연고 확인</h2>
+          <p>관리자가 확인할 수 있도록 구체적으로 알려 주세요.</p>
+        </header>
+        <label className={styles.field}>
           연고 유형
           <select
+            className={styles.control}
             value={proofType}
             onChange={(e) => setProofType(e.target.value as LocalProofType)}
           >
@@ -190,9 +190,12 @@ export function LocalVerificationForm({
             <option value="OTHER">기타</option>
           </select>
         </label>
-        <label className="stackField">
-          관계 설명 <span>{note.length}/300</span>
+        <label className={styles.field}>
+          <span className={styles.fieldLabel}>
+            관계 설명 <span>{note.length}/300</span>
+          </span>
           <textarea
+            className={styles.control}
             maxLength={300}
             rows={5}
             value={note}
@@ -200,17 +203,17 @@ export function LocalVerificationForm({
             placeholder="제주에서 생활한 기간과 잘 아는 지역 등을 30자 이상 적어 주세요."
           />
         </label>
-        <label className="proofDrop">
+        <label className={styles.upload}>
           연고 증빙 선택
           <input
             type="file"
             accept="image/jpeg,image/png,application/pdf"
             onChange={(e) => setProof(e.target.files?.[0])}
           />
-          <span>{proof?.name ?? 'JPEG, PNG, PDF · 최대 5MB'}</span>
+          <span>{proof?.name ?? 'JPEG, PNG, PDF 파일, 최대 5MB'}</span>
         </label>
       </section>
-      <label className="verificationConsent">
+      <label className={styles.consent}>
         <input
           type="checkbox"
           checked={consent}
@@ -230,7 +233,7 @@ export function LocalVerificationForm({
           <p>{error}</p>
         </div>
       )}
-      <button className="verificationSubmit" disabled={pending}>
+      <button className={styles.submit} disabled={pending}>
         {pending ? (
           <>
             <span className="buttonSpinner" /> 신청 보내는 중

@@ -508,15 +508,13 @@ textarea {
 .authBack > .appIcon,
 .appBackLink > .appIcon,
 .communityHero > button > .appIcon,
-.communityCard__meta .appIcon,
-.verificationChoiceGrid b > .appIcon {
+.communityCard__meta .appIcon {
   width: 1rem;
   height: 1rem;
 }
 
 .communityHero > button,
-.communityCard__meta mark,
-.verificationChoiceGrid b {
+.communityCard__meta mark {
   display: inline-flex;
   gap: 0.38rem;
   align-items: center;
@@ -524,18 +522,13 @@ textarea {
 
 .reportSheet__close > .appIcon,
 .reportComplete > span > .appIcon,
-.submissionSuccess > span > .appIcon,
-.verificationEmpty > span > .appIcon,
-.qualificationIcon > .appIcon,
 .contributorVerification > span > .appIcon,
-.locationResult > span > .appIcon,
 .verifiedDot > .appIcon {
   width: 1.05rem;
   height: 1.05rem;
 }
 
 .safetyNote > span > .appIcon,
-.verificationGuide__notice > span > .appIcon,
 .formAlert > span > .appIcon {
   width: 0.82rem;
   height: 0.82rem;
@@ -4109,9 +4102,6 @@ textarea:focus-visible {
 }
 
 .lockedRoomPage,
-.verificationGuide,
-.verificationOverview,
-.verificationApplication,
 .profilePage {
   width: 100%;
   max-width: 720px;
@@ -6372,97 +6362,8 @@ textarea:focus-visible {
   }
 }
 
-/* T04 verification passes and trust desk */
-.verificationOverview,
-.verificationApplication {
-  animation: riseIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
+/* T04 admin review status */
 
-.submissionSuccess {
-  display: flex;
-  gap: 0.85rem;
-  align-items: center;
-  margin-top: 2rem;
-  padding: 1rem 1.1rem;
-  border-radius: 1rem;
-  background: #eafbf5;
-  color: #08795b;
-}
-
-.submissionSuccess > span {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border-radius: 0.7rem;
-  background: white;
-  font-weight: 850;
-}
-
-.submissionSuccess strong,
-.submissionSuccess p {
-  font-size: 0.8rem;
-}
-
-.submissionSuccess p {
-  margin: 0.25rem 0 0;
-}
-
-.verificationPassList {
-  display: grid;
-  margin-top: 2rem;
-  gap: 1rem;
-}
-
-.verificationPass {
-  position: relative;
-  overflow: hidden;
-  padding: 1.5rem;
-  border: 1px solid var(--line);
-  border-radius: 1.4rem;
-  background: white;
-  box-shadow: var(--shadow-card);
-}
-
-.verificationPass::before,
-.verificationPass::after {
-  position: absolute;
-  top: 4.6rem;
-  width: 1.1rem;
-  height: 1.1rem;
-  border-radius: 50%;
-  background: var(--canvas);
-  content: '';
-}
-
-.verificationPass::before {
-  left: -0.58rem;
-}
-.verificationPass::after {
-  right: -0.58rem;
-}
-
-.verificationPass__edge {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 0.3rem;
-  background: var(--gradient);
-}
-
-.verificationPass__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.verificationPass__top > span {
-  color: var(--purple);
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-}
-
-.verificationPass__top > strong,
 .adminStatus {
   padding: 0.42rem 0.6rem;
   border-radius: 0.6rem;
@@ -6472,395 +6373,14 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
-.verificationPass--approved .verificationPass__top > strong,
 .adminStatus--approved {
   background: #eafbf5;
   color: #08795b;
 }
 
-.verificationPass--rejected .verificationPass__top > strong,
 .adminStatus--rejected {
   background: #fff1f2;
   color: #b4232a;
-}
-
-.verificationPass h2 {
-  margin: 1.4rem 0 0;
-  font-family: var(--display);
-  font-size: 1.35rem;
-  letter-spacing: -0.045em;
-}
-
-.verificationPass > p {
-  margin: 0.45rem 0 0;
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.verificationPass ol {
-  display: grid;
-  margin: 1.5rem 0 0;
-  padding: 0;
-  grid-template-columns: repeat(3, 1fr);
-  list-style: none;
-}
-
-.verificationPass ol li {
-  position: relative;
-  padding-top: 1rem;
-  border-top: 2px solid var(--line);
-  color: var(--subtle);
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.verificationPass ol li::before {
-  position: absolute;
-  top: -0.38rem;
-  left: 0;
-  width: 0.65rem;
-  height: 0.65rem;
-  border: 2px solid white;
-  border-radius: 50%;
-  background: var(--line-strong);
-  content: '';
-}
-
-.verificationPass ol li.isDone,
-.verificationPass ol li.isCurrent {
-  color: var(--purple);
-  border-color: #cfc4f5;
-}
-.verificationPass ol li.isDone::before {
-  background: var(--purple);
-}
-.verificationPass ol li.isCurrent::before {
-  background: var(--magenta);
-  box-shadow: 0 0 0 0.25rem rgba(233, 60, 172, 0.1);
-}
-
-.verificationPass__reason {
-  margin-top: 1.25rem;
-  padding: 1rem;
-  border-radius: 0.9rem;
-  background: #fff6f6;
-}
-
-.verificationPass__reason strong {
-  color: #b4232a;
-  font-size: 0.75rem;
-}
-.verificationPass__reason p {
-  margin: 0.4rem 0 0;
-  color: var(--muted);
-  font-size: 0.78rem;
-  line-height: 1.55;
-}
-.verificationPass__reason a {
-  display: inline-flex;
-  margin-top: 0.75rem;
-  color: var(--purple);
-  font-size: 0.75rem;
-  font-weight: 750;
-  text-decoration: none;
-}
-
-.verificationEmpty {
-  margin-top: 2rem;
-  padding: 2.75rem 1.5rem;
-  border: 1px dashed var(--line-strong);
-  border-radius: 1.4rem;
-  text-align: center;
-}
-
-.verificationEmpty h2 {
-  margin: 0.8rem 0 0;
-  font-size: 1rem;
-}
-.verificationEmpty p {
-  margin: 0.5rem 0 0;
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-.verificationChoices {
-  margin-top: 3.5rem;
-}
-.verificationChoices > div:first-child > p {
-  margin: 0 0 0.5rem;
-  color: var(--purple);
-  font-size: 0.75rem;
-  font-weight: 750;
-}
-.verificationChoices h2 {
-  margin: 0;
-  font-family: var(--display);
-  font-size: 1.45rem;
-  letter-spacing: -0.045em;
-}
-.verificationChoiceGrid {
-  display: grid;
-  margin-top: 1rem;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.85rem;
-}
-.verificationChoiceGrid > a {
-  display: grid;
-  min-height: 13rem;
-  padding: 1.25rem;
-  border: 1px solid var(--line);
-  border-radius: 1.2rem;
-  background: white;
-  text-decoration: none;
-}
-.verificationChoiceGrid > a.isDisabled {
-  pointer-events: none;
-  opacity: 0.65;
-}
-.verificationChoiceGrid strong {
-  margin-top: 1rem;
-  font-size: 0.88rem;
-}
-.verificationChoiceGrid p {
-  margin: 0.45rem 0 0;
-  color: var(--muted);
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-.verificationChoiceGrid b {
-  align-self: end;
-  margin-top: 1rem;
-  color: var(--purple);
-  font-size: 0.72rem;
-}
-
-.destinationChip {
-  display: inline-flex;
-  margin-top: 1.5rem;
-  padding: 0.55rem 0.75rem;
-  border-radius: 0.75rem;
-  background: #f0ebff;
-  color: var(--purple);
-  font-size: 0.72rem;
-  font-weight: 750;
-}
-
-.verificationForm {
-  display: grid;
-  margin-top: 1rem;
-  gap: 1rem;
-  min-width: 0;
-}
-.formSection {
-  min-width: 0;
-  padding: 1.4rem;
-  border: 1px solid var(--line);
-  border-radius: 1.3rem;
-  background: white;
-}
-.formSection__heading {
-  display: flex;
-  gap: 0.8rem;
-  align-items: flex-start;
-}
-.formSection__heading > span {
-  display: grid;
-  width: 1.8rem;
-  height: 1.8rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.65rem;
-  background: #f1ecff;
-  color: var(--purple);
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-.formSection__heading h2 {
-  margin: 0;
-  font-size: 1rem;
-}
-.formSection__heading p {
-  margin: 0.3rem 0 0;
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-.dateFieldGrid {
-  display: grid;
-  margin-top: 1.4rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-.dateFieldGrid label,
-.stackField {
-  position: relative;
-  display: grid;
-  min-width: 0;
-  gap: 0.5rem;
-  color: #4e5968;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-.dateFieldGrid input,
-.stackField select,
-.stackField textarea {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--line);
-  border-radius: 0.9rem;
-  background: var(--canvas);
-  color: var(--ink);
-}
-.dateInputFrame {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 0.9rem;
-  background: var(--canvas);
-}
-.dateInputFrame:focus-within {
-  outline: 3px solid rgba(103, 93, 218, 0.34);
-  outline-offset: 3px;
-}
-.dateInputFrame input {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  outline: 0;
-  text-align: left;
-}
-.dateInputFrame input::-webkit-date-and-time-value {
-  min-width: 0;
-  text-align: left;
-}
-.stackField {
-  margin-top: 1rem;
-}
-.stackField > span {
-  position: absolute;
-  top: 0;
-  right: 0;
-  color: var(--subtle);
-  font-size: 0.67rem;
-  font-weight: 600;
-}
-.stackField textarea {
-  resize: vertical;
-  line-height: 1.6;
-}
-.proofDrop {
-  display: grid;
-  margin-top: 1.25rem;
-  padding: 1.2rem;
-  border: 1px dashed #cfc5ea;
-  border-radius: 1rem;
-  background: #faf8ff;
-  color: var(--purple);
-  cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 750;
-  text-align: center;
-}
-.proofDrop input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-}
-.proofDrop span {
-  margin-top: 0.35rem;
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.verificationConsent {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-  padding: 1rem;
-  border-radius: 1rem;
-  background: #f0f2f4;
-  color: var(--muted);
-  font-size: 0.74rem;
-  line-height: 1.55;
-}
-.verificationConsent input {
-  width: 1.1rem;
-  height: 1.1rem;
-  flex: 0 0 auto;
-  accent-color: var(--purple);
-}
-.verificationConsent strong {
-  display: block;
-  color: var(--ink);
-}
-.verificationSubmit {
-  display: inline-flex;
-  min-height: 3.5rem;
-  gap: 0.55rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 1rem;
-  background: var(--gradient);
-  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.2);
-  color: white;
-  cursor: pointer;
-  font-weight: 750;
-}
-.verificationSubmit:disabled {
-  cursor: wait;
-  opacity: 0.65;
-}
-.locationButton {
-  width: 100%;
-  min-height: 3.2rem;
-  margin-top: 1.25rem;
-  border: 1px solid #d9cefa;
-  border-radius: 0.9rem;
-  background: #f7f4ff;
-  color: var(--purple);
-  cursor: pointer;
-  font-weight: 750;
-}
-.locationResult {
-  display: flex;
-  gap: 0.55rem;
-  align-items: center;
-  margin-top: 0.75rem;
-  color: #08795b;
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-.locationResult > span {
-  display: grid;
-  width: 1.25rem;
-  height: 1.25rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 50%;
-  background: #eafbf5;
-  font-weight: 800;
-}
-
-.locationResult--error > span > .appIcon {
-  width: 0.95rem;
-  height: 0.95rem;
-}
-.locationResult--error {
-  color: #b4232a;
-}
-.locationResult--error > span {
-  background: #fff1f2;
 }
 
 .adminHeader > div > a {
@@ -7177,8 +6697,6 @@ textarea:focus-visible {
 }
 
 @media (max-width: 760px) {
-  .verificationChoiceGrid,
-  .dateFieldGrid,
   .reviewFacts {
     grid-template-columns: 1fr;
   }
@@ -7209,10 +6727,6 @@ textarea:focus-visible {
   .applicationList > a > p,
   .applicationList > a > small {
     grid-column: 2;
-  }
-  .proofDrop span {
-    white-space: normal;
-    word-break: break-all;
   }
 }
 
@@ -7297,7 +6811,6 @@ textarea:focus-visible {
 }
 
 .lockedRoomPage,
-.verificationGuide,
 .profilePage {
   animation: riseIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -7321,19 +6834,6 @@ textarea:focus-visible {
   letter-spacing: -0.065em;
   line-height: 1.18;
   word-break: keep-all;
-}
-
-.verificationGuide__notice > span {
-  display: grid;
-  width: 1.35rem;
-  height: 1.35rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border: 1px solid rgba(124, 58, 237, 0.28);
-  border-radius: 50%;
-  color: var(--purple);
-  font-size: 0.7rem;
-  font-weight: 800;
 }
 
 .profileEdit > div > h2 {
@@ -7423,27 +6923,6 @@ textarea:focus-visible {
 .emptyState p {
   margin: 0.5rem 0 0;
   font-size: 0.8rem;
-}
-
-.qualificationIcon {
-  display: grid;
-  width: 2.5rem;
-  height: 2.5rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border-radius: 0.9rem;
-  font-size: 1rem;
-  font-weight: 850;
-}
-
-.qualificationIcon--traveler {
-  background: #fff0f8;
-  color: var(--magenta);
-}
-
-.qualificationIcon--local {
-  background: #f1ecff;
-  color: var(--purple);
 }
 
 .appBackLink {
@@ -7538,8 +7017,7 @@ textarea:focus-visible {
 }
 
 .roomContext h2,
-.roomLockPanel h2,
-.verificationGuide__grid h2 {
+.roomLockPanel h2 {
   margin: 0;
   font-family: var(--display);
   font-size: 1.35rem;
@@ -7609,58 +7087,6 @@ textarea:focus-visible {
   max-width: 36rem;
 }
 
-.verificationGuide__grid {
-  display: grid;
-  margin-top: 2.5rem;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
-.verificationGuide__grid article {
-  padding: 1.5rem;
-  border: 1px solid var(--line);
-  border-radius: 1.35rem;
-  background: white;
-}
-
-.verificationGuide__grid article.isSelected {
-  border-color: rgba(124, 58, 237, 0.35);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.06);
-}
-
-.verificationGuide__grid article > p {
-  margin: 1.5rem 0 0.4rem;
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-
-.verificationGuide__grid ul {
-  display: grid;
-  margin: 1.25rem 0 0;
-  padding: 0;
-  gap: 0.65rem;
-  list-style: none;
-}
-
-.verificationGuide__grid li {
-  position: relative;
-  padding-left: 1.1rem;
-  color: #4e5968;
-  font-size: 0.78rem;
-  line-height: 1.5;
-}
-
-.verificationGuide__grid li::before {
-  position: absolute;
-  top: 0.52rem;
-  left: 0;
-  width: 0.35rem;
-  height: 0.35rem;
-  border-radius: 50%;
-  background: var(--purple);
-  content: '';
-}
-
 .guideStatus {
   display: inline-flex;
   min-height: 2rem;
@@ -7672,27 +7098,6 @@ textarea:focus-visible {
   color: var(--muted);
   font-size: 0.7rem;
   font-weight: 700;
-}
-
-.verificationGuide__notice {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-  margin-top: 1rem;
-  padding: 1rem;
-  border-radius: 1rem;
-  background: #f1f3f5;
-}
-
-.verificationGuide__notice p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.78rem;
-  line-height: 1.6;
-}
-
-.verificationGuide > .appBackLink {
-  margin-top: 2rem;
 }
 
 .profileIdentity {
@@ -8844,8 +8249,7 @@ body:has(.legalPage) {
     font-size: 2.35rem;
   }
 
-  .roomContext dl,
-  .verificationGuide__grid {
+  .roomContext dl {
     grid-template-columns: 1fr;
   }
 
@@ -8887,7 +8291,6 @@ body:has(.legalPage) {
 
 @media (prefers-reduced-motion: reduce) {
   .lockedRoomPage,
-  .verificationGuide,
   .profilePage,
   .appSkeleton > span,
   .appSkeleton > div {
