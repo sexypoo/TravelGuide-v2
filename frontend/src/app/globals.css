@@ -3496,8 +3496,7 @@ textarea:focus-visible {
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08);
 }
 
-.placePickerSearch button,
-.nearbyRestaurantButton {
+.placePickerSearch button {
   min-height: 2.65rem;
   padding: 0 0.85rem;
   border-radius: 0.8rem;
@@ -3506,13 +3505,6 @@ textarea:focus-visible {
   cursor: pointer;
   font-size: 0.68rem;
   font-weight: 760;
-}
-
-.nearbyRestaurantButton {
-  justify-self: start;
-  min-height: 2.2rem;
-  background: #f4effb;
-  color: var(--purple);
 }
 
 .placePickerMap {
@@ -9475,19 +9467,6 @@ body:has(.chatRoomExperience) {
   margin-left: 0.25rem;
 }
 
-.nearbyExplorer {
-  padding-bottom: 2rem;
-}
-
-.nearbyExplorer__hero {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 0.75rem 0 1.6rem;
-  gap: 2rem;
-}
-
-.nearbyExplorer__hero p,
 .travelRecords > header p {
   margin: 0;
   color: var(--magenta);
@@ -9497,51 +9476,6 @@ body:has(.chatRoomExperience) {
   letter-spacing: 0.14em;
 }
 
-.nearbyExplorer__hero h1 {
-  margin: 0.45rem 0 0;
-  font-family: var(--display);
-  font-size: clamp(2rem, 5vw, 3.25rem);
-  font-weight: 820;
-  letter-spacing: -0.07em;
-  line-height: 1.05;
-}
-
-.nearbyExplorer__hero > div > span {
-  display: block;
-  margin-top: 0.7rem;
-  color: var(--muted);
-  font-size: 0.78rem;
-  line-height: 1.6;
-}
-
-.nearbyExplorer__hero > button {
-  display: inline-flex;
-  min-height: 3.2rem;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  padding: 0 1.1rem;
-  border-radius: 0.9rem;
-  background: var(--ink);
-  box-shadow: 0 10px 24px rgba(40, 37, 49, 0.18);
-  color: #fff;
-  cursor: pointer;
-  font-size: 0.76rem;
-  font-weight: 760;
-  gap: 0.45rem;
-}
-
-.nearbyExplorer__hero > button > .appIcon {
-  width: 1rem;
-  height: 1rem;
-}
-
-.nearbyExplorer__hero > button:disabled {
-  cursor: wait;
-  opacity: 0.65;
-}
-
-.nearbyExplorer__error,
 .travelRecordError {
   margin: 0 0 0.75rem;
   padding: 0.75rem 0.9rem;
@@ -9550,214 +9484,6 @@ body:has(.chatRoomExperience) {
   color: #a92536;
   font-size: 0.72rem;
   font-weight: 650;
-}
-
-.nearbyExplorer__content {
-  display: grid;
-  min-height: 31rem;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 1.35rem;
-  background: #fff;
-  box-shadow: var(--shadow-card);
-  grid-template-columns: minmax(0, 3fr) minmax(17rem, 2fr);
-}
-
-.nearbyExplorer__map {
-  min-height: 31rem;
-  background: #eeedf0;
-}
-
-.nearbyExplorer__map--unavailable {
-  display: grid;
-  align-content: center;
-  padding: 2rem;
-  color: var(--muted);
-  justify-items: center;
-  gap: 0.4rem;
-  text-align: center;
-}
-
-.nearbyExplorer__map--unavailable strong {
-  color: var(--ink);
-}
-
-.nearbyExplorer__map--unavailable span {
-  font-size: 0.72rem;
-}
-
-.nearbyExplorer__list {
-  max-height: 31rem;
-  padding: 1rem;
-  overflow-y: auto;
-  border-left: 1px solid var(--line);
-  background: #fffdfd;
-}
-
-.nearbyExplorer__listHeading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.2rem 0.2rem 0.75rem;
-}
-
-.nearbyExplorer__listHeading strong {
-  font-size: 0.78rem;
-}
-
-.nearbyExplorer__listHeading span {
-  color: var(--subtle);
-  font-size: 0.66rem;
-}
-
-.nearbyExplorer__empty {
-  display: grid;
-  min-height: 100%;
-  align-content: center;
-  justify-items: center;
-  padding: 2rem 1rem;
-  color: var(--muted);
-  gap: 0.35rem;
-  text-align: center;
-}
-
-.nearbyExplorer__empty > span {
-  display: grid;
-  width: 2.8rem;
-  height: 2.8rem;
-  margin-bottom: 0.45rem;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--iris-soft);
-  color: var(--purple);
-  font-size: 1rem;
-}
-
-.nearbyExplorer__empty > span > .appIcon {
-  width: 1.15rem;
-  height: 1.15rem;
-}
-
-.nearbyExplorer__empty strong {
-  color: var(--ink);
-  font-size: 0.82rem;
-}
-
-.nearbyExplorer__empty p {
-  margin: 0;
-  font-size: 0.68rem;
-  line-height: 1.55;
-}
-
-.nearbyPlaceCard {
-  display: grid;
-  overflow: hidden;
-  border: 1px solid #eee8ed;
-  border-radius: 0.95rem;
-  background: #fff;
-  grid-template-columns: minmax(0, 1fr) 2.5rem;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
-}
-
-.nearbyPlaceCard + .nearbyPlaceCard {
-  margin-top: 0.55rem;
-}
-
-.nearbyPlaceCard.isSelected {
-  border-color: rgba(199, 53, 104, 0.42);
-  box-shadow: 0 7px 18px rgba(145, 75, 165, 0.09);
-}
-
-.nearbyPlaceCard__main {
-  display: grid;
-  min-width: 0;
-  padding: 0.75rem;
-  background: transparent;
-  cursor: pointer;
-  grid-template-columns: 1.7rem minmax(0, 1fr);
-  gap: 0.6rem;
-  text-align: left;
-}
-
-.nearbyPlaceCard__number {
-  color: var(--plum);
-  font-family: var(--display);
-  font-size: 0.6rem;
-  font-weight: 850;
-  letter-spacing: 0.06em;
-}
-
-.nearbyPlaceCard__main > span:last-child {
-  display: grid;
-  min-width: 0;
-  gap: 0.18rem;
-}
-
-.nearbyPlaceCard__main small {
-  display: flex;
-  align-items: center;
-  color: var(--success);
-  font-size: 0.56rem;
-  font-weight: 780;
-  gap: 0.28rem;
-}
-
-.nearbyPlaceCard__main small i {
-  width: 0.35rem;
-  height: 0.35rem;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.nearbyPlaceCard__main strong {
-  overflow: hidden;
-  color: var(--ink);
-  font-size: 0.76rem;
-  font-weight: 760;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.nearbyPlaceCard__main > span:last-child > span {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 0.6rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.nearbyPlaceCard > a {
-  display: grid;
-  place-items: center;
-  border-left: 1px solid #f0eaef;
-  color: var(--purple);
-  font-size: 0.8rem;
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.nearbyPlaceCard > a > .appIcon {
-  width: 0.9rem;
-  height: 0.9rem;
-}
-
-.nearbyExplorer__privacy {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0.8rem 0 0;
-  color: var(--subtle);
-  font-size: 0.64rem;
-  text-align: center;
-  gap: 0.3rem;
-}
-
-.nearbyExplorer__privacy .appIcon {
-  width: 0.75rem;
-  height: 0.75rem;
-  color: var(--success);
 }
 
 .profileQuickLinks {
@@ -10201,34 +9927,6 @@ body:has(.chatRoomExperience) {
 }
 
 @media (max-width: 760px) {
-  .nearbyExplorer__hero {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .nearbyExplorer__hero > button {
-    width: 100%;
-  }
-
-  .nearbyExplorer__content {
-    grid-template-columns: 1fr;
-  }
-
-  .nearbyExplorer__map {
-    min-height: 18rem;
-  }
-
-  .nearbyExplorer__list {
-    max-height: none;
-    border-top: 1px solid var(--line);
-    border-left: 0;
-  }
-
-  .nearbyExplorer__empty {
-    min-height: 10rem;
-  }
-
   .profileQuickLinks {
     grid-template-columns: 1fr;
   }

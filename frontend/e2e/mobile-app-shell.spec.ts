@@ -26,8 +26,8 @@ const mobilePages = [
   {
     name: 'nearby',
     path: '/app/nearby',
-    heading: '.nearbyExplorer__hero h1',
-    body: '.nearbyExplorer__hero > div > span',
+    heading: '#nearby-title',
+    body: '#nearby-lede',
   },
   {
     name: 'profile',

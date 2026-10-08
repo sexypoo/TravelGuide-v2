@@ -1,0 +1,248 @@
+/* T47 — nearby open restaurants in the T42 direction. The 58rem cap keeps
+ * the page clear of the fixed desktop navigation. */
+
+.page {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 58rem;
+  margin-inline: auto;
+  color: var(--ink);
+}
+
+.header h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.header p {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.search {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3.25rem;
+  margin-top: 1.25rem;
+  padding: 0 1.5rem;
+  border: 0;
+  border-radius: 0.875rem;
+  background: var(--ink);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.search:hover:not(:disabled) {
+  background: #3a3644;
+}
+
+.search:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.search :global(.appIcon) {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-weight: 650;
+  line-height: 1.6;
+}
+
+.content {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.map {
+  min-height: 15rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.875rem;
+  background: #f3eff2;
+}
+
+.map[data-unavailable] {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.map[data-unavailable] p {
+  margin: 0;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.results {
+  min-width: 0;
+}
+
+.status {
+  margin: 0;
+  padding: 1rem 0.25rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.resultsHeading {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.resultsHeading span {
+  font-variant-numeric: tabular-nums;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.list li {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--line);
+}
+
+.list li[data-selected] {
+  background: var(--surface);
+}
+
+.place {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 0.875rem;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 4.5rem;
+  padding: 0.875rem 0.25rem 0.875rem 0.5rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.place > span:last-child {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.place strong {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.place > span:last-child > span {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 1.625rem;
+  height: 1.625rem;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.list li[data-selected] .rank {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #ffffff;
+}
+
+.external {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  place-items: center;
+  color: var(--muted);
+}
+
+.external:hover {
+  color: var(--ink);
+}
+
+.external :global(.appIcon) {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.privacy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.search:focus-visible,
+.place:focus-visible,
+.external:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 2px;
+}
+
+@media (min-width: 761px) {
+  .header h1 {
+    font-size: 2.5rem;
+  }
+
+  .search {
+    width: auto;
+  }
+
+  .content {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+    align-items: start;
+  }
+
+  .map {
+    min-height: 32rem;
+  }
+
+  .results {
+    max-height: 32rem;
+    overflow-y: auto;
+  }
+}

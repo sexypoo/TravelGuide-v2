@@ -49,5 +49,9 @@ describe('NearbyPlacesExplorer', () => {
     expect(
       screen.getByRole('link', { name: /동백식당 Google 지도/ }),
     ).toHaveAttribute('href', place.googleMapsUri);
+    expect(
+      screen.getByRole('button', { name: '동백식당 제주시 바다로 1' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByText('영업 중')).not.toBeInTheDocument();
   });
 });
