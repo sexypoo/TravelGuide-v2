@@ -26,7 +26,7 @@ describe('public home gateway', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: '로그인하고, 여행지의 지금을 확인하세요.',
+        name: '여행이 틀어지는 순간, 지금 그곳을 아는 사람에게 묻다.',
       }),
     ).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: '로그인' })).toHaveLength(2);
@@ -42,7 +42,7 @@ describe('public home gateway', () => {
     ).toHaveAttribute('href', '/auth/login?next=%2Fapp%2Fcommunity');
     expect(
       screen.getByRole('list', { name: '서비스 이용 순서' }),
-    ).toHaveTextContent('인증질문답변');
+    ).toHaveTextContent('인증질문여러 현지인의 답변');
     expect(container.querySelector('.landingHero')).toBeNull();
   });
 
