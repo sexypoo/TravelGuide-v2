@@ -32,8 +32,8 @@ const mobilePages = [
   {
     name: 'profile',
     path: '/app/profile',
-    heading: '.pageHeading h1',
-    body: '.pageHeading > span',
+    heading: '#profile-title',
+    body: '#profile-lede',
   },
   {
     name: 'verifications',
@@ -44,8 +44,8 @@ const mobilePages = [
   {
     name: 'saved-places',
     path: '/app/saved-places',
-    heading: '.pageHeading h1',
-    body: '.pageHeading > span',
+    heading: '#saved-places-title',
+    body: '#saved-places-lede',
   },
 ] as const;
 

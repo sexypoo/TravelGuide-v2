@@ -15,6 +15,7 @@ import {
   travelStyleLabels,
 } from '@/lib/api/profile';
 import { AppIcon } from '@/components/common';
+import styles from './profile.module.css';
 
 interface ProfileFormProps {
   profile: OwnProfile;
@@ -152,15 +153,12 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
 
   return (
     <form
-      className="profileForm"
+      className={styles.form}
       onSubmit={(event) => void handleSubmit(event)}
       noValidate
     >
-      <section
-        className="profilePhotoEditor"
-        aria-labelledby="profile-photo-title"
-      >
-        <div className="profilePhotoEditor__preview">
+      <section className={styles.photo} aria-labelledby="profile-photo-title">
+        <span className={styles.avatar}>
           {profileImageUrl === null ? (
             <span aria-hidden="true">{Array.from(nickname)[0] ?? '여'}</span>
           ) : (
@@ -168,12 +166,14 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={profileImageUrl} alt="현재 프로필 사진" />
           )}
-        </div>
-        <div className="profilePhotoEditor__copy">
+        </span>
+        <div className={styles.photoCopy}>
           <strong id="profile-photo-title">프로필 사진</strong>
-          <p>얼굴이나 여행의 분위기가 잘 보이는 정사각형 사진이 좋아요.</p>
-          <div>
-            <label className={isAvatarSaving ? 'isDisabled' : ''}>
+          <div className={styles.photoActions}>
+            <label
+              className={styles.secondary}
+              data-disabled={isAvatarSaving || undefined}
+            >
               <AppIcon name="image" />
               {isAvatarSaving ? '사진 저장 중' : '사진 선택'}
               <input
@@ -186,6 +186,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
             </label>
             {profileImageUrl !== null && (
               <button
+                className={styles.textButton}
                 type="button"
                 disabled={isAvatarSaving}
                 onClick={() => void handleAvatarRemove()}
@@ -194,17 +195,18 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
               </button>
             )}
           </div>
-          <small>JPEG, PNG, WebP · 최대 5MB</small>
+          <small>JPEG, PNG, WebP 파일, 최대 5MB</small>
         </div>
       </section>
 
-      <div className="profileField">
-        <div>
+      <div className={styles.field}>
+        <div className={styles.fieldLabel}>
           <label htmlFor="profile-nickname">닉네임</label>
           <span>{Array.from(nickname).length}/20</span>
         </div>
         <input
           id="profile-nickname"
+          className={styles.control}
           value={nickname}
           onChange={(event) => setNickname(event.target.value)}
           maxLength={20}
@@ -215,24 +217,28 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
           }
         />
         {errors.nickname !== undefined && (
-          <p id="nickname-error" className="fieldError">
+          <p id="nickname-error" className={styles.fieldError}>
             {errors.nickname}
           </p>
         )}
       </div>
 
-      <fieldset className="profileTravelStyles">
-        <legend>나의 여행 스타일</legend>
-        <div className="profileTravelStyles__meta">
-          <p>나를 잘 보여주는 취향을 최대 5개 골라주세요.</p>
-          <span aria-live="polite">{travelStyles.length}/5 선택</span>
-        </div>
-        <div>
+      <fieldset className={styles.styles}>
+        <legend>
+          <span className={styles.stylesLabel}>
+            나의 여행 스타일
+            <span aria-live="polite">
+              최대 5개, {travelStyles.length}개 선택
+            </span>
+          </span>
+        </legend>
+        <div className={styles.chips}>
           {TRAVEL_STYLES.map((style) => {
             const selected = travelStyles.includes(style);
             return (
               <button
                 key={style}
+                className={styles.chip}
                 type="button"
                 aria-pressed={selected}
                 disabled={!selected && travelStyles.length >= 5}
@@ -244,28 +250,23 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
                   )
                 }
               >
-                <span className="profileTravelStyles__emoji" aria-hidden="true">
-                  {travelStyleEmojis[style]}
-                </span>
+                <span aria-hidden="true">{travelStyleEmojis[style]}</span>
                 <span>{travelStyleLabels[style]}</span>
-                {selected && (
-                  <i className="profileTravelStyles__check" aria-hidden="true">
-                    <AppIcon name="check" />
-                  </i>
-                )}
+                {selected && <AppIcon name="check" />}
               </button>
             );
           })}
         </div>
       </fieldset>
 
-      <div className="profileField">
-        <div>
+      <div className={styles.field}>
+        <div className={styles.fieldLabel}>
           <label htmlFor="profile-bio">짧은 소개</label>
           <span>{Array.from(bio).length}/300</span>
         </div>
         <textarea
           id="profile-bio"
+          className={styles.control}
           value={bio}
           onChange={(event) => setBio(event.target.value)}
           maxLength={300}
@@ -275,29 +276,28 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
           aria-describedby={errors.bio === undefined ? 'bio-help' : 'bio-error'}
         />
         {errors.bio === undefined ? (
-          <p id="bio-help" className="fieldHelp">
+          <p id="bio-help" className={styles.help}>
             이메일과 인증 증빙은 공개되지 않아요.
           </p>
         ) : (
-          <p id="bio-error" className="fieldError">
+          <p id="bio-error" className={styles.fieldError}>
             {errors.bio}
           </p>
         )}
       </div>
 
       {message !== undefined && (
-        <div
-          className={`profileMessage profileMessage--${message.type}`}
+        <p
+          className={styles.message}
+          data-tone={message.type}
           role={message.type === 'error' ? 'alert' : 'status'}
         >
-          <span aria-hidden="true">
-            <AppIcon name={message.type === 'success' ? 'check' : 'alert'} />
-          </span>
+          <AppIcon name={message.type === 'success' ? 'check' : 'alert'} />
           {message.text}
-        </div>
+        </p>
       )}
 
-      <button className="profileSaveButton" type="submit" disabled={isSaving}>
+      <button className={styles.primary} type="submit" disabled={isSaving}>
         {isSaving ? '저장 중' : '변경 내용 저장'}
       </button>
     </form>

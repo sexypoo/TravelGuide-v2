@@ -52,9 +52,7 @@ describe('TravelRecordsPanel', () => {
       updatedAt: '2026-04-07T00:00:00.000Z',
     });
     renderPanel();
-    expect(
-      await screen.findByText('첫 여행을 기록해 보세요'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/아직 기록이 없어요/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /기록 추가/ }));
     fireEvent.change(screen.getByLabelText('기록 제목'), {
