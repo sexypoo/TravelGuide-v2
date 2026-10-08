@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { deleteOwnAccount } from '@/lib/api/profile';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
+import styles from './profile.module.css';
 
 interface AccountDeletionPanelProps {
   hasPassword: boolean;
@@ -60,30 +61,29 @@ export function AccountDeletionPanel({
   }
 
   return (
-    <section className="accountManagement" aria-labelledby="account-title">
-      <header>
+    <section className={styles.section} aria-labelledby="account-title">
+      <header className={styles.sectionHeader}>
         <div>
-          <p>ACCOUNT</p>
           <h2 id="account-title">계정 관리</h2>
-          <span>개인정보 처리방침과 영구 삭제 경로를 확인할 수 있어요.</span>
+          <p>개인정보 처리방침과 계정 삭제 방법을 확인할 수 있어요.</p>
         </div>
-        <nav aria-label="계정 정책">
-          <Link href="/privacy">개인정보 처리방침</Link>
-          <Link href="/account-deletion">삭제 안내</Link>
-        </nav>
       </header>
+      <nav className={styles.accountLinks} aria-label="계정 정책">
+        <Link href="/privacy">개인정보 처리방침</Link>
+        <Link href="/account-deletion">삭제 안내</Link>
+      </nav>
 
       {!expanded ? (
         <button
-          className="accountManagement__open"
+          className={`${styles.textButton} ${styles.openDeletion}`}
           type="button"
           onClick={() => setExpanded(true)}
         >
           계정 삭제 살펴보기
         </button>
       ) : (
-        <form className="accountDeletion" onSubmit={submit}>
-          <div className="accountDeletion__scope">
+        <form className={styles.deletion} onSubmit={submit}>
+          <div>
             <strong>삭제하면 되돌릴 수 없습니다.</strong>
             <p>
               프로필과 인증, 질문·답변·채팅·커뮤니티 콘텐츠, 여행 기록과 찜,
@@ -100,6 +100,7 @@ export function AccountDeletionPanel({
             <label>
               <span>현재 비밀번호</span>
               <input
+                className={styles.control}
                 autoComplete="current-password"
                 disabled={submitting}
                 maxLength={72}
@@ -109,7 +110,7 @@ export function AccountDeletionPanel({
               />
             </label>
           ) : (
-            <p className="accountDeletion__socialNotice">
+            <p>
               소셜 로그인으로 만든 계정입니다. 연결된 로그인 정보도 함께
               해제됩니다.
             </p>
@@ -120,6 +121,7 @@ export function AccountDeletionPanel({
               확인을 위해 <b>{CONFIRMATION}</b>를 입력해 주세요.
             </span>
             <input
+              className={styles.control}
               autoComplete="off"
               disabled={submitting}
               onChange={(event) => setConfirmation(event.target.value)}
@@ -128,13 +130,14 @@ export function AccountDeletionPanel({
           </label>
 
           {error === null ? null : (
-            <p className="accountDeletion__error" role="alert">
+            <p className={styles.error} role="alert">
               {error}
             </p>
           )}
 
-          <div className="accountDeletion__actions">
+          <div className={styles.deletionActions}>
             <button
+              className={styles.textButton}
               type="button"
               disabled={submitting}
               onClick={() => {
@@ -146,7 +149,11 @@ export function AccountDeletionPanel({
             >
               취소
             </button>
-            <button type="submit" disabled={!ready}>
+            <button
+              className={styles.dangerButton}
+              type="submit"
+              disabled={!ready}
+            >
               {submitting ? '삭제 중…' : '계정 영구 삭제'}
             </button>
           </div>

@@ -13,6 +13,7 @@ import {
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { AppIcon } from '@/components/common';
+import styles from './profile.module.css';
 
 const emptyInput: SaveTravelRecordInput = {
   title: '',
@@ -97,26 +98,25 @@ export function TravelRecordsPanel(): React.JSX.Element {
   }
 
   return (
-    <section className="travelRecords" aria-labelledby="travel-records-title">
-      <header>
+    <section className={styles.section} aria-labelledby="travel-records-title">
+      <header className={styles.sectionHeader}>
         <div>
-          <p>MY JOURNEY</p>
           <h2 id="travel-records-title">나의 여행 기록</h2>
-          <span>기억하고 싶은 여행을 짧게 남겨두세요. 나에게만 보여요.</span>
+          <p>기억하고 싶은 여행을 짧게 남겨 두세요. 나에게만 보여요.</p>
         </div>
-        <button className="iconTextControl" type="button" onClick={openCreate}>
+        <button className={styles.secondary} type="button" onClick={openCreate}>
           <AppIcon name="add" /> 기록 추가
         </button>
       </header>
 
       {isFormOpen && (
-        <form className="travelRecordForm" onSubmit={submit}>
-          <div className="travelRecordForm__heading">
+        <form className={styles.recordForm} onSubmit={submit}>
+          <div className={styles.recordFormHeading}>
             <strong>
               {editingId === undefined ? '새 여행 기록' : '여행 기록 수정'}
             </strong>
             <button
-              className="iconOnlyControl"
+              className={styles.textButton}
               type="button"
               aria-label="여행 기록 폼 닫기"
               onClick={() => setIsFormOpen(false)}
@@ -124,10 +124,11 @@ export function TravelRecordsPanel(): React.JSX.Element {
               <AppIcon name="close" />
             </button>
           </div>
-          <div className="travelRecordForm__grid">
-            <label>
+          <div className={styles.recordGrid}>
+            <label className={styles.field}>
               기록 제목
               <input
+                className={styles.control}
                 required
                 minLength={2}
                 maxLength={80}
@@ -141,9 +142,10 @@ export function TravelRecordsPanel(): React.JSX.Element {
                 }
               />
             </label>
-            <label>
+            <label className={styles.field}>
               여행지
               <input
+                className={styles.control}
                 required
                 minLength={2}
                 maxLength={80}
@@ -157,9 +159,10 @@ export function TravelRecordsPanel(): React.JSX.Element {
                 }
               />
             </label>
-            <label>
+            <label className={styles.field}>
               시작일
               <input
+                className={styles.control}
                 required
                 type="date"
                 value={input.startedOn}
@@ -171,9 +174,10 @@ export function TravelRecordsPanel(): React.JSX.Element {
                 }
               />
             </label>
-            <label>
+            <label className={styles.field}>
               종료일
               <input
+                className={styles.control}
                 required
                 type="date"
                 min={input.startedOn || undefined}
@@ -187,9 +191,10 @@ export function TravelRecordsPanel(): React.JSX.Element {
               />
             </label>
           </div>
-          <label>
-            짧은 메모 <span>선택</span>
+          <label className={styles.field}>
+            짧은 메모 (선택)
             <textarea
+              className={styles.control}
               rows={3}
               maxLength={500}
               value={input.note ?? ''}
@@ -203,71 +208,79 @@ export function TravelRecordsPanel(): React.JSX.Element {
             />
           </label>
           {formError && (
-            <p className="travelRecordError" role="alert">
+            <p className={styles.error} role="alert">
               {formError}
             </p>
           )}
-          <footer>
-            <button type="button" onClick={() => setIsFormOpen(false)}>
+          <div className={styles.recordActions}>
+            <button
+              className={styles.textButton}
+              type="button"
+              onClick={() => setIsFormOpen(false)}
+            >
               취소
             </button>
-            <button type="submit" disabled={save.isPending}>
+            <button
+              className={styles.secondary}
+              type="submit"
+              disabled={save.isPending}
+            >
               {save.isPending ? '저장 중' : '기록 저장'}
             </button>
-          </footer>
+          </div>
         </form>
       )}
 
       {records.isPending ? (
-        <div className="travelRecordsState">여행 기록을 불러오는 중이에요.</div>
+        <p className={styles.state}>여행 기록을 불러오는 중이에요.</p>
       ) : records.isError ? (
-        <div className="travelRecordsState" role="alert">
+        <div className={styles.state} role="alert">
           <strong>기록을 불러오지 못했어요.</strong>
-          <button type="button" onClick={() => void records.refetch()}>
+          <button
+            className={styles.textButton}
+            type="button"
+            onClick={() => void records.refetch()}
+          >
             다시 시도
           </button>
         </div>
       ) : records.data.length === 0 ? (
-        <div className="travelRecordsState travelRecordsState--empty">
-          <AppIcon name="sparkle" />
-          <strong>첫 여행을 기록해 보세요</strong>
-          <p>여행지와 날짜, 한 줄의 기억이면 충분해요.</p>
-        </div>
+        <p className={styles.state}>
+          아직 기록이 없어요. 여행지와 날짜, 한 줄의 기억이면 충분해요.
+        </p>
       ) : (
-        <ol className="travelRecordTimeline">
+        <ol className={styles.rows}>
           {records.data.map((record) => (
             <li key={record.id}>
-              <span className="travelRecordTimeline__dot" aria-hidden="true" />
-              <article>
-                <header>
-                  <div>
-                    <small>{record.destination}</small>
-                    <h3>{record.title}</h3>
-                  </div>
-                  <time dateTime={record.startedOn}>
-                    {formatPeriod(record)}
-                  </time>
-                </header>
+              <article className={styles.record}>
+                <h3>{record.title}</h3>
+                <time dateTime={record.startedOn}>{formatPeriod(record)}</time>
+                <span className={styles.recordPlace}>{record.destination}</span>
                 {record.note && <p>{record.note}</p>}
-                <footer>
-                  <button type="button" onClick={() => openEdit(record)}>
+                <div>
+                  <button
+                    className={styles.textButton}
+                    type="button"
+                    onClick={() => openEdit(record)}
+                  >
                     수정
                   </button>
                   <button
+                    className={styles.textButton}
                     type="button"
                     disabled={remove.isPending}
                     onClick={() => remove.mutate(record.id)}
                   >
                     삭제
                   </button>
-                </footer>
+                </div>
               </article>
             </li>
           ))}
         </ol>
       )}
       {remove.isError && (
-        <p className="travelRecordError" role="alert">
+        <p className={styles.error} role="alert">
           {actionableErrorMessage(
             remove.error,
             '여행 기록을 삭제하지 못했어요.',

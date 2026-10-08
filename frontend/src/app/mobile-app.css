@@ -183,25 +183,14 @@
     line-height: 1.45;
   }
 
-  .appShell:not(.appShell--room) :where(.pageHeading h1, .communityHero h1) {
+  .appShell:not(.appShell--room) :where(.communityHero h1) {
     font-size: clamp(2rem, 9vw, 2.35rem);
     font-weight: 800;
     letter-spacing: -0.055em;
     line-height: 1.16;
   }
 
-  .appShell:not(.appShell--room)
-    :where(.pageHeading > p, .travelRecords > header p) {
-    margin-bottom: 0.55rem;
-    color: var(--magenta);
-    font-size: 0.75rem;
-    font-weight: 820;
-    letter-spacing: 0.1em;
-    line-height: 1.35;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(.pageHeading > span, .communityHero > div > span) {
+  .appShell:not(.appShell--room) :where(.communityHero > div > span) {
     margin-top: 0.7rem;
     color: var(--muted);
     font-size: 0.9375rem;
@@ -213,12 +202,7 @@
       .communityCard,
       .communityDetailCard,
       .communityCommentForm,
-      .communityComments,
-      .profileIdentity,
-      .profileSavedPlacesLink,
-      .profileEdit,
-      .travelRecords,
-      .savedPlaceCard
+      .communityComments
     ) {
     border-color: var(--line);
     box-shadow: var(--shadow-card);
@@ -230,11 +214,6 @@
       .communityComposer > button,
       .communityCommentForm button,
       .communityMore,
-      .profileSaveButton,
-      .travelRecords > header > button,
-      .travelRecordForm footer button,
-      .savedPlaceCard footer a,
-      .savedPlaceCard footer button,
       .appError button
     ) {
     min-height: 2.75rem;
@@ -242,31 +221,15 @@
   }
 
   .appShell:not(.appShell--room)
-    :where(
-      .communityComposer input,
-      .communityComposer select,
-      .profileField input,
-      .travelRecordForm input
-    ) {
+    :where(.communityComposer input, .communityComposer select) {
     min-height: 3rem;
     font-size: 1rem;
   }
 
   .appShell:not(.appShell--room)
-    :where(
-      .communityComposer textarea,
-      .communityCommentForm textarea,
-      .profileField textarea,
-      .travelRecordForm textarea
-    ) {
+    :where(.communityComposer textarea, .communityCommentForm textarea) {
     font-size: 1rem;
     line-height: 1.6;
-  }
-
-  .appShell:not(.appShell--room) :where(.profileEdit > div > h2) {
-    font-size: 1.4rem;
-    font-weight: 780;
-    line-height: 1.25;
   }
 
   /* Community */
@@ -351,127 +314,11 @@
   /* Nearby */
 
   /* Profile and saved places */
-  .appShell:not(.appShell--room) .profileIdentity {
-    margin-top: 1.5rem;
-    padding: 1.15rem;
-  }
-
-  .appShell:not(.appShell--room) .profileIdentity p {
-    font-size: 0.8125rem;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(.profileIdentity > div > span, .profileIdentity__status) {
-    color: var(--muted);
-    font-size: 0.75rem;
-  }
-
-  .appShell:not(.appShell--room) .profileSavedPlacesLink {
-    min-height: 5rem;
-    padding: 1rem;
-    background: var(--surface);
-  }
-
-  .appShell:not(.appShell--room) .profileSavedPlacesLink strong {
-    font-size: 0.9375rem;
-  }
-
-  .appShell:not(.appShell--room) .profileSavedPlacesLink p {
-    font-size: 0.8125rem;
-    line-height: 1.5;
-  }
-
-  .appShell:not(.appShell--room) .profileEdit,
-  .appShell:not(.appShell--room) .travelRecords {
-    padding: 1.15rem;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(.profileEdit > div > p, .profilePhotoEditor__copy p, .fieldHelp) {
-    color: var(--muted);
-    font-size: 0.8125rem;
-  }
-
-  .appShell:not(.appShell--room) .profilePhotoEditor__copy strong,
-  .appShell:not(.appShell--room) .profileField label {
-    font-size: 0.875rem;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(.profilePhotoEditor__copy label, .profilePhotoEditor__copy button) {
-    min-height: 2.75rem;
-    font-size: 0.8125rem;
-  }
-
-  .appShell:not(.appShell--room) .profileTravelStyles legend,
-  .appShell:not(.appShell--room) .travelRecords > header h2 {
-    font-size: 1.05rem;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(
-      .profileTravelStyles__meta > p,
-      .profileTravelStyles__meta > span,
-      .travelRecords > header > div > span
-    ) {
-    font-family: var(--body);
-    font-size: 0.75rem;
-  }
-
-  .appShell:not(.appShell--room) .profileTravelStyles button {
-    min-height: 3rem;
-    font-size: 0.75rem;
-  }
-
-  .appShell:not(.appShell--room) .travelRecordForm label,
-  .appShell:not(.appShell--room) .travelRecordForm__heading strong {
-    font-size: 0.8125rem;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(.travelRecordsState strong, .travelRecordTimeline h3) {
-    font-size: 0.9375rem;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(.travelRecordsState p, .travelRecordTimeline article > p) {
-    font-size: 0.8125rem;
-  }
-
-  .appShell:not(.appShell--room)
-    :where(
-      .travelRecordTimeline small,
-      .travelRecordTimeline time,
-      .travelRecordTimeline article > footer button
-    ) {
-    font-size: 0.75rem;
-  }
 
   .appShell:not(.appShell--room) .guideStatus {
     min-height: 2.75rem;
     align-items: center;
     font-size: 0.8125rem;
-  }
-
-  .appShell:not(.appShell--room) .savedPlacesGrid {
-    margin-top: 1.5rem;
-  }
-
-  .appShell:not(.appShell--room) .savedPlaceCard {
-    padding: 1.1rem;
-  }
-
-  .appShell:not(.appShell--room) .savedPlaceCard small {
-    font-size: 0.75rem;
-  }
-
-  .appShell:not(.appShell--room) .savedPlaceCard h2 {
-    font-size: 1.2rem;
-  }
-
-  .appShell:not(.appShell--room) .savedPlaceCard p,
-  .appShell:not(.appShell--room) .savedPlacesState p {
-    font-size: 0.875rem;
   }
 
   .appShell:not(.appShell--room) .appBackLink {

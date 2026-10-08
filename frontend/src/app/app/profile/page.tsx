@@ -4,6 +4,7 @@ import { TravelRecordsPanel } from '@/components/profile/travel-records-panel';
 import { getOwnProfile } from '@/lib/api/profile.server';
 import { AppIcon } from '@/components/common';
 import { AccountDeletionPanel } from '@/components/profile/account-deletion-panel';
+import styles from '@/components/profile/profile.module.css';
 
 function formatJoinDate(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', {
@@ -12,70 +13,53 @@ function formatJoinDate(value: string): string {
   }).format(new Date(value));
 }
 
+const shortcuts = [
+  {
+    title: '찜한 장소',
+    description: '실시간방에서 추천받고 저장한 장소를 다시 봐요.',
+    href: '/app/saved-places',
+  },
+  {
+    title: '참여 자격',
+    description: '여행자·현지인 인증 상태를 확인하고 신청해요.',
+    href: '/app/verifications',
+  },
+] as const;
+
 export default async function ProfilePage(): Promise<React.JSX.Element> {
   const profile = await getOwnProfile();
-  const initial = Array.from(profile.nickname)[0] ?? '여';
 
   return (
-    <div className="profilePage">
-      <header className="pageHeading">
-        <p>내 정보</p>
-        <h1>프로필</h1>
-        <span>
-          질문과 답변에서 다른 사용자에게 보일 기본 정보를 관리합니다.
-        </span>
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <h1 id="profile-title">프로필</h1>
+        <p id="profile-lede">
+          {profile.email}로 {formatJoinDate(profile.createdAt)}에 가입했어요.
+          이메일은 다른 사용자에게 보이지 않아요.
+        </p>
       </header>
 
-      <section className="profileIdentity" aria-label="계정 요약">
-        <span className="profileIdentity__avatar">
-          {profile.profileImageUrl === null ? (
-            <span aria-hidden="true">{initial}</span>
-          ) : (
-            // Authenticated media is intentionally loaded from the same-origin API.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={profile.profileImageUrl} alt="내 프로필 사진" />
-          )}
-        </span>
-        <div>
-          <strong>{profile.nickname}</strong>
-          <p>{profile.email}</p>
-          <span>{formatJoinDate(profile.createdAt)} 가입</span>
-        </div>
-        <span className="profileIdentity__status">일반 사용자</span>
-      </section>
+      <ul className={`${styles.rows} ${styles.shortcuts}`}>
+        {shortcuts.map((shortcut) => (
+          <li key={shortcut.href}>
+            <Link className={styles.shortcut} href={shortcut.href}>
+              <span>
+                <strong>{shortcut.title}</strong>
+                <span>{shortcut.description}</span>
+              </span>
+              <AppIcon name="arrow-right" />
+            </Link>
+          </li>
+        ))}
+      </ul>
 
-      <div className="profileQuickLinks">
-        <Link className="profileSavedPlacesLink" href="/app/saved-places">
-          <span aria-hidden="true">
-            <AppIcon name="heart-filled" />
-          </span>
+      <section className={styles.section} aria-labelledby="profile-edit-title">
+        <header className={styles.sectionHeader}>
           <div>
-            <strong>찜한 장소</strong>
-            <p>추천받고 저장한 장소를 다시 확인하세요.</p>
+            <h2 id="profile-edit-title">공개 정보</h2>
+            <p>질문과 답변에서 다른 사용자에게 보이는 정보예요.</p>
           </div>
-          <b aria-hidden="true">
-            <AppIcon name="arrow-right" />
-          </b>
-        </Link>
-        <Link className="profileSavedPlacesLink" href="/app/verifications">
-          <span aria-hidden="true">
-            <AppIcon name="shield" />
-          </span>
-          <div>
-            <strong>지역 인증</strong>
-            <p>여행자 또는 현지인 인증 상태를 관리하세요.</p>
-          </div>
-          <b aria-hidden="true">
-            <AppIcon name="arrow-right" />
-          </b>
-        </Link>
-      </div>
-
-      <section className="profileEdit" aria-labelledby="profile-edit-title">
-        <div>
-          <h2 id="profile-edit-title">공개 정보</h2>
-          <p>이메일은 다른 사용자에게 표시되지 않습니다.</p>
-        </div>
+        </header>
         <ProfileForm profile={profile} />
       </section>
 
