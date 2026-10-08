@@ -40,6 +40,7 @@ describe('LocalVerificationForm', () => {
       <LocalVerificationForm
         destination={{
           id: 'destination-jeju',
+          nameKo: '제주',
           center: { latitude: 33.3617, longitude: 126.5292 },
           radiusKm: 80,
         }}
@@ -47,7 +48,7 @@ describe('LocalVerificationForm', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: '현재 위치 확인' }));
     expect(await screen.findByRole('status')).toHaveTextContent(
-      '제주 안에서 확인했어요 · 정확도 83m',
+      '제주 안에서 확인했어요. 정확도 83m',
     );
     expect(screen.queryByText(/33\.3617|126\.5292/)).not.toBeInTheDocument();
     expect(getCurrentPosition).toHaveBeenCalledWith(
@@ -62,6 +63,7 @@ describe('LocalVerificationForm', () => {
       <LocalVerificationForm
         destination={{
           id: 'destination-jeju',
+          nameKo: '제주',
           center: { latitude: 33.3617, longitude: 126.5292 },
           radiusKm: 80,
         }}

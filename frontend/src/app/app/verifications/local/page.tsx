@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AppIcon } from '@/components/common';
 import { LocalVerificationForm } from '@/components/verifications/local-verification-form';
+import styles from '@/components/verifications/verification.module.css';
 import { getRooms } from '@/lib/api/rooms.server';
 
 export default async function LocalVerificationPage(): Promise<React.JSX.Element> {
@@ -9,21 +10,16 @@ export default async function LocalVerificationPage(): Promise<React.JSX.Element
   if (destination === undefined)
     throw new Error('인증 가능한 여행지가 없습니다.');
   return (
-    <div className="verificationApplication">
-      <Link className="appBackLink" href="/app/verifications">
+    <div className={styles.page}>
+      <Link className={`appBackLink ${styles.back}`} href="/app/verifications">
         <AppIcon name="arrow-left" /> 인증 현황
       </Link>
-      <header className="pageHeading">
-        <p>현지인 인증</p>
-        <h1>지금 제주를 아는 사람으로 참여해요</h1>
-        <span>
-          현재 위치는 제주 내부 여부 확인에만 쓰고 화면에 좌표를 표시하지
-          않습니다.
-        </span>
+      <header className={styles.header}>
+        <h1>현지인 인증 신청</h1>
+        <p>
+          승인되면 {destination.nameKo} 도움방에서 여행자 질문에 답할 수 있어요.
+        </p>
       </header>
-      <div className="destinationChip">
-        제주 · 반경 {destination.radiusKm}km
-      </div>
       <LocalVerificationForm destination={destination} />
     </div>
   );

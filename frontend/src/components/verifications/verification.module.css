@@ -1,0 +1,558 @@
+/* T46 — verification overview and application forms in the T42 direction. */
+
+.page {
+  display: grid;
+  gap: 2rem;
+  width: 100%;
+  max-width: 45rem;
+  margin-inline: auto;
+  color: var(--ink);
+}
+
+.header h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+.header p {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+/* Overrides the global .appBackLink bottom margin; the grid gap spaces it. */
+.page > .back {
+  justify-self: start;
+  margin: 0 0 -1rem;
+}
+
+.submitted {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.submitted > span {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  place-items: center;
+  margin-top: 0.1rem;
+  border-radius: 50%;
+  background: var(--purple);
+  color: #ffffff;
+}
+
+.submitted :global(.appIcon) {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.submitted strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.submitted p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.section h2 {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.list > li {
+  border-bottom: 1px solid var(--line);
+}
+
+.empty {
+  padding: 1rem 0.25rem;
+  color: var(--muted);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+/* Status rows */
+
+.status {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem 1rem;
+  padding: 1rem 0.25rem;
+}
+
+.status h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.statusLabel {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.statusLabel[data-tone='approved'] {
+  color: var(--purple);
+}
+
+.statusLabel[data-tone='rejected'] {
+  color: var(--danger);
+}
+
+.statusLabel[data-tone='pending'],
+.statusLabel[data-tone='inactive'] {
+  color: var(--muted);
+}
+
+.validity {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress li {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+  color: var(--subtle);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.progress li + li::before {
+  width: 1.25rem;
+  height: 1px;
+  margin-right: 0.15rem;
+  background: var(--line-strong);
+  content: '';
+}
+
+.progress li > span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.progress li[data-state='done'] {
+  color: var(--ink);
+}
+
+.progress li[data-state='done'] > span {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.progress li[data-state='current'] {
+  color: var(--purple);
+}
+
+.progress li[data-state='current'] > span {
+  border-color: var(--purple);
+  background: var(--purple);
+}
+
+.reason {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.reason strong {
+  font-size: 0.95rem;
+}
+
+.reason p {
+  margin: 0.25rem 0 0.5rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.reason a,
+.support a {
+  color: var(--ink);
+  font-weight: 700;
+  text-underline-offset: 0.2em;
+}
+
+.support {
+  grid-column: 1 / -1;
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Choice rows */
+
+.choice {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 4.5rem;
+  padding: 1rem 0.25rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.choice > span:first-child {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.choice strong {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.choice > span:first-child > span {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+
+.choice > :global(.appIcon) {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--muted);
+  transition: transform 160ms ease;
+}
+
+a.choice:hover > :global(.appIcon) {
+  color: var(--ink);
+  transform: translateX(3px);
+}
+
+.choiceState {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.note {
+  margin: -0.75rem 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+/* Application forms */
+
+.form {
+  display: grid;
+  border-top: 1px solid var(--line);
+  counter-reset: form-section;
+}
+
+.formSection {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--line);
+  counter-increment: form-section;
+}
+
+.formSection > header h2 {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.formSection > header h2::before {
+  display: inline-grid;
+  width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--muted);
+  content: counter(form-section);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.formSection > header p {
+  margin: 0.35rem 0 0 2.1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.fieldLabel {
+  display: flex;
+  justify-content: space-between;
+}
+
+.fieldLabel > span {
+  color: var(--subtle);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.dates {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.control,
+.dateFrame {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+}
+
+.control {
+  padding: 0.8rem 0.9rem;
+}
+
+textarea.control {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.control:focus-visible,
+.dateFrame:focus-within,
+.upload:focus-within,
+.locate:focus-visible,
+.submit:focus-visible,
+.consent input:focus-visible,
+.choice:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: 3px;
+}
+
+/* The frame clips Safari's intrinsic date-input width inside 390px. */
+.dateFrame {
+  display: block;
+  overflow: hidden;
+}
+
+.dateFrame input {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  padding: 0.8rem 0.9rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: 0;
+  text-align: left;
+}
+
+.dateFrame input::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}
+
+.upload {
+  position: relative;
+  display: grid;
+  gap: 0.3rem;
+  justify-items: center;
+  padding: 1.25rem 1rem;
+  border: 1px dashed var(--line-strong);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.upload:hover {
+  border-color: var(--ink);
+}
+
+.upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.upload > span {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.locate {
+  justify-self: start;
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  border: 1px solid var(--ink);
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.locate:disabled {
+  cursor: progress;
+  opacity: 0.55;
+}
+
+.locationResult {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  color: var(--success);
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.locationResult[data-tone='error'] {
+  color: var(--danger);
+}
+
+.locationResult :global(.appIcon) {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
+}
+
+.consent {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1.25rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  cursor: pointer;
+  word-break: keep-all;
+}
+
+.consent input {
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0.15rem 0 0;
+  accent-color: var(--ink);
+}
+
+.consent strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.submit {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 3.25rem;
+  margin-top: 0.5rem;
+  border: 0;
+  border-radius: 0.875rem;
+  background: var(--ink);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.submit:hover:not(:disabled) {
+  background: #3a3644;
+}
+
+.submit:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.form > :global(.formAlert) {
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 761px) {
+  .header h1 {
+    font-size: 2.5rem;
+  }
+
+  .submit {
+    width: auto;
+    min-width: 15rem;
+    justify-self: start;
+    padding: 0 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choice > :global(.appIcon) {
+    transition: none;
+  }
+}
