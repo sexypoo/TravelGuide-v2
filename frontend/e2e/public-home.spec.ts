@@ -18,10 +18,10 @@ for (const viewport of viewports) {
 
     await expect(
       page.getByRole('heading', {
-        name: '로그인하고, 여행지의 지금을 확인하세요.',
+        name: '여행이 틀어지는 순간, 지금 그곳을 아는 사람에게 묻다.',
       }),
     ).toBeVisible();
-    await expect(page.locator('.guestHome__primary')).toHaveAttribute(
+    await expect(page.locator('#guest-login')).toHaveAttribute(
       'href',
       '/auth/login',
     );
@@ -35,15 +35,15 @@ for (const viewport of viewports) {
     await expect(page.getByText('서비스 정상 연결')).toBeVisible();
 
     const layout = await page.evaluate(() => {
-      const home = document.querySelector<HTMLElement>('.guestHome');
-      const heading = document.querySelector<HTMLElement>('.guestHome h1');
-      const primary = document.querySelector<HTMLElement>(
-        '.guestHome__primary',
-      );
+      const home = document.querySelector<HTMLElement>('main');
+      const heading = document.querySelector<HTMLElement>('#guest-title');
+      const primary = document.querySelector<HTMLElement>('#guest-login');
       const entries = Array.from(
-        document.querySelectorAll<HTMLElement>('.guestHome__entry'),
+        document.querySelectorAll<HTMLElement>(
+          '[aria-labelledby="destinations-title"] a',
+        ),
       );
-      const footer = document.querySelector<HTMLElement>('.guestHome__footer');
+      const footer = document.querySelector<HTMLElement>('main > footer');
       if (
         home === null ||
         heading === null ||
@@ -78,7 +78,7 @@ for (const viewport of viewports) {
     expect(layout.primaryHeight).toBeGreaterThanOrEqual(48);
     expect(Math.min(...layout.entryHeights)).toBeGreaterThanOrEqual(64);
     expect(layout.footer.bottom).toBeLessThanOrEqual(layout.viewport.height);
-    expect(layout.background).toBe('rgb(244, 246, 248)');
+    expect(layout.background).toBe('rgb(255, 249, 251)');
 
     await page.screenshot({
       path: `test-results/public-home-${viewport.name}.png`,
