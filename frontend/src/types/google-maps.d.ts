@@ -22,6 +22,7 @@ interface TravelGuideGoogleMapsNamespace {
       map: TravelGuideGoogleMap;
       position: { lat: number; lng: number };
       title: string;
+      label?: string;
     }) => TravelGuideGoogleMarker;
   };
 }

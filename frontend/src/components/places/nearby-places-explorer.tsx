@@ -5,6 +5,7 @@ import { getNearbyOpenRestaurants, type GooglePlace } from '@/lib/api/places';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { loadGoogleMaps } from '@/lib/maps/google-maps-loader';
 import { AppIcon } from '@/components/common';
+import styles from './nearby.module.css';
 
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.978 };
 
@@ -45,7 +46,9 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
         setMapReady(true);
       })
       .catch(() =>
-        setError('지도를 불러오지 못했어요. API 키 설정을 확인해 주세요.'),
+        setError(
+          '지도를 불러오지 못했어요. 가까운 식당은 목록으로 확인할 수 있어요.',
+        ),
       );
     return () => {
       active = false;
@@ -59,11 +62,12 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
     if (!mapReady || currentMap === undefined || google === undefined) return;
     markers.current.forEach((marker) => marker.setMap(null));
     markers.current = places.map(
-      (place) =>
+      (place, index) =>
         new google.maps.Marker({
           map: currentMap,
           position: { lat: place.latitude, lng: place.longitude },
           title: place.name,
+          label: String(index + 1),
         }),
     );
   }, [mapReady, places]);
@@ -114,21 +118,14 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
   }
 
   return (
-    <section className="nearbyExplorer" aria-labelledby="nearby-title">
-      <header className="nearbyExplorer__hero">
-        <div>
-          <p>NEARBY, RIGHT NOW</p>
-          <h1 id="nearby-title">
-            지금 문 연 곳을
-            <br />
-            가볍게 찾아보세요
-          </h1>
-          <span>
-            현재 위치에서 가까운 영업 중 식당을 지도와 함께 보여드려요.
-          </span>
-        </div>
+    <section className={styles.page} aria-labelledby="nearby-title">
+      <header className={styles.header}>
+        <h1 id="nearby-title">지금 문 연 식당</h1>
+        <p id="nearby-lede">
+          현재 위치에서 1.5km 안의 영업 중 식당을 가까운 순서로 보여줘요.
+        </p>
         <button
-          className="iconTextControl"
+          className={styles.search}
           type="button"
           disabled={loading}
           onClick={findNearby}
@@ -143,88 +140,85 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
       </header>
 
       {error && (
-        <p className="nearbyExplorer__error" role="alert">
+        <p className={styles.error} role="alert">
           {error}
         </p>
       )}
 
-      <div className="nearbyExplorer__content">
+      <div className={styles.content}>
         {apiKey.length === 0 ? (
-          <div className="nearbyExplorer__map nearbyExplorer__map--unavailable">
-            <strong>지도를 준비 중이에요</strong>
-            <span>Google Maps API 키를 설정하면 지도가 표시됩니다.</span>
+          <div className={styles.map} data-unavailable>
+            <p>
+              지도를 표시할 수 없어요.
+              <br />
+              가까운 식당은 목록으로 확인할 수 있어요.
+            </p>
           </div>
         ) : (
           <div
             ref={mapElement}
-            className="nearbyExplorer__map"
+            className={styles.map}
             aria-label="내 주변 영업 중 식당 지도"
           />
         )}
 
-        <div className="nearbyExplorer__list" aria-live="polite">
+        <div className={styles.results} aria-live="polite">
           {!hasSearched ? (
-            <div className="nearbyExplorer__empty">
-              <span aria-hidden="true">
-                <AppIcon name="pin" />
-              </span>
-              <strong>현재 위치를 알려주세요</strong>
-              <p>위치는 주변 검색에만 사용하고 저장하지 않아요.</p>
-            </div>
+            <p className={styles.status}>
+              내 주변 보기를 누르면 가까운 식당이 여기에 나와요.
+            </p>
           ) : loading ? (
-            <div className="nearbyExplorer__empty">
-              <strong>가까운 장소를 찾고 있어요…</strong>
-            </div>
+            <p className={styles.status}>가까운 식당을 찾고 있어요…</p>
           ) : places.length === 0 ? (
-            <div className="nearbyExplorer__empty">
-              <strong>근처에서 영업 중인 식당을 찾지 못했어요.</strong>
-            </div>
+            <p className={styles.status}>
+              1.5km 안에 영업 중인 식당이 없어요. 조금 이동한 뒤 다시 찾아
+              보세요.
+            </p>
           ) : (
             <>
-              <div className="nearbyExplorer__listHeading">
-                <strong>가까운 순서</strong>
-                <span>{places.length}곳</span>
-              </div>
-              {places.map((place, index) => (
-                <article
-                  key={place.id}
-                  className={`nearbyPlaceCard${selectedId === place.id ? ' isSelected' : ''}`}
-                >
-                  <button
-                    type="button"
-                    className="nearbyPlaceCard__main"
-                    onClick={() => focusPlace(place)}
+              <h2 className={styles.resultsHeading}>
+                가까운 순서 <span>{places.length}곳</span>
+              </h2>
+              <ol className={styles.list}>
+                {places.map((place, index) => (
+                  <li
+                    key={place.id}
+                    data-selected={selectedId === place.id || undefined}
                   >
-                    <span className="nearbyPlaceCard__number">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span>
-                      <small>
-                        <i aria-hidden="true" /> 영업 중
-                      </small>
-                      <strong>{place.name}</strong>
-                      <span>
-                        {place.address ?? place.category ?? '주소 정보 없음'}
+                    <button
+                      type="button"
+                      className={styles.place}
+                      onClick={() => focusPlace(place)}
+                      aria-pressed={selectedId === place.id}
+                    >
+                      <span className={styles.rank} aria-hidden="true">
+                        {index + 1}
                       </span>
-                    </span>
-                  </button>
-                  <a
-                    href={placeMapUrl(place)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${place.name} Google 지도에서 보기`}
-                  >
-                    <AppIcon name="external" />
-                  </a>
-                </article>
-              ))}
+                      <span>
+                        <strong>{place.name}</strong>
+                        <span>
+                          {place.address ?? place.category ?? '주소 정보 없음'}
+                        </span>
+                      </span>
+                    </button>
+                    <a
+                      className={styles.external}
+                      href={placeMapUrl(place)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${place.name} Google 지도에서 보기`}
+                    >
+                      <AppIcon name="external" />
+                    </a>
+                  </li>
+                ))}
+              </ol>
             </>
           )}
         </div>
       </div>
-      <p className="nearbyExplorer__privacy">
-        <AppIcon name="check" /> 현재 위치는 검색에만 사용되며 서버에 저장하지
-        않습니다.
+      <p className={styles.privacy}>
+        현재 위치는 검색에만 쓰고 서버에 저장하지 않아요.
       </p>
     </section>
   );
