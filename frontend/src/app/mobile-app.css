@@ -11,27 +11,6 @@
   }
 
   .appShell:not(.appShell--room) {
-    --ink: #282531;
-    --muted: #625c69;
-    --subtle: #77717e;
-    --canvas: #fff9fb;
-    --surface: #ffffff;
-    --line: rgba(40, 37, 49, 0.12);
-    --line-strong: rgba(40, 37, 49, 0.2);
-    --magenta: #c73568;
-    --purple: #675dda;
-    --purple-dark: #5148b4;
-    --plum: #8a3e8f;
-    --berry-soft: rgba(199, 53, 104, 0.08);
-    --iris-soft: rgba(103, 93, 218, 0.09);
-    --gradient: linear-gradient(118deg, #c73568 0%, #8a3e8f 52%, #675dda 100%);
-    --display-gradient: linear-gradient(
-      108deg,
-      #c73568 0%,
-      #8a3e8f 52%,
-      #675dda 100%
-    );
-    --shadow-card: 0 8px 24px rgba(40, 37, 49, 0.07);
     min-height: 100dvh;
     background:
       linear-gradient(rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0)),

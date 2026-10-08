@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from 'next';
+import './fonts/pretendard/pretendard.css';
+import './fonts/wanted-sans/wanted-sans.css';
 import './globals.css';
 import './mobile-app.css';
 import './chat-room.css';
