@@ -530,6 +530,17 @@
 - 영향: `AuthIdentity`에 공개 응답으로 절대 반환하지 않는 nullable 암호문 열과 운영 비밀값이 추가된다. 삭제 성공 후 세션 쿠키가 지워지고 계정은 복구할 수 없다. DB 커밋과 객체 저장소 삭제는 원자적이지 않아 실패 로그를 운영 점검해야 하며, 마이그레이션 이전 Apple identity에는 refresh token이 없어 로컬 삭제와 경고 로그만 가능하다.
 - 되돌리는 조건: 법정 보존, 환불·분쟁, 복구 유예가 필요해지면 즉시 hard delete를 삭제 요청 ledger와 만료 worker로 교체하고, 보존 대상은 접근 차단된 별도 목적 저장소와 명시적 만료일로 분리한다.
 
+### ADR-045 런타임을 Node.js 24.x로 상향
+
+- 날짜: 2026-10-07
+- 상태: accepted
+- 문제: Vercel이 Node.js 20.x 빌드를 중단해 2026-08-23 이후 모든 프론트엔드 프리뷰·프로덕션 배포가 클론 직후 실패한다. 동시에 GitHub Actions는 `setup-node`의 yarn 캐시 단계가 Corepack보다 먼저 전역 Yarn 1을 실행해 `packageManager: yarn@4.2.2`와 충돌하며 8월부터 실패하고 있었다.
+- 선택지: 프론트엔드만 24.x로 올려 런타임을 둘로 나누기, CI만 고치고 배포 실패 유지, 웹·API·CI·Docker를 함께 24.x로 올리기.
+- 결정: `frontend`와 `backend`의 `engines`, 두 Dockerfile, 두 CI 워크플로를 Node.js 24.x로 맞춘다. CI는 `setup-node`의 yarn 캐시를 쓰지 않고 `corepack enable` 뒤에 설치한다. 고정 버전(Next.js 15.5.2, NestJS 11, Prisma 5.22.0, Yarn 4.2.2)과 `@types/node` 20.19.11은 바꾸지 않는다.
+- 이유: Vercel이 요구하는 최소 변경이고, 한 저장소의 두 앱이 같은 런타임을 쓰면 로컬 재현과 문서가 단순하다. 로컬 Node 24.2.0에서 프론트엔드 lint·typecheck·단위 테스트·빌드·Playwright와 백엔드 unit·PostgreSQL 통합 테스트(Prisma 5.22 포함)가 통과했다.
+- 영향: 다음 Railway 백엔드 배포부터 `node:24-alpine` 이미지로 실행된다. CI는 Yarn 캐시가 없어 설치 시간이 늘 수 있다. `@types/node`는 20 API 타입이므로 Node 24 전용 API는 타입 갱신 전까지 쓰지 않는다. 날짜가 적힌 과거 검증 기록의 Node 20 표기는 당시 사실이라 그대로 둔다.
+- 되돌리는 조건: Prisma 5.22나 Next.js 15.5가 Node 24에서 운영 장애를 일으키면 해당 라이브러리 업그레이드 Task로 해결하고, Vercel이 지원하는 다른 LTS(22.x 등)로만 내린다.
+
 ---
 
 ## 신규 결정 템플릿

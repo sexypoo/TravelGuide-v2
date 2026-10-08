@@ -20,7 +20,7 @@ review of `capacitor.config.ts`.
 
 ## Prerequisites
 
-- Node 22 or later (the existing web/API projects remain on Node 20)
+- Node 22 or later (the web/API projects run on Node 24)
 - JDK 21 for Android builds
 - Android SDK 36 and build tools
 - Xcode 26 or later for iOS

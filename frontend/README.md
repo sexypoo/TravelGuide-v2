@@ -6,7 +6,7 @@ Jeju live room for conversation and durable topics.
 
 ## Prerequisites
 
-- Node.js 20.x
+- Node.js 24.x
 - Corepack
 - The backend running at `http://localhost:3001`
 
@@ -110,4 +110,4 @@ single public HTTPS origin.
   directly, then confirm `API_INTERNAL_URL` matches its origin.
 - If port 3000 is occupied, run `yarn dev --port 3002`.
 - If Yarn reports 1.x, use `corepack yarn --version` and confirm `4.2.2`.
-- Use Node 20.x; other Node majors are not the supported project runtime.
+- Use Node 24.x; other Node majors are not the supported project runtime.
