@@ -394,28 +394,28 @@
 }
 
 :root {
-  --ink: #494653;
-  --muted: #706a78;
-  --subtle: #918a98;
+  --ink: #282531;
+  --muted: #625c69;
+  --subtle: #77717e;
   --canvas: #fff9fb;
   --surface: #ffffff;
-  --line: #eee7ec;
-  --line-strong: #dcd3da;
-  --magenta: #cf426f;
-  --purple: #7068d8;
-  --purple-dark: #5b53b8;
-  --plum: #914ba5;
-  --berry-soft: #fff0f5;
-  --iris-soft: #f1efff;
+  --line: rgba(40, 37, 49, 0.12);
+  --line-strong: rgba(40, 37, 49, 0.2);
+  --magenta: #c73568;
+  --purple: #675dda;
+  --purple-dark: #5148b4;
+  --plum: #8a3e8f;
+  --berry-soft: rgba(199, 53, 104, 0.08);
+  --iris-soft: rgba(103, 93, 218, 0.09);
   --plum-soft: #f8effa;
   --success: #00a878;
   --danger: #e5484d;
-  --gradient: linear-gradient(118deg, #cf426f 0%, #914ba5 52%, #7068d8 100%);
+  --gradient: linear-gradient(118deg, #c73568 0%, #8a3e8f 52%, #675dda 100%);
   --display-gradient: linear-gradient(
     108deg,
-    #d94f7d 0%,
-    #9851b5 52%,
-    #7b73e6 100%
+    #c73568 0%,
+    #8a3e8f 52%,
+    #675dda 100%
   );
   --display:
     'Wanted Sans Variable', 'Pretendard Variable', 'SUIT Variable',
@@ -423,8 +423,8 @@
   --body:
     'Pretendard Variable', 'SUIT Variable', 'Apple SD Gothic Neo',
     'Noto Sans KR', system-ui, sans-serif;
-  --shadow-card: 0 10px 32px rgba(73, 70, 83, 0.09);
-  --shadow-signal: 0 20px 60px rgba(112, 104, 216, 0.2);
+  --shadow-card: 0 8px 24px rgba(40, 37, 49, 0.07);
+  --shadow-signal: 0 20px 60px rgba(103, 93, 218, 0.2);
 }
 
 * {
@@ -551,7 +551,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(112, 104, 216, 0.34);
+  outline: 3px solid rgba(103, 93, 218, 0.34);
   outline-offset: 3px;
 }
 
@@ -676,7 +676,7 @@ textarea:focus-visible {
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(112, 104, 216, 0.12),
+    rgba(103, 93, 218, 0.12),
     transparent 67%
   );
   content: '';
@@ -763,12 +763,12 @@ textarea:focus-visible {
   background:
     radial-gradient(
       circle at 64% 42%,
-      rgba(112, 104, 216, 0.19),
+      rgba(103, 93, 218, 0.19),
       transparent 31%
     ),
     radial-gradient(
       circle at 28% 65%,
-      rgba(207, 66, 111, 0.14),
+      rgba(199, 53, 104, 0.14),
       transparent 32%
     );
   filter: blur(1px);
@@ -795,7 +795,7 @@ textarea:focus-visible {
   border: 0.23rem solid white;
   border-radius: 50%;
   background: var(--magenta);
-  box-shadow: 0 0 0 1px rgba(207, 66, 111, 0.25);
+  box-shadow: 0 0 0 1px rgba(199, 53, 104, 0.25);
   content: '';
 }
 
@@ -833,7 +833,7 @@ textarea:focus-visible {
   bottom: 3.25rem;
   width: min(18.5rem, 62%);
   padding: 1.15rem 1.25rem;
-  border: 1px solid rgba(112, 104, 216, 0.18);
+  border: 1px solid rgba(103, 93, 218, 0.18);
   border-radius: 1.15rem;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 18px 50px rgba(53, 46, 66, 0.14);
@@ -1000,7 +1000,7 @@ textarea:focus-visible {
   padding: 8rem max(1.5rem, calc((100% - 1180px) / 2));
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(207, 66, 111, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(199, 53, 104, 0.035) 1px, transparent 1px),
     #f8f6fc;
   background-size: min(8vw, 7rem) 100%;
 }
@@ -1253,7 +1253,7 @@ textarea:focus-visible {
   background:
     radial-gradient(
       circle at 90% 20%,
-      rgba(112, 104, 216, 0.2),
+      rgba(103, 93, 218, 0.2),
       transparent 24rem
     ),
     #f5f1fa;
@@ -1665,7 +1665,7 @@ textarea:focus-visible {
     ),
     radial-gradient(
       circle at 12% 52%,
-      rgba(112, 104, 216, 0.055),
+      rgba(103, 93, 218, 0.055),
       transparent 26rem
     ),
     var(--canvas);
@@ -1893,7 +1893,7 @@ textarea:focus-visible {
   position: absolute;
   inset: 7%;
   border-radius: inherit;
-  background: conic-gradient(from 210deg, #d94f7d, #7068d8, #914ba5, #d94f7d);
+  background: conic-gradient(from 210deg, #c73568, #675dda, #8a3e8f, #c73568);
   content: '';
   filter: blur(2.7rem);
   opacity: 0.33;
@@ -1902,7 +1902,7 @@ textarea:focus-visible {
 .signalHalo__orbit {
   position: absolute;
   inset: 10%;
-  border: 1px solid rgba(112, 104, 216, 0.17);
+  border: 1px solid rgba(103, 93, 218, 0.17);
   border-radius: 50%;
 }
 
@@ -2349,7 +2349,7 @@ textarea:focus-visible {
 .formField input:focus {
   border-color: var(--purple);
   background: white;
-  box-shadow: 0 0 0 3px rgba(112, 104, 216, 0.1);
+  box-shadow: 0 0 0 3px rgba(103, 93, 218, 0.1);
   outline: 0;
 }
 
@@ -2620,7 +2620,7 @@ textarea:focus-visible {
   background:
     radial-gradient(
       circle at 90% 0,
-      rgba(112, 104, 216, 0.07),
+      rgba(103, 93, 218, 0.07),
       transparent 28rem
     ),
     radial-gradient(
@@ -2777,7 +2777,7 @@ textarea:focus-visible {
   border: 1px solid rgba(238, 231, 236, 0.92);
   border-radius: 1.2rem;
   background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 12px 36px rgba(73, 70, 83, 0.13);
+  box-shadow: 0 12px 36px rgba(40, 37, 49, 0.13);
   transform: translateX(-50%);
   backdrop-filter: blur(18px);
 }
@@ -3570,7 +3570,7 @@ textarea:focus-visible {
 }
 
 .placePickerResults > button.isSelected {
-  border-color: rgba(207, 66, 111, 0.35);
+  border-color: rgba(199, 53, 104, 0.35);
   background: #fff4f8;
 }
 
@@ -3777,7 +3777,7 @@ textarea:focus-visible {
 }
 
 .chatBubble--place .placeFavoriteControl > button.isSaved {
-  border-color: rgba(207, 66, 111, 0.28);
+  border-color: rgba(199, 53, 104, 0.28);
   background: #fff3f8;
   color: var(--berry);
 }
@@ -4142,7 +4142,7 @@ textarea:focus-visible {
   border: 1px solid #eee4ec;
   border-radius: 1.65rem;
   background: white;
-  box-shadow: 0 14px 34px rgba(73, 70, 83, 0.09);
+  box-shadow: 0 14px 34px rgba(40, 37, 49, 0.09);
 }
 
 .liveRoomHeader__signal::after {
@@ -4616,7 +4616,7 @@ textarea:focus-visible {
   padding: 0.28rem 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 999px;
-  background: rgba(73, 70, 83, 0.78);
+  background: rgba(40, 37, 49, 0.78);
   color: white;
   backdrop-filter: blur(8px);
   font-size: 0.58rem;
@@ -5040,7 +5040,7 @@ textarea:focus-visible {
   border: 1px solid #eadde7;
   border-radius: 0.7rem;
   background: rgba(255, 249, 251, 0.94);
-  box-shadow: 0 8px 22px rgba(73, 70, 83, 0.1);
+  box-shadow: 0 8px 22px rgba(40, 37, 49, 0.1);
   backdrop-filter: blur(10px);
 }
 
@@ -5826,7 +5826,7 @@ body:has(.guestHome) {
 }
 
 .chatRoomExperience {
-  --chat-line: #eee7ec;
+  --chat-line: rgba(40, 37, 49, 0.12);
   --chat-soft: #faf5f8;
   --topic-wash: #f7f3fb;
   display: flex;
@@ -5848,7 +5848,7 @@ body:has(.guestHome) {
   border: 1px solid var(--line);
   border-radius: 1.1rem;
   background: linear-gradient(110deg, #ffffff 0%, #fff9fb 68%, #f1efff 100%);
-  box-shadow: 0 8px 24px rgba(73, 70, 83, 0.055);
+  box-shadow: 0 8px 24px rgba(40, 37, 49, 0.055);
 }
 
 .conversationRoomHeader > .appBackLink {
@@ -5918,7 +5918,7 @@ body:has(.guestHome) {
 
 .roomNotificationControl > button:hover:not(:disabled),
 .roomNotificationControl > button:focus-visible {
-  border-color: rgba(207, 66, 111, 0.45);
+  border-color: rgba(199, 53, 104, 0.45);
   color: var(--berry);
   background: #fff8fb;
 }
@@ -5948,7 +5948,7 @@ body:has(.guestHome) {
 }
 
 .roomNotificationControl--enabled > button {
-  border-color: rgba(207, 66, 111, 0.32);
+  border-color: rgba(199, 53, 104, 0.32);
   color: var(--berry);
   background: linear-gradient(120deg, #fff6fa, #f7f1ff);
   animation: notificationBellPulse 2.8s ease-out infinite;
@@ -5958,10 +5958,10 @@ body:has(.guestHome) {
   0%,
   65%,
   100% {
-    box-shadow: 0 0 0 0 rgba(207, 66, 111, 0);
+    box-shadow: 0 0 0 0 rgba(199, 53, 104, 0);
   }
   78% {
-    box-shadow: 0 0 0 0.32rem rgba(207, 66, 111, 0.1);
+    box-shadow: 0 0 0 0.32rem rgba(199, 53, 104, 0.1);
   }
 }
 
@@ -6060,7 +6060,7 @@ body:has(.guestHome) {
   background: var(--gradient);
   box-shadow:
     0 10px 26px rgba(145, 75, 165, 0.24),
-    0 2px 7px rgba(73, 70, 83, 0.1);
+    0 2px 7px rgba(40, 37, 49, 0.1);
   color: white;
   font-size: 0.7rem;
   font-weight: 780;
@@ -6096,7 +6096,7 @@ body:has(.guestHome) {
 }
 
 .newMessageShortcut:focus-visible {
-  outline: 3px solid rgba(112, 104, 216, 0.24);
+  outline: 3px solid rgba(103, 93, 218, 0.24);
   outline-offset: 3px;
 }
 
@@ -7174,7 +7174,7 @@ body:has(.guestHome) {
   background: var(--canvas);
 }
 .dateInputFrame:focus-within {
-  outline: 3px solid rgba(112, 104, 216, 0.34);
+  outline: 3px solid rgba(103, 93, 218, 0.34);
   outline-offset: 3px;
 }
 .dateInputFrame input {
@@ -8787,7 +8787,7 @@ body:has(.guestHome) {
 .accountDeletion > label input:focus {
   border-color: var(--purple);
   background: white;
-  box-shadow: 0 0 0 3px rgba(112, 104, 216, 0.1);
+  box-shadow: 0 0 0 3px rgba(103, 93, 218, 0.1);
   outline: none;
 }
 
@@ -9950,7 +9950,7 @@ body:has(.legalPage) {
 .communityComposer textarea:focus,
 .communityCommentForm textarea:focus {
   border-color: var(--purple);
-  box-shadow: 0 0 0 3px rgba(112, 104, 216, 0.11);
+  box-shadow: 0 0 0 3px rgba(103, 93, 218, 0.11);
 }
 
 .communityComposer > button {
@@ -9997,7 +9997,7 @@ body:has(.legalPage) {
   border: 1px solid var(--line);
   border-radius: 1.25rem;
   background: white;
-  box-shadow: 0 8px 26px rgba(73, 70, 83, 0.055);
+  box-shadow: 0 8px 26px rgba(40, 37, 49, 0.055);
 }
 
 .communityCard {
@@ -10233,7 +10233,7 @@ textarea::placeholder {
   border: 1px solid #dedce3;
   border-radius: 1.05rem;
   background: #fff;
-  box-shadow: 0 8px 22px rgba(73, 70, 83, 0.09);
+  box-shadow: 0 8px 22px rgba(40, 37, 49, 0.09);
   color: var(--ink);
   gap: 0;
   text-align: left;
@@ -10246,13 +10246,13 @@ textarea::placeholder {
 
 .chatMessage .chatBubble--topic:hover {
   border-color: #cfc7dc;
-  box-shadow: 0 12px 28px rgba(73, 70, 83, 0.13);
+  box-shadow: 0 12px 28px rgba(40, 37, 49, 0.13);
   transform: translateY(-1px);
 }
 
 .chatMessage .chatBubble--topic:focus-visible {
   border-color: var(--purple);
-  outline: 3px solid rgba(112, 104, 216, 0.2);
+  outline: 3px solid rgba(103, 93, 218, 0.2);
   outline-offset: 3px;
 }
 
@@ -10447,7 +10447,7 @@ body:has(.chatRoomExperience) {
   border: 1px solid #e8e1e7;
   border-radius: 1.05rem;
   background: #fff;
-  box-shadow: 0 8px 24px rgba(73, 70, 83, 0.08);
+  box-shadow: 0 8px 24px rgba(40, 37, 49, 0.08);
   gap: 0;
 }
 
@@ -10598,7 +10598,7 @@ body:has(.chatRoomExperience) {
   padding: 0 1.1rem;
   border-radius: 0.9rem;
   background: var(--ink);
-  box-shadow: 0 10px 24px rgba(73, 70, 83, 0.18);
+  box-shadow: 0 10px 24px rgba(40, 37, 49, 0.18);
   color: #fff;
   cursor: pointer;
   font-size: 0.76rem;
@@ -10741,7 +10741,7 @@ body:has(.chatRoomExperience) {
 }
 
 .nearbyPlaceCard.isSelected {
-  border-color: rgba(207, 66, 111, 0.42);
+  border-color: rgba(199, 53, 104, 0.42);
   box-shadow: 0 7px 18px rgba(145, 75, 165, 0.09);
 }
 
@@ -11107,7 +11107,7 @@ body:has(.chatRoomExperience) {
 .travelRecordForm input:focus,
 .travelRecordForm textarea:focus {
   border-color: var(--purple);
-  box-shadow: 0 0 0 3px rgba(112, 104, 216, 0.08);
+  box-shadow: 0 0 0 3px rgba(103, 93, 218, 0.08);
 }
 
 .travelRecordForm footer {
@@ -11217,12 +11217,12 @@ body:has(.chatRoomExperience) {
   border: 2px solid #fff;
   border-radius: 50%;
   background: var(--magenta);
-  box-shadow: 0 0 0 1px rgba(207, 66, 111, 0.25);
+  box-shadow: 0 0 0 1px rgba(199, 53, 104, 0.25);
 }
 
 .travelRecordTimeline article {
   padding: 0.85rem 0.95rem;
-  border: 1px solid #eee7ec;
+  border: 1px solid var(--line);
   border-radius: 0.9rem;
   background: #fffdfd;
 }
