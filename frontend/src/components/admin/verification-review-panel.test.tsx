@@ -36,6 +36,30 @@ describe('VerificationReviewPanel', () => {
     });
   });
 
+  it('shows operator-readable labels instead of raw enum values', () => {
+    render(
+      <VerificationReviewPanel
+        verification={{
+          ...verification,
+          type: 'LOCAL',
+          startsAt: null,
+          endsAt: null,
+          localProofType: 'WORK',
+          gpsSummary: {
+            accuracyMeters: 42,
+            capturedAt: '2026-07-31T09:59:00.000Z',
+            withinDestinationRadius: true,
+          },
+        }}
+      />,
+    );
+    expect(screen.getByText('현지인 신청')).toBeInTheDocument();
+    expect(screen.getByText('심사 중')).toBeInTheDocument();
+    expect(screen.getByText('근무')).toBeInTheDocument();
+    expect(screen.getByText('제주 안, 정확도 42m')).toBeInTheDocument();
+    expect(screen.queryByText(/PENDING|WORK|LOCAL/)).not.toBeInTheDocument();
+  });
+
   it('requires confirmation before approving and refreshes after success', async () => {
     fetchMock.mockResolvedValue({ ok: true, status: 200 } as Response);
     render(<VerificationReviewPanel verification={verification} />);

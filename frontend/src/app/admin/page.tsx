@@ -1,7 +1,12 @@
 import Link from 'next/link';
 import { VerificationReviewPanel } from '@/components/admin/verification-review-panel';
-import { LogoutButton } from '@/components/auth/logout-button';
-import { Wordmark } from '@/components/brand/wordmark';
+import { AdminFrame } from '@/components/admin/admin-frame';
+import {
+  verificationStatusLabels,
+  verificationStatusTones,
+  verificationTypeLabels,
+} from '@/components/admin/admin-labels';
+import styles from '@/components/admin/admin.module.css';
 import {
   getAdminVerification,
   getAdminVerifications,
@@ -47,89 +52,84 @@ export default async function AdminPage({
   };
 
   return (
-    <main className="adminShell">
-      <header className="adminHeader">
-        <Wordmark />
-        <div>
-          <span>{admin.nickname} 관리자</span>
-          <Link href="/app">사용자 화면</Link>
-          <LogoutButton />
-        </div>
-      </header>
-      <div className="adminWorkspace">
-        <header className="adminWorkspace__heading">
-          <p>TRUST DESK</p>
-          <h1>인증 심사</h1>
-          <span>
-            신청 내용과 비공개 증빙을 확인한 뒤 참여 자격을 결정하세요.
-          </span>
-        </header>
-        <nav className="adminTabs" aria-label="관리자 메뉴">
-          <span aria-current="page">인증 심사</span>
-          <Link href="/admin/reports">신고 관리</Link>
-          <Link href="/admin/metrics">서비스 지표</Link>
-        </nav>
-        <form className="adminFilters" method="get">
-          <label>
-            상태
-            <select name="status" defaultValue={filters.status}>
-              <option value="">전체 상태</option>
-              <option value="PENDING">심사 중</option>
-              <option value="APPROVED">승인</option>
-              <option value="REJECTED">반려</option>
-            </select>
-          </label>
-          <label>
-            유형
-            <select name="type" defaultValue={filters.type}>
-              <option value="">전체 유형</option>
-              <option value="TRAVELER">여행자</option>
-              <option value="LOCAL">현지인</option>
-            </select>
-          </label>
-          <button>필터 적용</button>
-        </form>
-        <div className="adminReviewGrid">
-          <section className="applicationList" aria-label="인증 신청 목록">
-            <div className="applicationList__count">
-              <strong>{items.length}건</strong>
-              <span>최신 제출순</span>
-            </div>
-            {items.length === 0 ? (
-              <div className="adminEmpty">조건에 맞는 신청이 없습니다.</div>
-            ) : (
-              items.map((item) => (
-                <Link
-                  key={item.id}
-                  className={selectedId === item.id ? 'isSelected' : undefined}
-                  href={linkFor(item.id)}
-                >
-                  <span
-                    className={`adminStatus adminStatus--${item.status.toLowerCase()}`}
-                  >
-                    {item.status}
-                  </span>
-                  <strong>{item.applicant.nickname}</strong>
-                  <p>
-                    {item.destination.nameKo} ·{' '}
-                    {item.type === 'TRAVELER' ? '여행자' : '현지인'}
-                  </p>
-                  <small>{shortDate(item.createdAt)} 제출</small>
-                </Link>
-              ))
-            )}
-          </section>
-          {selected === null ? (
-            <section className="reviewPlaceholder">
-              <span>↖</span>
-              <h2>검토할 신청을 선택하세요</h2>
-              <p>증빙은 선택 후 명시적으로 열 때만 불러옵니다.</p>
-            </section>
+    <AdminFrame
+      adminNickname={admin.nickname}
+      current="verifications"
+      title="인증 심사"
+      description="신청 내용과 비공개 증빙을 확인한 뒤 참여 자격을 결정하세요."
+    >
+      <form className={styles.filters} method="get">
+        <label>
+          상태
+          <select
+            className={styles.select}
+            name="status"
+            defaultValue={filters.status}
+          >
+            <option value="">전체 상태</option>
+            <option value="PENDING">심사 중</option>
+            <option value="APPROVED">승인</option>
+            <option value="REJECTED">반려</option>
+          </select>
+        </label>
+        <label>
+          유형
+          <select
+            className={styles.select}
+            name="type"
+            defaultValue={filters.type}
+          >
+            <option value="">전체 유형</option>
+            <option value="TRAVELER">여행자</option>
+            <option value="LOCAL">현지인</option>
+          </select>
+        </label>
+        <button className={styles.button}>필터 적용</button>
+      </form>
+      <div className={styles.review}>
+        <section className={styles.queue} aria-label="인증 신청 목록">
+          <p className={styles.queueHeading}>
+            <strong>{items.length}건</strong>
+            <span>최신 제출순</span>
+          </p>
+          {items.length === 0 ? (
+            <p className={styles.empty}>조건에 맞는 신청이 없습니다.</p>
           ) : (
-            <VerificationReviewPanel verification={selected} />
+            <ul className={styles.queueList}>
+              {items.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    className={styles.queueItem}
+                    aria-current={selectedId === item.id ? 'true' : undefined}
+                    href={linkFor(item.id)}
+                  >
+                    <strong>{item.applicant.nickname}</strong>
+                    <span
+                      className={styles.status}
+                      data-tone={verificationStatusTones[item.status]}
+                    >
+                      {verificationStatusLabels[item.status]}
+                    </span>
+                    <small>
+                      {item.destination.nameKo}{' '}
+                      {verificationTypeLabels[item.type]} ·{' '}
+                      {shortDate(item.createdAt)} 제출
+                    </small>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           )}
-        </div>
+        </section>
+        {selected === null ? (
+          <section className={styles.placeholder}>
+            <h2>검토할 신청을 선택하세요</h2>
+            <p>증빙은 선택 후 직접 열 때만 불러옵니다.</p>
+          </section>
+        ) : (
+          <VerificationReviewPanel verification={selected} />
+        )}
       </div>
-    </main>
+    </AdminFrame>
   );
 }
