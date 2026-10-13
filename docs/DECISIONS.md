@@ -554,6 +554,19 @@
 
 ---
 
+### ADR-047 자율 에이전트 팀과 저위험 변경 자동 머지
+
+- 날짜: 2026-10-14
+- 상태: proposed
+- 문제: 오너 없이도 매일 프로젝트를 개선하고 싶지만, `main`은 Vercel·Railway 프로덕션에 바로 배포되고 브랜치 보호가 없다.
+- 선택지: (1) 모든 변경을 PR로만 남김 (2) CI 통과 시 전부 자동 머지 (3) 저위험 경로만 자동 머지
+- 결정: (3). 클라우드 루틴이 `docs/AUTOPILOT.md`에 따라 기획→디자인→개발→리뷰를 하루 한 번 돌리고 `autopilot/*` PR을 연다. `autopilot-merge.yml`이 `frontend/src/app`, `frontend/src/components`, `frontend/public`, `frontend/e2e`, `docs`, `tasks` 안의 20파일·500줄 이하 변경만 Frontend CI 통과 후 머지한다.
+- 이유: UI·문구·문서 개선은 되돌리기 쉽고 API 권한 검사에 영향을 주지 않는다. 백엔드, Prisma, 인증, API 클라이언트, 의존성, 에이전트 규칙은 오너가 본다. 워크플로는 `pull_request_target`으로 main의 분류기를 실행해 PR이 자기 규칙을 완화할 수 없다.
+- 영향: 저위험 변경은 사람 리뷰 없이 프로덕션에 나간다. Playwright E2E는 CI에 없어 UI 회귀가 빠져나갈 수 있다. 다음 실행이 헬스 체크 실패 시 revert PR을 연다.
+- 되돌리는 조건: 자동 머지된 변경이 사용자에게 보이는 회귀를 두 번 이상 일으키면 자동 머지를 끄고 PR 전용으로 돌린다.
+
+---
+
 ## 신규 결정 템플릿
 
 ```md
