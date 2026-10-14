@@ -1,0 +1,96 @@
+name: Autopilot merge
+
+# Merges low-risk PRs from the autopilot agent team after CI passes.
+#
+# pull_request_target runs this file and the risk classifier as they exist on
+# main, so a PR cannot loosen its own guardrails. PR code is never checked out
+# or executed here; Frontend/Backend CI test it under pull_request as usual.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches: [main]
+
+concurrency:
+  group: autopilot-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  merge:
+    if: >-
+      startsWith(github.event.pull_request.head.ref, 'autopilot/') &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !github.event.pull_request.draft &&
+      !contains(github.event.pull_request.labels.*.name, 'autopilot:hold')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: .github/scripts
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Classify risk
+        id: risk
+        run: |
+          gh pr view "$PR" --json files \
+            --jq '.files[] | "\(.additions)\t\(.deletions)\t\(.path)"' > numstat.txt
+          result="$(node .github/scripts/autopilot-risk.mjs < numstat.txt)"
+          echo "$result"
+          echo "risk=$(jq -r .risk <<<"$result")" >> "$GITHUB_OUTPUT"
+          echo "frontend=$(jq -r .frontend <<<"$result")" >> "$GITHUB_OUTPUT"
+          jq -r '.reasons[]' <<<"$result" > reasons.txt
+
+      - name: Leave high-risk PRs for the owner
+        if: steps.risk.outputs.risk != 'low'
+        run: |
+          gh pr edit "$PR" --add-label "autopilot:needs-owner" || true
+          {
+            echo "Autopilot: 자동 머지 대상이 아니에요. 오너 리뷰가 필요해요."
+            echo
+            sed 's/^/- /' reasons.txt
+          } > body.md
+          gh pr comment "$PR" --body-file body.md
+
+      - name: Wait for CI
+        if: steps.risk.outputs.risk == 'low'
+        env:
+          NEEDS_FRONTEND: ${{ steps.risk.outputs.frontend }}
+        run: |
+          # Docs-only PRs trigger no CI; frontend PRs must pass Frontend CI.
+          if [ "$NEEDS_FRONTEND" != "true" ]; then exit 0; fi
+          for _ in $(seq 1 80); do
+            states="$(gh pr checks "$PR" --json workflow,state \
+              --jq '[.[] | select(.workflow == "Frontend CI") | .state] | join(" ")' || true)"
+            echo "Frontend CI: ${states:-not started}"
+            case " $states " in
+              *" FAILURE "*|*" CANCELLED "*|*" ERROR "*|*" TIMED_OUT "*)
+                gh pr edit "$PR" --add-label "autopilot:ci-failed" || true
+                exit 1 ;;
+            esac
+            if [ -n "$states" ] && [ -z "$(tr -d ' ' <<<"${states//SUCCESS/}")" ]; then
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "Timed out waiting for Frontend CI"
+          exit 1
+
+      - name: Merge
+        if: steps.risk.outputs.risk == 'low'
+        run: |
+          gh pr merge "$PR" --squash --delete-branch --match-head-commit "$HEAD_SHA"
