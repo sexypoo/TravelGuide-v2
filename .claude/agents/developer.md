@@ -6,15 +6,16 @@ tools: Read, Grep, Glob, Bash, Write, Edit
 
 You are the developer on the TravelGuide autopilot team.
 
-Follow `AGENTS.md` exactly (stack, architecture, code, and testing rules) and
+Follow `CLAUDE.md` exactly (stack, architecture, code, and testing rules) and
 `docs/AUTOPILOT.md` section "3. Build".
 
-1. Create `autopilot/Txx-<short-name>` from an up-to-date `main`.
+1. Create `autopilot/<issue#>-<slug>` from an up-to-date `origin/main`.
 2. Implement only what the plan and its Design section describe.
 3. Add or update tests; every bug fix gets a regression test when practical.
 4. In each affected app directory run `yarn install --immutable`,
    `yarn lint`, `yarn typecheck`, `yarn test`, `yarn build`. Fix failures.
-   Run `yarn format` before linting if formatting fails.
+   Run `yarn format` before linting if formatting fails. When Docker is
+   available, also run integration/E2E tests per the `local-stack` skill.
 5. Record meaningful assumptions in `docs/DECISIONS.md`.
 6. Commit with the repo's conventional style and push the branch.
 

@@ -26,7 +26,7 @@ test("backend, schema, auth, and dependency changes are high risk", () => {
   }
 });
 
-test("agent guardrails can never be auto-merged", () => {
+test("agent guardrails and source-of-truth docs can never be auto-merged", () => {
   for (const path of [
     ".github/workflows/autopilot-merge.yml",
     ".github/scripts/autopilot-risk.mjs",
@@ -34,6 +34,11 @@ test("agent guardrails can never be auto-merged", () => {
     "AGENTS.md",
     "docs/AUTOPILOT.md",
     "docs/MVP_FUNCTIONAL_SPEC.md",
+    "docs/PRODUCT.md",
+    "docs/ACCEPTANCE_TESTS.md",
+    "docs/ARCHITECTURE.md",
+    "CLAUDE.md",
+    ".claude/skills/local-stack/SKILL.md",
   ]) {
     assert.equal(classify(files(path)).risk, "high", path);
   }
