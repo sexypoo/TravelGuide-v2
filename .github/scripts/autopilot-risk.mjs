@@ -22,7 +22,8 @@ const LOW_RISK_PREFIXES = [
 
 const ALWAYS_HIGH_RISK = [
   /^docs\/AUTOPILOT\.md$/,
-  /^docs\/MVP_FUNCTIONAL_SPEC\.md$/,
+  // Source-of-truth docs define product scope; the owner changes those.
+  /^docs\/(PRODUCT|MVP_FUNCTIONAL_SPEC|ACCEPTANCE_TESTS|ARCHITECTURE)\.md$/,
   /(^|\/)route\.tsx?$/,
   /(^|\/)middleware\.tsx?$/,
   /(^|\/)\.env/,
