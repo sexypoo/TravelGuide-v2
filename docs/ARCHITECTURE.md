@@ -435,7 +435,9 @@ index.ts
 
 ## 11. 로컬 개발 명령
 
-루트 package.json이 최소 다음을 제공한다.
+루트 `package.json`은 없다. 명령은 `frontend/`와 `backend/`에서 각각 실행한다.
+최신 명령 목록은 `CLAUDE.md`의 Commands와 `.claude/skills/local-stack`을 따른다.
+아래는 초기 설계 당시의 목록이다.
 
 ```bash
 yarn dev
