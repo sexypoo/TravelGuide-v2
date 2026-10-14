@@ -7012,6 +7012,21 @@ body:has(.legalPage) {
   }
 }
 
+/* #12 — keep the /app body clear of the fixed left navigation (tablet + desktop) */
+@media (min-width: 761px) and (max-width: 1050px) {
+  .appShell:not(.appShell--room) .appContent:not(.appContent--room) {
+    width: min(100% - 8.65rem, 720px);
+    margin-right: auto;
+    margin-left: max(7.4rem, calc((100% - 720px) / 2));
+  }
+}
+
+@media (min-width: 1051px) {
+  .appShell:not(.appShell--room) .appContent:not(.appContent--room) {
+    width: min(100% - 15.8rem, 59.2rem);
+  }
+}
+
 @media (max-width: 760px) {
   .appContent {
     width: min(100% - 2.5rem, 720px);
