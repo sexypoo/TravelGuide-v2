@@ -52,6 +52,30 @@ Pick exactly one task, in this priority:
 Never pick work outside P0/P1 scope. A new product idea goes into a GitHub
 issue labeled `autopilot:proposal` for the owner instead of code.
 
+**Quality bar.** A task qualifies only if the planner can name, with a file
+and line, one of:
+
+- a problem a user hits (bug, blocked flow, unreadable or broken screen);
+- a mismatch between the spec/acceptance tests and the code;
+- an untested P0 path.
+
+"It could look nicer" does not qualify. Do not rework a screen or file
+changed in the last 30 days (`git log --since=30.days`) unless it has a real
+bug. Doing nothing is better than churn.
+
+**Idle day.** If no candidate passes the bar:
+
+1. Open no branch and no PR.
+2. Open at most 2 `autopilot:proposal` issues with new ideas (problem,
+   who it helps, rough scope, why it is outside P0/P1). Skip any idea that
+   duplicates an open issue.
+3. Report with status 💤 and what was checked.
+4. If the last two `Autopilot log` comments were also 💤 (three idle days in
+   a row), say so in the report: "할 일이 바닥났어요. 새 방향이 필요해요",
+   and list all open `autopilot:proposal` issues. From then on, while idle,
+   only run preflight and report; do not open more proposals until an
+   `autopilot:idea` issue appears or the owner acts on a proposal.
+
 Prefer tasks that fit the auto-merge rules below. Size: one task should be a
 change a reviewer reads in 10 minutes.
 
@@ -123,7 +147,7 @@ missing, label `autopilot:log`). Korean, short:
 
 ```
 [Autopilot] YYYY-MM-DD
-상태: ✅ PR 생성 / ⏸ 대기 / 🚨 긴급
+상태: ✅ PR 생성 / 💤 개선할 것 없음 / ⏸ 대기 / 🚨 긴급
 작업: Txx 제목 (선택 이유 한 줄)
 PR: <link> — 자동 머지 대상 | 오너 리뷰 필요
 검증: lint ✅ typecheck ✅ test ✅ build ✅ (못 돌린 것: …)
@@ -135,7 +159,7 @@ If Slack is unavailable, still write the issue comment and mention it.
 
 ## Hard rules
 
-- One task per run. Stop after reporting.
+- At most one task per run; zero is fine. Stop after reporting.
 - No secrets, tokens, or real user data in code, PRs, issues, or Slack.
 - Do not read or print production environment variables.
 - Do not change pinned versions or add dependencies; propose it in an issue.
