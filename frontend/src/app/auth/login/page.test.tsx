@@ -49,7 +49,7 @@ const unsafeNextValues = [
   '/app\\..\\..\\evil.example',
   '/app/../..//evil.example',
   '/appx',
-  '/admin',
+  '/adminx',
   '/auth/login',
 ];
 
@@ -61,6 +61,7 @@ describe('login page for a signed-in visitor', () => {
       destination: '/app/questions/q-1?tab=answers',
     },
     { next: '/app', destination: '/app' },
+    { next: '/admin/reports', destination: '/admin/reports' },
     ...unsafeNextValues.map((next) => ({ next, destination: '/app' })),
     { next: undefined, destination: '/app' },
   ])('sends next=$next to $destination', async ({ next, destination }) => {
@@ -83,6 +84,7 @@ describe('login page for a signed-in visitor', () => {
 
   it.each([
     { next: '/app/rooms/jeju', nextPath: '/app/rooms/jeju' },
+    { next: '/admin', nextPath: '/admin' },
     ...unsafeNextValues.map((next) => ({ next, nextPath: '/app' })),
   ])(
     'gives the signed-out login form next=$nextPath for $next',

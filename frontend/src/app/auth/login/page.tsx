@@ -10,8 +10,9 @@ const internalBase = 'https://internal.invalid';
 // cross-origin URLs (e.g. `/\evil.example`), so reject them before parsing.
 const unsafeCharacters = /[\\\u0000-\u001f\u007f]/u;
 
-// Narrows a login `next` value to a same-origin /app path. The signed-in
-// redirect and the login form must both use this value.
+// Narrows a login `next` value to a same-origin /app or /admin path (admin
+// pages check the role themselves). The signed-in redirect and the login form
+// must both use this value.
 function internalAppPath(value: string): string {
   if (unsafeCharacters.test(value)) return fallbackPath;
 
@@ -23,9 +24,11 @@ function internalAppPath(value: string): string {
   }
 
   if (url.origin !== internalBase) return fallbackPath;
-  if (url.pathname !== '/app' && !url.pathname.startsWith('/app/')) {
-    return fallbackPath;
-  }
+  const allowed = ['/app', '/admin'].some(
+    (prefix) =>
+      url.pathname === prefix || url.pathname.startsWith(`${prefix}/`),
+  );
+  if (!allowed) return fallbackPath;
 
   const path = `${url.pathname}${url.search}${url.hash}`;
   return path.startsWith('//') ? fallbackPath : path;
