@@ -25,7 +25,7 @@ describe('/app page guards', () => {
     '%s redirects signed-out visitors with its own next path',
     (page) => {
       const source = readFileSync(join(appDirectory, page), 'utf8');
-      expect(source).toMatch(/\brequireUser\(/u);
+      expect(source).toMatch(/\brequireUser\(\s*['`]\/app/u);
     },
   );
 });

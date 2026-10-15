@@ -4,6 +4,33 @@ import { AuthShell } from '@/components/auth/auth-shell';
 import { getCurrentUser } from '@/lib/auth/session';
 import { safeNextPath } from '@/lib/auth/safe-next-path';
 
+const fallbackPath = '/app';
+const internalBase = 'https://internal.invalid';
+// Backslashes and control characters are normalized by browsers into
+// cross-origin URLs (e.g. `/\evil.example`), so reject them before parsing.
+const unsafeCharacters = /[\\\u0000-\u001f\u007f]/u;
+
+// Narrows a login `next` value to a same-origin /app path. The signed-in
+// redirect and the login form must both use this value.
+function internalAppPath(value: string): string {
+  if (unsafeCharacters.test(value)) return fallbackPath;
+
+  let url: URL;
+  try {
+    url = new URL(value, internalBase);
+  } catch {
+    return fallbackPath;
+  }
+
+  if (url.origin !== internalBase) return fallbackPath;
+  if (url.pathname !== '/app' && !url.pathname.startsWith('/app/')) {
+    return fallbackPath;
+  }
+
+  const path = `${url.pathname}${url.search}${url.hash}`;
+  return path.startsWith('//') ? fallbackPath : path;
+}
+
 interface LoginPageProps {
   searchParams: Promise<{
     next?: string | string[];
@@ -18,7 +45,7 @@ export default async function LoginPage({
     getCurrentUser(),
     searchParams,
   ]);
-  const nextPath = safeNextPath(parameters.next);
+  const nextPath = internalAppPath(safeNextPath(parameters.next));
   if (user !== null) {
     redirect(user.isAdmin ? '/admin' : nextPath);
   }
