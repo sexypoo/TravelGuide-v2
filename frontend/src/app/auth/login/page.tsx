@@ -14,13 +14,15 @@ interface LoginPageProps {
 export default async function LoginPage({
   searchParams,
 }: LoginPageProps): Promise<React.JSX.Element> {
-  const user = await getCurrentUser();
+  const [user, parameters] = await Promise.all([
+    getCurrentUser(),
+    searchParams,
+  ]);
+  const nextPath = safeNextPath(parameters.next);
   if (user !== null) {
-    redirect(user.isAdmin ? '/admin' : '/app');
+    redirect(user.isAdmin ? '/admin' : nextPath);
   }
 
-  const parameters = await searchParams;
-  const nextPath = safeNextPath(parameters.next);
   return (
     <AuthShell
       eyebrow="다시 만나서 반가워요"

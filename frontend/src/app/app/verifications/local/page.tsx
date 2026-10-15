@@ -3,8 +3,10 @@ import { AppIcon } from '@/components/common';
 import { LocalVerificationForm } from '@/components/verifications/local-verification-form';
 import styles from '@/components/verifications/verification.module.css';
 import { getRooms } from '@/lib/api/rooms.server';
+import { requireUser } from '@/lib/auth/session';
 
 export default async function LocalVerificationPage(): Promise<React.JSX.Element> {
+  await requireUser('/app/verifications/local');
   const rooms = await getRooms();
   const destination = rooms[0]?.destination;
   if (destination === undefined)

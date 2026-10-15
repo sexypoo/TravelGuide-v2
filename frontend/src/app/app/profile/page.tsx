@@ -5,6 +5,7 @@ import { getOwnProfile } from '@/lib/api/profile.server';
 import { AppIcon } from '@/components/common';
 import { AccountDeletionPanel } from '@/components/profile/account-deletion-panel';
 import styles from '@/components/profile/profile.module.css';
+import { requireUser } from '@/lib/auth/session';
 
 function formatJoinDate(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', {
@@ -27,6 +28,7 @@ const shortcuts = [
 ] as const;
 
 export default async function ProfilePage(): Promise<React.JSX.Element> {
+  await requireUser('/app/profile');
   const profile = await getOwnProfile();
 
   return (

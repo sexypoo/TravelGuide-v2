@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { SavedPlacesList } from '@/components/places/saved-places-list';
 import { AppIcon } from '@/components/common';
 import styles from '@/components/profile/profile.module.css';
+import { requireUser } from '@/lib/auth/session';
 
-export default function SavedPlacesPage(): React.JSX.Element {
+export default async function SavedPlacesPage(): Promise<React.JSX.Element> {
+  await requireUser('/app/saved-places');
   return (
     <div className={styles.page}>
       <Link className={`appBackLink ${styles.back}`} href="/app/profile">
