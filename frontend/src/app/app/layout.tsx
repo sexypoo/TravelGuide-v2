@@ -4,12 +4,18 @@ import { AppNavigation } from '@/components/app/app-navigation';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { Wordmark } from '@/components/brand/wordmark';
 import { AppProviders } from '@/components/providers/app-providers';
-import { requireUser } from '@/lib/auth/session';
+import { getCurrentUser } from '@/lib/auth/session';
 
 export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>): Promise<React.JSX.Element> {
-  const user = await requireUser('/app');
+  const user = await getCurrentUser();
+  if (user === null) {
+    // Each page calls requireUser with its own path, so the login redirect
+    // keeps the exact `next` instead of falling back to /app.
+    return <>{children}</>;
+  }
+
   const initial = Array.from(user.nickname)[0] ?? '여';
 
   return (

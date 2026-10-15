@@ -3,8 +3,10 @@ import { AppIcon } from '@/components/common';
 import { TravelerVerificationForm } from '@/components/verifications/traveler-verification-form';
 import styles from '@/components/verifications/verification.module.css';
 import { getRooms } from '@/lib/api/rooms.server';
+import { requireUser } from '@/lib/auth/session';
 
 export default async function TravelerVerificationPage(): Promise<React.JSX.Element> {
+  await requireUser('/app/verifications/traveler');
   const rooms = await getRooms();
   const destination = rooms[0]?.destination;
   if (destination === undefined)

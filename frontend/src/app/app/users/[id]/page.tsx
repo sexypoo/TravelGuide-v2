@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AppIcon } from '@/components/common';
 import { getPublicContributorProfile } from '@/lib/api/profile.server';
+import { requireUser } from '@/lib/auth/session';
 
 interface PublicProfilePageProps {
   params: Promise<{ id: string }>;
@@ -18,6 +19,7 @@ export default async function PublicProfilePage({
   params,
 }: PublicProfilePageProps): Promise<React.JSX.Element> {
   const { id } = await params;
+  await requireUser(`/app/users/${encodeURIComponent(id)}`);
   const profile = await getPublicContributorProfile(id);
   const initial = Array.from(profile.nickname)[0] ?? '여';
 

@@ -11,10 +11,9 @@ export default async function QuestionPage({
   params,
 }: QuestionPageProps): Promise<React.JSX.Element> {
   const { id } = await params;
-  const [user, room] = await Promise.all([
-    requireUser(`/app/questions/${encodeURIComponent(id)}`),
-    getRoom('jeju'),
-  ]);
+  // Guard first: getRoom redirects with its own room path when signed out.
+  const user = await requireUser(`/app/questions/${encodeURIComponent(id)}`);
+  const room = await getRoom('jeju');
   if (!room.access.canViewContent) redirect('/app/rooms/jeju');
   return (
     <QuestionDetailView questionId={id} room={room} currentUserId={user.id} />

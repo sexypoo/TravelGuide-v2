@@ -4,6 +4,7 @@ import { VerificationStatusCard } from '@/components/verifications/verification-
 import styles from '@/components/verifications/verification.module.css';
 import type { VerificationType } from '@/lib/api/verifications';
 import { getMyVerifications } from '@/lib/api/verifications.server';
+import { requireUser } from '@/lib/auth/session';
 
 interface PageProps {
   searchParams: Promise<{ submitted?: string | string[] }>;
@@ -35,6 +36,7 @@ const choices: ReadonlyArray<{
 export default async function VerificationsPage({
   searchParams,
 }: PageProps): Promise<React.JSX.Element> {
+  await requireUser('/app/verifications');
   const [verifications, query] = await Promise.all([
     getMyVerifications(),
     searchParams,

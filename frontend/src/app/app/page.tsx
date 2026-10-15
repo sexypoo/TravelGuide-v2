@@ -41,8 +41,9 @@ function statusSummary(source: Verification | undefined): StatusSummary {
 }
 
 export default async function AppHome(): Promise<React.JSX.Element> {
-  const [user, rooms, verifications] = await Promise.all([
-    requireUser('/app'),
+  // Guard first so a signed-out redirect always carries next=/app.
+  const user = await requireUser('/app');
+  const [rooms, verifications] = await Promise.all([
     getRooms(),
     getMyVerifications(),
   ]);
