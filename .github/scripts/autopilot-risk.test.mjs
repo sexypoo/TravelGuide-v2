@@ -44,6 +44,17 @@ test("agent guardrails and source-of-truth docs can never be auto-merged", () =>
   }
 });
 
+test("auth and account deletion screens are high risk", () => {
+  for (const path of [
+    "frontend/src/app/auth/login/page.tsx",
+    "frontend/src/app/auth/reset-password/page.tsx",
+    "frontend/src/app/account-deletion/page.tsx",
+  ]) {
+    assert.equal(classify(files(path)).risk, "high", path);
+  }
+  assert.equal(classify(files("frontend/src/app/app/page.tsx")).risk, "low");
+});
+
 test("route handlers, middleware, and env files under UI paths are high risk", () => {
   for (const path of [
     "frontend/src/app/api/session/route.ts",

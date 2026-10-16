@@ -24,6 +24,8 @@ const ALWAYS_HIGH_RISK = [
   /^docs\/AUTOPILOT\.md$/,
   // Source-of-truth docs define product scope; the owner changes those.
   /^docs\/(PRODUCT|MVP_FUNCTIONAL_SPEC|ACCEPTANCE_TESTS|ARCHITECTURE)\.md$/,
+  // Sign-in, recovery, and account deletion screens are security-sensitive.
+  /^frontend\/src\/app\/(auth|account-deletion)\//,
   /(^|\/)route\.tsx?$/,
   /(^|\/)middleware\.tsx?$/,
   /(^|\/)\.env/,

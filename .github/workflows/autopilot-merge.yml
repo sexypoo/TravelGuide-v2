@@ -18,6 +18,7 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
   checks: read
 
 jobs:
@@ -94,3 +95,15 @@ jobs:
         if: steps.risk.outputs.risk == 'low'
         run: |
           gh pr merge "$PR" --squash --delete-branch --match-head-commit "$HEAD_SHA"
+
+      # Merges made with GITHUB_TOKEN do not apply "Closes #n", so close
+      # the PR's linked issues here.
+      - name: Close linked issues
+        if: steps.risk.outputs.risk == 'low'
+        run: |
+          query='query($owner:String!,$repo:String!,$pr:Int!){repository(owner:$owner,name:$repo){pullRequest(number:$pr){closingIssuesReferences(first:10){nodes{number}}}}}'
+          for issue in $(gh api graphql -f query="$query" \
+              -f owner="${GH_REPO%%/*}" -f repo="${GH_REPO#*/}" -F pr="$PR" \
+              --jq '.data.repository.pullRequest.closingIssuesReferences.nodes[].number'); do
+            gh issue close "$issue" --comment "#$PR 에서 수정되어 main에 머지됐어요." || true
+          done
