@@ -460,13 +460,6 @@
 }
 
 @media (max-width: 900px) {
-  .appShell--room .conversationStage {
-    border-right: 0;
-    border-left: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
   .appShell--room .conversationStageHeader {
     display: none;
   }
@@ -523,12 +516,6 @@
 }
 
 @media (max-width: 760px) {
-  .appShell--room .appContent.appContent--room {
-    width: 100%;
-    padding-right: 0;
-    padding-left: 0;
-  }
-
   .appShell--room .conversationRoomHeader {
     min-height: 3.75rem;
     padding: 0.4rem max(0.75rem, env(safe-area-inset-right)) 0.55rem
@@ -549,11 +536,6 @@
 
   .appShell--room .conversationWorkspace {
     margin-top: 0.4rem;
-  }
-
-  .appShell--room .mobileRoomSwitcher {
-    margin-right: max(0.75rem, env(safe-area-inset-right));
-    margin-left: max(0.75rem, env(safe-area-inset-left));
   }
 }
 
@@ -626,8 +608,6 @@
 
 /* T34 — quiet chat density, Toss-like topics, and a viewport place modal. */
 .appShell--room .appContent.appContent--room {
-  width: min(calc(100% - 2rem), 100rem);
-  padding: 0.75rem 0 1rem;
   background: #f2f4f6;
 }
 
@@ -866,12 +846,12 @@
 }
 
 .appShell--room .topicRail .topicCategoryFilters button {
-  min-height: 1.9rem;
-  padding: 0 0.58rem;
+  min-height: 2.25rem;
+  padding: 0 0.7rem;
   border: 0;
   background: transparent;
-  color: #8b95a1;
-  font-size: 0.62rem;
+  color: #6b7684;
+  font-size: 0.8125rem;
 }
 
 .appShell--room .topicRail .topicCategoryFilters button[aria-pressed='true'] {
@@ -1409,11 +1389,6 @@
 }
 
 @media (max-width: 900px) {
-  .appShell--room .appContent.appContent--room {
-    width: 100%;
-    padding: 0;
-  }
-
   .appShell--room .conversationWorkspace {
     grid-template-columns: 1fr;
     gap: 0;
@@ -1441,12 +1416,6 @@
 
   .appShell--room .miniVerifiedBadge {
     font-size: 0.72rem;
-  }
-
-  .appShell--room .topicRail {
-    padding: 0.7rem max(0.75rem, env(safe-area-inset-right)) 1rem
-      max(0.75rem, env(safe-area-inset-left));
-    border-radius: 0;
   }
 }
 
@@ -1912,5 +1881,111 @@
   .appShell--room .lockedRoomPage .roomContext {
     margin-top: 2rem;
     padding: 1.1rem;
+  }
+}
+
+/* Room layout (#25) — the one place that sets the room's width, gutters, and
+   column sizes. Earlier layers only style surfaces. */
+.appShell--room {
+  --room-max-width: 80rem;
+  --room-gutter: 1.5rem;
+  --room-chat-measure: 48rem;
+}
+
+.appShell--room .appContent.appContent--room {
+  width: min(100%, var(--room-max-width));
+  padding: 0.75rem var(--room-gutter) 1rem;
+}
+
+.appShell--room .conversationWorkspace {
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
+  gap: 1rem;
+}
+
+.appShell--room .topicRail {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #fff;
+}
+
+.appShell--room .topicRail .topicCategoryFilters button[aria-pressed='true'] {
+  background: #f2f4f6;
+  box-shadow: none;
+}
+
+.appShell--room .topicRail .signalQuestionCard,
+.appShell--room .topicRail .signalQuestionCard--urgent {
+  background: #f6f7f9;
+}
+
+/* The page canvas continues past the content's max width. */
+.appShell--room:has(.chatRoomExperience) {
+  background: #f2f4f6;
+}
+
+/* Keep a readable conversation measure on wide screens. */
+.appShell--room .messageTimeline__content,
+.appShell--room .messageComposer > * {
+  width: 100%;
+  max-width: var(--room-chat-measure);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.appShell--room .roomTrustLine {
+  padding: 0.45rem 0.25rem 0;
+}
+
+@media (max-width: 1100px) {
+  .appShell--room {
+    --room-gutter: 1rem;
+  }
+
+  .appShell--room .conversationWorkspace {
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 21rem);
+  }
+}
+
+@media (max-width: 900px) {
+  .appShell--room .conversationWorkspace {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .appShell--room .conversationStage,
+  .appShell--room .topicRail {
+    border-radius: 1rem;
+  }
+}
+
+/* Phones use the full width (ADR-037); only inner content keeps a gutter. */
+@media (max-width: 760px) {
+  .appShell--room {
+    --room-gutter: 0;
+  }
+
+  .appShell--room .appContent.appContent--room {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .appShell--room .conversationStage,
+  .appShell--room .topicRail {
+    border-radius: 0;
+  }
+
+  .appShell--room .topicRail {
+    padding: 0.7rem max(0.75rem, env(safe-area-inset-right)) 1rem
+      max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .appShell--room .roomTrustLine {
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .appShell--room .mobileRoomSwitcher {
+    margin-right: max(0.75rem, env(safe-area-inset-right));
+    margin-left: max(0.75rem, env(safe-area-inset-left));
   }
 }
