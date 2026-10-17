@@ -6,6 +6,14 @@ import { AppIcon } from '@/components/common';
 import type { LocalProofType } from '@/lib/api/verifications';
 import { submitLocalVerification } from '@/lib/api/verifications';
 import { applicationError, proofError } from './verification-form-utils';
+import { Button } from '@/components/ui';
+import {
+  ConsentCard,
+  FormCard,
+  FormFooter,
+  PrepareCard,
+  ProofPicker,
+} from './verification-form-parts';
 import styles from './verification.module.css';
 
 interface CapturedLocation {
@@ -14,6 +22,15 @@ interface CapturedLocation {
   accuracy: number;
   capturedAt: string;
 }
+
+type LocateState = 'idle' | 'locating' | 'done' | 'error';
+
+const locateTitles: Readonly<Record<LocateState, string>> = {
+  idle: '아직 확인하지 않았어요',
+  locating: '위치를 확인하고 있어요',
+  done: '위치 확인 완료',
+  error: '위치를 확인하지 못했어요',
+};
 
 function distanceKm(
   first: { latitude: number; longitude: number },
@@ -134,6 +151,15 @@ export function LocalVerificationForm({
     }
   }
 
+  const located = location !== undefined;
+  const locateState: LocateState = locating
+    ? 'locating'
+    : located
+      ? 'done'
+      : locationMessage !== undefined
+        ? 'error'
+        : 'idle';
+
   return (
     <form
       method="post"
@@ -142,17 +168,45 @@ export function LocalVerificationForm({
       noValidate
       data-verification-form
     >
-      <section className={styles.formSection}>
-        <header>
-          <h2>현재 위치</h2>
-          <p>
-            {destination.nameKo} 중심 반경 {destination.radiusKm}km 안에
-            있는지만 확인해요. 좌표는 화면에 표시하지 않아요.
-          </p>
-        </header>
-        <button
-          className={styles.locate}
-          type="button"
+      <PrepareCard
+        items={[
+          {
+            icon: 'pin',
+            title: '현재 위치 확인',
+            text: `${destination.nameKo} 안에서 버튼 한 번으로 확인해요`,
+          },
+          {
+            icon: 'notebook',
+            title: '연고 증빙',
+            text: '거주, 근무, 학업을 확인할 수 있는 서류 한 장',
+          },
+        ]}
+      />
+      <FormCard
+        title="현재 위치"
+        description={`${destination.nameKo} 중심 반경 ${destination.radiusKm}km 안에 있는지만 확인해요. 좌표는 화면에 표시하지 않아요.`}
+      >
+        <div className={styles.locate} data-state={locateState} role="status">
+          <span className={styles.locateIcon} aria-hidden="true">
+            <AppIcon
+              name={
+                locateState === 'done'
+                  ? 'check'
+                  : locateState === 'error'
+                    ? 'alert'
+                    : 'pin'
+              }
+            />
+          </span>
+          <span className={styles.locateText}>
+            <strong>{locateTitles[locateState]}</strong>
+            <small>{locationMessage ?? '정확도 200m 이내에서 확인돼요'}</small>
+          </span>
+        </div>
+        <Button
+          variant={located ? 'secondary' : 'primary'}
+          block
+          icon={located ? 'refresh' : 'pin'}
           onClick={captureLocation}
           disabled={locating}
         >
@@ -161,42 +215,32 @@ export function LocalVerificationForm({
             : location === undefined
               ? '현재 위치 확인'
               : '위치 다시 확인'}
-        </button>
-        {locationMessage !== undefined && (
-          <div
-            className={styles.locationResult}
-            data-tone={location === undefined ? 'error' : 'success'}
-            role="status"
-          >
-            <AppIcon name={location === undefined ? 'alert' : 'check'} />
-            <span>{locationMessage}</span>
-          </div>
-        )}
-      </section>
-      <section className={styles.formSection}>
-        <header>
-          <h2>연고 확인</h2>
-          <p>관리자가 확인할 수 있도록 구체적으로 알려 주세요.</p>
-        </header>
+        </Button>
+      </FormCard>
+      <FormCard
+        title="연고 확인"
+        description="관리자가 확인할 수 있도록 구체적으로 알려 주세요."
+      >
         <label className={styles.field}>
-          연고 유형
-          <select
-            className={styles.control}
-            value={proofType}
-            onChange={(e) => setProofType(e.target.value as LocalProofType)}
-          >
-            <option value="RESIDENCE">거주</option>
-            <option value="WORK">근무</option>
-            <option value="STUDY">학업</option>
-            <option value="OTHER">기타</option>
-          </select>
+          <span className={styles.label}>연고 유형</span>
+          <span className={styles.selectFrame}>
+            <select
+              value={proofType}
+              onChange={(e) => setProofType(e.target.value as LocalProofType)}
+            >
+              <option value="RESIDENCE">거주</option>
+              <option value="WORK">근무</option>
+              <option value="STUDY">학업</option>
+              <option value="OTHER">기타</option>
+            </select>
+            <AppIcon name="chevron-right" className={styles.selectChevron} />
+          </span>
         </label>
         <label className={styles.field}>
-          <span className={styles.fieldLabel}>
-            관계 설명 <span>{note.length}/300</span>
+          <span className={styles.label}>
+            관계 설명 <small>{note.length}/300</small>
           </span>
           <textarea
-            className={styles.control}
             maxLength={300}
             rows={5}
             value={note}
@@ -204,45 +248,21 @@ export function LocalVerificationForm({
             placeholder="제주에서 생활한 기간과 잘 아는 지역 등을 30자 이상 적어 주세요."
           />
         </label>
-        <label className={styles.upload}>
-          연고 증빙 선택
-          <input
-            type="file"
-            accept="image/jpeg,image/png,application/pdf"
-            onChange={(e) => setProof(e.target.files?.[0])}
-          />
-          <span>{proof?.name ?? 'JPEG, PNG, PDF 파일, 최대 5MB'}</span>
-        </label>
-      </section>
-      <label className={styles.consent}>
-        <input
-          type="checkbox"
-          checked={consent}
-          onChange={(e) => setConsent(e.target.checked)}
-        />
-        <span>
-          <strong>위치·증빙 확인 및 개인정보 이용에 동의합니다.</strong> 정확한
-          위치와 파일은 인증 심사에만 사용되며 일반 사용자에게 공개되지
-          않습니다.
-        </span>
-      </label>
-      {error !== undefined && (
-        <div className="formAlert" role="alert">
-          <span aria-hidden="true">
-            <AppIcon name="alert" />
-          </span>
-          <p>{error}</p>
-        </div>
-      )}
-      <button className={styles.submit} disabled={pending}>
-        {pending ? (
-          <>
-            <span className="buttonSpinner" /> 신청 보내는 중
-          </>
-        ) : (
-          '현지인 인증 신청하기'
-        )}
-      </button>
+        <ProofPicker label="연고 증빙 선택" file={proof} onChange={setProof} />
+      </FormCard>
+      <ConsentCard
+        checked={consent}
+        onChange={setConsent}
+        title="위치·증빙 확인 및 개인정보 이용에 동의합니다."
+      >
+        정확한 위치와 파일은 인증 심사에만 사용되며 일반 사용자에게 공개되지
+        않습니다.
+      </ConsentCard>
+      <FormFooter
+        error={error}
+        pending={pending}
+        label="현지인 인증 신청하기"
+      />
     </form>
   );
 }

@@ -9,6 +9,7 @@ import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { usePlaceFavorites } from '@/lib/query/use-place-favorites';
 import { AppIcon } from '@/components/common';
+import styles from './favorite.module.css';
 
 export function PlaceFavoriteButton({
   messageId,
@@ -36,10 +37,10 @@ export function PlaceFavoriteButton({
   const label = saved === undefined ? '찜하기' : '찜했어요';
 
   return (
-    <span className="placeFavoriteControl">
+    <span className={`${styles.control} placeFavoriteControl`}>
       <button
         type="button"
-        className={saved === undefined ? '' : 'isSaved'}
+        className={styles.button}
         aria-label={`${placeName} ${saved === undefined ? '찜하기' : '찜 해제'}`}
         aria-pressed={saved !== undefined}
         disabled={favorites.isPending || mutation.isPending}
@@ -49,7 +50,7 @@ export function PlaceFavoriteButton({
         {mutation.isPending ? '저장 중' : label}
       </button>
       {mutation.isError && (
-        <small role="alert">
+        <small className={styles.error} role="alert">
           {actionableErrorMessage(mutation.error, '장소를 저장하지 못했어요.')}
         </small>
       )}

@@ -78,7 +78,7 @@ for (const viewport of viewports) {
     expect(layout.primaryHeight).toBeGreaterThanOrEqual(48);
     expect(Math.min(...layout.entryHeights)).toBeGreaterThanOrEqual(64);
     expect(layout.footer.bottom).toBeLessThanOrEqual(layout.viewport.height);
-    expect(layout.background).toBe('rgb(255, 249, 251)');
+    expect(layout.background).toBe('rgb(244, 243, 247)');
 
     await page.screenshot({
       path: `test-results/public-home-${viewport.name}.png`,

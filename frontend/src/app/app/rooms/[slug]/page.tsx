@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import { AppIcon } from '@/components/common';
-import { AccessIcon } from '@/components/app/access-icon';
+import { Page, PageHeader } from '@/components/app/page';
 import { RoomExperience } from '@/components/rooms/room-experience';
+import styles from '@/components/rooms/room.module.css';
+import { ButtonLink, Card, IconTile, ListRow, Notice } from '@/components/ui';
 import { getRoom } from '@/lib/api/rooms.server';
 import { requireUser } from '@/lib/auth/session';
 
@@ -17,74 +17,60 @@ export default async function RoomPage({
     getRoom(slug),
     requireUser(`/app/rooms/${slug}`),
   ]);
-  const locked = !room.access.canViewContent;
 
-  if (!locked) {
+  if (room.access.canViewContent) {
     return <RoomExperience room={room} currentUserId={user.id} />;
   }
 
+  const pending =
+    room.access.status === 'TRAVELER_PENDING' ||
+    room.access.status === 'LOCAL_PENDING';
+
   return (
-    <div className="lockedRoomPage">
-      <Link className="appBackLink" href="/app">
-        <AppIcon name="arrow-left" /> 홈으로
-      </Link>
-      <header className="roomHeader">
-        <div>
-          <p>
-            {room.destination.nameKo} · {room.destination.countryCode}
-          </p>
-          <h1>{room.title}</h1>
-          <span>인증된 여행자와 현지인만 참여할 수 있어요.</span>
-        </div>
-        <span
-          className={`accessBadge accessBadge--${locked ? 'locked' : 'open'}`}
-        >
-          <AccessIcon locked={locked} />
-          {room.access.labelKo}
-        </span>
-      </header>
-
-      <section className="roomContext" aria-labelledby="room-context-title">
-        <div className="roomContext__map" aria-hidden="true">
-          <span className="roomContext__ring" />
-          <span className="roomContext__point" />
-          <strong>JEJU</strong>
-        </div>
-        <div>
-          <p>도움 지역</p>
-          <h2 id="room-context-title">제주 전역의 지금을 나눠보세요</h2>
-          <dl>
-            <div>
-              <dt>기준 위치</dt>
-              <dd>
-                {room.destination.center.latitude.toFixed(4)},{' '}
-                {room.destination.center.longitude.toFixed(4)}
-              </dd>
-            </div>
-            <div>
-              <dt>도움 범위</dt>
-              <dd>중심 반경 {room.destination.radiusKm}km</dd>
-            </div>
-          </dl>
-        </div>
-      </section>
-
-      <section className="roomLockPanel" aria-labelledby="room-lock-title">
-        <span className="roomLockPanel__icon">
-          <AccessIcon locked />
-        </span>
-        <div>
-          <p>대화방 잠김</p>
+    <Page>
+      <PageHeader
+        title={`${room.destination.nameKo} 도움방`}
+        description="인증된 여행자와 현지인만 대화할 수 있어요."
+        backHref="/app"
+        backLabel="홈으로"
+      />
+      <div className={styles.lockedStack}>
+        <Card className={styles.lockedCard} aria-labelledby="room-lock-title">
+          <IconTile icon="lock" tone="plum" />
           <h2 id="room-lock-title">
-            인증 후 {room.destination.nameKo} 도움방이 열려요
+            {pending
+              ? '심사가 끝나면 대화방이 열려요'
+              : `인증하면 ${room.destination.nameKo} 도움방이 열려요`}
           </h2>
-          <span>
-            현재는 방 소개만 볼 수 있습니다. 여행자 또는 현지인 인증 방법을 먼저
-            확인해 주세요.
-          </span>
-        </div>
-        <Link href="/app/verifications">인증 방법 확인하기</Link>
-      </section>
-    </div>
+          <p>
+            {pending
+              ? '심사 결과는 참여 자격 화면에서 확인할 수 있어요.'
+              : '여행자는 여행 일정과 예약 증빙으로, 현지인은 위치와 거주 증빙으로 인증해요.'}
+          </p>
+          <ButtonLink href="/app/verifications" size="lg" block>
+            {pending ? '심사 현황 보기' : '인증 방법 확인하기'}
+          </ButtonLink>
+        </Card>
+
+        <Card padding="list" aria-label="도움 지역">
+          <ListRow
+            icon="pin"
+            tone="magenta"
+            title={`${room.destination.nameKo} 전역`}
+            description={`중심에서 반경 ${room.destination.radiusKm}km 안의 지금을 나눠요`}
+          />
+          <ListRow
+            icon="shield"
+            tone="iris"
+            title="증빙은 공개되지 않아요"
+            description="관리자 심사에만 쓰이고, 정확한 위치도 다른 사람에게 보이지 않아요"
+          />
+        </Card>
+
+        <Notice icon="info">
+          인증 없이도 커뮤니티에서 여행 정보를 묻고 나눌 수 있어요.
+        </Notice>
+      </div>
+    </Page>
   );
 }

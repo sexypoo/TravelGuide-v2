@@ -2,6 +2,9 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { AppIcon } from '@/components/common';
+import composer from '@/components/questions/composer.module.css';
+import { Button } from '@/components/ui';
 import {
   createAnswer,
   createAnswerWithImage,
@@ -15,6 +18,7 @@ import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import { sourceLabels } from '@/lib/questions/presentation';
 import { queryKeys } from '@/lib/query/keys';
 import { mergeAnswerIntoDetail } from '@/lib/query/realtime-cache';
+import styles from './answer-form.module.css';
 
 function answerError(error: unknown): string {
   if (error instanceof ApiProblem) {
@@ -126,19 +130,24 @@ export function AnswerForm({
     clientError || (mutation.isError ? answerError(mutation.error) : '');
 
   return (
-    <form method="post" className="answerComposer" onSubmit={submit} noValidate>
-      <header>
+    <form
+      method="post"
+      className={`${composer.form} ${styles.card}`}
+      onSubmit={submit}
+      noValidate
+    >
+      <header className={composer.head}>
         <h2>이 질문에 근거 있는 답을 남겨주세요</h2>
         <p>
           직접 확인한 범위와 정보의 시점을 분명하게 적으면 여행자가 판단하기
           쉬워져요.
         </p>
       </header>
-      <fieldset className="composerChoices answerSourceChoices">
+      <fieldset className={composer.choices}>
         <legend>답변 근거</legend>
-        <div>
+        <div className={composer.options}>
           {sourceTypes.map((item) => (
-            <label key={item}>
+            <label key={item} className={composer.option}>
               <input
                 type="radio"
                 name="sourceType"
@@ -151,8 +160,8 @@ export function AnswerForm({
         </div>
       </fieldset>
       {sourceType === 'OFFICIAL_SOURCE' && (
-        <label className="composerField">
-          <span>공식 HTTPS 주소</span>
+        <label className={composer.field}>
+          <span className={composer.label}>공식 HTTPS 주소</span>
           <input
             type="url"
             value={sourceUrl}
@@ -163,97 +172,112 @@ export function AnswerForm({
         </label>
       )}
       {['WAITING', 'CROWD'].includes(category) && (
-        <fieldset className="fieldObservationFields">
+        <fieldset className={composer.observation}>
           <legend>지금 직접 본 현장 상태</legend>
-          <label>
-            <span>예상 대기 시간</span>
-            <div>
-              <input
-                type="number"
-                min="0"
-                max="1440"
-                value={waitMinutes}
-                onChange={(event) => setWaitMinutes(event.target.value)}
-                placeholder="30"
-              />
-              <small>분</small>
-            </div>
-          </label>
-          <label>
-            <span>혼잡도</span>
-            <select
-              value={crowdLevel ?? ''}
-              onChange={(event) =>
-                setCrowdLevel(
-                  event.target.value
-                    ? (event.target.value as CrowdLevel)
-                    : undefined,
-                )
-              }
-            >
-              <option value="">선택</option>
-              <option value="QUIET">여유</option>
-              <option value="MODERATE">보통</option>
-              <option value="BUSY">많음</option>
-              <option value="VERY_BUSY">매우 많음</option>
-            </select>
-          </label>
-          <label>
-            <span>입장 상태</span>
-            <select
-              value={entryStatus ?? ''}
-              onChange={(event) =>
-                setEntryStatus(
-                  event.target.value
-                    ? (event.target.value as EntryStatus)
-                    : undefined,
-                )
-              }
-            >
-              <option value="">선택</option>
-              <option value="OPEN">입장 가능</option>
-              <option value="LIMITED">제한 입장</option>
-              <option value="PAUSED">일시 중단</option>
-              <option value="CLOSED">입장 마감</option>
-              <option value="UNKNOWN">확인 필요</option>
-            </select>
-          </label>
-          <p>답변을 보내는 시각이 현장 확인 시각으로 함께 기록됩니다.</p>
+          <div className={composer.observationGrid}>
+            <label className={composer.field}>
+              <span className={composer.label}>예상 대기 시간</span>
+              <div className={composer.suffix}>
+                <input
+                  type="number"
+                  min="0"
+                  max="1440"
+                  inputMode="numeric"
+                  value={waitMinutes}
+                  onChange={(event) => setWaitMinutes(event.target.value)}
+                  placeholder="30"
+                />
+                <small>분</small>
+              </div>
+            </label>
+            <label className={composer.field}>
+              <span className={composer.label}>혼잡도</span>
+              <select
+                value={crowdLevel ?? ''}
+                onChange={(event) =>
+                  setCrowdLevel(
+                    event.target.value
+                      ? (event.target.value as CrowdLevel)
+                      : undefined,
+                  )
+                }
+              >
+                <option value="">선택</option>
+                <option value="QUIET">여유</option>
+                <option value="MODERATE">보통</option>
+                <option value="BUSY">많음</option>
+                <option value="VERY_BUSY">매우 많음</option>
+              </select>
+            </label>
+            <label className={composer.field}>
+              <span className={composer.label}>입장 상태</span>
+              <select
+                value={entryStatus ?? ''}
+                onChange={(event) =>
+                  setEntryStatus(
+                    event.target.value
+                      ? (event.target.value as EntryStatus)
+                      : undefined,
+                  )
+                }
+              >
+                <option value="">선택</option>
+                <option value="OPEN">입장 가능</option>
+                <option value="LIMITED">제한 입장</option>
+                <option value="PAUSED">일시 중단</option>
+                <option value="CLOSED">입장 마감</option>
+                <option value="UNKNOWN">확인 필요</option>
+              </select>
+            </label>
+          </div>
+          <p>답변을 보내는 시각이 현장 확인 시각으로 함께 기록돼요.</p>
         </fieldset>
       )}
-      <label className="composerField">
-        <span>
+      <label className={composer.field}>
+        <span className={composer.label}>
           답변 내용 <small>{Array.from(content).length}/1000</small>
         </span>
         <textarea
           value={content}
           minLength={10}
           maxLength={1000}
-          rows={6}
+          rows={5}
           placeholder="지금 확인한 상황과 여행자가 취할 수 있는 선택을 적어 주세요."
           aria-invalid={message.length > 0}
           onChange={(event) => setContent(event.target.value)}
         />
       </label>
-      <label className="answerImageField">
-        <span>
-          현장 사진 <small>선택 · 최대 10MB</small>
-        </span>
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={(event) => setImage(event.target.files?.[0])}
-        />
-        {image && <strong>{image.name}</strong>}
-      </label>
+      <div className={composer.picker}>
+        <div className={composer.pickerInfo}>
+          <span className={composer.pickerIcon} aria-hidden="true">
+            <AppIcon name="image" />
+          </span>
+          <div>
+            <strong>현장 사진</strong>
+            <small>선택 · 최대 10MB</small>
+          </div>
+        </div>
+        <div className={composer.fileRow}>
+          {image && <strong title={image.name}>{image.name}</strong>}
+          <label className={composer.pickerButton}>
+            {image ? '다시 선택' : '사진 선택'}
+            <input
+              className="srOnly"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => setImage(event.target.files?.[0])}
+            />
+          </label>
+        </div>
+      </div>
       {message.length > 0 && (
-        <p className="composerError" role="alert">
+        <p className={composer.error} role="alert">
           {message}
         </p>
       )}
-      <button type="submit" disabled={mutation.isPending}>
+      <Button type="submit" size="lg" block disabled={mutation.isPending}>
         {mutation.isPending ? '답변 보내는 중' : '답변 보내기'}
-      </button>
+      </Button>
     </form>
   );
 }

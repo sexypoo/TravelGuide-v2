@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { AppIcon } from '@/components/common';
+import { Button, Notice } from '@/components/ui';
 import {
   getAuthCapabilities,
   login,
@@ -20,6 +20,7 @@ import {
   validateRegistration,
   type AuthFieldErrors,
 } from '@/lib/auth/validation';
+import styles from './auth.module.css';
 
 interface AuthFormProps {
   mode: 'login' | 'register';
@@ -70,7 +71,7 @@ function Field({
 }: FieldProps): React.JSX.Element {
   const errorId = `${id}-error`;
   return (
-    <div className="formField">
+    <div className={styles.field}>
       <label htmlFor={id}>{label}</label>
       <input
         id={id}
@@ -82,7 +83,7 @@ function Field({
         aria-describedby={error === undefined ? undefined : errorId}
       />
       {error !== undefined && (
-        <p className="fieldError" id={errorId}>
+        <p className={styles.fieldError} id={errorId}>
           {error}
         </p>
       )}
@@ -190,10 +191,8 @@ export function AuthForm({
   }
 
   return (
-    // method="post" keeps credentials out of the URL if someone submits
-    // before hydration; the handler still prevents the native submit.
     <form
-      className="authForm"
+      className={styles.form}
       method="post"
       onSubmit={(event) => void handleSubmit(event)}
       noValidate
@@ -228,7 +227,7 @@ export function AuthForm({
       />
 
       {isRegister && (
-        <div className="termsField">
+        <div className={styles.terms}>
           <label>
             <input
               name="termsAgreed"
@@ -253,7 +252,7 @@ export function AuthForm({
             </span>
           </label>
           {errors.termsAgreed !== undefined && (
-            <p className="fieldError" id="terms-help">
+            <p className={styles.fieldError} id="terms-help">
               {errors.termsAgreed}
             </p>
           )}
@@ -261,45 +260,46 @@ export function AuthForm({
       )}
 
       {(formError !== null || socialError) && (
-        <div className="formAlert" role="alert">
-          <span aria-hidden="true">
-            <AppIcon name="alert" />
-          </span>
-          <p>
-            {formError ??
-              '소셜 로그인을 완료하지 못했습니다. 다시 시도하거나 다른 방법을 이용해 주세요.'}
-          </p>
-        </div>
+        <Notice tone="danger" icon="alert" role="alert">
+          {formError ??
+            '소셜 로그인을 완료하지 못했습니다. 다시 시도하거나 다른 방법을 이용해 주세요.'}
+        </Notice>
       )}
 
-      <button className="primaryButton" type="submit" disabled={isSubmitting}>
+      <Button
+        className={styles.submit}
+        type="submit"
+        size="lg"
+        block
+        disabled={isSubmitting}
+      >
         {isSubmitting ? (
           <>
-            <span className="buttonSpinner" aria-hidden="true" /> 처리 중
+            <span className={styles.spinner} aria-hidden="true" /> 처리 중
           </>
         ) : isRegister ? (
           '계정 만들기'
         ) : (
           '로그인'
         )}
-      </button>
+      </Button>
 
       {capabilities !== null && capabilities.socialProviders.length > 0 && (
-        <div className="socialAuth">
-          <div className="authDivider" aria-hidden="true">
+        <div className={styles.social}>
+          <div className={styles.divider} aria-hidden="true">
             <span>또는 간편하게</span>
           </div>
-          <div className="socialAuth__buttons" aria-label="소셜 로그인">
+          <div className={styles.socialButtons} aria-label="소셜 로그인">
             {capabilities.socialProviders.map((provider) => {
               const content = providerContent(provider);
               return (
                 <button
-                  className={`socialButton socialButton--${provider}`}
+                  className={`${styles.socialButton} ${styles[`social--${provider}`] ?? ''}`}
                   type="button"
                   key={provider}
                   onClick={() => startSocialLogin(provider)}
                 >
-                  <span className="socialButton__mark" aria-hidden="true">
+                  <span className={styles.socialMark} aria-hidden="true">
                     {content.mark}
                   </span>
                   {content.label}
@@ -311,12 +311,12 @@ export function AuthForm({
       )}
 
       {!isRegister && capabilities?.passwordReset === true && (
-        <p className="authHelp">
+        <p className={styles.help}>
           비밀번호가 기억나지 않나요?{' '}
           <Link href="/auth/forgot-password">비밀번호 재설정</Link>
         </p>
       )}
-      <p className="submitStatus" aria-live="polite">
+      <p className={styles.status} aria-live="polite">
         {isSubmitting
           ? `${isRegister ? '가입' : '로그인'} 요청을 처리하고 있습니다.`
           : ''}

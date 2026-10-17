@@ -1,14 +1,15 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
+import { Button, ButtonLink, Notice } from '@/components/ui';
 import { registerPreorder } from '@/lib/api/preorders';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import {
   validatePreorder,
   type PreorderFieldErrors,
 } from '@/lib/preorders/validation';
+import styles from './preorder-form.module.css';
 
 function hasErrors(errors: PreorderFieldErrors): boolean {
   return Object.values(errors).some((message) => message !== undefined);
@@ -58,34 +59,34 @@ export function PreorderForm(): React.JSX.Element {
 
   if (isComplete) {
     return (
-      <div className="preorderSuccess" role="status">
-        <span aria-hidden="true">
+      <div className={styles.success} role="status">
+        <span className={styles.successIcon} aria-hidden="true">
           <AppIcon name="check" />
         </span>
-        <p className="preorderKicker">신청 완료</p>
+        <p className={styles.kicker}>신청 완료</p>
         <h2>첫 출발 명단에 등록했어요.</h2>
         <p>첫 파일럿 소식이 준비되면 입력한 이메일로 알려드릴게요.</p>
-        <Link className="secondaryLink" href="/">
+        <ButtonLink href="/" variant="secondary" block>
           여쭈어 더 알아보기
-        </Link>
+        </ButtonLink>
       </div>
     );
   }
 
   return (
     <form
+      className={styles.form}
       method="post"
-      className="preorderForm"
       onSubmit={(event) => void handleSubmit(event)}
       noValidate
     >
-      <div className="preorderForm__heading">
-        <p className="preorderKicker">PREORDER</p>
+      <div className={styles.heading}>
+        <p className={styles.kicker}>사전예약</p>
         <h2>첫 오픈 소식 받기</h2>
         <p>필요한 안내만 이메일로 보내드려요.</p>
       </div>
 
-      <div className="formField">
+      <div className={styles.field}>
         <label htmlFor="preorder-name">이름</label>
         <input
           id="preorder-name"
@@ -99,13 +100,13 @@ export function PreorderForm(): React.JSX.Element {
           }
         />
         {errors.name !== undefined && (
-          <p className="fieldError" id="name-error">
+          <p className={styles.fieldError} id="name-error">
             {errors.name}
           </p>
         )}
       </div>
 
-      <div className="formField">
+      <div className={styles.field}>
         <label htmlFor="preorder-email">이메일</label>
         <input
           id="preorder-email"
@@ -120,13 +121,13 @@ export function PreorderForm(): React.JSX.Element {
           }
         />
         {errors.email !== undefined && (
-          <p className="fieldError" id="email-error">
+          <p className={styles.fieldError} id="email-error">
             {errors.email}
           </p>
         )}
       </div>
 
-      <div className="termsField preorderConsent">
+      <div className={styles.consent}>
         <label>
           <input
             name="privacyConsent"
@@ -141,33 +142,30 @@ export function PreorderForm(): React.JSX.Element {
           </span>
         </label>
         {errors.privacyConsent !== undefined && (
-          <p className="fieldError" id="consent-error">
+          <p className={styles.fieldError} id="consent-error">
             {errors.privacyConsent}
           </p>
         )}
       </div>
 
       {formError !== null && (
-        <div className="formAlert" role="alert">
-          <span aria-hidden="true">
-            <AppIcon name="alert" />
-          </span>
-          <p>{formError}</p>
-        </div>
+        <Notice tone="danger" icon="alert" role="alert">
+          {formError}
+        </Notice>
       )}
 
-      <button className="primaryButton" type="submit" disabled={isSubmitting}>
+      <Button type="submit" size="lg" block disabled={isSubmitting}>
         {isSubmitting ? (
           <>
-            <span className="buttonSpinner" aria-hidden="true" /> 저장 중
+            <span className={styles.spinner} aria-hidden="true" /> 저장 중
           </>
         ) : (
           <>
             사전예약 신청하기 <AppIcon name="arrow-right" />
           </>
         )}
-      </button>
-      <p className="submitStatus" aria-live="polite">
+      </Button>
+      <p className={styles.status} aria-live="polite">
         {isSubmitting ? '사전예약 신청을 저장하고 있습니다.' : ''}
       </p>
     </form>

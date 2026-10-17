@@ -1,558 +1,581 @@
-/* T46 — verification overview and application forms in the T42 direction. */
+/* Participation status and verification forms (#31). */
 
-.page {
+/* Status page layout */
+.layout {
   display: grid;
-  gap: 2rem;
-  width: 100%;
-  max-width: 45rem;
-  margin-inline: auto;
-  color: var(--ink);
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
-.header h1 {
-  margin: 0;
-  font-family: var(--display);
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  word-break: keep-all;
+.column {
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+  min-width: 0;
 }
 
-.header p {
-  margin: 0.6rem 0 0;
-  color: var(--muted);
-  font-size: 1rem;
-  line-height: 1.6;
-  word-break: keep-all;
-}
-
-/* Overrides the global .appBackLink bottom margin; the grid gap spaces it. */
-.page > .back {
-  justify-self: start;
-  margin: 0 0 -1rem;
-}
-
-.submitted {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-}
-
-.submitted > span {
-  display: inline-grid;
-  flex: 0 0 auto;
-  width: 1.4rem;
-  height: 1.4rem;
-  place-items: center;
-  margin-top: 0.1rem;
-  border-radius: 50%;
-  background: var(--purple);
-  color: #ffffff;
-}
-
-.submitted :global(.appIcon) {
-  width: 0.85rem;
-  height: 0.85rem;
-}
-
-.submitted strong {
-  display: block;
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.submitted p {
-  margin: 0.2rem 0 0;
-  color: var(--muted);
-  line-height: 1.5;
-}
-
-.section h2 {
-  margin: 0 0 0.5rem;
-  color: var(--muted);
-  font-size: 1rem;
-  font-weight: 650;
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    align-items: start;
+  }
 }
 
 .list {
+  display: grid;
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--line);
   list-style: none;
 }
 
-.list > li {
-  border-bottom: 1px solid var(--line);
-}
-
-.empty {
-  padding: 1rem 0.25rem;
-  color: var(--muted);
-  line-height: 1.6;
-  word-break: keep-all;
-}
-
-/* Status rows */
-
+/* Status card */
 .status {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.25rem 1rem;
-  padding: 1rem 0.25rem;
+  gap: 1rem;
 }
 
-.status h3 {
+.statusHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.statusTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.statusTitle h3 {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: var(--text-xl);
   font-weight: 700;
-}
-
-.statusLabel {
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.statusLabel[data-tone='approved'] {
-  color: var(--purple);
-}
-
-.statusLabel[data-tone='rejected'] {
-  color: var(--danger);
-}
-
-.statusLabel[data-tone='pending'],
-.statusLabel[data-tone='inactive'] {
-  color: var(--muted);
 }
 
 .validity {
-  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
   margin: 0;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
 }
 
+.validity :global(.appIcon) {
+  font-size: 1rem;
+}
+
+/* Three-step progress: 제출 → 심사 → 참여 */
 .progress {
-  display: flex;
-  grid-column: 1 / -1;
-  gap: 0.5rem;
-  align-items: center;
-  margin: 0.5rem 0 0;
-  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0.875rem 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunk);
   list-style: none;
 }
 
 .progress li {
-  display: inline-flex;
-  gap: 0.35rem;
-  align-items: center;
-  color: var(--subtle);
-  font-size: 0.875rem;
-  font-weight: 650;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
 }
 
+/* Connector between this step and the previous one */
 .progress li + li::before {
-  width: 1.25rem;
-  height: 1px;
-  margin-right: 0.15rem;
-  background: var(--line-strong);
   content: '';
+  position: absolute;
+  top: 0.875rem;
+  right: calc(50% + 1.125rem);
+  left: calc(-50% + 1.125rem);
+  height: 2px;
+  border-radius: 1px;
+  background: var(--line-strong);
 }
 
-.progress li > span {
-  width: 0.5rem;
-  height: 0.5rem;
-  border: 1px solid currentColor;
+.progress li[data-state='done']::before,
+.progress li[data-state='current']::before {
+  background: var(--iris);
+}
+
+.stepDot {
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 2px solid var(--line-strong);
   border-radius: 50%;
+  background: var(--surface);
+  color: var(--faint);
+  font-size: var(--text-xs);
+  font-weight: 700;
 }
 
-.progress li[data-state='done'] {
-  color: var(--ink);
+.stepDot :global(.appIcon) {
+  font-size: 0.9375rem;
+  stroke-width: 2.6;
 }
 
-.progress li[data-state='done'] > span {
-  border-color: var(--ink);
-  background: var(--ink);
+.stepLabel {
+  color: var(--faint);
+  font-size: var(--text-sm);
+  font-weight: 600;
 }
 
-.progress li[data-state='current'] {
-  color: var(--purple);
+li[data-state='done'] .stepDot {
+  border-color: var(--iris);
+  background: var(--iris);
+  color: #fff;
 }
 
-.progress li[data-state='current'] > span {
-  border-color: var(--purple);
-  background: var(--purple);
+li[data-state='done'] .stepLabel {
+  color: var(--ink-2);
+}
+
+li[data-state='current'] .stepDot {
+  border-color: var(--iris);
+  background: var(--iris-soft);
+  color: var(--iris-ink);
+  box-shadow: 0 0 0 4px rgba(103, 93, 218, 0.14);
+}
+
+li[data-state='current'] .stepLabel {
+  color: var(--iris-ink);
+  font-weight: 700;
+}
+
+/* A rejected review is "done" but did not pass: show it in danger. */
+.progress[data-status='REJECTED'] li:nth-child(2) .stepDot {
+  border-color: var(--danger);
+  background: var(--danger);
+}
+
+.progress[data-status='REJECTED'] li:nth-child(2)::before {
+  background: var(--danger);
+}
+
+.progress[data-status='REJECTED'] li:nth-child(2) .stepLabel {
+  color: var(--danger-ink);
 }
 
 .reason {
-  grid-column: 1 / -1;
-  margin-top: 0.5rem;
-  padding: 0.75rem 0 0;
-  border-top: 1px solid var(--line);
+  display: grid;
+  justify-items: start;
+  gap: 0.625rem;
 }
 
-.reason strong {
-  font-size: 0.95rem;
-}
-
-.reason p {
-  margin: 0.25rem 0 0.5rem;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.reason a,
-.support a {
-  color: var(--ink);
+.reasonTitle {
+  display: block;
   font-weight: 700;
-  text-underline-offset: 0.2em;
+}
+
+.reasonText {
+  display: block;
+  margin-top: 0.125rem;
+  white-space: pre-wrap;
 }
 
 .support {
-  grid-column: 1 / -1;
-  margin: 0.25rem 0 0;
+  margin: 0;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: var(--text-sm);
 }
 
-/* Choice rows */
-
-.choice {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 4.5rem;
-  padding: 1rem 0.25rem;
-  color: inherit;
-  text-decoration: none;
-}
-
-.choice > span:first-child {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.choice strong {
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.choice > span:first-child > span {
-  color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  word-break: keep-all;
-}
-
-.choice > :global(.appIcon) {
-  flex: 0 0 auto;
-  width: 1.1rem;
-  height: 1.1rem;
-  color: var(--muted);
-  transition: transform 160ms ease;
-}
-
-a.choice:hover > :global(.appIcon) {
-  color: var(--ink);
-  transform: translateX(3px);
-}
-
-.choiceState {
-  flex: 0 0 auto;
-  color: var(--muted);
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.note {
-  margin: -0.75rem 0 0;
-  color: var(--muted);
-  font-size: 0.875rem;
-  line-height: 1.6;
-  word-break: keep-all;
-}
-
-/* Application forms */
-
+/* Forms */
 .form {
   display: grid;
-  border-top: 1px solid var(--line);
-  counter-reset: form-section;
+  width: 100%;
+  max-width: 40rem;
+  gap: 0.75rem;
+  padding-bottom: 1.5rem;
 }
 
-.formSection {
+.formCard {
   display: grid;
   gap: 1rem;
-  padding: 1.5rem 0;
-  border-bottom: 1px solid var(--line);
-  counter-increment: form-section;
 }
 
-.formSection > header h2 {
-  display: flex;
-  gap: 0.6rem;
-  align-items: center;
+.formHead h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: var(--text-xl);
   font-weight: 700;
 }
 
-.formSection > header h2::before {
-  display: inline-grid;
-  width: 1.5rem;
-  height: 1.5rem;
-  place-items: center;
-  border: 1px solid var(--line-strong);
-  border-radius: 50%;
+.formHead p {
+  margin: 0.25rem 0 0;
   color: var(--muted);
-  content: counter(form-section);
-  font-size: 0.8rem;
-  font-variant-numeric: tabular-nums;
+  font-size: var(--text-sm);
+  line-height: 1.5;
 }
 
-.formSection > header p {
-  margin: 0.35rem 0 0 2.1rem;
-  color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  word-break: keep-all;
-}
-
-.field {
+.prepare {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.875rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prepare li {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.prepare li > span:last-child {
+  display: grid;
   min-width: 0;
-  font-size: 0.95rem;
+}
+
+.prepare strong {
+  font-size: var(--text-lg);
   font-weight: 650;
 }
 
-.fieldLabel {
-  display: flex;
-  justify-content: space-between;
-}
-
-.fieldLabel > span {
-  color: var(--subtle);
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
+.prepare li > span:last-child > span {
+  color: var(--muted);
+  font-size: var(--text-sm);
 }
 
 .dates {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: 0.625rem;
 }
 
-.control,
+.field {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.label small {
+  color: var(--faint);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.field textarea,
+.field select,
 .dateFrame {
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  border: 1px solid var(--line-strong);
-  border-radius: 0.75rem;
-  background: var(--surface);
+  min-height: 3rem;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunk);
   color: var(--ink);
-  font: inherit;
-  font-weight: 500;
+  font-family: inherit;
+  font-size: var(--text-lg);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
-.control {
-  padding: 0.8rem 0.9rem;
-}
-
-textarea.control {
+.field textarea {
+  min-height: 7.5rem;
+  padding: 0.8125rem 0.9375rem;
+  line-height: 1.55;
   resize: vertical;
-  line-height: 1.6;
 }
 
-.control:focus-visible,
-.dateFrame:focus-within,
-.upload:focus-within,
-.locate:focus-visible,
-.submit:focus-visible,
-.consent input:focus-visible,
-.choice:focus-visible {
-  outline: 2px solid var(--purple);
-  outline-offset: 3px;
+.field textarea:focus,
+.field select:focus,
+.dateFrame:focus-within {
+  border-color: var(--iris);
+  background: var(--surface);
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
-/* The frame clips Safari's intrinsic date-input width inside 390px. */
+/* Native date inputs sit in a clipped frame so iOS cannot widen them. */
 .dateFrame {
-  display: block;
+  display: flex;
+  align-items: center;
   overflow: hidden;
+  min-width: 0;
 }
 
 .dateFrame input {
-  display: block;
   width: 100%;
-  max-width: 100%;
   min-width: 0;
-  min-height: 3rem;
-  padding: 0.8rem 0.9rem;
+  min-height: 2.875rem;
+  box-sizing: border-box;
+  padding: 0 0.875rem;
   border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
-  outline: 0;
   text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.dateFrame input:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 .dateFrame input::-webkit-date-and-time-value {
-  min-width: 0;
   text-align: left;
 }
 
-.upload {
+.selectFrame {
   position: relative;
-  display: grid;
-  gap: 0.3rem;
-  justify-items: center;
-  padding: 1.25rem 1rem;
-  border: 1px dashed var(--line-strong);
-  border-radius: 0.75rem;
-  background: var(--surface);
+  display: block;
+}
+
+.field select {
+  padding: 0 2.75rem 0 0.9375rem;
+  appearance: none;
   cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-align: center;
+}
+
+.selectChevron {
+  position: absolute;
+  top: 50%;
+  right: 0.9375rem;
+  color: var(--muted);
+  font-size: 1.125rem;
+  pointer-events: none;
+  transform: translateY(-50%) rotate(90deg);
+}
+
+/* File picker: dashed drop row */
+.upload {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 4.25rem;
+  padding: 0.75rem 0.875rem;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .upload:hover {
-  border-color: var(--ink);
+  border-color: var(--iris);
+  background: var(--surface-sunk);
 }
 
-.upload input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
+.upload:focus-within {
+  border-color: var(--iris);
+  box-shadow: var(--focus-ring);
 }
 
-.upload > span {
-  max-width: 100%;
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.upload[data-selected='true'] {
+  border-style: solid;
+  border-color: var(--success);
+  background: var(--success-soft);
 }
 
-.locate {
-  justify-self: start;
-  min-height: 3rem;
-  padding: 0 1.25rem;
-  border: 1px solid var(--ink);
-  border-radius: 0.75rem;
-  background: transparent;
-  color: var(--ink);
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
-}
-
-.locate:disabled {
-  cursor: progress;
-  opacity: 0.55;
-}
-
-.locationResult {
-  display: flex;
-  gap: 0.5rem;
-  align-items: flex-start;
-  color: var(--success);
-  font-size: 0.95rem;
-  font-weight: 650;
-  line-height: 1.5;
-}
-
-.locationResult[data-tone='error'] {
-  color: var(--danger);
-}
-
-.locationResult :global(.appIcon) {
+.uploadIcon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
   flex: 0 0 auto;
-  width: 1.1rem;
-  height: 1.1rem;
-  margin-top: 0.15rem;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--iris-soft);
+  color: var(--iris-ink);
+  font-size: 1.25rem;
 }
 
+.upload[data-selected='true'] .uploadIcon {
+  background: var(--success);
+  color: #fff;
+}
+
+.uploadText {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+}
+
+.uploadText strong {
+  font-size: var(--text-md);
+  font-weight: 650;
+}
+
+.uploadText small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.upload[data-selected='true'] .uploadText small {
+  color: var(--success-ink);
+  font-weight: 600;
+}
+
+.uploadAction {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 2.25rem;
+  padding: 0 0.875rem;
+  border-radius: var(--radius-pill);
+  background: var(--iris-soft);
+  color: var(--iris-ink);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.upload[data-selected='true'] .uploadAction {
+  background: var(--surface);
+  color: var(--ink-2);
+}
+
+/* GPS capture */
+.locate {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunk);
+}
+
+.locateIcon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 1.25rem;
+}
+
+.locate[data-state='locating'] .locateIcon {
+  color: var(--iris-ink);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.locate[data-state='done'] {
+  background: var(--success-soft);
+}
+
+.locate[data-state='done'] .locateIcon {
+  background: var(--success);
+  color: #fff;
+}
+
+.locate[data-state='error'] {
+  background: var(--danger-soft);
+}
+
+.locate[data-state='error'] .locateIcon {
+  color: var(--danger-ink);
+}
+
+.locate[data-state='error'] .locateText small {
+  color: var(--danger-ink);
+}
+
+.locate[data-state='done'] .locateText small {
+  color: var(--success-ink);
+}
+
+.locateText {
+  display: grid;
+  min-width: 0;
+}
+
+.locateText strong {
+  font-size: var(--text-md);
+  font-weight: 650;
+}
+
+.locateText small {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(103, 93, 218, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(103, 93, 218, 0);
+  }
+}
+
+/* Consent */
 .consent {
   display: flex;
-  gap: 0.75rem;
   align-items: flex-start;
-  padding: 1.25rem 0;
+  gap: 0.75rem;
   color: var(--muted);
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: var(--text-sm);
+  line-height: 1.55;
   cursor: pointer;
-  word-break: keep-all;
 }
 
 .consent input {
+  width: 1.375rem;
+  height: 1.375rem;
   flex: 0 0 auto;
-  width: 1.25rem;
-  height: 1.25rem;
-  margin: 0.15rem 0 0;
-  accent-color: var(--ink);
+  margin: 0.0625rem 0 0;
+  accent-color: var(--iris);
+  cursor: pointer;
 }
 
 .consent strong {
+  display: block;
+  margin-bottom: 0.125rem;
   color: var(--ink);
-  font-weight: 700;
+  font-size: var(--text-md);
+  font-weight: 650;
 }
 
-.submit {
-  display: inline-flex;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 3.25rem;
-  margin-top: 0.5rem;
-  border: 0;
-  border-radius: 0.875rem;
-  background: var(--ink);
-  color: #ffffff;
-  cursor: pointer;
-  font: inherit;
-  font-size: 1.05rem;
-  font-weight: 700;
+.footer {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
 }
 
-.submit:hover:not(:disabled) {
-  background: #3a3644;
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
-.submit:disabled {
-  cursor: progress;
-  opacity: 0.6;
-}
-
-.form > :global(.formAlert) {
-  margin-top: 0.5rem;
-}
-
-@media (min-width: 761px) {
-  .header h1 {
-    font-size: 2.5rem;
-  }
-
-  .submit {
-    width: auto;
-    min-width: 15rem;
-    justify-self: start;
-    padding: 0 2rem;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .choice > :global(.appIcon) {
-    transition: none;
+@media (max-width: 359px) {
+  .dates {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

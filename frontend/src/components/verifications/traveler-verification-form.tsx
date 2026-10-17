@@ -2,13 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { AppIcon } from '@/components/common';
 import { submitTravelerVerification } from '@/lib/api/verifications';
 import {
   applicationError,
   localDateToIso,
   proofError,
 } from './verification-form-utils';
+import {
+  ConsentCard,
+  FormCard,
+  FormFooter,
+  PrepareCard,
+  ProofPicker,
+} from './verification-form-parts';
 import styles from './verification.module.css';
 
 export function TravelerVerificationForm({
@@ -65,14 +71,27 @@ export function TravelerVerificationForm({
       noValidate
       data-verification-form
     >
-      <section className={styles.formSection}>
-        <header>
-          <h2>여행 일정</h2>
-          <p>도움방을 이용할 날짜를 골라 주세요.</p>
-        </header>
+      <PrepareCard
+        items={[
+          {
+            icon: 'clock',
+            title: '여행 일정',
+            text: '도움방을 이용할 시작일과 종료일',
+          },
+          {
+            icon: 'notebook',
+            title: '예약 증빙',
+            text: '항공권이나 숙소 예약 내역 한 장',
+          },
+        ]}
+      />
+      <FormCard
+        title="여행 일정"
+        description="도움방을 이용할 날짜를 골라 주세요."
+      >
         <div className={styles.dates}>
           <label className={styles.field}>
-            시작일
+            <span className={styles.label}>시작일</span>
             <span className={styles.dateFrame} data-date-frame>
               <input
                 type="date"
@@ -83,7 +102,7 @@ export function TravelerVerificationForm({
             </span>
           </label>
           <label className={styles.field}>
-            종료일
+            <span className={styles.label}>종료일</span>
             <span className={styles.dateFrame} data-date-frame>
               <input
                 type="date"
@@ -94,27 +113,17 @@ export function TravelerVerificationForm({
             </span>
           </label>
         </div>
-      </section>
-      <section className={styles.formSection}>
-        <header>
-          <h2>여행 증빙</h2>
-          <p>항공권이나 숙소 예약 내역을 올려 주세요.</p>
-        </header>
-        <label className={styles.upload}>
-          증빙 파일 선택
-          <input
-            type="file"
-            accept="image/jpeg,image/png,application/pdf"
-            onChange={(e) => setProof(e.target.files?.[0])}
-          />
-          <span>{proof?.name ?? 'JPEG, PNG, PDF 파일, 최대 5MB'}</span>
-        </label>
+      </FormCard>
+      <FormCard
+        title="여행 증빙"
+        description="항공권이나 숙소 예약 내역을 올려 주세요."
+      >
+        <ProofPicker label="증빙 파일 선택" file={proof} onChange={setProof} />
         <label className={styles.field}>
-          <span className={styles.fieldLabel}>
-            관리자에게 남길 메모 (선택) <span>{note.length}/300</span>
+          <span className={styles.label}>
+            관리자에게 남길 메모 (선택) <small>{note.length}/300</small>
           </span>
           <textarea
-            className={styles.control}
             maxLength={300}
             rows={4}
             value={note}
@@ -122,47 +131,20 @@ export function TravelerVerificationForm({
             placeholder="확인에 도움이 되는 내용을 적어 주세요."
           />
         </label>
-      </section>
-      <Consent checked={consent} onChange={setConsent} />
-      {error !== undefined && (
-        <div className="formAlert" role="alert">
-          <span aria-hidden="true">
-            <AppIcon name="alert" />
-          </span>
-          <p>{error}</p>
-        </div>
-      )}
-      <button className={styles.submit} disabled={pending}>
-        {pending ? (
-          <>
-            <span className="buttonSpinner" /> 신청 보내는 중
-          </>
-        ) : (
-          '여행자 인증 신청하기'
-        )}
-      </button>
-    </form>
-  );
-}
-
-function Consent({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: (value: boolean) => void;
-}): React.JSX.Element {
-  return (
-    <label className={styles.consent}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
+      </FormCard>
+      <ConsentCard
+        checked={consent}
+        onChange={setConsent}
+        title="증빙 확인 및 개인정보 이용에 동의합니다."
+      >
+        제출한 파일과 일정은 인증 심사에만 사용되며 일반 사용자에게 공개되지
+        않습니다.
+      </ConsentCard>
+      <FormFooter
+        error={error}
+        pending={pending}
+        label="여행자 인증 신청하기"
       />
-      <span>
-        <strong>증빙 확인 및 개인정보 이용에 동의합니다.</strong> 제출한 파일과
-        일정은 인증 심사에만 사용되며 일반 사용자에게 공개되지 않습니다.
-      </span>
-    </label>
+    </form>
   );
 }

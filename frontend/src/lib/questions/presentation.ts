@@ -89,6 +89,25 @@ export function formatTopicCardTime(
   }).format(createdAt);
 }
 
+/** "방금", "12분 전", "3시간 전", then a short date. */
+export function formatRelativeTime(
+  value: string,
+  reference = new Date(),
+): string {
+  const minutes = Math.floor(
+    (reference.getTime() - new Date(value).getTime()) / 60_000,
+  );
+  if (minutes < 1) return '방금';
+  if (minutes < 60) return `${minutes}분 전`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}시간 전`;
+  return new Intl.DateTimeFormat('ko-KR', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'Asia/Seoul',
+  }).format(new Date(value));
+}
+
 export function formatChatTime(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', {
     hour: '2-digit',

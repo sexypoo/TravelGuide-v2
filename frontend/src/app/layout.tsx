@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './fonts/pretendard/pretendard.css';
 import './fonts/wanted-sans/wanted-sans.css';
-import './globals.css';
-import './mobile-app.css';
-import './chat-room.css';
+import '../styles/tokens.css';
 
 export const metadata: Metadata = {
   title: {
@@ -16,7 +14,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: 'light',
-  themeColor: '#fff9fb',
+  themeColor: '#f4f3f7',
   interactiveWidget: 'resizes-content',
 };
 
@@ -25,9 +23,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>): React.JSX.Element {
   return (
     <html lang="ko" data-scroll-behavior="smooth">
-      <body className="antialiased" suppressHydrationWarning>
-        {children}
-      </body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

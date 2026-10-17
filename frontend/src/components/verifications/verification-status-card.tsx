@@ -1,4 +1,12 @@
-import Link from 'next/link';
+import { AppIcon } from '@/components/common';
+import {
+  ButtonLink,
+  Card,
+  Chip,
+  IconTile,
+  Notice,
+  type ChipTone,
+} from '@/components/ui';
 import type { Verification, VerificationStatus } from '@/lib/api/verifications';
 import styles from './verification.module.css';
 
@@ -10,12 +18,12 @@ const labels = {
   EXPIRED: '기간 만료',
 } as const;
 
-const tones: Readonly<Record<VerificationStatus, string>> = {
-  PENDING: 'pending',
-  APPROVED: 'approved',
-  REJECTED: 'rejected',
-  REVOKED: 'inactive',
-  EXPIRED: 'inactive',
+const tones: Readonly<Record<VerificationStatus, ChipTone>> = {
+  PENDING: 'warning',
+  APPROVED: 'success',
+  REJECTED: 'danger',
+  REVOKED: 'neutral',
+  EXPIRED: 'neutral',
 };
 
 type StepState = 'done' | 'current' | 'upcoming';
@@ -50,45 +58,65 @@ export function VerificationStatusCard({
       : `${date(verification.expiresAt)}까지 유효`;
 
   return (
-    <article className={styles.status} data-status={verification.status}>
-      <h3>
-        {verification.destination.nameKo} {isTraveler ? '여행자' : '현지인'}{' '}
-        인증
-      </h3>
-      <strong
-        className={styles.statusLabel}
-        data-tone={tones[verification.status]}
+    <Card as="article" className={styles.status}>
+      <div className={styles.statusHead} data-status={verification.status}>
+        <div className={styles.statusTitle}>
+          <IconTile
+            icon={isTraveler ? 'map' : 'home'}
+            tone={isTraveler ? 'magenta' : 'iris'}
+          />
+          <h3>
+            {verification.destination.nameKo} {isTraveler ? '여행자' : '현지인'}{' '}
+            인증
+          </h3>
+        </div>
+        <Chip tone={tones[verification.status]}>
+          {labels[verification.status]}
+        </Chip>
+      </div>
+      <p className={styles.validity}>
+        <AppIcon name="clock" />
+        {validity}
+      </p>
+      <ol
+        className={styles.progress}
+        aria-label="인증 진행 상태"
+        data-status={verification.status}
       >
-        {labels[verification.status]}
-      </strong>
-      <p className={styles.validity}>{validity}</p>
-      <ol className={styles.progress} aria-label="인증 진행 상태">
-        {steps(verification.status).map((step) => (
+        {steps(verification.status).map((step, index) => (
           <li
             key={step.label}
             data-state={step.state}
             aria-current={step.state === 'current' ? 'step' : undefined}
           >
-            <span aria-hidden="true" />
-            {step.label}
+            <span className={styles.stepDot} aria-hidden="true">
+              {step.state === 'done' ? <AppIcon name="check" /> : index + 1}
+            </span>
+            <span className={styles.stepLabel}>{step.label}</span>
           </li>
         ))}
       </ol>
       {verification.status === 'REJECTED' &&
         verification.rejectionReason !== null && (
           <div className={styles.reason}>
-            <strong>다시 확인할 내용</strong>
-            <p>{verification.rejectionReason}</p>
-            <Link
+            <Notice tone="danger" icon="alert">
+              <strong className={styles.reasonTitle}>다시 확인할 내용</strong>
+              <span className={styles.reasonText}>
+                {verification.rejectionReason}
+              </span>
+            </Notice>
+            <ButtonLink
+              variant="secondary"
+              size="sm"
               href={`/app/verifications/${isTraveler ? 'traveler' : 'local'}`}
             >
               새로 신청하기
-            </Link>
+            </ButtonLink>
           </div>
         )}
       {verification.status === 'REVOKED' && (
         <p className={styles.support}>자격 관련 문의는 운영팀에 알려 주세요.</p>
       )}
-    </article>
+    </Card>
   );
 }

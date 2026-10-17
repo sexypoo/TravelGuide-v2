@@ -10,6 +10,7 @@ import {
 import { ReportMenu } from '@/components/reports/report-menu';
 import { PlaceFavoriteButton } from '@/components/places/place-favorite-button';
 import { AppIcon } from '@/components/common';
+import styles from './messages.module.css';
 
 export function MessageCard({
   message,
@@ -39,16 +40,19 @@ export function MessageCard({
         : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(message.place.name)}&query_place_id=${encodeURIComponent(message.place.googlePlaceId)}`;
 
   return (
-    <article className={`chatMessage${own ? ' chatMessage--own' : ''}`}>
+    <article className={`${styles.message}${own ? ` ${styles.own}` : ''}`}>
       {!own && (
-        <span className="chatMessage__avatar" aria-hidden="true">
+        <span
+          className={`${styles.avatar} ${styles[`avatar--${badgeKind}`]}`}
+          aria-hidden="true"
+        >
           {Array.from(message.author.nickname)[0] ?? '제'}
         </span>
       )}
-      <div className="chatMessage__body">
-        <header>
+      <div className={styles.body}>
+        <header className={styles.meta}>
           <strong>{own ? '나' : message.author.nickname}</strong>
-          <span className={`miniVerifiedBadge miniVerifiedBadge--${badgeKind}`}>
+          <span className={`${styles.badge} ${styles[`badge--${badgeKind}`]}`}>
             {participantBadgeLabel(message.author.badge)}
           </span>
           <time dateTime={message.createdAt}>
@@ -56,11 +60,11 @@ export function MessageCard({
           </time>
         </header>
         {message.removed ? (
-          <div className="chatBubble chatBubble--removed">
+          <div className={`${styles.bubble} ${styles.removed}`}>
             <p>{message.content}</p>
           </div>
         ) : message.type === 'IMAGE' && message.image !== null ? (
-          <div className="chatBubble chatBubble--image">
+          <div className={`${styles.bubble} ${styles.image}`}>
             {/* Protected room media is intentionally loaded from the authenticated API route. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -72,30 +76,25 @@ export function MessageCard({
             )}
           </div>
         ) : message.type === 'PLACE' && message.place !== null ? (
-          <div className="chatBubble chatBubble--place placeTicket">
-            <div className="placeTicket__content">
-              <header className="placeTicket__eyebrow">
-                <span>
-                  <i aria-hidden="true">
-                    <AppIcon name="pin" />
-                  </i>
-                  장소 추천
-                </span>
-                <small>공유된 장소</small>
-              </header>
-              <strong className="placeTicket__name">
-                {message.place.name}
-              </strong>
-              {message.place.address && (
-                <span className="placeTicket__address">
-                  {message.place.address}
-                </span>
-              )}
-              {message.content && (
-                <p className="placeTicket__note">{message.content}</p>
-              )}
+          <div className={styles.attachment}>
+            <div className={styles.attachmentKind}>
+              <span>
+                <AppIcon name="pin" />
+                장소 추천
+              </span>
             </div>
-            <footer className="placeMessageActions placeTicket__actions">
+            <strong className={styles.attachmentTitle}>
+              {message.place.name}
+            </strong>
+            {message.place.address && (
+              <span className={styles.attachmentText}>
+                {message.place.address}
+              </span>
+            )}
+            {message.content && (
+              <p className={styles.attachmentNote}>{message.content}</p>
+            )}
+            <footer className={styles.attachmentFooter}>
               <a href={placeMapUrl} target="_blank" rel="noopener noreferrer">
                 지도에서 보기 <AppIcon name="external" />
               </a>
@@ -107,61 +106,57 @@ export function MessageCard({
           </div>
         ) : message.type === 'TOPIC_SHARE' && message.sharedTopic !== null ? (
           <Link
-            className="chatBubble chatBubble--topic"
+            className={styles.attachment}
             href={`/app/questions/${message.sharedTopic.id}`}
           >
-            <header className="sharedTopicHeader">
-              <span className="sharedTopicCategory">
-                <i aria-hidden="true">
-                  <AppIcon name="topic" />
-                </i>
-                {categoryLabels[message.sharedTopic.category]}
+            <span className={styles.attachmentKind}>
+              <span>
+                <AppIcon name="topic" />
+                {categoryLabels[message.sharedTopic.category]} 토픽
               </span>
               <span
-                className={`sharedTopicStatus sharedTopicStatus--${message.sharedTopic.status.toLowerCase()}`}
+                className={`${styles.status} ${styles[`status--${message.sharedTopic.status.toLowerCase()}`]}`}
               >
                 {statusLabels[message.sharedTopic.status]}
               </span>
-            </header>
-            <strong>{message.sharedTopic.content}</strong>
+            </span>
+            <strong className={styles.attachmentTitle}>
+              {message.sharedTopic.content}
+            </strong>
             {message.sharedTopic.areaText && (
-              <span className="sharedTopicPlace">
+              <span className={styles.attachmentText}>
                 <AppIcon name="pin" />
                 {message.sharedTopic.areaText}
               </span>
             )}
-            <div className="sharedTopicMeta">
+            <span className={styles.attachmentFacts}>
               <span>
-                <small>답변</small>
-                <b>{message.sharedTopic.answerCount}개</b>
+                답변<b>{message.sharedTopic.answerCount}개</b>
               </span>
               <span>
-                <small>요청</small>
-                <b>{urgencyLabels[message.sharedTopic.urgency]}</b>
+                요청<b>{urgencyLabels[message.sharedTopic.urgency]}</b>
               </span>
-            </div>
-            <footer>
+            </span>
+            <span className={styles.attachmentFooter}>
               <span>답변과 현황 보기</span>
-              <b aria-hidden="true">
-                <AppIcon name="arrow-right" />
-              </b>
-            </footer>
+              <AppIcon name="chevron-right" />
+            </span>
           </Link>
         ) : (
-          <div className="chatBubble chatBubble--text">
+          <div className={styles.bubble}>
             <p>{message.content}</p>
           </div>
         )}
         {message.topicId !== null ? (
           <Link
-            className="messageTopicLink"
+            className={styles.followUp}
             href={`/app/questions/${message.topicId}`}
           >
-            <span aria-hidden="true" /> 토픽으로 이어짐
+            토픽으로 이어짐
           </Link>
         ) : canPromote ? (
           <button
-            className="messagePromoteButton"
+            className={styles.followUp}
             type="button"
             onClick={() => onPromote(message)}
           >

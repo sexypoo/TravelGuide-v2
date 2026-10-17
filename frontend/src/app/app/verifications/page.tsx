@@ -1,5 +1,12 @@
-import Link from 'next/link';
-import { AppIcon } from '@/components/common';
+import { Page, PageHeader } from '@/components/app/page';
+import {
+  Card,
+  Chip,
+  EmptyState,
+  ListRow,
+  Notice,
+  SectionHead,
+} from '@/components/ui';
 import { VerificationStatusCard } from '@/components/verifications/verification-status-card';
 import styles from '@/components/verifications/verification.module.css';
 import type { VerificationType } from '@/lib/api/verifications';
@@ -54,73 +61,83 @@ export default async function VerificationsPage({
   );
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <h1 id="verifications-title">참여 자격</h1>
-        <p id="verifications-lede">
-          질문하려면 여행자 인증, 답변하려면 현지인 인증이 필요해요.
-        </p>
-      </header>
+    <Page>
+      <PageHeader
+        title="참여 자격"
+        description="질문하려면 여행자 인증, 답변하려면 현지인 인증이 필요해요."
+        backHref="/app/profile"
+        backLabel="내 정보"
+      />
 
-      {submitted !== null && (
-        <div className={styles.submitted} role="status">
-          <span aria-hidden="true">
-            <AppIcon name="check" />
-          </span>
-          <div>
-            <strong>{submitted} 인증을 보냈어요</strong>
-            <p>관리자가 확인하면 여기에 바로 반영돼요.</p>
-          </div>
-        </div>
-      )}
-
-      <section className={styles.section} aria-labelledby="my-verifications">
-        <h2 id="my-verifications">내 인증</h2>
-        <ul className={styles.list}>
-          {verifications.length > 0 ? (
-            verifications.map((item) => (
-              <li key={item.id}>
-                <VerificationStatusCard verification={item} />
-              </li>
-            ))
-          ) : (
-            <li className={styles.empty}>
-              아직 신청한 인증이 없어요. 아래에서 참여 방식을 골라 신청하세요.
-            </li>
+      <div className={styles.layout}>
+        <div className={styles.column}>
+          {submitted !== null && (
+            <Notice tone="success" icon="check" role="status">
+              <strong className={styles.reasonTitle}>
+                {submitted} 인증을 보냈어요
+              </strong>
+              <span className={styles.reasonText}>
+                관리자가 확인하면 여기에 바로 반영돼요.
+              </span>
+            </Notice>
           )}
-        </ul>
-      </section>
 
-      <section className={styles.section} aria-labelledby="new-verification">
-        <h2 id="new-verification">새로 신청하기</h2>
-        <ul className={styles.list}>
-          {choices.map((choice) => (
-            <li key={choice.type}>
-              {pendingTypes.has(choice.type) ? (
-                <div className={styles.choice}>
-                  <span>
-                    <strong>{choice.title}</strong>
-                    <span>{choice.pendingDescription}</span>
-                  </span>
-                  <span className={styles.choiceState}>심사 중</span>
-                </div>
-              ) : (
-                <Link className={styles.choice} href={choice.href}>
-                  <span>
-                    <strong>{choice.title}</strong>
-                    <span>{choice.description}</span>
-                  </span>
-                  <AppIcon name="arrow-right" />
-                </Link>
+          <section aria-labelledby="my-verifications">
+            <SectionHead id="my-verifications" title="내 인증" />
+            {verifications.length > 0 ? (
+              <ul className={styles.list}>
+                {verifications.map((item) => (
+                  <li key={item.id}>
+                    <VerificationStatusCard verification={item} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Card padding="none">
+                <EmptyState
+                  icon="shield"
+                  tone="iris"
+                  title="아직 신청한 인증이 없어요"
+                  description="아래에서 참여 방식을 골라 신청하세요."
+                />
+              </Card>
+            )}
+          </section>
+        </div>
+
+        <div className={styles.column}>
+          <section aria-labelledby="new-verification">
+            <SectionHead id="new-verification" title="새로 신청하기" />
+            <Card padding="list">
+              {choices.map((choice) =>
+                pendingTypes.has(choice.type) ? (
+                  <ListRow
+                    key={choice.type}
+                    icon={choice.type === 'TRAVELER' ? 'map' : 'home'}
+                    tone={choice.type === 'TRAVELER' ? 'magenta' : 'iris'}
+                    title={choice.title}
+                    description={choice.pendingDescription}
+                    trailing={<Chip tone="warning">심사 중</Chip>}
+                  />
+                ) : (
+                  <ListRow
+                    key={choice.type}
+                    href={choice.href}
+                    icon={choice.type === 'TRAVELER' ? 'map' : 'home'}
+                    tone={choice.type === 'TRAVELER' ? 'magenta' : 'iris'}
+                    title={choice.title}
+                    description={choice.description}
+                  />
+                ),
               )}
-            </li>
-          ))}
-        </ul>
-      </section>
+            </Card>
+          </section>
 
-      <p className={styles.note}>
-        증빙과 정확한 위치는 공개되지 않고 관리자 심사에만 쓰여요.
-      </p>
-    </div>
+          <Notice tone="info" icon="lock">
+            증빙과 정확한 위치는 공개되지 않고 관리자 심사에만 쓰여요.
+          </Notice>
+        </div>
+      </div>
+    </Page>
   );
 }

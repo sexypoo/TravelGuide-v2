@@ -22,7 +22,7 @@ test('auth forms submitted without JavaScript keep credentials out of the URL', 
           candidate.isNavigationRequest() &&
           new URL(candidate.url()).pathname === path,
       ),
-      page.locator('form.authForm button[type="submit"]').click(),
+      page.locator('form[method="post"] button[type="submit"]').click(),
     ]);
     expect(request.method(), path).toBe('POST');
     expect(request.url(), path).not.toContain(secret);

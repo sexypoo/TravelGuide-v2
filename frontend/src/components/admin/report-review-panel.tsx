@@ -11,9 +11,11 @@ import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { reportReasonLabels } from '@/components/reports/report-reason-labels';
 import {
   reportStatusLabels,
+  statusChipTones,
   reportStatusTones,
   reportTargetLabels,
 } from './admin-labels';
+import { Button, Chip, Notice } from '@/components/ui';
 import styles from './admin.module.css';
 
 const decisionLabels: Record<ReportReviewDecision, string> = {
@@ -57,11 +59,10 @@ export function ReportReviewPanel({
       <header className={styles.panelTitle}>
         <p>{reportTargetLabels[report.targetType]} 신고</p>
         <h2>{report.target.author.nickname}</h2>
-        <span
-          className={styles.status}
-          data-tone={reportStatusTones[report.status]}
-        >
-          {reportStatusLabels[report.status]}
+        <span className={styles.panelStatus}>
+          <Chip tone={statusChipTones[reportStatusTones[report.status]]}>
+            {reportStatusLabels[report.status]}
+          </Chip>
         </span>
       </header>
       <dl className={styles.facts}>
@@ -100,29 +101,23 @@ export function ReportReviewPanel({
           <p>원문과 신고 사유를 비교한 뒤 한 가지 결정을 선택하세요.</p>
           {decision === undefined ? (
             <div className={styles.actions}>
-              <button
-                className={styles.button}
-                type="button"
-                onClick={() => setDecision('KEEP')}
-              >
+              <Button variant="secondary" onClick={() => setDecision('KEEP')}>
                 유지 검토
-              </button>
+              </Button>
               {report.targetType !== 'USER' && (
-                <button
-                  className={styles.button}
-                  type="button"
+                <Button
+                  variant="secondary"
                   onClick={() => setDecision('REMOVE')}
                 >
                   숨김 검토
-                </button>
+                </Button>
               )}
-              <button
-                className={styles.button}
-                type="button"
+              <Button
+                variant="secondary"
                 onClick={() => setDecision('DISMISS')}
               >
                 기각 검토
-              </button>
+              </Button>
             </div>
           ) : (
             <>
@@ -137,26 +132,20 @@ export function ReportReviewPanel({
                 aria-label="처리 근거 메모"
               />
               <div className={styles.confirmActions}>
-                <button
-                  className={styles.cancel}
-                  type="button"
+                <Button
+                  variant="ghost"
                   onClick={() => setDecision(undefined)}
                   disabled={pending}
                 >
                   취소
-                </button>
-                <button
-                  className={
-                    decision === 'REMOVE'
-                      ? styles.confirmDanger
-                      : styles.confirm
-                  }
-                  type="button"
+                </Button>
+                <Button
+                  variant={decision === 'REMOVE' ? 'danger' : 'dark'}
                   onClick={() => void confirm()}
                   disabled={pending}
                 >
                   {pending ? '처리 중…' : `${decisionLabels[decision]} 확정`}
-                </button>
+                </Button>
               </div>
             </>
           )}
@@ -170,9 +159,9 @@ export function ReportReviewPanel({
         </div>
       )}
       {message !== undefined && (
-        <p className={styles.message} role="alert">
+        <Notice tone="danger" icon="alert" role="alert">
           {message}
-        </p>
+        </Notice>
       )}
     </section>
   );

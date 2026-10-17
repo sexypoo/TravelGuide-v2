@@ -1,181 +1,116 @@
-/* T42 — authenticated home pilot. Tokens are pinned here so desktop and the
- * mobile shell render the same values. */
-
-.home {
-  --home-ink: #282531;
-  --home-muted: #625c69;
-  --home-line: rgba(40, 37, 49, 0.12);
-  --home-iris: #675dda;
-  --home-magenta: #c73568;
-  display: grid;
-  gap: 2.5rem;
-  width: 100%;
-  max-width: 45rem;
-  margin-inline: auto;
-  color: var(--home-ink);
-  font-family: var(--body);
-}
-
 .greeting {
-  display: grid;
-  gap: 1.25rem;
+  padding: 0.5rem 0.25rem 1.25rem;
 }
 
-.greeting h1 {
+.greeting p {
   margin: 0;
-  color: var(--home-ink);
-  font-family: var(--display);
-  font-size: 2rem;
-  font-weight: 760;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  word-break: keep-all;
+  color: var(--muted);
+  font-size: var(--text-md);
+  font-weight: 500;
+}
+
+.greeting h2 {
+  margin: 0.125rem 0 0;
+  font-size: var(--text-4xl);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.28;
 }
 
 .status {
-  display: flex;
-  gap: 0.6rem;
-  align-items: flex-start;
-  width: fit-content;
-  max-width: 100%;
-  color: var(--home-muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  text-decoration: none;
-  word-break: keep-all;
+  display: inline-flex;
+  margin-top: 0.875rem;
 }
 
-.status strong {
-  color: var(--home-ink);
-  font-weight: 700;
-}
-
-.status:hover strong {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.status:focus-visible,
-.more a:focus-visible {
-  outline: 2px solid var(--home-iris);
-  outline-offset: 3px;
-  border-radius: 0.5rem;
-}
-
-.statusIcon {
-  display: inline-grid;
-  flex: 0 0 auto;
-  width: 1.4rem;
-  height: 1.4rem;
-  place-items: center;
-  margin-top: 0.05rem;
-  border-radius: 50%;
-  background: rgba(98, 92, 105, 0.12);
-  color: var(--home-muted);
-}
-
-.statusIcon[data-tone='check'] {
-  background: var(--home-iris);
-  color: #ffffff;
-}
-
-.statusIcon :global(.appIcon) {
-  width: 0.85rem;
-  height: 0.85rem;
-}
-
-.rooms {
+.grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.875rem;
 }
 
-.empty {
-  padding: 1.5rem 0;
-  border-top: 1px solid var(--home-line);
+.main,
+.side {
+  display: grid;
+  gap: 0.875rem;
+  align-content: start;
 }
 
-.empty h2 {
+.posts {
+  padding-bottom: 0.25rem;
+}
+
+.postsHead {
+  padding: 1.125rem 1.25rem 0;
+}
+
+.postsNote {
   margin: 0;
-  font-size: 1.25rem;
+  padding: 0 1.25rem 1.25rem;
+  color: var(--muted);
+  font-size: var(--text-sm);
 }
 
-.empty p {
-  margin: 0.4rem 0 0;
-  color: var(--home-muted);
-  line-height: 1.6;
-}
-
-.more h2 {
-  margin: 0 0 0.5rem;
-  color: var(--home-muted);
-  font-size: 1rem;
-  font-weight: 650;
-}
-
-.more ul {
+.postList {
   margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--home-line);
+  padding: 0 1.25rem;
   list-style: none;
 }
 
-.more li {
-  border-bottom: 1px solid var(--home-line);
+.postList li + li {
+  border-top: 1px solid var(--line);
 }
 
-.more a {
+.postList a {
+  display: block;
+  padding: 0.875rem 0;
+}
+
+.postTitle {
+  display: block;
+  overflow: hidden;
+  font-size: var(--text-md);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.postList a:hover .postTitle {
+  color: var(--iris-ink);
+}
+
+.postMeta {
   display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 4.5rem;
-  padding: 1rem 0.25rem;
-  color: inherit;
-  text-decoration: none;
+  gap: 0.625rem;
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: var(--text-xs);
 }
 
-.more a > span {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.more strong {
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.more a > span > span {
-  color: var(--home-muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  word-break: keep-all;
-}
-
-.more a > :global(.appIcon) {
-  flex: 0 0 auto;
-  width: 1.1rem;
-  height: 1.1rem;
-  color: var(--home-muted);
-  transition: transform 160ms ease;
-}
-
-.more a:hover > :global(.appIcon) {
-  color: var(--home-ink);
-  transform: translateX(3px);
-}
-
-@media (min-width: 761px) {
-  .home {
-    gap: 3.5rem;
+@media (min-width: 1024px) {
+  .greeting {
+    padding: 0 0 1.75rem;
   }
 
-  .greeting h1 {
-    font-size: 2.5rem;
+  .greeting p {
+    font-size: var(--text-lg);
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .more a > :global(.appIcon) {
-    transition: none;
+  .greeting h2 {
+    margin-top: 0.25rem;
+    font-size: var(--text-5xl);
+  }
+
+  .mobileBreak {
+    display: none;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .main,
+  .side {
+    gap: 1.25rem;
   }
 }

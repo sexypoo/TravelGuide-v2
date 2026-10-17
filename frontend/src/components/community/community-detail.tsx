@@ -1,10 +1,19 @@
 'use client';
 
-import Link from 'next/link';
-import { AppIcon } from '@/components/common';
+import { Page, PageHeader } from '@/components/app/page';
+import {
+  Avatar,
+  Button,
+  Card,
+  Chip,
+  Notice,
+  SectionHead,
+} from '@/components/ui';
+import { formatRelativeTime } from '@/lib/questions/presentation';
+import styles from './community.module.css';
 import { useCallback, useEffect, useState } from 'react';
 import { ReportMenu } from '@/components/reports/report-menu';
-import { communityCategoryLabels } from './community-board';
+import { communityCategoryLabels } from '@/lib/community/presentation';
 import {
   createCommunityComment,
   getCommunityPost,
@@ -70,112 +79,146 @@ export function CommunityDetail({
 
   if (post === undefined) {
     return (
-      <div className="communityDetailPage">
-        <Link href="/app/community">
-          <AppIcon name="arrow-left" /> 커뮤니티
-        </Link>
-        <p role={error === undefined ? 'status' : 'alert'}>
-          {error ?? '게시글을 불러오는 중…'}
-        </p>
-      </div>
+      <Page>
+        <PageHeader
+          title="커뮤니티"
+          backHref="/app/community"
+          backLabel="커뮤니티"
+        />
+        <Card>
+          {error === undefined ? (
+            <p className={styles.removed} role="status">
+              게시글을 불러오는 중…
+            </p>
+          ) : (
+            <Notice tone="danger" icon="alert" role="alert">
+              {error}
+            </Notice>
+          )}
+        </Card>
+      </Page>
     );
   }
 
   return (
-    <div className="communityDetailPage">
-      <Link className="appBackLink" href="/app/community">
-        <AppIcon name="arrow-left" /> 여행자 커뮤니티
-      </Link>
-      <article className="communityDetailCard">
-        <div className="communityCard__meta">
-          <span>{communityCategoryLabels[post.category]}</span>
-          {post.areaText !== null && (
-            <mark>
-              <AppIcon name="pin" /> {post.areaText}
-            </mark>
-          )}
-        </div>
-        <h1>{post.title}</h1>
-        <p>{post.content}</p>
-        <footer>
-          <span>{post.author.nickname}</span>
-          {post.author.id !== currentUserId && !post.removed && (
-            <ReportMenu
-              targets={[
-                { type: 'COMMUNITY_POST', id: post.id, label: '이 게시글' },
-                {
-                  type: 'USER',
-                  id: post.author.id,
-                  label: `${post.author.nickname} 사용자`,
-                },
-              ]}
-            />
-          )}
-        </footer>
-      </article>
-
-      {!post.removed && (
-        <form
-          method="post"
-          className="communityCommentForm"
-          onSubmit={(event) => void submit(event)}
-        >
-          <label htmlFor="community-comment">댓글로 경험을 보태세요</label>
-          <div>
-            <textarea
-              id="community-comment"
-              name="content"
-              maxLength={500}
-              rows={3}
-              required
-              placeholder="질문에 답하거나 최신 정보를 덧붙여 주세요."
-            />
-            <button type="submit" disabled={pending}>
-              {pending ? '올리는 중…' : '댓글 올리기'}
-            </button>
+    <Page>
+      <PageHeader
+        title="커뮤니티"
+        backHref="/app/community"
+        backLabel="여행자 커뮤니티"
+      />
+      <div className={styles.detail}>
+        <Card as="article" className={styles.article}>
+          <div className={styles.articleMeta}>
+            <Chip tone="plum">{communityCategoryLabels[post.category]}</Chip>
+            {post.areaText !== null && <Chip icon="pin">{post.areaText}</Chip>}
           </div>
-        </form>
-      )}
-      {error !== undefined && (
-        <p className="communityError" role="alert">
-          {error}
-        </p>
-      )}
+          <h1>{post.title}</h1>
+          <p
+            className={`${styles.articleBody}${post.removed ? ` ${styles.removed}` : ''}`}
+          >
+            {post.content}
+          </p>
+          <footer className={styles.articleFoot}>
+            <span className={styles.by}>
+              <Avatar name={post.author.nickname} size="sm" tone="iris" />
+              <b>{post.author.nickname}</b>
+              <span>{formatRelativeTime(post.createdAt)}</span>
+            </span>
+            {post.author.id !== currentUserId && !post.removed && (
+              <ReportMenu
+                targets={[
+                  { type: 'COMMUNITY_POST', id: post.id, label: '이 게시글' },
+                  {
+                    type: 'USER',
+                    id: post.author.id,
+                    label: `${post.author.nickname} 사용자`,
+                  },
+                ]}
+              />
+            )}
+          </footer>
+        </Card>
 
-      <section
-        className="communityComments"
-        aria-labelledby="community-comments-title"
-      >
-        <header>
-          <h2 id="community-comments-title">댓글 {post.comments.length}</h2>
-        </header>
-        {post.comments.length === 0 ? (
-          <p>아직 댓글이 없어요. 알고 있는 정보를 보태 주세요.</p>
-        ) : (
-          post.comments.map((comment) => (
-            <article key={comment.id}>
-              <strong>{comment.author.nickname}</strong>
-              <p>{comment.content}</p>
-              {comment.author.id !== currentUserId && !comment.removed && (
-                <ReportMenu
-                  targets={[
-                    {
-                      type: 'COMMUNITY_COMMENT',
-                      id: comment.id,
-                      label: '이 댓글',
-                    },
-                    {
-                      type: 'USER',
-                      id: comment.author.id,
-                      label: `${comment.author.nickname} 사용자`,
-                    },
-                  ]}
+        <Card aria-labelledby="community-comments-title">
+          <SectionHead
+            id="community-comments-title"
+            title={`댓글 ${post.comments.length}`}
+          />
+          {post.comments.length === 0 ? (
+            <p className={styles.removed}>
+              아직 댓글이 없어요. 알고 있는 정보를 보태 주세요.
+            </p>
+          ) : (
+            <ul className={styles.commentList}>
+              {post.comments.map((comment) => (
+                <li key={comment.id} className={styles.comment}>
+                  <span className={styles.by}>
+                    <Avatar
+                      name={comment.author.nickname}
+                      size="sm"
+                      tone="magenta"
+                    />
+                    <b>{comment.author.nickname}</b>
+                    {comment.author.id !== currentUserId &&
+                      !comment.removed && (
+                        <span className={styles.report}>
+                          <ReportMenu
+                            targets={[
+                              {
+                                type: 'COMMUNITY_COMMENT',
+                                id: comment.id,
+                                label: '이 댓글',
+                              },
+                              {
+                                type: 'USER',
+                                id: comment.author.id,
+                                label: `${comment.author.nickname} 사용자`,
+                              },
+                            ]}
+                          />
+                        </span>
+                      )}
+                  </span>
+                  <p className={comment.removed ? styles.removed : undefined}>
+                    {comment.content}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {!post.removed && (
+            <form
+              className={`${styles.form} ${styles.commentForm}`}
+              method="post"
+              onSubmit={(event) => void submit(event)}
+            >
+              <label className={styles.field} htmlFor="community-comment">
+                <span>댓글로 경험을 보태세요</span>
+              </label>
+              <div className={styles.field}>
+                <textarea
+                  id="community-comment"
+                  name="content"
+                  maxLength={500}
+                  rows={3}
+                  required
+                  placeholder="질문에 답하거나 최신 정보를 덧붙여 주세요."
                 />
-              )}
-            </article>
-          ))
-        )}
-      </section>
-    </div>
+              </div>
+              <Button type="submit" disabled={pending}>
+                {pending ? '올리는 중…' : '댓글 올리기'}
+              </Button>
+            </form>
+          )}
+          {error !== undefined && (
+            <Notice tone="danger" icon="alert" role="alert">
+              {error}
+            </Notice>
+          )}
+        </Card>
+      </div>
+    </Page>
   );
 }

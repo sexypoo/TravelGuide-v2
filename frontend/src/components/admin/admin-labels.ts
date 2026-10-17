@@ -1,3 +1,4 @@
+import type { ChipTone } from '@/components/ui';
 import type { ReportStatus } from '@/lib/api/admin-reports';
 import type { ReportTargetType } from '@/lib/api/reports';
 import type {
@@ -63,4 +64,11 @@ export const reportStatusTones: Readonly<Record<ReportStatus, StatusTone>> = {
   REVIEWED: 'neutral',
   RESOLVED: 'negative',
   DISMISSED: 'neutral',
+};
+
+export const statusChipTones: Readonly<Record<StatusTone, ChipTone>> = {
+  pending: 'warning',
+  positive: 'success',
+  negative: 'danger',
+  neutral: 'neutral',
 };

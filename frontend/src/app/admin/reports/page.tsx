@@ -3,10 +3,12 @@ import { ReportReviewPanel } from '@/components/admin/report-review-panel';
 import { AdminFrame } from '@/components/admin/admin-frame';
 import {
   reportStatusLabels,
+  statusChipTones,
   reportStatusTones,
   reportTargetLabels,
 } from '@/components/admin/admin-labels';
 import styles from '@/components/admin/admin.module.css';
+import { Button, Card, Chip, EmptyState } from '@/components/ui';
 import { reportReasonLabels } from '@/components/reports/report-reason-labels';
 import {
   getAdminReport,
@@ -88,16 +90,22 @@ export default async function AdminReportsPage({
             <option value="USER">사용자</option>
           </select>
         </label>
-        <button className={styles.button}>필터 적용</button>
+        <Button type="submit" variant="dark">
+          필터 적용
+        </Button>
       </form>
       <div className={styles.review}>
-        <section className={styles.queue} aria-label="신고 목록">
+        <Card padding="none" className={styles.queue} aria-label="신고 목록">
           <p className={styles.queueHeading}>
             <strong>{items.length}건</strong>
             <span>최신 접수순</span>
           </p>
           {items.length === 0 ? (
-            <p className={styles.empty}>조건에 맞는 신고가 없습니다.</p>
+            <EmptyState
+              icon="search"
+              title="조건에 맞는 신고가 없습니다."
+              description="필터를 바꾸거나 전체 상태로 다시 확인해 보세요."
+            />
           ) : (
             <ul className={styles.queueList}>
               {items.map((item) => (
@@ -108,12 +116,11 @@ export default async function AdminReportsPage({
                     href={linkFor(item.id)}
                   >
                     <strong>{item.target.author.nickname}</strong>
-                    <span
-                      className={styles.status}
-                      data-tone={reportStatusTones[item.status]}
+                    <Chip
+                      tone={statusChipTones[reportStatusTones[item.status]]}
                     >
                       {reportStatusLabels[item.status]}
-                    </span>
+                    </Chip>
                     <small>
                       {reportTargetLabels[item.targetType]},{' '}
                       {reportReasonLabels[item.reason]} ·{' '}
@@ -124,12 +131,15 @@ export default async function AdminReportsPage({
               ))}
             </ul>
           )}
-        </section>
+        </Card>
         {selected === null ? (
-          <section className={styles.placeholder}>
-            <h2>검토할 신고를 선택하세요</h2>
-            <p>신고만으로 콘텐츠를 자동 숨기지 않습니다.</p>
-          </section>
+          <Card className={styles.placeholder}>
+            <EmptyState
+              icon="info"
+              title="검토할 신고를 선택하세요"
+              description="신고만으로 콘텐츠를 자동 숨기지 않습니다."
+            />
+          </Card>
         ) : (
           <ReportReviewPanel report={selected} />
         )}

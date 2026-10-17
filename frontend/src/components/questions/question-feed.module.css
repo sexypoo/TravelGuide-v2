@@ -1,0 +1,44 @@
+.filters {
+  margin: 0 0 0.875rem;
+  padding-bottom: 0.125rem;
+}
+
+/* The rail panel is white, so idle filters sit on the sunk tone. */
+.filters button[aria-pressed='false'] {
+  background: var(--surface-sunk);
+}
+
+.feed {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.state {
+  padding: 0.5rem 0;
+}
+
+.skeleton {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.skeleton span {
+  height: 7rem;
+  border-radius: 1.125rem;
+  background: var(--surface-sunk);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeleton span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.skeleton span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes shimmer {
+  50% {
+    opacity: 0.55;
+  }
+}

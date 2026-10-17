@@ -19,9 +19,9 @@ describe('AppFrame', () => {
     );
 
     expect(screen.getByRole('navigation', { name: '앱 메뉴' })).toBeVisible();
-    expect(screen.getByText('커뮤니티 화면').closest('main')).not.toHaveClass(
-      'appContent--room',
-    );
+    expect(
+      screen.getByText('커뮤니티 화면').closest('main'),
+    ).not.toHaveAttribute('data-room-focused');
   });
 
   it('hides global chrome and enables focus mode in a room detail', () => {
@@ -36,9 +36,6 @@ describe('AppFrame', () => {
     expect(
       screen.queryByRole('navigation', { name: '앱 메뉴' }),
     ).not.toBeInTheDocument();
-    expect(screen.getByText('제주 실시간방').closest('main')).toHaveClass(
-      'appContent--room',
-    );
     expect(screen.getByText('제주 실시간방').closest('main')).toHaveAttribute(
       'data-room-focused',
       'true',
@@ -74,7 +71,9 @@ describe('AppFrame', () => {
         <p>제주 실시간방</p>
       </AppFrame>,
     );
-    const shell = screen.getByText('제주 실시간방').closest('.appShell');
+    const shell = screen
+      .getByText('제주 실시간방')
+      .closest('div[data-room-focused]');
     expect(shell).toHaveStyle({ height: '700px' });
 
     Object.defineProperty(viewport, 'height', {
@@ -134,7 +133,9 @@ describe('AppFrame', () => {
       </AppFrame>,
     );
 
-    expect(screen.getByText('제주 실시간방').closest('.appShell')).toHaveStyle({
+    expect(
+      screen.getByText('제주 실시간방').closest('div[data-room-focused]'),
+    ).toHaveStyle({
       height: '844px',
     });
 

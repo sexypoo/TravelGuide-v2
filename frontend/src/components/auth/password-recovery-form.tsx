@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
+import { ButtonLink, Button, Notice } from '@/components/ui';
 import { requestPasswordReset, resetPassword } from '@/lib/api/auth-client';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
+import styles from './auth.module.css';
 
 interface PasswordRecoveryFormProps {
   mode: 'forgot' | 'reset';
@@ -93,8 +95,8 @@ export function PasswordRecoveryForm({
 
   if (completed) {
     return (
-      <section className="recoveryComplete" aria-live="polite">
-        <span aria-hidden="true">
+      <section className={styles.complete} aria-live="polite">
+        <span className={styles.completeIcon} aria-hidden="true">
           <AppIcon name="check" />
         </span>
         <h2>
@@ -105,24 +107,22 @@ export function PasswordRecoveryForm({
             ? '가입 여부와 관계없이 같은 안내를 보여드려요. 계정이 있다면 30분 동안 사용할 수 있는 링크를 보냈습니다.'
             : '새 비밀번호로 다시 로그인해 주세요. 기존 로그인 세션은 안전하게 종료됩니다.'}
         </p>
-        <Link className="primaryButton" href="/auth/login">
+        <ButtonLink href="/auth/login" size="lg" block>
           로그인으로 돌아가기
-        </Link>
+        </ButtonLink>
       </section>
     );
   }
 
   return (
-    // method="post" keeps credentials out of the URL if someone submits
-    // before hydration; the handler still prevents the native submit.
     <form
-      className="authForm"
+      className={styles.form}
       method="post"
       onSubmit={(event) => void handleSubmit(event)}
       noValidate
     >
       {mode === 'forgot' ? (
-        <div className="formField">
+        <div className={styles.field}>
           <label htmlFor="email">가입한 이메일</label>
           <input
             id="email"
@@ -138,7 +138,7 @@ export function PasswordRecoveryForm({
         </div>
       ) : (
         <>
-          <div className="formField">
+          <div className={styles.field}>
             <label htmlFor="password">새 비밀번호</label>
             <input
               id="password"
@@ -149,7 +149,7 @@ export function PasswordRecoveryForm({
               aria-invalid={fieldError !== null}
             />
           </div>
-          <div className="formField">
+          <div className={styles.field}>
             <label htmlFor="passwordConfirmation">새 비밀번호 확인</label>
             <input
               id="passwordConfirmation"
@@ -167,26 +167,29 @@ export function PasswordRecoveryForm({
       )}
 
       {fieldError !== null && (
-        <p className="fieldError" id="recovery-field-error">
+        <p className={styles.fieldError} id="recovery-field-error">
           {fieldError}
         </p>
       )}
       {formError !== null && (
-        <div className="formAlert" role="alert">
-          <span aria-hidden="true">
-            <AppIcon name="alert" />
-          </span>
-          <p>{formError}</p>
-        </div>
+        <Notice tone="danger" icon="alert" role="alert">
+          {formError}
+        </Notice>
       )}
-      <button className="primaryButton" type="submit" disabled={isSubmitting}>
+      <Button
+        className={styles.submit}
+        type="submit"
+        size="lg"
+        block
+        disabled={isSubmitting}
+      >
         {isSubmitting
           ? '처리 중'
           : mode === 'forgot'
             ? '재설정 메일 받기'
             : '새 비밀번호 저장'}
-      </button>
-      <p className="authHelp">
+      </Button>
+      <p className={styles.help}>
         <Link href="/auth/login">로그인으로 돌아가기</Link>
       </p>
     </form>

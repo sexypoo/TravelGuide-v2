@@ -48,7 +48,7 @@ describe('RoomExperience conversation and topics', () => {
     render(<RoomExperience room={room} currentUserId="traveler-1" />);
     const conversation = screen.getByRole('region', { name: '제주 대화' });
     const roomHeader = screen
-      .getByRole('heading', { name: room.title })
+      .getByRole('heading', { name: '제주 도움방' })
       .closest('header');
 
     expect(roomHeader).not.toBeNull();
