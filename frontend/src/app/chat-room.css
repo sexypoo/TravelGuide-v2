@@ -607,7 +607,7 @@
 }
 
 /* T34 — quiet chat density, Toss-like topics, and a viewport place modal. */
-.appShell--room .appContent.appContent--room {
+.appShell--room .appContent.appContent--room:has(.chatRoomExperience) {
   background: #f2f4f6;
 }
 
@@ -1884,15 +1884,16 @@
   }
 }
 
-/* Room layout (#25) — the one place that sets the room's width, gutters, and
-   column sizes. Earlier layers only style surfaces. */
+/* Room layout (#25) — the one place that sets the live room's width, gutters,
+   and column sizes. Earlier layers only style surfaces. The locked room
+   introduction keeps its own page layout (#27). */
 .appShell--room {
   --room-max-width: 80rem;
   --room-gutter: 1.5rem;
   --room-chat-measure: 48rem;
 }
 
-.appShell--room .appContent.appContent--room {
+.appShell--room .appContent.appContent--room:has(.chatRoomExperience) {
   width: min(100%, var(--room-max-width));
   padding: 0.75rem var(--room-gutter) 1rem;
 }
@@ -1964,7 +1965,7 @@
     --room-gutter: 0;
   }
 
-  .appShell--room .appContent.appContent--room {
+  .appShell--room .appContent.appContent--room:has(.chatRoomExperience) {
     padding-top: 0;
     padding-bottom: 0;
   }
