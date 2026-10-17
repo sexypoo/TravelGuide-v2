@@ -86,8 +86,12 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
     .locator('.chatRoomExperience')
     .boundingBox();
   expect(desktopRoom).not.toBeNull();
-  expect(desktopRoom?.x ?? -1).toBeLessThanOrEqual(16.5);
-  expect(desktopRoom?.width ?? 0).toBeGreaterThanOrEqual(1407);
+  // The room is capped at 80rem and centered with a gutter on wide screens.
+  expect(desktopRoom?.width ?? 0).toBeLessThanOrEqual(1280);
+  expect(desktopRoom?.width ?? 0).toBeGreaterThanOrEqual(1200);
+  expect(
+    Math.abs((desktopRoom?.x ?? 0) + (desktopRoom?.width ?? 0) / 2 - 720),
+  ).toBeLessThanOrEqual(1);
   expect(desktopRoom?.y ?? -1).toBeGreaterThanOrEqual(0);
   expect(
     (desktopRoom?.y ?? 0) + (desktopRoom?.height ?? 0),
@@ -650,7 +654,8 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
       sharePosition: getComputedStyle(share!).position,
     };
   });
-  expect(topicSurface.background).toBe('rgb(255, 255, 255)');
+  // Topic cards sit as a light tint on the white topic panel.
+  expect(topicSurface.background).toBe('rgb(246, 247, 249)');
   expect(topicSurface.borderWidth).toBe('0px');
   expect(topicSurface.borderRadius).toBeLessThanOrEqual(15);
   expect(topicSurface.boxShadow).toBe('none');
