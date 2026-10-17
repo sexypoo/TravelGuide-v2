@@ -116,6 +116,7 @@ export function CommunityDetail({
 
       {!post.removed && (
         <form
+          method="post"
           className="communityCommentForm"
           onSubmit={(event) => void submit(event)}
         >

@@ -144,6 +144,7 @@ export function CommunityBoard({
 
       {composerOpen && (
         <form
+          method="post"
           className="communityComposer"
           onSubmit={(event) => void submit(event)}
         >

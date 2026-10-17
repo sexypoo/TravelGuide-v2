@@ -82,7 +82,7 @@ export function AccountDeletionPanel({
           계정 삭제 살펴보기
         </button>
       ) : (
-        <form className={styles.deletion} onSubmit={submit}>
+        <form method="post" className={styles.deletion} onSubmit={submit}>
           <div>
             <strong>삭제하면 되돌릴 수 없습니다.</strong>
             <p>

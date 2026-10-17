@@ -113,8 +113,11 @@ export function PasswordRecoveryForm({
   }
 
   return (
+    // method="post" keeps credentials out of the URL if someone submits
+    // before hydration; the handler still prevents the native submit.
     <form
       className="authForm"
+      method="post"
       onSubmit={(event) => void handleSubmit(event)}
       noValidate
     >

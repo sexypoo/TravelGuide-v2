@@ -74,6 +74,7 @@ export function PreorderForm(): React.JSX.Element {
 
   return (
     <form
+      method="post"
       className="preorderForm"
       onSubmit={(event) => void handleSubmit(event)}
       noValidate
