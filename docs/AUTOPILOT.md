@@ -135,8 +135,9 @@ Open the PR against `main`:
 
 - **Low risk** — every changed file is under `frontend/src/app/`,
   `frontend/src/components/`, `frontend/public/`, `frontend/e2e/`, `docs/`,
-  or `tasks/`; no route handlers, middleware, env files, agent rules, or
-  source-of-truth docs; at most 20 files and 500 changed lines. Merged
+  or `tasks/`; no sign-in or account deletion screens
+  (`frontend/src/app/auth/`, `frontend/src/app/account-deletion/`), route
+  handlers, middleware, env files, agent rules, or source-of-truth docs; at most 20 files and 500 changed lines. Merged
   automatically once Frontend CI passes, then deployed by Vercel.
 - **High risk** — anything else (backend, Prisma, auth, API client,
   dependencies, workflows, agent rules). Labeled `autopilot:needs-owner`
