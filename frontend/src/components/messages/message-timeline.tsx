@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppIcon } from '@/components/common';
+import styles from './messages.module.css';
 import type { ChatMessage } from '@/lib/api/messages';
 import { formatChatDate } from '@/lib/questions/presentation';
 import { useMessages } from '@/lib/query/use-messages';
@@ -118,7 +119,7 @@ export function MessageTimeline({
 
   if (query.isPending) {
     return (
-      <div className="messageTimelineSkeleton" aria-label="대화를 불러오는 중">
+      <div className={styles.skeleton} aria-label="대화를 불러오는 중">
         <span />
         <span />
         <span />
@@ -127,7 +128,7 @@ export function MessageTimeline({
   }
   if (query.isError) {
     return (
-      <div className="chatQueryState" role="alert">
+      <div className={styles.state} role="alert">
         <strong>대화를 불러오지 못했어요</strong>
         <span>연결을 확인한 뒤 다시 시도해 주세요.</span>
         <button type="button" onClick={() => void query.refetch()}>
@@ -138,17 +139,17 @@ export function MessageTimeline({
   }
 
   return (
-    <div className="messageTimelineFrame">
+    <div className={styles.frame}>
       <div
         ref={timelineRef}
-        className="messageTimeline"
+        className={styles.timeline}
         aria-label="제주방 대화"
         onScroll={handleScroll}
       >
-        <div className="messageTimeline__content">
+        <div className={styles.content}>
           {query.hasNextPage && (
             <button
-              className="olderMessagesButton"
+              className={styles.older}
               type="button"
               disabled={query.isFetchingNextPage}
               onClick={() => void query.fetchNextPage()}
@@ -159,8 +160,8 @@ export function MessageTimeline({
             </button>
           )}
           {messages.length === 0 ? (
-            <div className="chatEmptyState">
-              <span aria-hidden="true">
+            <div className={styles.state}>
+              <span className={styles.stateIcon} aria-hidden="true">
                 <AppIcon name="live" />
               </span>
               <strong>제주의 첫 대화를 시작해 보세요</strong>
@@ -177,7 +178,7 @@ export function MessageTimeline({
               return (
                 <div key={message.id}>
                   {showDate && (
-                    <div className="chatDateDivider">
+                    <div className={styles.dateDivider}>
                       <span>{formatChatDate(message.createdAt)}</span>
                     </div>
                   )}
@@ -194,12 +195,12 @@ export function MessageTimeline({
       </div>
       {unreadCount > 0 && (
         <button
-          className="newMessageShortcut"
+          className={styles.newMessages}
           type="button"
           aria-label={`새 메시지 ${unreadCount}개, 최신 대화로 이동`}
           onClick={() => moveToLatest(scrollBehavior())}
         >
-          <span aria-hidden="true">↓</span>새 메시지
+          <AppIcon name="arrow-right" className={styles.down} />새 메시지
           <strong>{unreadCount}</strong>
         </button>
       )}

@@ -3,6 +3,18 @@
 import Link from 'next/link';
 import { communityCategoryLabels } from '@/lib/community/presentation';
 import { AppIcon } from '@/components/common';
+import { Page, PageHeader } from '@/components/app/page';
+import {
+  Avatar,
+  Button,
+  Card,
+  Chip,
+  EmptyState,
+  Notice,
+  uiStyles,
+} from '@/components/ui';
+import { formatRelativeTime } from '@/lib/questions/presentation';
+import styles from './community.module.css';
 import { useEffect, useState } from 'react';
 import { ReportMenu } from '@/components/reports/report-menu';
 import {
@@ -15,9 +27,7 @@ import {
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 
 function date(value: string): string {
-  return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' }).format(
-    new Date(value),
-  );
+  return formatRelativeTime(value);
 }
 
 export function CommunityBoard({
@@ -117,73 +127,86 @@ export function CommunityBoard({
     }
   }
 
+  const composeLabel = composerOpen ? '작성 닫기' : '글쓰기';
+
   return (
-    <div className="communityPage">
-      <header className="communityHero">
-        <div>
-          <h1>여행자 커뮤니티</h1>
-          <span>인증 전에도 여행 정보를 편하게 묻고 나눌 수 있어요.</span>
-        </div>
-        <button
-          className="iconTextControl"
-          type="button"
-          onClick={() => setComposerOpen((open) => !open)}
-        >
-          <AppIcon name={composerOpen ? 'close' : 'add'} />
-          {composerOpen ? '작성 닫기' : '정보 나누기'}
-        </button>
-      </header>
+    <Page>
+      <PageHeader
+        title="커뮤니티"
+        description="인증 없이도 여행 정보를 편하게 묻고 나눠요."
+        actions={
+          <span className={styles.webCompose}>
+            <Button
+              icon={composerOpen ? 'close' : 'pencil'}
+              variant={composerOpen ? 'secondary' : 'primary'}
+              onClick={() => setComposerOpen((open) => !open)}
+            >
+              {composeLabel}
+            </Button>
+          </span>
+        }
+      />
 
       {composerOpen && (
-        <form
-          className="communityComposer"
-          onSubmit={(event) => void submit(event)}
-        >
-          <header>
-            <strong>어떤 여행 정보를 나눌까요?</strong>
-            <span>연락처나 정확한 숙소 위치 같은 개인정보는 적지 마세요.</span>
-          </header>
-          <div className="communityComposer__row">
-            <label>
-              분류
-              <select name="category" defaultValue="TRAVEL_TIP">
-                {communityCategories.map((item) => (
-                  <option key={item} value={item}>
-                    {communityCategoryLabels[item]}
-                  </option>
-                ))}
-              </select>
+        <Card className={styles.composerCard} aria-label="새 글 쓰기">
+          <form
+            className={styles.form}
+            method="post"
+            onSubmit={(event) => void submit(event)}
+          >
+            <div className={styles.formHead}>
+              <strong>어떤 여행 정보를 나눌까요?</strong>
+              <span>
+                연락처나 정확한 숙소 위치 같은 개인정보는 적지 마세요.
+              </span>
+            </div>
+            <div className={styles.formRow}>
+              <label className={styles.field}>
+                <span>분류</span>
+                <select name="category" defaultValue="TRAVEL_TIP">
+                  {communityCategories.map((item) => (
+                    <option key={item} value={item}>
+                      {communityCategoryLabels[item]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={styles.field}>
+                <span>
+                  지역 <small>선택</small>
+                </span>
+                <input
+                  name="areaText"
+                  maxLength={60}
+                  placeholder="예: 부산, 도쿄"
+                />
+              </label>
+            </div>
+            <label className={styles.field}>
+              <span>제목</span>
+              <input name="title" minLength={5} maxLength={100} required />
             </label>
-            <label>
-              지역 <small>선택</small>
-              <input
-                name="areaText"
-                maxLength={60}
-                placeholder="예: 부산, 도쿄"
+            <label className={styles.field}>
+              <span>내용</span>
+              <textarea
+                name="content"
+                minLength={10}
+                maxLength={2000}
+                rows={6}
+                required
               />
             </label>
-          </div>
-          <label>
-            제목
-            <input name="title" minLength={5} maxLength={100} required />
-          </label>
-          <label>
-            내용
-            <textarea
-              name="content"
-              minLength={10}
-              maxLength={2000}
-              rows={6}
-              required
-            />
-          </label>
-          <button type="submit" disabled={pending}>
-            {pending ? '올리는 중…' : '커뮤니티에 올리기'}
-          </button>
-        </form>
+            <Button type="submit" size="lg" block disabled={pending}>
+              {pending ? '올리는 중…' : '커뮤니티에 올리기'}
+            </Button>
+          </form>
+        </Card>
       )}
 
-      <div className="communityFilters" aria-label="게시글 분류">
+      <div
+        className={`${uiStyles.filters} ${styles.filters}`}
+        aria-label="게시글 분류"
+      >
         <button
           type="button"
           aria-pressed={category === undefined}
@@ -204,62 +227,103 @@ export function CommunityBoard({
       </div>
 
       {error !== undefined && (
-        <p className="communityError" role="alert">
-          {error}
-        </p>
+        <div className={styles.error}>
+          <Notice tone="danger" icon="alert" role="alert">
+            {error}
+          </Notice>
+        </div>
       )}
       {!loading && posts.length === 0 ? (
-        <div className="communityEmpty">
-          <strong>아직 도착한 여행 정보가 없어요</strong>
-          <p>이 지역을 아는 첫 번째 여행자가 되어 주세요.</p>
-        </div>
+        <Card>
+          <EmptyState
+            icon="community"
+            tone="iris"
+            title="아직 도착한 여행 정보가 없어요"
+            description="이 지역을 아는 첫 번째 여행자가 되어 주세요."
+          />
+        </Card>
+      ) : loading && posts.length === 0 ? (
+        <Card padding="none" className={styles.feed} aria-busy="true">
+          {[0, 1, 2].map((item) => (
+            <div key={item} className={styles.skeleton} aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+          ))}
+        </Card>
       ) : (
-        <div className="communityFeed" aria-busy={loading}>
+        <Card padding="none" className={styles.feed} aria-busy={loading}>
           {posts.map((post) => (
-            <article key={post.id} className="communityCard">
-              <Link href={`/app/community/${post.id}`}>
-                <div className="communityCard__meta">
-                  <span>{communityCategoryLabels[post.category]}</span>
-                  {post.areaText !== null && (
-                    <mark>
-                      <AppIcon name="pin" /> {post.areaText}
-                    </mark>
-                  )}
-                </div>
-                <h2>{post.title}</h2>
-                <p>{post.content}</p>
-              </Link>
-              <footer>
-                <span>
-                  {post.author.nickname} · {date(post.createdAt)}
+            <article key={post.id} className={styles.post}>
+              <Link
+                className={styles.postLink}
+                href={`/app/community/${post.id}`}
+              >
+                <span className={styles.by}>
+                  <Avatar name={post.author.nickname} size="sm" tone="iris" />
+                  <b>{post.author.nickname}</b>
+                  <span>{date(post.createdAt)}</span>
                 </span>
-                <span>댓글 {post.commentCount}</span>
+                <h2 className={styles.title}>{post.title}</h2>
+                <p className={styles.preview}>{post.content}</p>
+              </Link>
+              <footer className={styles.foot}>
+                <Chip tone="plum">
+                  {communityCategoryLabels[post.category]}
+                </Chip>
+                {post.areaText !== null && (
+                  <Chip icon="pin">{post.areaText}</Chip>
+                )}
+                <span className={styles.comments}>
+                  <AppIcon name="community" />
+                  <span className="srOnly">댓글</span>
+                  {post.commentCount}
+                </span>
                 {post.author.id !== currentUserId && !post.removed && (
-                  <ReportMenu
-                    targets={[
-                      {
-                        type: 'COMMUNITY_POST',
-                        id: post.id,
-                        label: '이 게시글',
-                      },
-                    ]}
-                  />
+                  <span className={styles.report}>
+                    <ReportMenu
+                      targets={[
+                        {
+                          type: 'COMMUNITY_POST',
+                          id: post.id,
+                          label: '이 게시글',
+                        },
+                      ]}
+                    />
+                  </span>
                 )}
               </footer>
             </article>
           ))}
-        </div>
+        </Card>
       )}
       {cursor !== null && (
-        <button
-          className="communityMore"
-          type="button"
+        <Button
+          className={styles.more}
+          variant="secondary"
+          block
           onClick={() => void loadMore()}
           disabled={loading}
         >
           {loading ? '불러오는 중…' : '이전 글 더 보기'}
-        </button>
+        </Button>
       )}
-    </div>
+
+      {!composerOpen && (
+        <Button
+          className={styles.fab}
+          variant="live"
+          size="lg"
+          icon="pencil"
+          onClick={() => {
+            setComposerOpen(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        >
+          글쓰기
+        </Button>
+      )}
+    </Page>
   );
 }

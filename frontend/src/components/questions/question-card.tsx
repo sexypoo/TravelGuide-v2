@@ -1,14 +1,14 @@
 import Link from 'next/link';
-import { AppIcon } from '@/components/common';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import type { Question } from '@/lib/api/questions';
 import {
   categoryLabels,
-  formatTopicCardTime,
+  formatRelativeTime,
   statusLabels,
   urgencyLabels,
 } from '@/lib/questions/presentation';
 import { TopicShareButton } from './topic-share-button';
+import styles from './question-card.module.css';
 
 export function QuestionCard({
   question,
@@ -19,49 +19,34 @@ export function QuestionCard({
   roomSlug?: string;
   canShare?: boolean;
 }): React.JSX.Element {
-  const badgeKind =
-    question.author.badge === 'VERIFIED_LOCAL'
-      ? 'local'
-      : question.author.badge === 'VERIFIED_BOTH'
-        ? 'both'
-        : 'traveler';
+  const showShare = canShare && roomSlug && question.status !== 'REMOVED';
   return (
     <article
-      className={`signalQuestionCard${question.urgency === 'URGENT' ? ' signalQuestionCard--urgent' : ''}`}
+      className={styles.card}
+      data-status={question.status.toLowerCase()}
+      data-urgent={question.urgency === 'URGENT' ? 'true' : undefined}
     >
-      <Link className="questionCardLink" href={`/app/questions/${question.id}`}>
-        <div className="questionLeadRow">
-          <span className="questionCategory">
+      <Link className={styles.link} href={`/app/questions/${question.id}`}>
+        <span className={styles.lead}>
+          <span className={styles.category}>
             {categoryLabels[question.category]}
-          </span>
-          <span className="questionLeadSeparator" aria-hidden="true">
-            ·
+            {question.urgency === 'URGENT' && (
+              <span className={styles.urgent}>{urgencyLabels.URGENT}</span>
+            )}
           </span>
           <span
-            className={`questionStatus questionStatus--${question.status.toLowerCase()}`}
+            className={styles.status}
+            data-status={question.status.toLowerCase()}
           >
-            <i aria-hidden="true" />
             {statusLabels[question.status]}
           </span>
-          {question.urgency === 'URGENT' && (
-            <>
-              <span className="questionLeadSeparator" aria-hidden="true">
-                ·
-              </span>
-              <span className="questionUrgency questionUrgency--urgent">
-                {urgencyLabels.URGENT}
-              </span>
-            </>
-          )}
-        </div>
-        <p className="questionCardContent">{question.content}</p>
+        </span>
+        <span className={styles.content}>{question.content}</span>
         {question.areaText !== null && (
-          <span className="questionArea">
-            <AppIcon name="pin" /> {question.areaText}
-          </span>
+          <span className={styles.area}>{question.areaText}</span>
         )}
         {question.image !== null && (
-          <div className="questionCardEvidence">
+          <span className={styles.evidence}>
             {/* Protected room media is served by the authenticated API route. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -69,29 +54,30 @@ export function QuestionCard({
               alt={`${question.areaText ?? '현장'} 토픽 첨부 사진`}
             />
             <span>현장 사진</span>
-          </div>
+          </span>
         )}
-        <footer className="questionCardFooter">
-          <span className="questionCardByline">
-            <span
-              className={`publicBadge publicBadge--${badgeKind}`}
-              aria-label={`${question.author.nickname} · ${participantBadgeLabel(question.author.badge)}`}
-            >
-              <span>{question.author.nickname}</span>
-              <AppIcon name="check" />
-            </span>
-            <time dateTime={question.createdAt}>
-              {formatTopicCardTime(question.createdAt)}
-            </time>
-          </span>
-          <span className="questionAnswerCount">
+        <span
+          className={styles.meta}
+          data-share={showShare ? 'true' : undefined}
+        >
+          <span>
             답변 <strong>{question.answerCount}</strong>
-            <AppIcon name="arrow-right" />
           </span>
-        </footer>
+          <time dateTime={question.createdAt}>
+            {formatRelativeTime(question.createdAt)}
+          </time>
+          <span
+            className={styles.author}
+            aria-label={`${question.author.nickname} · ${participantBadgeLabel(question.author.badge)}`}
+          >
+            {question.author.nickname}
+          </span>
+        </span>
       </Link>
-      {canShare && roomSlug && question.status !== 'REMOVED' && (
-        <TopicShareButton roomSlug={roomSlug} questionId={question.id} />
+      {showShare && (
+        <div className={styles.share}>
+          <TopicShareButton roomSlug={roomSlug} questionId={question.id} />
+        </div>
       )}
     </article>
   );

@@ -1,0 +1,92 @@
+.panel {
+  padding: 1.25rem;
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.head h2 {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: 750;
+}
+
+.head p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.choices {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: 3.25rem;
+  padding: 0 1rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--success-soft);
+  color: var(--success-ink);
+  font-family: inherit;
+  font-size: var(--text-md);
+  font-weight: 600;
+  text-align: left;
+  transition: filter 0.15s ease;
+}
+
+.choice:hover {
+  filter: brightness(0.97);
+}
+
+.choice :global(.appIcon) {
+  font-size: 1.125rem;
+}
+
+.choice strong {
+  font-weight: 750;
+}
+
+.choiceQuiet {
+  background: var(--surface-sunk);
+  color: var(--ink-2);
+}
+
+.confirm {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunk);
+}
+
+.confirm > strong {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.confirm > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.confirm > .error {
+  margin-top: 0.25rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+}
+
+.confirmActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+}

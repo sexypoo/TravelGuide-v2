@@ -1,8 +1,15 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
-import { AppIcon } from '@/components/common';
+import {
+  Button,
+  Chip,
+  IconButton,
+  IconLink,
+  Notice,
+  uiStyles,
+} from '@/components/ui';
+import styles from './room.module.css';
 import { MessageComposer } from '@/components/messages/message-composer';
 import { MessageTimeline } from '@/components/messages/message-timeline';
 import { useRoomRealtime } from '@/components/providers/realtime-provider';
@@ -62,73 +69,76 @@ export function RoomExperience({
     if (result.autoShared) setMobileView('chat');
   }
 
+  const roleTone =
+    room.access.participantKind === 'LOCAL'
+      ? 'local'
+      : room.access.participantKind === null
+        ? 'neutral'
+        : 'traveler';
+
   return (
-    <div className="roomExperience chatRoomExperience">
-      <header className="conversationRoomHeader">
-        <Link className="appBackLink" href="/app">
-          <AppIcon name="arrow-left" /> 홈으로
-        </Link>
-        <div className="conversationRoomHeader__copy">
-          <div className="liveRoomEyebrow">
-            <span
-              className={`connectionPill connectionPill--${connectionState}`}
-            >
-              <i aria-hidden="true" /> {connectionCopy[connectionState]}
-            </span>
-          </div>
-          <h1>{room.title}</h1>
+    <div className={styles.room} data-testid="room-experience">
+      <header className={styles.bar}>
+        <IconLink href="/app" icon="chevron-left" label="홈으로" />
+        <div className={styles.barText}>
+          <h1>{room.destination.nameKo} 도움방</h1>
           <p>
-            {room.destination.nameKo}의 지금을 이야기하고, 중요한 상황은
-            토픽으로 이어가세요.
+            <span
+              className={styles.connection}
+              data-state={connectionState}
+              aria-hidden="true"
+            />
+            <span role="status">
+              {connectionState === 'connected'
+                ? '인증된 여행자와 현지인만 대화해요'
+                : connectionCopy[connectionState]}
+            </span>
           </p>
         </div>
-        <div className="conversationRoomHeader__actions">
-          <RoomNotificationControl />
-          <span className="roomRoleBadge">
-            <AppIcon name="check" />
-            {roleLabel(room)}
+        <div className={styles.barActions}>
+          <span className={styles.role}>
+            <Chip tone={roleTone} icon="check">
+              {roleLabel(room)}
+            </Chip>
           </span>
+          <RoomNotificationControl />
         </div>
       </header>
 
-      <div className="roomTrustLine">
-        <span aria-hidden="true">●</span>
-        인증된 참여자만 대화합니다. 증빙과 정확한 위치는 공개되지 않아요.
+      <div className={styles.tabs}>
+        <div className={uiStyles.segmented} role="tablist" aria-label="방 보기">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mobileView === 'chat'}
+            onClick={() => setMobileView('chat')}
+          >
+            대화
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mobileView === 'topics'}
+            onClick={() => setMobileView('topics')}
+          >
+            실시간 토픽
+          </button>
+        </div>
       </div>
 
-      <div className="mobileRoomSwitcher" role="tablist" aria-label="방 보기">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mobileView === 'chat'}
-          onClick={() => setMobileView('chat')}
-        >
-          대화
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={mobileView === 'topics'}
-          onClick={() => setMobileView('topics')}
-        >
-          실시간 토픽
-        </button>
-      </div>
-
-      <div className="conversationWorkspace" data-mobile-view={mobileView}>
+      <div className={styles.workspace} data-mobile-view={mobileView}>
         <section
-          className="conversationStage"
+          className={styles.stage}
           aria-label={`${room.destination.nameKo} 대화`}
         >
-          <header className="conversationStageHeader">
-            <h2>실시간 대화</h2>
-            <p>인증된 참여자의 현장 교신</p>
-          </header>
+          <h2 className="srOnly">실시간 대화</h2>
           {connectionState !== 'connected' && (
-            <div className="connectionNotice" role="status" aria-live="polite">
-              {connectionState === 'offline'
-                ? '인터넷 연결을 확인해 주세요. 연결되면 놓친 대화를 자동으로 다시 불러옵니다.'
-                : '실시간 연결을 복구하고 있어요. 연결되면 놓친 대화를 자동으로 다시 불러옵니다.'}
+            <div className={styles.notice} aria-live="polite">
+              <Notice tone="warning" icon="refresh">
+                {connectionState === 'offline'
+                  ? '인터넷 연결을 확인해 주세요. 연결되면 놓친 대화를 자동으로 다시 불러와요.'
+                  : '실시간 연결을 복구하고 있어요. 연결되면 놓친 대화를 자동으로 다시 불러와요.'}
+              </Notice>
             </div>
           )}
           <MessageTimeline
@@ -146,30 +156,24 @@ export function RoomExperience({
           )}
         </section>
 
-        <aside className="topicRail" aria-labelledby="topic-rail-title">
-          <header className="topicRail__header">
-            <h2 id="topic-rail-title">지금 이어지는 토픽</h2>
+        <aside className={styles.rail} aria-labelledby="topic-rail-title">
+          <header className={styles.railHead}>
+            <h2 id="topic-rail-title">진행 중인 토픽</h2>
             {room.access.canCreateTopic && (
-              <button
-                className="iconTextControl"
-                type="button"
-                onClick={openDirectTopic}
-              >
-                <AppIcon name="add" /> 새 토픽
-              </button>
+              <Button size="sm" icon="add" onClick={openDirectTopic}>
+                새 토픽
+              </Button>
             )}
           </header>
 
           {topicComposerOpen && (
-            <div className="topicComposerTray">
-              <button
-                className="topicComposerTray__close iconOnlyControl"
-                type="button"
+            <div className={styles.tray}>
+              <IconButton
+                className={styles.trayClose}
+                icon="close"
+                label="토픽 작성 닫기"
                 onClick={closeComposer}
-                aria-label="토픽 작성 닫기"
-              >
-                <AppIcon name="close" />
-              </button>
+              />
               <QuestionComposer
                 key={sourceMessage?.id ?? 'direct-topic'}
                 roomSlug={room.slug}
@@ -180,7 +184,7 @@ export function RoomExperience({
           )}
 
           <div
-            className="roomTabs topicTabs"
+            className={`${uiStyles.segmented} ${styles.railStatus}`}
             role="tablist"
             aria-label="토픽 상태"
           >

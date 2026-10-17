@@ -34,7 +34,7 @@ describe('MessageCard topic handoff', () => {
       <MessageCard message={message} own={false} onPromote={jest.fn()} />,
     );
 
-    expect(container.querySelector('.chatBubble--text')).toHaveTextContent(
+    expect(container.querySelector('.bubble')).toHaveTextContent(
       message.content,
     );
   });
@@ -104,7 +104,7 @@ describe('MessageCard topic handoff', () => {
     expect(topicCard).toHaveTextContent('답변과 현황 보기');
     expect(topicCard).toHaveTextContent('성산일출봉 매표소');
     expect(
-      container.querySelector('.sharedTopicCategory .appIcon'),
+      container.querySelector('.attachmentKind .appIcon'),
     ).toBeInTheDocument();
   });
 
@@ -140,7 +140,7 @@ describe('MessageCard topic handoff', () => {
       screen.getByRole('button', { name: '동백식당 찜하기' }),
     ).toBeInTheDocument();
     expect(
-      container.querySelector('.placeTicket__eyebrow .appIcon'),
+      container.querySelector('.attachmentKind .appIcon'),
     ).toBeInTheDocument();
   });
 
@@ -158,7 +158,7 @@ describe('MessageCard topic handoff', () => {
     const { container, rerender } = render(
       <MessageCard message={imageMessage} own onPromote={jest.fn()} />,
     );
-    expect(container.querySelector('.chatBubble--image p')).toBeNull();
+    expect(container.querySelector('.image p')).toBeNull();
 
     rerender(
       <MessageCard
@@ -167,7 +167,7 @@ describe('MessageCard topic handoff', () => {
         onPromote={jest.fn()}
       />,
     );
-    expect(container.querySelector('.chatBubble--image p')).toHaveTextContent(
+    expect(container.querySelector('.image p')).toHaveTextContent(
       '오늘 협재 바다예요.',
     );
   });

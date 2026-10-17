@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Page, PageHeader } from '@/components/app/page';
 import { AppIcon } from '@/components/common';
 import { AnswerCard } from '@/components/answers/answer-card';
 import { AnswerForm } from '@/components/answers/answer-form';
@@ -9,7 +9,14 @@ import { ReportMenu } from '@/components/reports/report-menu';
 import { TopicResolutionActions } from '@/components/questions/topic-resolution-actions';
 import { TopicShareButton } from '@/components/questions/topic-share-button';
 import { LiveStatusBoard } from '@/components/questions/live-status-board';
-import { participantBadgeLabel } from '@/lib/api/participants';
+import {
+  Avatar,
+  Button,
+  Card,
+  Chip,
+  EmptyState,
+  Notice,
+} from '@/components/ui';
 import type { Room } from '@/lib/api/rooms';
 import {
   categoryLabels,
@@ -18,6 +25,29 @@ import {
   urgencyLabels,
 } from '@/lib/questions/presentation';
 import { useQuestion } from '@/lib/query/use-questions';
+import { ParticipantChip, participantAvatarTone } from './participant-chip';
+import styles from './question-detail.module.css';
+
+function DetailFrame({
+  room,
+  children,
+}: {
+  room: Room;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  return (
+    <Page>
+      <div className={styles.frame}>
+        <PageHeader
+          title="토픽"
+          backHref={`/app/rooms/${room.slug}`}
+          backLabel={`${room.destination.nameKo} 도움방`}
+        />
+        <div className={styles.column}>{children}</div>
+      </div>
+    </Page>
+  );
+}
 
 export function QuestionDetailView({
   questionId,
@@ -33,33 +63,37 @@ export function QuestionDetailView({
 
   if (query.isPending) {
     return (
-      <div
-        className="questionDetailSkeleton"
-        aria-label="토픽 상세를 불러오는 중"
-      >
-        <span />
-        <span />
-        <span />
-      </div>
+      <DetailFrame room={room}>
+        <div className={styles.skeleton} aria-label="토픽 상세를 불러오는 중">
+          <span />
+          <span />
+          <span />
+        </div>
+      </DetailFrame>
     );
   }
   if (query.isError) {
     return (
-      <div className="questionDetailPage">
-        <Link className="appBackLink" href={`/app/rooms/${room.slug}`}>
-          <AppIcon name="arrow-left" /> {room.destination.nameKo} 도움방
-        </Link>
-        <div className="roomQueryState roomQueryState--error" role="alert">
-          <span aria-hidden="true">
-            <AppIcon name="alert" />
-          </span>
-          <h1>토픽을 불러오지 못했어요</h1>
-          <p>토픽이 삭제되었거나 연결이 잠시 불안정할 수 있어요.</p>
-          <button type="button" onClick={() => void query.refetch()}>
-            다시 불러오기
-          </button>
-        </div>
-      </div>
+      <DetailFrame room={room}>
+        <Card>
+          <div role="alert">
+            <EmptyState
+              icon="alert"
+              title="토픽을 불러오지 못했어요"
+              description="토픽이 삭제되었거나 연결이 잠시 불안정할 수 있어요."
+              action={
+                <Button
+                  variant="secondary"
+                  icon="refresh"
+                  onClick={() => void query.refetch()}
+                >
+                  다시 불러오기
+                </Button>
+              }
+            />
+          </div>
+        </Card>
+      </DetailFrame>
     );
   }
 
@@ -69,54 +103,50 @@ export function QuestionDetailView({
     question.author.id !== currentUserId &&
     question.status === 'OPEN' &&
     new Date(question.expiresAt).getTime() > Date.now();
-  const badgeKind =
-    question.author.badge === 'VERIFIED_LOCAL'
-      ? 'local'
-      : question.author.badge === 'VERIFIED_BOTH'
-        ? 'both'
-        : 'traveler';
   const isOwner = question.author.id === currentUserId;
   const canResolve =
     isOwner &&
     question.status === 'OPEN' &&
     new Date(question.expiresAt).getTime() > Date.now();
+  const canShare = room.access.canChat && question.status !== 'REMOVED';
+  const statusTone =
+    question.status === 'OPEN'
+      ? 'success'
+      : question.status === 'REMOVED'
+        ? 'danger'
+        : 'neutral';
 
   return (
-    <div className="questionDetailPage">
-      <Link className="appBackLink" href={`/app/rooms/${room.slug}`}>
-        <AppIcon name="arrow-left" /> {room.destination.nameKo} 도움방
-      </Link>
+    <DetailFrame room={room}>
       {connectionState !== 'connected' && (
-        <div className="connectionNotice" role="status" aria-live="polite">
+        <Notice tone="warning" icon="refresh" role="status">
           {connectionState === 'offline'
-            ? '인터넷 연결을 확인해 주세요. 연결되면 이 토픽을 자동으로 다시 불러옵니다.'
-            : '실시간 연결을 복구 중입니다. 연결되면 이 토픽을 자동으로 다시 불러옵니다.'}
-        </div>
+            ? '인터넷 연결을 확인해 주세요. 연결되면 이 토픽을 자동으로 다시 불러와요.'
+            : '실시간 연결을 복구 중이에요. 연결되면 이 토픽을 자동으로 다시 불러와요.'}
+        </Notice>
       )}
-      <article className="fullQuestionCard">
-        <div className="questionMetaRow">
-          <span className="questionCategory">
+      <Card as="article" className={styles.question}>
+        <div className={styles.lead}>
+          <span className={styles.category}>
             {categoryLabels[question.category]}
           </span>
-          <span
-            className={`questionUrgency questionUrgency--${question.urgency.toLowerCase()}`}
-          >
-            {urgencyLabels[question.urgency]}
-          </span>
-          <span
-            className={`questionStatus questionStatus--${question.status.toLowerCase()}`}
-          >
-            {statusLabels[question.status]}
+          <span className={styles.chips}>
+            {question.urgency === 'URGENT' && (
+              <Chip tone="traveler" icon="clock">
+                {urgencyLabels.URGENT}
+              </Chip>
+            )}
+            <Chip tone={statusTone}>{statusLabels[question.status]}</Chip>
           </span>
         </div>
-        <h1>{question.content}</h1>
+        <h2 className={styles.content}>{question.content}</h2>
         {question.areaText !== null && (
-          <p className="questionArea">
+          <p className={styles.area}>
             <AppIcon name="pin" /> {question.areaText}
           </p>
         )}
         {question.image !== null && (
-          <figure className="topicEvidencePanel">
+          <figure className={styles.evidence}>
             {/* Protected room media is served by the authenticated API route. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -130,45 +160,64 @@ export function QuestionDetailView({
           </figure>
         )}
         {question.safetyNotice !== null && (
-          <div className="safetyNotice">
+          <div className={styles.safety}>
             <strong>긴급 상황 안내</strong>
-            {question.safetyNotice}
+            <p>{question.safetyNotice}</p>
           </div>
         )}
-        <footer>
-          <span className={`publicBadge publicBadge--${badgeKind}`}>
-            <AppIcon name="external" />
-            {question.author.nickname} ·{' '}
-            {participantBadgeLabel(question.author.badge)}
-          </span>
-          <span>
-            {formatDateTime(question.createdAt)} 토픽 ·{' '}
-            {formatDateTime(question.expiresAt)} 마감
-          </span>
-          {!isOwner && question.status !== 'REMOVED' && (
-            <ReportMenu
-              targets={[
-                { type: 'QUESTION', id: question.id, label: '이 토픽' },
-                {
-                  type: 'USER',
-                  id: question.author.id,
-                  label: `${question.author.nickname} 사용자`,
-                },
-              ]}
+        <footer className={styles.footer}>
+          <div className={styles.author}>
+            <Avatar
+              name={question.author.nickname}
+              tone={participantAvatarTone(question.author.badge)}
             />
+            <div className={styles.authorText}>
+              <span className={styles.authorName}>
+                {question.author.nickname}
+                <ParticipantChip badge={question.author.badge} />
+              </span>
+              <span className={styles.time}>
+                <time dateTime={question.createdAt}>
+                  {formatDateTime(question.createdAt)}
+                </time>{' '}
+                ·{' '}
+                <time dateTime={question.expiresAt}>
+                  {formatDateTime(question.expiresAt)}
+                </time>{' '}
+                마감
+              </span>
+            </div>
+          </div>
+          {(canShare || (!isOwner && question.status !== 'REMOVED')) && (
+            <div className={styles.actions}>
+              {canShare && (
+                <TopicShareButton
+                  roomSlug={room.slug}
+                  questionId={question.id}
+                />
+              )}
+              {!isOwner && question.status !== 'REMOVED' && (
+                <ReportMenu
+                  targets={[
+                    { type: 'QUESTION', id: question.id, label: '이 토픽' },
+                    {
+                      type: 'USER',
+                      id: question.author.id,
+                      label: `${question.author.nickname} 사용자`,
+                    },
+                  ]}
+                />
+              )}
+            </div>
           )}
         </footer>
-      </article>
-
-      {room.access.canChat && question.status !== 'REMOVED' && (
-        <TopicShareButton roomSlug={room.slug} questionId={question.id} />
-      )}
+      </Card>
 
       <LiveStatusBoard question={question} />
 
       {question.status === 'RESOLVED' && (
-        <div className="resolutionSummary" role="status">
-          <span aria-hidden="true">
+        <div className={styles.resolved} role="status">
+          <span className={styles.resolvedIcon} aria-hidden="true">
             <AppIcon name="check" />
           </span>
           <div>
@@ -179,38 +228,31 @@ export function QuestionDetailView({
             </strong>
             <p>
               {question.resolvedAt === null
-                ? '이 토픽은 해결됨으로 마무리되었습니다.'
-                : `${formatDateTime(question.resolvedAt)}에 해결되었습니다.`}
+                ? '이 토픽은 해결됨으로 마무리되었어요.'
+                : `${formatDateTime(question.resolvedAt)}에 해결되었어요.`}
             </p>
           </div>
         </div>
       )}
 
-      {canResolve && (
-        <TopicResolutionActions question={question} roomSlug={room.slug} />
-      )}
-
-      <section className="answerThread" aria-labelledby="answer-thread-title">
-        <div className="answerThread__heading">
+      <section className={styles.answers} aria-labelledby="answer-thread-title">
+        <div className={styles.answersHead}>
           <h2 id="answer-thread-title">
             참여자 답변 {question.answers.length}
           </h2>
           <span>먼저 도착한 순서</span>
         </div>
         {question.answers.length === 0 ? (
-          <div className="roomQueryState">
-            <span aria-hidden="true">
-              <AppIcon name="live" />
-            </span>
-            <h3>아직 도착한 답변이 없어요</h3>
-            <p>
-              실시간 연결을 유지하고 있어요. 참여자의 첫 답변이 오면 바로
-              알려드릴게요.
-            </p>
-          </div>
+          <Card>
+            <EmptyState
+              icon="live"
+              tone="iris"
+              title="아직 도착한 답변이 없어요"
+              description="실시간 연결을 유지하고 있어요. 참여자의 첫 답변이 오면 바로 보여드릴게요."
+            />
+          </Card>
         ) : (
-          <div className="answerSignalList">
-            <div className="answerSignalRail" aria-hidden="true" />
+          <div className={styles.answerList}>
             {question.answers.map((answer) => (
               <AnswerCard
                 key={answer.id}
@@ -223,6 +265,10 @@ export function QuestionDetailView({
         )}
       </section>
 
+      {canResolve && (
+        <TopicResolutionActions question={question} roomSlug={room.slug} />
+      )}
+
       {canAnswer && (
         <AnswerForm
           questionId={question.id}
@@ -230,6 +276,6 @@ export function QuestionDetailView({
           category={question.category}
         />
       )}
-    </div>
+    </DetailFrame>
   );
 }

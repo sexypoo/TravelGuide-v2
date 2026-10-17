@@ -11,6 +11,7 @@ import { shareTopicMessage, type MessagePage } from '@/lib/api/messages';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { mergeMessageIntoTimeline } from '@/lib/query/realtime-cache';
+import styles from './topic-share-button.module.css';
 
 export function TopicShareButton({
   roomSlug,
@@ -33,9 +34,9 @@ export function TopicShareButton({
   });
 
   return (
-    <div className="topicShareAction">
+    <div className={styles.action}>
       <button
-        className="iconTextControl"
+        className={styles.button}
         type="button"
         disabled={mutation.isPending}
         aria-label={
@@ -51,7 +52,7 @@ export function TopicShareButton({
         {mutation.isPending ? '공유 중' : sent ? '다시 공유' : '공유'}
       </button>
       {mutation.isError && (
-        <span role="alert">
+        <span className={styles.error} role="alert">
           {actionableErrorMessage(mutation.error, '토픽을 보내지 못했어요.')}
         </span>
       )}

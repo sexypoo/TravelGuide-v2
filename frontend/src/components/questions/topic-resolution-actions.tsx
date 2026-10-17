@@ -6,6 +6,8 @@ import {
   type InfiniteData,
 } from '@tanstack/react-query';
 import { useState } from 'react';
+import { AppIcon } from '@/components/common';
+import { Button } from '@/components/ui';
 import {
   acceptAnswer,
   resolveQuestion,
@@ -18,6 +20,7 @@ import {
   mergeQuestionIntoFeed,
   removeQuestionFromFeed,
 } from '@/lib/query/realtime-cache';
+import styles from './topic-resolution-actions.module.css';
 
 type Decision = { kind: 'ACCEPT'; answerId: string } | { kind: 'RESOLVE' };
 
@@ -63,56 +66,61 @@ export function TopicResolutionActions({
     : undefined;
 
   return (
-    <section className="resolutionActions" aria-label="토픽 해결 결정">
-      <header>
+    <section className={styles.panel} aria-label="토픽 해결 결정">
+      <header className={styles.head}>
         <h2>도움이 됐다면 해결을 남겨주세요</h2>
         <p>채택은 한 번만 가능하며 이후에는 새 답변을 받을 수 없어요.</p>
       </header>
       {decision === undefined ? (
-        <div className="resolutionActions__choices">
+        <div className={styles.choices}>
           {question.answers
             .filter((answer) => !answer.removed)
             .map((answer) => (
               <button
                 key={answer.id}
+                className={styles.choice}
                 type="button"
                 onClick={() =>
                   setDecision({ kind: 'ACCEPT', answerId: answer.id })
                 }
               >
-                <span>{answer.author.nickname}</span>이 답변 채택
+                <AppIcon name="check" />
+                <span>
+                  <strong>{answer.author.nickname}</strong>이 답변 채택
+                </span>
               </button>
             ))}
           <button
+            className={`${styles.choice} ${styles.choiceQuiet}`}
             type="button"
             onClick={() => setDecision({ kind: 'RESOLVE' })}
           >
-            답변 없이 해결됨으로 표시
+            <AppIcon name="minus" />
+            <span>답변 없이 해결됨으로 표시</span>
           </button>
         </div>
       ) : (
-        <div className="resolutionConfirm">
+        <div className={styles.confirm}>
           <strong>
             {decision.kind === 'ACCEPT'
               ? `${selectedAnswer?.author.nickname ?? '선택한 현지인'}님의 답변을 채택할까요?`
               : '답변 채택 없이 이 토픽을 해결할까요?'}
           </strong>
-          <p>완료 후에는 채택을 바꾸거나 토픽을 다시 열 수 없습니다.</p>
+          <p>완료 후에는 채택을 바꾸거나 토픽을 다시 열 수 없어요.</p>
           {error !== undefined && (
-            <p className="composerError" role="alert">
+            <p className={styles.error} role="alert">
               {error}
             </p>
           )}
-          <div>
-            <button
-              type="button"
+          <div className={styles.confirmActions}>
+            <Button
+              variant="secondary"
               onClick={() => setDecision(undefined)}
               disabled={mutation.isPending}
             >
               취소
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
               onClick={() => mutation.mutate(decision)}
               disabled={mutation.isPending}
             >
@@ -121,7 +129,7 @@ export function TopicResolutionActions({
                 : decision.kind === 'ACCEPT'
                   ? '채택하고 해결'
                   : '해결 확정'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -1,0 +1,11 @@
+.card {
+  padding: 1.25rem;
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: 1.5rem;
+  }
+}

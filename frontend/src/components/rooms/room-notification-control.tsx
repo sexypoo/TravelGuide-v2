@@ -1,5 +1,8 @@
 'use client';
 
+import { AppIcon } from '@/components/common';
+import styles from './room.module.css';
+
 import { useEffect, useState } from 'react';
 import {
   notificationControlState,
@@ -65,24 +68,21 @@ export function RoomNotificationControl(): React.JSX.Element {
     state === 'loading' || state === 'unsupported' || state === 'blocked';
 
   return (
-    <div
-      className={`roomNotificationControl roomNotificationControl--${state}`}
-    >
+    <div className={styles.notify} data-state={state}>
       <button
         type="button"
+        className={styles.notifyButton}
         disabled={unavailable}
         aria-label={copy.label}
         aria-pressed={state === 'enabled'}
         aria-describedby="room-notification-detail"
+        title={copy.detail}
         onClick={() => void toggle()}
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6.8 9.7a5.2 5.2 0 0 1 10.4 0c0 6 2.3 6.4 2.3 6.4h-15s2.3-.4 2.3-6.4Z" />
-          <path d="M9.8 19h4.4" />
-        </svg>
-        <span>{copy.label}</span>
+        <AppIcon name="bell" />
+        <span className={styles.notifyLabel}>{copy.label}</span>
       </button>
-      <span id="room-notification-detail" role="status">
+      <span id="room-notification-detail" className="srOnly" role="status">
         {copy.detail}
       </span>
     </div>

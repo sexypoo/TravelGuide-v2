@@ -1,0 +1,91 @@
+/* 찜한 장소 (#31): one white card, a row per saved place. */
+
+.stack {
+  display: grid;
+  gap: 0.875rem;
+  padding-bottom: 1.5rem;
+}
+
+.state {
+  margin: 0;
+  padding: 1.5rem 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list li + li {
+  border-top: 1px solid var(--line);
+}
+
+.place {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem 0.875rem;
+  padding: 1rem 0;
+}
+
+.text h2 {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.text p {
+  margin: 0.125rem 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.actions {
+  display: flex;
+  grid-column: 2;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: -0.75rem;
+}
+
+.mapLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: var(--radius-md);
+  color: var(--iris-ink);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.mapLink:hover {
+  background: var(--iris-soft);
+}
+
+.mapLink :global(.appIcon) {
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 640px) {
+  .place {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .actions {
+    grid-column: auto;
+    margin-left: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .stack {
+    max-width: 45rem;
+  }
+}

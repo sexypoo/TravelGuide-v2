@@ -11,7 +11,20 @@
   );
 }
 
+.shell--focus {
+  display: flex;
+  height: 100vh;
+  height: 100dvh;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .shell--focus .content {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
   padding-bottom: 0;
 }
 
@@ -77,7 +90,7 @@
   }
 
   .shell--focus {
-    display: block;
+    display: flex;
   }
 
   .content {

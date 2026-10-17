@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import { AppIcon, type AppIconName } from '@/components/common';
-import type { Answer } from '@/lib/api/questions';
-import { participantBadgeLabel } from '@/lib/api/participants';
+import {
+  ParticipantChip,
+  participantAvatarTone,
+} from '@/components/questions/participant-chip';
 import { ReportMenu } from '@/components/reports/report-menu';
+import { Avatar, Chip } from '@/components/ui';
+import type { Answer, AnswerSourceType } from '@/lib/api/questions';
 import {
   formatDateTime,
   formatVerifiedDate,
@@ -10,6 +14,14 @@ import {
   crowdLabels,
   entryLabels,
 } from '@/lib/questions/presentation';
+import styles from './answer-card.module.css';
+
+const sourceIcons: Record<AnswerSourceType, AppIconName> = {
+  ON_SITE_NOW: 'pin',
+  RECENT_EXPERIENCE: 'clock',
+  OFFICIAL_SOURCE: 'shield',
+  PERSONAL_OPINION: 'info',
+};
 
 export function AnswerCard({
   answer,
@@ -20,55 +32,63 @@ export function AnswerCard({
   accepted: boolean;
   currentUserId: string;
 }): React.JSX.Element {
-  const badgeKind =
-    answer.author.badge === 'VERIFIED_LOCAL'
-      ? 'local'
-      : answer.author.badge === 'VERIFIED_BOTH'
-        ? 'both'
-        : 'traveler';
-  const badgeIcon: AppIconName =
-    badgeKind === 'local'
-      ? 'shield'
-      : badgeKind === 'traveler'
-        ? 'pin'
-        : 'check';
   return (
     <article
-      className={`signalAnswerCard${accepted ? ' signalAnswerCard--accepted' : ''}${answer.removed ? ' signalAnswerCard--removed' : ''}`}
+      className={styles.card}
+      data-accepted={accepted ? 'true' : undefined}
+      data-removed={answer.removed ? 'true' : undefined}
     >
-      <span className="signalAnswerCard__node" aria-hidden="true" />
-      {accepted && <span className="acceptedAnswerFlag">채택된 답변</span>}
-      <header>
+      {accepted && (
+        <div className={styles.accepted}>
+          <Chip tone="success" icon="check">
+            채택된 답변
+          </Chip>
+        </div>
+      )}
+      <header className={styles.head}>
         {answer.removed ? (
-          <span className={`publicBadge publicBadge--${badgeKind}`}>
+          <span className={styles.removedLabel}>
             <AppIcon name="minus" />
             숨김 처리된 답변
           </span>
         ) : (
-          <Link
-            className={`publicBadge publicBadge--${badgeKind} publicBadge--linked`}
-            href={`/app/users/${encodeURIComponent(answer.author.id)}`}
-            aria-label={`${answer.author.nickname} 공개 프로필 보기`}
-          >
-            <AppIcon name={badgeIcon} />
-            {answer.author.nickname} ·{' '}
-            {participantBadgeLabel(answer.author.badge)}
-          </Link>
+          <>
+            <Avatar
+              name={answer.author.nickname}
+              tone={participantAvatarTone(answer.author.badge)}
+            />
+            <div className={styles.who}>
+              <span className={styles.whoLine}>
+                <Link
+                  className={styles.name}
+                  href={`/app/users/${encodeURIComponent(answer.author.id)}`}
+                  aria-label={`${answer.author.nickname} 공개 프로필 보기`}
+                >
+                  {answer.author.nickname}
+                </Link>
+                <ParticipantChip badge={answer.author.badge} />
+              </span>
+              <span className={styles.sub}>
+                <time dateTime={answer.createdAt}>
+                  {formatDateTime(answer.createdAt)}
+                </time>
+                <span aria-hidden="true">·</span>
+                <span>{formatVerifiedDate(answer.author.verifiedAt)} 인증</span>
+              </span>
+            </div>
+          </>
         )}
-        <time dateTime={answer.createdAt}>
-          {formatDateTime(answer.createdAt)}
-        </time>
       </header>
-      <p>{answer.content}</p>
+      <p className={styles.content}>{answer.content}</p>
       {answer.image && (
-        <div className="answerEvidenceImage">
+        <figure className={styles.evidence}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={answer.image.url} alt={answer.image.originalName} />
-          <span>현장 확인 사진</span>
-        </div>
+          <figcaption>현장 확인 사진</figcaption>
+        </figure>
       )}
       {answer.observation && (
-        <div className="answerObservation" aria-label="현장 관찰 정보">
+        <div className={styles.observation} aria-label="현장 관찰 정보">
           {answer.observation.waitMinutes !== null && (
             <span>
               <small>대기</small>
@@ -92,35 +112,39 @@ export function AnswerCard({
           </time>
         </div>
       )}
-      <footer>
-        {!answer.removed && (
-          <span
-            className={`sourceChip sourceChip--${answer.sourceType.toLowerCase()}`}
-          >
-            {sourceLabels[answer.sourceType]}
-          </span>
-        )}
-        {!answer.removed && (
-          <span>{formatVerifiedDate(answer.author.verifiedAt)} 인증</span>
-        )}
-        {answer.sourceUrl !== null && (
-          <a href={answer.sourceUrl} target="_blank" rel="noopener noreferrer">
-            공식 출처 열기 <AppIcon name="external" />
-          </a>
-        )}
-        {answer.author.id !== currentUserId && !answer.removed && (
-          <ReportMenu
-            targets={[
-              { type: 'ANSWER', id: answer.id, label: '이 답변' },
-              {
-                type: 'USER',
-                id: answer.author.id,
-                label: `${answer.author.nickname} 사용자`,
-              },
-            ]}
-          />
-        )}
-      </footer>
+      {(!answer.removed || answer.sourceUrl !== null) && (
+        <footer className={styles.footer}>
+          {!answer.removed && (
+            <Chip icon={sourceIcons[answer.sourceType]}>
+              {sourceLabels[answer.sourceType]}
+            </Chip>
+          )}
+          {answer.sourceUrl !== null && (
+            <a
+              className={styles.source}
+              href={answer.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              공식 출처 열기 <AppIcon name="external" />
+            </a>
+          )}
+          {answer.author.id !== currentUserId && !answer.removed && (
+            <span className={styles.report}>
+              <ReportMenu
+                targets={[
+                  { type: 'ANSWER', id: answer.id, label: '이 답변' },
+                  {
+                    type: 'USER',
+                    id: answer.author.id,
+                    label: `${answer.author.nickname} 사용자`,
+                  },
+                ]}
+              />
+            </span>
+          )}
+        </footer>
+      )}
     </article>
   );
 }

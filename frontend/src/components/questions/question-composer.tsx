@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
+import { Button } from '@/components/ui';
 import {
   shareTopicMessage,
   type ChatMessage,
@@ -28,6 +29,7 @@ import {
   mergeMessageIntoTimeline,
   mergeQuestionIntoFeed,
 } from '@/lib/query/realtime-cache';
+import styles from './composer.module.css';
 
 function questionError(error: unknown): string {
   if (error instanceof ApiProblem) {
@@ -131,8 +133,8 @@ export function QuestionComposer({
     clientError || (mutation.isError ? questionError(mutation.error) : '');
 
   return (
-    <form className="questionComposer" onSubmit={submit} noValidate>
-      <header>
+    <form className={styles.form} onSubmit={submit} noValidate>
+      <header className={styles.head}>
         <h2>
           {sourceMessage === undefined
             ? '새 토픽 만들기'
@@ -142,11 +144,11 @@ export function QuestionComposer({
           답변과 해결 과정을 남길 가치가 있는 상황을 구체적으로 정리해 주세요.
         </p>
       </header>
-      <fieldset className="composerChoices">
+      <fieldset className={styles.choices}>
         <legend>토픽 종류</legend>
-        <div>
+        <div className={styles.options}>
           {questionCategories.map((item) => (
-            <label key={item}>
+            <label key={item} className={styles.option}>
               <input
                 type="radio"
                 name="category"
@@ -159,11 +161,11 @@ export function QuestionComposer({
           ))}
         </div>
       </fieldset>
-      <fieldset className="composerChoices composerChoices--urgency">
+      <fieldset className={styles.choices}>
         <legend>답변이 필요한 시간</legend>
-        <div>
+        <div className={styles.options}>
           {(['NORMAL', 'URGENT'] as const).map((item) => (
-            <label key={item}>
+            <label key={item} className={styles.option}>
               <input
                 type="radio"
                 name="urgency"
@@ -176,8 +178,8 @@ export function QuestionComposer({
           ))}
         </div>
       </fieldset>
-      <label className="composerField">
-        <span>
+      <label className={styles.field}>
+        <span className={styles.label}>
           지역·장소 <small>선택</small>
         </span>
         <input
@@ -189,24 +191,24 @@ export function QuestionComposer({
       </label>
       {sourceMessage === undefined ? (
         <>
-          <label className="composerField">
-            <span>
+          <label className={styles.field}>
+            <span className={styles.label}>
               토픽 내용 <small>{Array.from(content).length}/1000</small>
             </span>
             <textarea
               value={content}
               minLength={20}
               maxLength={1000}
-              rows={7}
+              rows={6}
               placeholder="현재 상황, 이미 확인한 내용, 결정해야 하는 시간을 함께 적어 주세요."
               aria-describedby="question-composer-help"
               aria-invalid={message.length > 0}
               onChange={(event) => setContent(event.target.value)}
             />
           </label>
-          <div className="topicImagePicker">
-            <div>
-              <span aria-hidden="true">
+          <div className={styles.picker}>
+            <div className={styles.pickerInfo}>
+              <span className={styles.pickerIcon} aria-hidden="true">
                 <AppIcon name="image" />
               </span>
               <div>
@@ -215,7 +217,7 @@ export function QuestionComposer({
               </div>
             </div>
             {image === undefined ? (
-              <label>
+              <label className={styles.pickerButton}>
                 사진 선택
                 <input
                   className="srOnly"
@@ -234,7 +236,7 @@ export function QuestionComposer({
                 />
               </label>
             ) : (
-              <div className="topicImagePicker__selected">
+              <div className={styles.pickerSelected}>
                 <span title={image.name}>{image.name}</span>
                 <button type="button" onClick={() => setImage(undefined)}>
                   제거
@@ -244,22 +246,22 @@ export function QuestionComposer({
           </div>
         </>
       ) : (
-        <div className="sourceMessagePreview">
+        <div className={styles.preview}>
           <span>원본 메시지</span>
           <p>{sourceMessage.content}</p>
         </div>
       )}
-      <p id="question-composer-help" className="composerHelp">
+      <p id="question-composer-help" className={styles.help}>
         안전 카테고리의 즉시 위험 상황은 답변보다 112·119에 먼저 연락하세요.
       </p>
       {message.length > 0 && (
-        <p className="composerError" role="alert">
+        <p className={styles.error} role="alert">
           {message}
         </p>
       )}
-      <button type="submit" disabled={mutation.isPending}>
+      <Button type="submit" size="lg" block disabled={mutation.isPending}>
         {mutation.isPending ? '토픽 만드는 중' : '토픽 만들기'}
-      </button>
+      </Button>
     </form>
   );
 }

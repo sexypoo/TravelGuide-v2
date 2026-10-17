@@ -39,12 +39,10 @@ describe('QuestionCard topic evidence', () => {
     ).toHaveAttribute('src', question.image?.url);
     expect(screen.getByText('현장 사진')).toBeInTheDocument();
     expect(screen.getByText('진행 중')).toBeInTheDocument();
-    expect(
-      screen.getByText('0').closest('.questionAnswerCount'),
-    ).toHaveTextContent('답변 0');
+    expect(screen.getByText('0').closest('span')).toHaveTextContent('답변 0');
     expect(screen.queryByText('오늘 중')).not.toBeInTheDocument();
-    expect(
-      screen.getByText('대기 현황').closest('.questionLeadRow'),
-    ).toHaveTextContent('대기 현황·진행 중');
+    expect(screen.getByText('대기 현황').parentElement).toHaveTextContent(
+      '대기 현황진행 중',
+    );
   });
 });
