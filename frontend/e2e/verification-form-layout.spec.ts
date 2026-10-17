@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { loginAs } from './helpers';
 
 test('traveler verification form stays within a 390px viewport', async ({
   browser,
@@ -9,11 +10,7 @@ test('traveler verification form stays within a 390px viewport', async ({
   });
   const page = await context.newPage();
 
-  await page.goto('/auth/login');
-  await page.getByLabel('이메일').fill('traveler@e2e.local');
-  await page.getByLabel('비밀번호').fill('e2e-password123');
-  await page.getByRole('button', { name: '로그인' }).click();
-  await expect(page).toHaveURL(/\/app$/u, { timeout: 30_000 });
+  await loginAs(page);
 
   await page.goto('/app/verifications/traveler');
   await expect(

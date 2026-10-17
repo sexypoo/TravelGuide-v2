@@ -53,7 +53,8 @@ for (const viewport of viewports) {
     });
     expect(registration.ok()).toBe(true);
 
-    await page.goto('/app/profile');
+    // Account deletion lives on the profile edit screen (#31).
+    await page.goto('/app/profile/edit');
     await expect(
       page.getByRole('heading', { name: '계정 관리' }),
     ).toBeVisible();
