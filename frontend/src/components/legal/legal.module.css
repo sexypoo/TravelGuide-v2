@@ -1,0 +1,243 @@
+/* Public policy pages (#31): one readable column of section cards. */
+
+.page {
+  min-height: 100svh;
+  padding: 0 max(var(--page-gutter), env(safe-area-inset-right))
+    max(2.5rem, env(safe-area-inset-bottom))
+    max(var(--page-gutter), env(safe-area-inset-left));
+  background: var(--canvas);
+}
+
+.inner {
+  width: min(100%, 45rem);
+  margin: 0 auto;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  min-height: 3.5rem;
+  padding: 0.5rem 0;
+}
+
+.nav nav {
+  display: flex;
+  gap: 0.25rem;
+  margin-right: -0.625rem;
+}
+
+.nav nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 0.625rem;
+  border-radius: var(--radius-md);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.nav nav a:hover {
+  background: rgba(40, 37, 49, 0.05);
+}
+
+.document {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.intro {
+  padding: 1rem 0 0.75rem;
+}
+
+.intro p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.intro h1 {
+  margin: 0.25rem 0 0;
+  font-size: var(--text-4xl);
+  font-weight: 750;
+}
+
+.intro span {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--ink-2);
+  font-size: var(--text-md);
+  line-height: 1.6;
+}
+
+.document > section {
+  padding: 1.25rem;
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+}
+
+.document > section h2 {
+  margin: 0 0 0.625rem;
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.document > section p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--text-md);
+  line-height: 1.7;
+}
+
+.document > section p + p {
+  margin-top: 0.75rem;
+}
+
+.ledger {
+  display: grid;
+  margin: 0;
+}
+
+.ledger > div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.875rem 0;
+}
+
+.ledger > div + div {
+  border-top: 1px solid var(--line);
+}
+
+.ledger > div:first-child {
+  padding-top: 0.25rem;
+}
+
+.ledger > div:last-child {
+  padding-bottom: 0;
+}
+
+.ledger dt {
+  font-size: var(--text-md);
+  font-weight: 650;
+}
+
+.ledger dd {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--text-md);
+  line-height: 1.6;
+}
+
+.inlineLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2.75rem;
+  margin-top: 0.5rem;
+  color: var(--iris-ink);
+  font-size: var(--text-md);
+  font-weight: 650;
+}
+
+.inlineLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.steps {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.steps li {
+  display: flex;
+  gap: 0.875rem;
+}
+
+.stepNumber {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--iris-soft);
+  color: var(--iris-ink);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.steps strong {
+  display: block;
+  font-size: var(--text-lg);
+  font-weight: 650;
+  line-height: 2rem;
+}
+
+.document > section .steps p {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0 0 0.875rem;
+  padding: 0;
+  list-style: none;
+}
+
+.scope li {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.complete {
+  display: grid;
+  justify-items: start;
+  gap: 0.375rem;
+}
+
+.complete strong {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.complete a {
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .nav {
+    min-height: 4.5rem;
+  }
+
+  .intro {
+    padding-top: 2rem;
+  }
+
+  .intro h1 {
+    font-size: var(--text-5xl);
+  }
+
+  .document > section {
+    padding: 1.75rem;
+  }
+}

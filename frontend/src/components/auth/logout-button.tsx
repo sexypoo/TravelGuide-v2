@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { logout } from '@/lib/api/auth-client';
+import styles from './auth.module.css';
 
 export function LogoutButton(): React.JSX.Element {
   const router = useRouter();
@@ -23,15 +24,18 @@ export function LogoutButton(): React.JSX.Element {
   }
 
   return (
-    <div className="logoutAction">
+    <div className={styles.logout}>
       <button
+        className={styles.logoutButton}
         type="button"
         onClick={() => void handleLogout()}
         disabled={isPending}
       >
         {isPending ? '로그아웃 중' : '로그아웃'}
       </button>
-      <span aria-live="polite">{error}</span>
+      <span className={styles.logoutError} aria-live="polite">
+        {error}
+      </span>
     </div>
   );
 }

@@ -1,5 +1,6 @@
-import Link from 'next/link';
+import { ButtonLink } from '@/components/ui';
 import { LegalShell } from '@/components/legal/legal-shell';
+import styles from '@/components/legal/legal.module.css';
 
 export const metadata = {
   title: '계정 삭제 안내',
@@ -14,7 +15,7 @@ export default async function AccountDeletionPage({
   const deleted = (await searchParams).deleted === 'true';
   return (
     <LegalShell
-      eyebrow="ACCOUNT DELETION"
+      eyebrow="계정 관리"
       title={deleted ? '계정 삭제가 완료되었습니다.' : '여쭈어 계정 삭제'}
       description={
         deleted
@@ -23,32 +24,40 @@ export default async function AccountDeletionPage({
       }
     >
       {deleted ? (
-        <section className="legalDocument__complete" role="status">
+        <section className={styles.complete} role="status">
           <strong>삭제된 계정은 복구할 수 없습니다.</strong>
           <p>다시 이용하려면 새로운 계정을 만들어 주세요.</p>
-          <Link href="/">홈으로 돌아가기</Link>
+          <ButtonLink href="/" variant="secondary">
+            홈으로 돌아가기
+          </ButtonLink>
         </section>
       ) : (
         <>
           <section>
             <h2>삭제 방법</h2>
-            <ol className="deletionSteps">
+            <ol className={styles.steps}>
               <li>
-                <span>01</span>
+                <span className={styles.stepNumber} aria-hidden="true">
+                  1
+                </span>
                 <div>
                   <strong>웹 또는 앱에서 로그인</strong>
                   <p>삭제할 계정의 소유자임을 먼저 확인합니다.</p>
                 </div>
               </li>
               <li>
-                <span>02</span>
+                <span className={styles.stepNumber} aria-hidden="true">
+                  2
+                </span>
                 <div>
                   <strong>프로필 → 계정 관리</strong>
                   <p>계정 삭제 살펴보기를 선택합니다.</p>
                 </div>
               </li>
               <li>
-                <span>03</span>
+                <span className={styles.stepNumber} aria-hidden="true">
+                  3
+                </span>
                 <div>
                   <strong>본인 확인 후 영구 삭제</strong>
                   <p>
@@ -58,23 +67,22 @@ export default async function AccountDeletionPage({
                 </div>
               </li>
             </ol>
-            <Link
-              className="legalDocument__primary"
+            <ButtonLink
               href="/auth/login?next=%2Fapp%2Fprofile"
+              size="lg"
+              block
             >
               로그인하고 계정 삭제하기
-            </Link>
+            </ButtonLink>
           </section>
 
           <section>
             <h2>함께 삭제되는 항목</h2>
-            <div className="deletionRoute" aria-label="계정 삭제 범위">
-              <span>계정</span>
-              <i aria-hidden="true">→</i>
-              <span>공개 콘텐츠</span>
-              <i aria-hidden="true">→</i>
-              <span>비공개 증빙·업로드</span>
-            </div>
+            <ul className={styles.scope} aria-label="계정 삭제 범위">
+              <li>계정</li>
+              <li>공개 콘텐츠</li>
+              <li>비공개 증빙·업로드</li>
+            </ul>
             <p>
               프로필, 로그인 연결, 여행·인증 기록, 질문·답변·채팅·커뮤니티
               게시물, 찜한 장소, 동일 이메일의 사전예약 정보와 관련 비공개

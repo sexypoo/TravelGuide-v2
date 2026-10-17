@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { LegalShell } from '@/components/legal/legal-shell';
+import styles from '@/components/legal/legal.module.css';
 
 export const metadata = {
   title: '개인정보 처리방침',
@@ -9,13 +10,13 @@ export const metadata = {
 export default function PrivacyPage(): React.JSX.Element {
   return (
     <LegalShell
-      eyebrow="PRIVACY LEDGER · 2026. 08. 20"
+      eyebrow="시행일 2026년 8월 20일"
       title="개인정보 처리방침"
       description="여쭈어는 여행 도움방 운영에 필요한 정보만 처리하고, 위치·인증 증빙을 공개 프로필과 분리합니다."
     >
       <section>
         <h2>1. 처리하는 정보</h2>
-        <dl className="privacyLedger">
+        <dl className={styles.ledger}>
           <div>
             <dt>계정·프로필</dt>
             <dd>
@@ -64,7 +65,7 @@ export default function PrivacyPage(): React.JSX.Element {
           및 비공개 파일을 삭제합니다. 현재 서비스에는 계정 삭제 후 별도 법정
           보존 대상으로 설정된 항목이 없습니다.
         </p>
-        <Link className="legalDocument__inline" href="/account-deletion">
+        <Link className={styles.inlineLink} href="/account-deletion">
           계정 삭제 범위와 방법 자세히 보기
         </Link>
       </section>
