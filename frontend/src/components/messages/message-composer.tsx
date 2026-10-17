@@ -125,6 +125,7 @@ export function MessageComposer({
 
   return (
     <form
+      method="post"
       className="messageComposer"
       onSubmit={(event) => {
         event.preventDefault();

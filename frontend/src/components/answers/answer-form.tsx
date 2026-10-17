@@ -126,7 +126,7 @@ export function AnswerForm({
     clientError || (mutation.isError ? answerError(mutation.error) : '');
 
   return (
-    <form className="answerComposer" onSubmit={submit} noValidate>
+    <form method="post" className="answerComposer" onSubmit={submit} noValidate>
       <header>
         <h2>이 질문에 근거 있는 답을 남겨주세요</h2>
         <p>

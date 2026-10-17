@@ -153,6 +153,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
 
   return (
     <form
+      method="post"
       className={styles.form}
       onSubmit={(event) => void handleSubmit(event)}
       noValidate

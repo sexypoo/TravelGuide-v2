@@ -116,7 +116,7 @@ export function ReportMenu({
               </button>
             </div>
           ) : (
-            <form onSubmit={(event) => void submit(event)}>
+            <form method="post" onSubmit={(event) => void submit(event)}>
               <header>
                 <span>TRUST &amp; SAFETY</span>
                 <h2>신고하기</h2>

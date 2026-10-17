@@ -131,7 +131,12 @@ export function QuestionComposer({
     clientError || (mutation.isError ? questionError(mutation.error) : '');
 
   return (
-    <form className="questionComposer" onSubmit={submit} noValidate>
+    <form
+      method="post"
+      className="questionComposer"
+      onSubmit={submit}
+      noValidate
+    >
       <header>
         <h2>
           {sourceMessage === undefined
