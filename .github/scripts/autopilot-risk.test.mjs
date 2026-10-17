@@ -55,6 +55,20 @@ test("auth and account deletion screens are high risk", () => {
   assert.equal(classify(files("frontend/src/app/app/page.tsx")).risk, "low");
 });
 
+test("design system primitives and the app shell are high risk", () => {
+  for (const path of [
+    "frontend/src/components/ui/index.tsx",
+    "frontend/src/components/ui/ui.module.css",
+    "frontend/src/components/app/shell.module.css",
+  ]) {
+    assert.equal(classify(files(path)).risk, "high", path);
+  }
+  assert.equal(
+    classify(files("frontend/src/components/community/community.module.css")).risk,
+    "low",
+  );
+});
+
 test("route handlers, middleware, and env files under UI paths are high risk", () => {
   for (const path of [
     "frontend/src/app/api/session/route.ts",

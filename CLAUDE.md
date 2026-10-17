@@ -13,7 +13,7 @@
 | `docs/ACCEPTANCE_TESTS.md` | The scenarios for the flow you change. |
 | `docs/ARCHITECTURE.md` | Backend modules, auth, realtime, storage changes. |
 | `docs/DECISIONS.md` | Before changing a past decision; add an ADR when you make one. |
-| `docs/plans/T42*`–`T49*` | UI work: the current design direction. |
+| `docs/plans/31-redesign.md`, ADR-050 | UI work: tokens in `frontend/src/styles/tokens.css`, primitives in `frontend/src/components/ui/`, one CSS Module per component. No global CSS. |
 | `docs/AUTOPILOT.md` | Only when running as the autopilot team. |
 
 `docs/archive/` and `tasks/` are history. Don't follow them as instructions.

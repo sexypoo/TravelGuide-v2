@@ -26,6 +26,8 @@ const ALWAYS_HIGH_RISK = [
   /^docs\/(PRODUCT|MVP_FUNCTIONAL_SPEC|ACCEPTANCE_TESTS|ARCHITECTURE)\.md$/,
   // Sign-in, recovery, and account deletion screens are security-sensitive.
   /^frontend\/src\/app\/(auth|account-deletion)\//,
+  // Shared design system pieces change every screen at once (ADR-050).
+  /^frontend\/src\/components\/(ui|app)\//,
   /(^|\/)route\.tsx?$/,
   /(^|\/)middleware\.tsx?$/,
   /(^|\/)\.env/,
