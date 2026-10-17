@@ -5,16 +5,16 @@
 - `mobile/` produces an installable Android debug APK, an unsigned Play AAB, and
   a verified iOS Simulator app. Production Android/iOS artifacts remain blocked
   on owner-controlled signing credentials and developer-console accounts.
-- The product allows in-app account creation but does not yet provide account
-  deletion. Apple requires deletion initiation in-app; Google Play additionally
-  requires an external account-deletion request URL. Store production submission
-  must not proceed until both paths and the retention policy are implemented.
+- Account deletion is implemented (ADR-044): signed-in users delete their
+  account immediately from the profile, and the public `/account-deletion` and
+  `/privacy` pages work without the app. Before store submission, confirm the
+  store's data-safety answers match the deletion and retention behavior.
 - The Capacitor client uses the existing hosted Next.js origin. Apple may reject
   a remote-content wrapper under minimum-functionality guideline 4.2; physical
   device testing and additional native value remain release gates.
-- A public privacy-policy URL, support URL, store privacy/data-safety answers,
-  review/demo credentials, listing copy, and store screenshots are still owned
-  release inputs.
+- A support URL, store privacy/data-safety answers, review/demo credentials,
+  listing copy, and store screenshots are still owned release inputs. The
+  privacy policy is public at `/privacy`.
 
 ## Intentional MVP boundaries
 
