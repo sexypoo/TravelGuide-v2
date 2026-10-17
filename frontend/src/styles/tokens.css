@@ -1,0 +1,157 @@
+/* Design tokens and base element styles (#31). Components style themselves
+   with CSS Modules and read only these variables. */
+@tailwind base;
+
+:root {
+  --ink: #282531;
+  --ink-2: #4a4553;
+  --muted: #736d7b;
+  --faint: #a7a2ae;
+  --canvas: #f4f3f7;
+  --surface: #ffffff;
+  --surface-sunk: #f6f5f9;
+  --line: #ecebf0;
+  --line-strong: #dedce4;
+
+  --magenta: #c73568;
+  --magenta-soft: #fbe8ef;
+  --magenta-ink: #8f2149;
+  --iris: #675dda;
+  --iris-hover: #5a50cc;
+  --iris-soft: #efedfc;
+  --iris-ink: #4a41a8;
+  --plum: #8a3e8f;
+  --plum-soft: #f6eef7;
+  --plum-ink: #6d2f71;
+  --success: #00a878;
+  --success-soft: #e3f6ef;
+  --success-ink: #00704f;
+  --danger: #e5484d;
+  --danger-soft: #fdecec;
+  --danger-ink: #b42328;
+  --warning-soft: #fff4dc;
+  --warning-ink: #8a5a00;
+
+  --font-display:
+    'Wanted Sans Variable', 'Pretendard Variable', 'Apple SD Gothic Neo',
+    sans-serif;
+  --font-body:
+    'Pretendard Variable', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui,
+    sans-serif;
+
+  --text-xs: 0.8125rem; /* 13 */
+  --text-sm: 0.875rem; /* 14 */
+  --text-md: 0.9375rem; /* 15 */
+  --text-lg: 1rem; /* 16 */
+  --text-xl: 1.125rem; /* 18 */
+  --text-2xl: 1.25rem; /* 20 */
+  --text-3xl: 1.5rem; /* 24 */
+  --text-4xl: 1.6875rem; /* 27 */
+  --text-5xl: 2.125rem; /* 34 */
+
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.375rem;
+  --radius-2xl: 1.625rem;
+  --radius-pill: 999px;
+
+  --shadow-float:
+    0 10px 30px rgba(40, 37, 49, 0.08), 0 1px 3px rgba(40, 37, 49, 0.06);
+  --shadow-raise: 0 1px 3px rgba(40, 37, 49, 0.08);
+  --focus-ring: 0 0 0 3px rgba(103, 93, 218, 0.35);
+
+  --tabbar-height: 4.5rem;
+  --sidenav-width: 16rem;
+  --content-max: 67.5rem;
+  --page-gutter: 1rem;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --page-gutter: 1.5rem;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--canvas);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.035em;
+  line-height: 1.3;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  color: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+::placeholder {
+  color: var(--faint);
+}
+
+.appIcon {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

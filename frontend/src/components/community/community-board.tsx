@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { communityCategoryLabels } from '@/lib/community/presentation';
 import { AppIcon } from '@/components/common';
 import { useEffect, useState } from 'react';
 import { ReportMenu } from '@/components/reports/report-menu';
@@ -12,15 +13,6 @@ import {
   type CommunityPost,
 } from '@/lib/api/community';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
-
-export const communityCategoryLabels: Record<CommunityCategory, string> = {
-  TRAVEL_TIP: '여행 팁',
-  TRANSPORT: '교통',
-  FOOD: '맛집',
-  PLACE: '장소',
-  QUESTION: '궁금해요',
-  OTHER: '기타',
-};
 
 function date(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' }).format(

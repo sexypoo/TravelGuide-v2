@@ -6,6 +6,7 @@ import { AppIcon } from '@/components/common';
 import { AccountDeletionPanel } from '@/components/profile/account-deletion-panel';
 import styles from '@/components/profile/profile.module.css';
 import { requireUser } from '@/lib/auth/session';
+import { LogoutButton } from '@/components/auth/logout-button';
 
 function formatJoinDate(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', {
@@ -67,6 +68,7 @@ export default async function ProfilePage(): Promise<React.JSX.Element> {
 
       <TravelRecordsPanel />
       <AccountDeletionPanel hasPassword={profile.hasPassword} />
+      <LogoutButton />
     </div>
   );
 }

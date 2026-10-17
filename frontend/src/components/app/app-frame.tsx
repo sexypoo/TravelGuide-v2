@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import styles from './shell.module.css';
 
 interface AppFrameProps {
   chrome: React.ReactNode;
@@ -53,7 +54,8 @@ export function AppFrame({
 
   return (
     <div
-      className={`appShell${roomFocused ? ' appShell--room' : ''}`}
+      className={`${styles.shell}${roomFocused ? ` ${styles['shell--focus']}` : ''}`}
+      data-room-focused={roomFocused || undefined}
       style={
         roomFocused && roomViewportHeight !== undefined
           ? { height: `${roomViewportHeight}px` }
@@ -62,7 +64,7 @@ export function AppFrame({
     >
       {!roomFocused && chrome}
       <main
-        className={`appContent${roomFocused ? ' appContent--room' : ''}`}
+        className={styles.content}
         data-room-focused={roomFocused || undefined}
       >
         {children}

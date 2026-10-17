@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { AppIcon } from '@/components/common';
 import { useCallback, useEffect, useState } from 'react';
 import { ReportMenu } from '@/components/reports/report-menu';
-import { communityCategoryLabels } from './community-board';
+import { communityCategoryLabels } from '@/lib/community/presentation';
 import {
   createCommunityComment,
   getCommunityPost,

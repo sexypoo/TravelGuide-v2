@@ -9,9 +9,6 @@ describe('Wordmark', () => {
     expect(homeLink).toHaveAttribute('href', '/');
     expect(homeLink).toHaveTextContent('여JJU');
     expect(homeLink).not.toHaveTextContent('TravelGuide');
-    expect(homeLink.querySelector('.wordmark__mark svg')).toBeInTheDocument();
-    expect(homeLink.querySelector('.wordmark__mark')).not.toHaveTextContent(
-      'Y',
-    );
+    expect(homeLink.querySelector('svg')).toBeInTheDocument();
   });
 });

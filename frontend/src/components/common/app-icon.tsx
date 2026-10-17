@@ -22,7 +22,22 @@ export type AppIconName =
   | 'shield'
   | 'sparkle'
   | 'topic'
-  | 'refresh';
+  | 'refresh'
+  | 'home'
+  | 'room'
+  | 'community'
+  | 'map'
+  | 'user'
+  | 'bell'
+  | 'search'
+  | 'settings'
+  | 'chevron-right'
+  | 'chevron-left'
+  | 'pencil'
+  | 'notebook'
+  | 'lock'
+  | 'logout'
+  | 'mark';
 
 const paths: Readonly<Record<AppIconName, ReactNode>> = {
   add: <path d="M12 5v14M5 12h14" />,
@@ -121,6 +136,85 @@ const paths: Readonly<Record<AppIconName, ReactNode>> = {
       <path d="M19 8a7.5 7.5 0 1 0 .4 7" />
       <path d="M19 4v4h-4" />
     </>
+  ),
+  home: (
+    <>
+      <path d="M4.5 10.2 12 4l7.5 6.2V19a1 1 0 0 1-1 1h-4v-5.5h-5V20h-4a1 1 0 0 1-1-1v-8.8Z" />
+    </>
+  ),
+  room: (
+    <>
+      <circle cx="12" cy="12" r="1.6" />
+      <path d="M8.5 15.5a5 5 0 0 1 0-7M15.5 8.5a5 5 0 0 1 0 7" />
+      <path d="M5.6 18.4a9 9 0 0 1 0-12.8M18.4 5.6a9 9 0 0 1 0 12.8" />
+    </>
+  ),
+  community: (
+    <path d="M12 4c4.7 0 8.5 3.2 8.5 7.2s-3.8 7.2-8.5 7.2c-1 0-2-.1-2.9-.4L5 20l1.1-3.6c-1.6-1.3-2.6-3.1-2.6-5.2C3.5 7.2 7.3 4 12 4Z" />
+  ),
+  map: (
+    <>
+      <path d="m3.5 6.5 5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5V6.5Z" />
+      <path d="M9 4v13.5M15 6.5V20" />
+    </>
+  ),
+  user: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <circle cx="12" cy="10" r="3" />
+      <path d="M6.6 18.4a6.2 6.2 0 0 1 10.8 0" />
+    </>
+  ),
+  bell: (
+    <>
+      <path d="M6 16.5V11a6 6 0 1 1 12 0v5.5l1.5 1.5h-15L6 16.5Z" />
+      <path d="M10 20.5a2.2 2.2 0 0 0 4 0" />
+    </>
+  ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m16 16 4 4" />
+    </>
+  ),
+  settings: (
+    <>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M6 18l1.4-1.4M16.6 7.4 18 6" />
+    </>
+  ),
+  'chevron-right': <path d="m9.5 6 6 6-6 6" />,
+  'chevron-left': <path d="m14.5 6-6 6 6 6" />,
+  pencil: (
+    <>
+      <path d="M4.5 19.5 5.5 15 15.8 4.7a2 2 0 0 1 2.9 0l.6.6a2 2 0 0 1 0 2.9L9 18.5l-4.5 1Z" />
+      <path d="m14 6.5 3.5 3.5" />
+    </>
+  ),
+  notebook: (
+    <>
+      <rect x="5" y="3.5" width="14" height="17" rx="2" />
+      <path d="M9 3.5v17M12 8h4M12 11.5h4" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="5" y="10.5" width="14" height="10" rx="2" />
+      <path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" />
+    </>
+  ),
+  logout: (
+    <>
+      <path d="M10 20H6a1.5 1.5 0 0 1-1.5-1.5v-13A1.5 1.5 0 0 1 6 4h4" />
+      <path d="M15 16.5 19.5 12 15 7.5M19.5 12H9.5" />
+    </>
+  ),
+  mark: (
+    <path
+      fill="currentColor"
+      stroke="none"
+      d="M12 2.5 9.4 9 3 11.4v1.8l6.5-.7.8 5.9-2.2 1.5v1l3.9-.8 3.9.8v-1l-2.2-1.5.8-5.9 6.5.7v-1.8L14.6 9 12 2.5Z"
+    />
   ),
 };
 

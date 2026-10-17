@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { AppNavigation } from './app-navigation';
 
 jest.mock('next/navigation', () => ({
@@ -9,9 +9,11 @@ describe('AppNavigation', () => {
   it('promotes the real-time room while keeping nearby and verification available', () => {
     render(<AppNavigation />);
 
-    expect(screen.getAllByRole('link').map((link) => link.textContent)).toEqual(
-      ['홈', '실시간방', '커뮤니티', '주변', '프로필'],
-    );
+    expect(
+      within(screen.getByRole('list'))
+        .getAllByRole('link')
+        .map((link) => link.textContent),
+    ).toEqual(['홈', '도움방', '커뮤니티', '주변', '내 정보']);
 
     expect(screen.getByRole('link', { name: '주변' })).toHaveAttribute(
       'href',

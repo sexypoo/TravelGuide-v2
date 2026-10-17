@@ -1,0 +1,33 @@
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mark {
+  display: grid;
+  width: 1.875rem;
+  height: 1.875rem;
+  place-items: center;
+  border-radius: 0.6rem;
+  background: linear-gradient(135deg, var(--magenta), var(--iris));
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+
+.name b {
+  color: var(--iris);
+  font-weight: inherit;
+}
+
+.inverse .name,
+.inverse .name b {
+  color: #fff;
+}
