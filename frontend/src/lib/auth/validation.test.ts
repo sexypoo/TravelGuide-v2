@@ -45,4 +45,20 @@ describe('safe next path', () => {
     expect(safeNextPath('https://evil.example')).toBe('/app');
     expect(safeNextPath(['/admin'])).toBe('/app');
   });
+
+  it('rejects values browsers resolve to another origin', () => {
+    expect(safeNextPath('/\\evil.example')).toBe('/app');
+    expect(safeNextPath('/\t/evil.example')).toBe('/app');
+    expect(safeNextPath('/%09/evil.example')).toBe('/app');
+    expect(safeNextPath('/app/\\evil.example')).toBe('/app');
+  });
+
+  it('only allows /app and /admin paths', () => {
+    expect(safeNextPath('/app/rooms/jeju?tab=topics#latest')).toBe(
+      '/app/rooms/jeju?tab=topics#latest',
+    );
+    expect(safeNextPath('/auth/login')).toBe('/app');
+    expect(safeNextPath('/application')).toBe('/app');
+    expect(safeNextPath('/app/../auth/login')).toBe('/app');
+  });
 });
