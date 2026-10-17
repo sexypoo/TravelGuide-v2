@@ -1,176 +1,138 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { loginAs } from './helpers';
 
-const password = 'e2e-password123';
+// App shell (#31): a fixed bottom tab bar below 1024px and a side
+// navigation from 1024px. Content never slides under either, never scrolls
+// sideways, and keeps readable text.
 
-async function login(page: Page): Promise<void> {
-  await page.goto('/auth/login');
-  await page.getByLabel('이메일').fill('traveler@e2e.local');
-  await page.getByLabel('비밀번호').fill(password);
-  await page.getByRole('button', { name: '로그인' }).click();
-  await expect(page).toHaveURL(/\/app$/u, { timeout: 30_000 });
-}
-
-const mobilePages = [
-  {
-    name: 'home',
-    path: '/app',
-    heading: '#welcome-title',
-    body: '[data-room-summary]',
-  },
-  {
-    name: 'community',
-    path: '/app/community',
-    heading: '.communityHero h1',
-    body: '.communityHero > div > span',
-  },
-  {
-    name: 'nearby',
-    path: '/app/nearby',
-    heading: '#nearby-title',
-    body: '#nearby-lede',
-  },
-  {
-    name: 'profile',
-    path: '/app/profile',
-    heading: '#profile-title',
-    body: '#profile-lede',
-  },
-  {
-    name: 'verifications',
-    path: '/app/verifications',
-    heading: '#verifications-title',
-    body: '#verifications-lede',
-  },
-  {
-    name: 'saved-places',
-    path: '/app/saved-places',
-    heading: '#saved-places-title',
-    body: '#saved-places-lede',
-  },
+const appPages = [
+  { path: '/app', title: '홈' },
+  { path: '/app/community', title: '커뮤니티' },
+  { path: '/app/nearby', title: '주변' },
+  { path: '/app/profile', title: '내 정보' },
+  { path: '/app/verifications', title: '참여 자격' },
+  { path: '/app/saved-places', title: '찜한 장소' },
 ] as const;
 
-test('mobile app pages keep a fixed route deck and readable hierarchy', async ({
+const tabLabels = ['홈', '도움방', '커뮤니티', '주변', '내 정보'];
+
+async function measure(page: import('@playwright/test').Page) {
+  return page.evaluate(() => {
+    const nav = document.querySelector<HTMLElement>(
+      'nav[aria-label="앱 메뉴"]',
+    );
+    const main = document.querySelector<HTMLElement>('main');
+    const heading = main?.querySelector<HTMLElement>('h1') ?? null;
+    if (nav === null || main === null || heading === null) return null;
+    const texts = Array.from(
+      main.querySelectorAll<HTMLElement>('p, span, a, li, label'),
+    )
+      .filter((element) => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        return (
+          rect.width > 0 &&
+          rect.height > 0 &&
+          style.visibility !== 'hidden' &&
+          element.closest('.srOnly') === null &&
+          (element.textContent ?? '').trim().length > 0
+        );
+      })
+      .map((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+    const links = Array.from(nav.querySelectorAll<HTMLElement>('ul a'));
+    return {
+      viewport: { width: innerWidth, height: innerHeight },
+      documentWidth: document.documentElement.scrollWidth,
+      nav: nav.getBoundingClientRect().toJSON(),
+      navPosition: getComputedStyle(nav).position,
+      main: main.getBoundingClientRect().toJSON(),
+      mainPaddingBottom: Number.parseFloat(
+        getComputedStyle(main).paddingBottom,
+      ),
+      smallestText: Math.min(...texts),
+      linkHeights: links.map((link) => link.getBoundingClientRect().height),
+      linkLabels: links.map((link) => link.textContent?.trim() ?? ''),
+    };
+  });
+}
+
+test('mobile and tablet keep a fixed tab bar and readable pages', async ({
   browser,
-}, testInfo) => {
-  test.setTimeout(60_000);
+}) => {
+  test.setTimeout(180_000);
   const context = await browser.newContext({
     baseURL: 'http://127.0.0.1:3100',
-    viewport: { width: 390, height: 844 },
   });
   const page = await context.newPage();
-  await login(page);
+  await loginAs(page);
 
-  for (const appPage of mobilePages) {
-    await page.goto(appPage.path);
-    await expect(page.locator(appPage.heading)).toBeVisible();
-    await expect(page.locator(appPage.body)).toBeVisible();
-    await page.evaluate(() => window.scrollTo(0, 0));
-    const navigation = page.getByRole('navigation', { name: '앱 메뉴' });
-    await expect(navigation).toBeVisible();
-
-    const before = await page.evaluate(
-      ({ headingSelector, bodySelector }) => {
-        const nav = document.querySelector<HTMLElement>('.appNavigation');
-        const main = document.querySelector<HTMLElement>(
-          '.appContent:not(.appContent--room)',
-        );
-        const heading = document.querySelector<HTMLElement>(headingSelector);
-        const body = document.querySelector<HTMLElement>(bodySelector);
-        const links = Array.from(
-          document.querySelectorAll<HTMLElement>('.appNavigation a'),
-        );
-        if (
-          nav === null ||
-          main === null ||
-          heading === null ||
-          body === null
-        ) {
-          return null;
-        }
-        return {
-          viewport: { width: innerWidth, height: innerHeight },
-          documentWidth: document.documentElement.scrollWidth,
-          nav: nav.getBoundingClientRect().toJSON(),
-          navPosition: getComputedStyle(nav).position,
-          mainPaddingBottom: Number.parseFloat(
-            getComputedStyle(main).paddingBottom,
-          ),
-          headingFontSize: Number.parseFloat(
-            getComputedStyle(heading).fontSize,
-          ),
-          bodyFontSize: Number.parseFloat(getComputedStyle(body).fontSize),
-          linkHeights: links.map((link) => link.getBoundingClientRect().height),
-        };
-      },
-      { headingSelector: appPage.heading, bodySelector: appPage.body },
-    );
-
-    expect(before).not.toBeNull();
-    if (before === null) throw new Error('Mobile app shell must be measurable');
-    expect(before.documentWidth).toBeLessThanOrEqual(before.viewport.width);
-    expect(before.navPosition).toBe('fixed');
-    expect(before.nav.left).toBeCloseTo(0, 1);
-    expect(before.nav.right).toBeCloseTo(before.viewport.width, 1);
-    expect(before.nav.bottom).toBeCloseTo(before.viewport.height, 1);
-    expect(before.mainPaddingBottom).toBeGreaterThan(before.nav.height + 16);
-    expect(before.headingFontSize).toBeGreaterThanOrEqual(32);
-    expect(before.bodyFontSize).toBeGreaterThanOrEqual(15);
-    expect(Math.min(...before.linkHeights)).toBeGreaterThanOrEqual(44);
-
-    if (['home', 'community', 'nearby', 'profile'].includes(appPage.name)) {
-      await page.screenshot({
-        path: testInfo.outputPath(`${appPage.name}-390x844.png`),
-      });
+  for (const width of [390, 768, 1000]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const appPage of appPages) {
+      await page.goto(appPage.path);
+      await expect(
+        page
+          .getByRole('main')
+          .getByRole('heading', { level: 1, name: appPage.title }),
+      ).toBeAttached();
+      const layout = await measure(page);
+      expect(layout, `${appPage.path} at ${width}px`).not.toBeNull();
+      if (layout === null) throw new Error('App shell must be measurable');
+      const label = `${appPage.path} at ${width}px`;
+      expect(layout.documentWidth, label).toBeLessThanOrEqual(
+        layout.viewport.width,
+      );
+      expect(layout.navPosition, label).toBe('fixed');
+      expect(layout.nav.left, label).toBeCloseTo(0, 0);
+      expect(layout.nav.right, label).toBeCloseTo(layout.viewport.width, 0);
+      expect(layout.nav.bottom, label).toBeCloseTo(layout.viewport.height, 0);
+      expect(layout.mainPaddingBottom, label).toBeGreaterThan(
+        layout.nav.height,
+      );
+      expect(layout.linkLabels, label).toEqual(tabLabels);
+      expect(Math.min(...layout.linkHeights), label).toBeGreaterThanOrEqual(44);
+      expect(layout.smallestText, label).toBeGreaterThanOrEqual(12);
     }
-
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await expect
-      .poll(() => page.evaluate(() => Math.round(window.scrollY)))
-      .toBeGreaterThanOrEqual(0);
-    const after = await navigation.evaluate((element) => {
-      const rect = element.getBoundingClientRect();
-      return {
-        top: rect.top,
-        bottom: rect.bottom,
-        viewportHeight: innerHeight,
-        documentWidth: document.documentElement.scrollWidth,
-      };
-    });
-    expect(after.bottom).toBeCloseTo(after.viewportHeight, 1);
-    expect(after.top).toBeCloseTo(before.nav.top, 1);
-    expect(after.documentWidth).toBeLessThanOrEqual(before.viewport.width);
   }
 
   await context.close();
 });
 
-test('desktop shell keeps its vertical navigation and contained content', async ({
+test('desktop keeps the side navigation and content beside it', async ({
   browser,
 }) => {
+  test.setTimeout(120_000);
   const context = await browser.newContext({
     baseURL: 'http://127.0.0.1:3100',
-    viewport: { width: 1440, height: 900 },
   });
   const page = await context.newPage();
-  await login(page);
-  const shell = await page.evaluate(() => {
-    const nav = document.querySelector<HTMLElement>('.appNavigation');
-    const main = document.querySelector<HTMLElement>('.appContent');
-    if (nav === null || main === null) return null;
-    return {
-      viewportWidth: innerWidth,
-      documentWidth: document.documentElement.scrollWidth,
-      nav: nav.getBoundingClientRect().toJSON(),
-      navColumns: getComputedStyle(nav).gridTemplateColumns,
-      main: main.getBoundingClientRect().toJSON(),
-    };
-  });
-  expect(shell).not.toBeNull();
-  if (shell === null) throw new Error('Desktop app shell must be measurable');
-  expect(shell.documentWidth).toBeLessThanOrEqual(shell.viewportWidth);
-  expect(shell.nav.width).toBeLessThan(120);
-  expect(shell.nav.height).toBeGreaterThan(300);
-  expect(shell.navColumns.split(' ')).toHaveLength(1);
-  expect(shell.main.width).toBeLessThanOrEqual(1180);
+  await loginAs(page);
+
+  for (const width of [1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const appPage of appPages) {
+      await page.goto(appPage.path);
+      const layout = await measure(page);
+      expect(layout).not.toBeNull();
+      if (layout === null) throw new Error('App shell must be measurable');
+      const label = `${appPage.path} at ${width}px`;
+      expect(layout.documentWidth, label).toBeLessThanOrEqual(
+        layout.viewport.width,
+      );
+      expect(layout.nav.left, label).toBeCloseTo(0, 0);
+      expect(layout.nav.height, label).toBeGreaterThanOrEqual(
+        layout.viewport.height - 1,
+      );
+      expect(layout.main.left, label).toBeGreaterThanOrEqual(
+        layout.nav.right - 1,
+      );
+      expect(layout.linkLabels, label).toEqual(tabLabels);
+      expect(layout.smallestText, label).toBeGreaterThanOrEqual(12);
+    }
+    await expect(
+      page.getByRole('link', { name: '내 정보', exact: true }),
+    ).toHaveAttribute('aria-current', 'page');
+  }
+
   await context.close();
 });

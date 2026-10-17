@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AdminFrame } from '@/components/admin/admin-frame';
 import styles from '@/components/admin/admin.module.css';
+import { Card, EmptyState, SectionHead } from '@/components/ui';
 import { getAdminMetrics } from '@/lib/api/admin-metrics.server';
 import { requireAdmin } from '@/lib/auth/session';
 
@@ -43,25 +44,28 @@ export default async function AdminMetricsPage(): Promise<React.JSX.Element> {
     <AdminFrame
       adminNickname={admin.nickname}
       current="metrics"
-      title="서비스 지표"
+      title="운영 지표"
       description="질문이 답변과 해결로 이어지는 현재 흐름을 확인하세요."
     >
-      <ol className={styles.funnel} aria-label="질문 전환 흐름">
-        {funnel.map((step) => (
-          <li key={step.label}>
-            <span>{step.label}</span>
-            <div className={styles.bar} aria-hidden="true">
-              <i
-                style={{ width: `${Math.min(100, Math.max(0, step.rate))}%` }}
-              />
-            </div>
-            <strong>
-              {step.count.toLocaleString('ko-KR')}
-              {step.showRate && <small>{percent(step.rate)}</small>}
-            </strong>
-          </li>
-        ))}
-      </ol>
+      <Card className={styles.funnelCard} aria-labelledby="funnel-title">
+        <SectionHead id="funnel-title" title="질문 전환 흐름" />
+        <ol className={styles.funnel} aria-label="질문 전환 흐름">
+          {funnel.map((step) => (
+            <li key={step.label}>
+              <span>{step.label}</span>
+              <div className={styles.bar} aria-hidden="true">
+                <i
+                  style={{ width: `${Math.min(100, Math.max(0, step.rate))}%` }}
+                />
+              </div>
+              <strong>
+                {step.count.toLocaleString('ko-KR')}
+                {step.showRate && <small>{percent(step.rate)}</small>}
+              </strong>
+            </li>
+          ))}
+        </ol>
+      </Card>
 
       <dl className={styles.metricFacts} aria-label="응답과 채택 지표">
         <div>
@@ -87,16 +91,21 @@ export default async function AdminMetricsPage(): Promise<React.JSX.Element> {
         </div>
       </dl>
 
-      <section aria-labelledby="contributors-title">
-        <h2 id="contributors-title" className={styles.sectionTitle}>
-          현지 정보 기여 <span>공개 답변 기준</span>
-        </h2>
+      <Card aria-labelledby="contributors-title">
+        <SectionHead
+          id="contributors-title"
+          title="현지 정보 기여"
+          action={<span className={styles.sectionNote}>공개 답변 기준</span>}
+        />
         {metrics.localContributors.length === 0 ? (
-          <p className={styles.empty}>아직 현지인 답변 기록이 없습니다.</p>
+          <EmptyState icon="user" title="아직 현지인 답변 기록이 없습니다." />
         ) : (
           <ol className={styles.contributors}>
-            {metrics.localContributors.map((contributor) => (
+            {metrics.localContributors.map((contributor, index) => (
               <li key={contributor.userId}>
+                <span className={styles.rank} aria-hidden="true">
+                  {index + 1}
+                </span>
                 <Link
                   href={`/app/users/${encodeURIComponent(contributor.userId)}`}
                 >
@@ -107,7 +116,7 @@ export default async function AdminMetricsPage(): Promise<React.JSX.Element> {
             ))}
           </ol>
         )}
-      </section>
+      </Card>
       <p className={styles.generatedAt}>
         {new Intl.DateTimeFormat('ko-KR', {
           dateStyle: 'medium',

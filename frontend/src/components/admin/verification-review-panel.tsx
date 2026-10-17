@@ -10,10 +10,12 @@ import {
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import {
   localProofTypeLabels,
+  statusChipTones,
   verificationStatusLabels,
   verificationStatusTones,
   verificationTypeLabels,
 } from './admin-labels';
+import { Button, Chip, Notice } from '@/components/ui';
 import styles from './admin.module.css';
 
 function formatDate(value: string | null): string {
@@ -73,11 +75,12 @@ export function VerificationReviewPanel({
       <header className={styles.panelTitle}>
         <p>{verificationTypeLabels[verification.type]} 신청</p>
         <h2>{verification.applicant.nickname}</h2>
-        <span
-          className={styles.status}
-          data-tone={verificationStatusTones[verification.status]}
-        >
-          {verificationStatusLabels[verification.status]}
+        <span className={styles.panelStatus}>
+          <Chip
+            tone={statusChipTones[verificationStatusTones[verification.status]]}
+          >
+            {verificationStatusLabels[verification.status]}
+          </Chip>
         </span>
       </header>
       <dl className={styles.facts}>
@@ -127,34 +130,26 @@ export function VerificationReviewPanel({
           <p>{verification.note}</p>
         </div>
       )}
-      <div>
-        <button
-          className={styles.button}
-          type="button"
-          onClick={() => void evidence()}
-        >
+      <div className={styles.evidence}>
+        <Button variant="secondary" icon="lock" onClick={() => void evidence()}>
           비공개 증빙 다운로드
-        </button>
+        </Button>
+        <small>증빙은 이 버튼을 누를 때만 불러옵니다.</small>
       </div>
       {verification.status === 'PENDING' ? (
         <div className={styles.decision}>
           <p>처리 후에는 되돌릴 수 없습니다.</p>
           {decision === undefined ? (
             <div className={styles.actions}>
-              <button
-                className={styles.button}
-                type="button"
+              <Button
+                variant="secondary"
                 onClick={() => setDecision('APPROVE')}
               >
                 승인 검토
-              </button>
-              <button
-                className={styles.button}
-                type="button"
-                onClick={() => setDecision('REJECT')}
-              >
+              </Button>
+              <Button variant="secondary" onClick={() => setDecision('REJECT')}>
                 반려 검토
-              </button>
+              </Button>
             </div>
           ) : (
             <>
@@ -175,21 +170,15 @@ export function VerificationReviewPanel({
                 />
               )}
               <div className={styles.confirmActions}>
-                <button
-                  className={styles.cancel}
-                  type="button"
+                <Button
+                  variant="ghost"
                   onClick={() => setDecision(undefined)}
                   disabled={pending}
                 >
                   취소
-                </button>
-                <button
-                  className={
-                    decision === 'APPROVE'
-                      ? styles.confirm
-                      : styles.confirmDanger
-                  }
-                  type="button"
+                </Button>
+                <Button
+                  variant={decision === 'APPROVE' ? 'dark' : 'danger'}
                   onClick={() => void confirm()}
                   disabled={pending}
                 >
@@ -198,7 +187,7 @@ export function VerificationReviewPanel({
                     : decision === 'APPROVE'
                       ? '승인 확정'
                       : '반려 확정'}
-                </button>
+                </Button>
               </div>
             </>
           )}
@@ -211,9 +200,9 @@ export function VerificationReviewPanel({
         </p>
       )}
       {message !== undefined && (
-        <p className={styles.message} role="alert">
+        <Notice tone="danger" icon="alert" role="alert">
           {message}
-        </p>
+        </Notice>
       )}
     </section>
   );
