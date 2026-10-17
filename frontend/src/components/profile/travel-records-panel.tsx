@@ -110,7 +110,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
       </header>
 
       {isFormOpen && (
-        <form className={styles.recordForm} onSubmit={submit}>
+        <form method="post" className={styles.recordForm} onSubmit={submit}>
           <div className={styles.recordFormHeading}>
             <strong>
               {editingId === undefined ? '새 여행 기록' : '여행 기록 수정'}

@@ -1,153 +1,225 @@
-/* T48 — profile, travel records, account management, and saved places in the
- * T42 direction. */
+/* 내 정보 (#31): profile, travel records, account. */
 
-.page {
-  display: grid;
-  width: 100%;
-  max-width: 45rem;
-  margin-inline: auto;
-  color: var(--ink);
-}
-
-.header {
-  padding-bottom: 1.5rem;
-}
-
-.header h1 {
-  margin: 0;
-  font-family: var(--display);
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-
-.header p {
-  margin: 0.6rem 0 0;
-  color: var(--muted);
-  font-size: 1rem;
-  line-height: 1.6;
-  word-break: keep-all;
-}
-
-.page > .back {
-  justify-self: start;
-  margin: 0 0 1rem;
-}
-
-/* Sections */
-
+/* Section card shared by the panels */
 .section {
-  display: grid;
-  gap: 1.25rem;
-  padding: 1.75rem 0;
-  border-top: 1px solid var(--line);
+  padding: 1.25rem;
+  border-radius: var(--radius-xl);
+  background: var(--surface);
 }
 
 .sectionHeader {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem 1rem;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .sectionHeader h2 {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 750;
-}
-
-.sectionHeader p {
-  margin: 0.3rem 0 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  word-break: keep-all;
-}
-
-/* Rows (shortcuts, records, saved places) */
-
-.rows {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.rows > li + li {
-  border-top: 1px solid var(--line);
-}
-
-.shortcuts {
-  border-top: 1px solid var(--line);
-}
-
-.shortcut {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 4.5rem;
-  padding: 1rem 0.25rem;
-  color: inherit;
-  text-decoration: none;
-}
-
-.shortcut > span {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.shortcut strong {
-  font-size: 1.05rem;
+  font-size: var(--text-xl);
   font-weight: 700;
 }
 
-.shortcut > span > span {
+.sectionHeader p {
+  margin: 0.25rem 0 0;
   color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: var(--text-sm);
 }
 
-.shortcut > :global(.appIcon) {
-  flex: 0 0 auto;
-  width: 1.1rem;
-  height: 1.1rem;
-  color: var(--muted);
-  transition: transform 160ms ease;
+/* Buttons */
+.primary,
+.secondary,
+.dangerButton,
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border: 0;
+  font-family: inherit;
+  font-weight: 650;
+  white-space: nowrap;
 }
 
-.shortcut:hover > :global(.appIcon) {
+.primary {
+  width: 100%;
+  min-height: 3.375rem;
+  border-radius: var(--radius-lg);
+  background: var(--iris);
+  color: #fff;
+  font-size: var(--text-lg);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--iris-hover);
+}
+
+.secondary {
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunk);
   color: var(--ink);
-  transform: translateX(3px);
+  font-size: var(--text-sm);
+  cursor: pointer;
 }
 
-/* Form controls */
+.secondary:hover {
+  background: var(--line);
+}
 
+.secondary[data-disabled] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.dangerButton {
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border-radius: var(--radius-md);
+  background: var(--danger);
+  color: #fff;
+  font-size: var(--text-md);
+}
+
+.textButton {
+  min-height: 2.25rem;
+  padding: 0 0.375rem;
+  background: none;
+  color: var(--iris-ink);
+  font-size: var(--text-sm);
+}
+
+.textButton:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.primary:disabled,
+.secondary:disabled,
+.dangerButton:disabled,
+.textButton:disabled {
+  opacity: 0.5;
+}
+
+/* Fields */
 .form {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
+.field {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.fieldLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.fieldLabel span,
+.fieldLabel small {
+  color: var(--faint);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.field > span {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.control {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--surface-sunk);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+textarea.control {
+  min-height: 6.5rem;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.control:focus-visible {
+  border-color: var(--iris);
+  background: #fff;
+}
+
+.control[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.help {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.fieldError,
+.error {
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+  font-size: var(--text-sm);
+}
+
+.fieldError {
+  padding: 0;
+  background: none;
+  font-size: var(--text-xs);
+}
+
+.message {
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: var(--success-soft);
+  color: var(--success-ink);
+  font-size: var(--text-sm);
+}
+
+.message[role='alert'] {
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+}
+
+/* Photo */
 .photo {
   display: flex;
-  gap: 1rem;
   align-items: center;
+  gap: 1rem;
 }
 
 .avatar {
   display: grid;
-  flex: 0 0 auto;
   width: 4.5rem;
   height: 4.5rem;
-  overflow: hidden;
+  flex: 0 0 4.5rem;
   place-items: center;
+  overflow: hidden;
   border-radius: 50%;
-  background: var(--gradient);
-  color: #ffffff;
-  font-family: var(--display);
+  background: var(--plum);
+  color: #fff;
+  font-family: var(--font-display);
   font-size: 1.75rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .avatar img {
@@ -158,83 +230,27 @@
 
 .photoCopy {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .photoCopy strong {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: var(--text-md);
 }
 
 .photoCopy small {
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: var(--faint);
+  font-size: 0.78rem;
 }
 
 .photoActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.375rem;
 }
 
-.field {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.fieldLabel {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.95rem;
-  font-weight: 650;
-}
-
-.fieldLabel > span {
-  color: var(--subtle);
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-}
-
-.control {
-  width: 100%;
-  min-width: 0;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid var(--line-strong);
-  border-radius: 0.75rem;
-  background: var(--surface);
-  color: var(--ink);
-  font: inherit;
-  font-weight: 500;
-}
-
-textarea.control {
-  resize: vertical;
-  line-height: 1.6;
-}
-
-.control[aria-invalid='true'] {
-  border-color: var(--danger);
-}
-
-.help,
-.fieldError {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.help {
-  color: var(--muted);
-}
-
-.fieldError {
-  color: var(--danger);
-  font-weight: 650;
-}
-
+/* Travel styles */
 .styles {
-  min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
@@ -242,26 +258,22 @@ textarea.control {
 
 .styles legend {
   width: 100%;
-  margin-bottom: 0.6rem;
   padding: 0;
 }
 
-.styles legend + .chips {
-  clear: both;
+.stylesLabel span {
+  color: var(--faint);
+  font-size: 0.78rem;
+  font-weight: 500;
 }
 
 .stylesLabel {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  font-size: 0.95rem;
-  font-weight: 650;
-}
-
-.stylesLabel > span {
-  color: var(--subtle);
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
@@ -273,392 +285,172 @@ textarea.control {
 
 .chip {
   display: inline-flex;
-  gap: 0.4rem;
   align-items: center;
-  min-height: 2.75rem;
-  padding: 0 0.9rem;
+  gap: 0.375rem;
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
   border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--ink);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.95rem;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
-.chip[aria-pressed='true'] {
-  border-color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--ink);
-}
-
-.chip:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.chip :global(.appIcon) {
-  width: 0.9rem;
-  height: 0.9rem;
-  color: var(--purple);
-}
-
-.message {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin: 0;
-  font-weight: 650;
-}
-
-.message[data-tone='success'] {
-  color: var(--purple);
-}
-
-.message[data-tone='error'] {
-  color: var(--danger);
-}
-
-.message :global(.appIcon) {
-  width: 1rem;
-  height: 1rem;
-}
-
-/* Buttons */
-
-.primary,
-.secondary,
-.textButton,
-.dangerButton {
-  display: inline-flex;
-  gap: 0.4rem;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.75rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
-}
-
-.primary {
-  width: 100%;
-  min-height: 3.25rem;
-  padding: 0 2rem;
-  border: 0;
-  background: var(--ink);
-  color: #ffffff;
-  font-size: 1.05rem;
-}
-
-.primary:hover:not(:disabled) {
-  background: #3a3644;
-}
-
-.secondary {
-  padding: 0 1rem;
-  border: 1px solid var(--ink);
-  background: transparent;
-  color: var(--ink);
-  font-size: 0.95rem;
-}
-
-.textButton {
-  min-height: 2.75rem;
-  padding: 0 0.5rem;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.textButton:hover:not(:disabled) {
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.dangerButton {
-  padding: 0 1.25rem;
-  border: 0;
-  background: var(--danger);
-  color: #ffffff;
-  font-size: 0.95rem;
-}
-
-.primary:disabled,
-.secondary:disabled,
-.textButton:disabled,
-.dangerButton:disabled,
-.secondary[data-disabled] {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.secondary :global(.appIcon) {
-  width: 1rem;
-  height: 1rem;
+.chip[aria-pressed='true'],
+.chip:has(input:checked) {
+  border-color: var(--iris);
+  background: var(--iris-soft);
+  color: var(--iris-ink);
 }
 
 /* Travel records */
-
 .recordForm {
   display: grid;
-  gap: 1rem;
-  padding: 1.25rem 0;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunk);
+}
+
+.recordForm .control {
+  background: #fff;
 }
 
 .recordFormHeading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 700;
+  gap: 0.75rem;
+}
+
+.recordFormHeading strong,
+.recordFormHeading h3 {
+  margin: 0;
+  font-size: var(--text-lg);
 }
 
 .recordGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
+}
+
+.recordGrid > :first-child,
+.recordGrid > :nth-child(2) {
+  grid-column: 1 / -1;
 }
 
 .recordActions {
   display: flex;
-  gap: 0.5rem;
   justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rows > li + li {
+  border-top: 1px solid var(--line);
 }
 
 .record {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.2rem 1rem;
-  padding: 1rem 0.25rem 0.5rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.125rem 0.75rem;
+  padding: 0.875rem 0;
 }
 
 .record h3 {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.record time {
-  color: var(--muted);
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.recordPlace,
-.record > p {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-.recordPlace {
-  font-size: 0.9rem;
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
   font-weight: 650;
 }
 
-.record > div {
-  display: flex;
+.record time,
+.recordPlace {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.record time {
+  grid-column: 1;
+}
+
+.recordPlace {
+  grid-column: 1;
+}
+
+.record p {
   grid-column: 1 / -1;
-  justify-content: flex-end;
-  margin-right: -0.5rem;
+  margin: 0.375rem 0 0;
+  font-size: var(--text-md);
+}
+
+.record > div {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  display: flex;
+  align-items: flex-start;
 }
 
 .state {
   margin: 0;
+  padding: 1.25rem 0;
   color: var(--muted);
-  line-height: 1.6;
+  font-size: var(--text-sm);
+  text-align: center;
 }
 
-.state strong {
-  display: block;
-  color: var(--ink);
+div.state {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
 }
 
-.error {
-  margin: 0;
-  color: var(--danger);
-  font-weight: 650;
-}
-
-/* Account management */
-
-.openDeletion {
-  justify-self: start;
-  margin-left: -0.5rem;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
+/* Account */
 .accountLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+  display: grid;
 }
 
 .accountLinks a {
-  color: var(--muted);
-  font-size: 0.95rem;
-  font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3rem;
+  color: var(--ink);
+  font-size: var(--text-md);
+  font-weight: 600;
 }
 
-.accountLinks a:hover {
-  color: var(--ink);
+.accountLinks a + a {
+  border-top: 1px solid var(--line);
+}
+
+.openDeletion {
+  margin-top: 0.5rem;
+  padding: 0;
+  color: var(--danger-ink);
 }
 
 .deletion {
   display: grid;
-  gap: 1rem;
-  padding: 1.25rem;
-  border: 1px solid rgba(229, 72, 77, 0.35);
-  border-radius: 0.875rem;
-}
-
-.deletion strong {
-  color: var(--danger);
-}
-
-.deletion p {
-  margin: 0.3rem 0 0;
-  color: var(--muted);
-  line-height: 1.6;
-  word-break: keep-all;
-}
-
-.deletion ol {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
-  margin: 0.5rem 0 0;
-  padding-left: 1.1rem;
-  color: var(--ink);
-  font-size: 0.9rem;
-  font-weight: 650;
-}
-
-.deletion label {
-  display: grid;
-  gap: 0.4rem;
-  font-size: 0.95rem;
-  font-weight: 650;
-}
-
-.deletion label b {
-  color: var(--danger);
+  gap: 0.875rem;
+  margin-top: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--danger-soft);
+  border-radius: var(--radius-lg);
+  background: #fffafa;
 }
 
 .deletionActions {
   display: flex;
-  gap: 0.5rem;
   justify-content: flex-end;
-}
-
-/* Saved places */
-
-.place {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.2rem 1rem;
-  align-items: center;
-  padding: 1rem 0.25rem;
-}
-
-.place h2 {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.place p {
-  grid-column: 1;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.place > div {
-  display: flex;
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  gap: 0.25rem;
-  align-items: center;
-}
-
-.mapLink {
-  display: inline-flex;
-  gap: 0.3rem;
-  align-items: center;
-  min-height: 2.75rem;
-  padding: 0 0.5rem;
-  color: var(--ink);
-  font-size: 0.95rem;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.mapLink:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.mapLink :global(.appIcon) {
-  width: 0.95rem;
-  height: 0.95rem;
-}
-
-.shortcut:focus-visible,
-.control:focus-visible,
-.chip:focus-visible,
-.primary:focus-visible,
-.secondary:focus-visible,
-.secondary:focus-within,
-.textButton:focus-visible,
-.dangerButton:focus-visible,
-.accountLinks a:focus-visible,
-.mapLink:focus-visible {
-  outline: 2px solid var(--purple);
-  outline-offset: 2px;
-}
-
-@media (max-width: 520px) {
-  .recordGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .place {
-    grid-template-columns: 1fr;
-  }
-
-  .place > div {
-    grid-column: 1;
-    grid-row: auto;
-    margin-left: -0.5rem;
-  }
-}
-
-@media (min-width: 761px) {
-  .header h1 {
-    font-size: 2.5rem;
-  }
-
-  .primary {
-    width: auto;
-    justify-self: start;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .shortcut > :global(.appIcon) {
-    transition: none;
-  }
+  gap: 0.5rem;
 }

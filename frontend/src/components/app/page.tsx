@@ -19,8 +19,10 @@ export function PageHeader({
   backLabel = '뒤로',
   actions,
   brand = false,
+  titleId,
 }: {
   title: string;
+  titleId?: string;
   description?: ReactNode;
   backHref?: string;
   backLabel?: string;
@@ -43,11 +45,13 @@ export function PageHeader({
         {brand ? (
           <>
             <Wordmark href="/app" />
-            <h1 className="srOnly">{title}</h1>
+            <h1 className="srOnly" id={titleId}>
+              {title}
+            </h1>
           </>
         ) : (
           <>
-            <h1>{title}</h1>
+            <h1 id={titleId}>{title}</h1>
             {description !== undefined && <p>{description}</p>}
           </>
         )}
