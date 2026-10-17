@@ -117,6 +117,7 @@ export function ReportMenu({
           </div>
         ) : (
           <form
+            method="post"
             className={styles.form}
             onSubmit={(event) => void submit(event)}
           >

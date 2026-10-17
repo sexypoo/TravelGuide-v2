@@ -65,8 +65,8 @@ export function TravelerVerificationForm({
 
   return (
     <form
-      className={styles.form}
       method="post"
+      className={styles.form}
       onSubmit={(event) => void submit(event)}
       noValidate
       data-verification-form

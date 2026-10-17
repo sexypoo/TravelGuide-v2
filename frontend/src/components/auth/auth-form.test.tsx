@@ -45,6 +45,13 @@ describe('AuthForm', () => {
     });
   });
 
+  it('posts the form natively so credentials never reach the URL (#29)', () => {
+    const { container } = render(<AuthForm mode="login" />);
+    expect(container.querySelector('form')?.getAttribute('method')).toBe(
+      'post',
+    );
+  });
+
   it('validates registration fields before making a request', async () => {
     render(<AuthForm mode="register" />);
 

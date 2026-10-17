@@ -131,6 +131,7 @@ export function AnswerForm({
 
   return (
     <form
+      method="post"
       className={`${composer.form} ${styles.card}`}
       onSubmit={submit}
       noValidate
