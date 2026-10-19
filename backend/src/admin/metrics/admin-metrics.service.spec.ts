@@ -198,6 +198,24 @@ describe('AdminMetricsService', () => {
     expect(result.questionCount).toBe(5);
   });
 
+  it('does not count an accepted step when the accepted answer was removed or the topic is not resolved', async () => {
+    const prisma = prismaMock({
+      questions: [
+        question({
+          authorId: 'traveler-1',
+          status: 'RESOLVED',
+          acceptedAnswerId: 'removed-answer',
+        }),
+        question({ authorId: 'traveler-2', acceptedAnswerId: 'answer-4' }),
+      ],
+    });
+
+    const result = await new AdminMetricsService(prisma as never).get(base);
+
+    expect(result.userFunnel.answerReceivedCount).toBe(0);
+    expect(result.userFunnel.answerAcceptedCount).toBe(0);
+  });
+
   it('filters signups and verifications to non-admin users, including approvals that later expired or were revoked', async () => {
     const prisma = prismaMock({});
     await new AdminMetricsService(prisma as never).get(base);

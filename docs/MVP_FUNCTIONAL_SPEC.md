@@ -1358,7 +1358,7 @@ NestJS         -> private object storage
   1건 이상인 사용자. 여행자·현지인 승인 수를 따로 함께 낸다
 - 첫 토픽 작성: 제거되지 않은 `Question`을 쓴 사용자
 - 답변 받음: 제거되지 않은 답변이 1개 이상 달린 토픽을 가진 사용자
-- 답변 채택: `acceptedAnswerId`가 있는 토픽을 가진 사용자
+- 답변 채택: 해결(`RESOLVED`)됐고 `acceptedAnswerId`가 있으며 보이는 답변이 남아 있는 토픽을 가진 사용자
 
 현지인 공급(ADR-051):
 

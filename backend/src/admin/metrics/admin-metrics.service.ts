@@ -133,7 +133,12 @@ export class AdminMetricsService {
     ).size;
     const answerAcceptedCount = new Set(
       memberQuestions
-        .filter((question) => question.acceptedAnswerId !== null)
+        .filter(
+          (question) =>
+            question.status === 'RESOLVED' &&
+            question.acceptedAnswerId !== null &&
+            question._count.answers > 0,
+        )
         .map((question) => question.authorId),
     ).size;
     const verificationAppliedCount = appliedUsers.length;
