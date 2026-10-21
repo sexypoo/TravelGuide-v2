@@ -115,7 +115,10 @@ export function TopicResolutionActions({
           <div className={styles.confirmActions}>
             <Button
               variant="secondary"
-              onClick={() => setDecision(undefined)}
+              onClick={() => {
+                mutation.reset();
+                setDecision(undefined);
+              }}
               disabled={mutation.isPending}
             >
               취소
