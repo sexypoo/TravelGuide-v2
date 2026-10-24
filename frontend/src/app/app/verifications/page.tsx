@@ -88,7 +88,10 @@ export default async function VerificationsPage({
               <ul className={styles.list}>
                 {verifications.map((item) => (
                   <li key={item.id}>
-                    <VerificationStatusCard verification={item} />
+                    <VerificationStatusCard
+                      verification={item}
+                      canReapply={!pendingTypes.has(item.type)}
+                    />
                   </li>
                 ))}
               </ul>
