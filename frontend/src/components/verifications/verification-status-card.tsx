@@ -47,8 +47,11 @@ function steps(
 
 export function VerificationStatusCard({
   verification,
+  canReapply,
 }: {
   verification: Verification;
+  /** False while a PENDING application of the same type exists (VER-001). */
+  canReapply: boolean;
 }): React.JSX.Element {
   const isTraveler = verification.type === 'TRAVELER';
   const validity = isTraveler
@@ -105,13 +108,15 @@ export function VerificationStatusCard({
                 {verification.rejectionReason}
               </span>
             </Notice>
-            <ButtonLink
-              variant="secondary"
-              size="sm"
-              href={`/app/verifications/${isTraveler ? 'traveler' : 'local'}`}
-            >
-              새로 신청하기
-            </ButtonLink>
+            {canReapply && (
+              <ButtonLink
+                variant="secondary"
+                size="sm"
+                href={`/app/verifications/${isTraveler ? 'traveler' : 'local'}`}
+              >
+                새로 신청하기
+              </ButtonLink>
+            )}
           </div>
         )}
       {verification.status === 'REVOKED' && (
