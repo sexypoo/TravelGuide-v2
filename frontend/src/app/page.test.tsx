@@ -41,6 +41,9 @@ describe('public home gateway', () => {
       screen.getByRole('link', { name: /여행자 커뮤니티/ }),
     ).toHaveAttribute('href', '/auth/login?next=%2Fapp%2Fcommunity');
     expect(
+      screen.getByRole('link', { name: '여행자 유형 테스트' }),
+    ).toHaveAttribute('href', '/test');
+    expect(
       screen.getByRole('list', { name: '서비스 이용 순서' }),
     ).toHaveTextContent('인증질문여러 현지인의 답변');
     expect(container.querySelector('.landingHero')).toBeNull();
