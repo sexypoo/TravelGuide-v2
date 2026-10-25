@@ -28,6 +28,7 @@ function answerError(error: unknown): string {
       QUESTION_NOT_OPEN: '이미 해결되었거나 닫힌 질문입니다.',
       SOURCE_URL_REQUIRED: '공식 정보의 HTTPS 주소를 입력해 주세요.',
       INVALID_SOURCE_URL: '출처 주소는 https://로 시작해야 합니다.',
+      UPLOAD_TOO_LARGE: '사진은 10MB 이하로 선택해 주세요.',
     };
     return (
       messages[error.code] ??
@@ -265,7 +266,16 @@ export function AnswerForm({
               className="srOnly"
               type="file"
               accept="image/jpeg,image/png,image/webp"
-              onChange={(event) => setImage(event.target.files?.[0])}
+              onChange={(event) => {
+                const nextImage = event.target.files?.[0];
+                if (nextImage && nextImage.size > 10 * 1024 * 1024) {
+                  setClientError('사진은 10MB 이하로 선택해 주세요.');
+                  event.target.value = '';
+                  return;
+                }
+                setImage(nextImage);
+                setClientError('');
+              }}
             />
           </label>
         </div>
