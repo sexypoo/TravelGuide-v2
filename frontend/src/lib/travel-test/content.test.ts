@@ -6,6 +6,7 @@ import {
   TRAVEL_TYPE_KEYS,
   TRAVEL_TYPES,
 } from './content';
+import { SAMPLE_COURSES } from './courses';
 
 describe('travel type test content', () => {
   it('asks ten questions with four distinct types each', () => {
@@ -57,5 +58,15 @@ describe('isTravelTypeKey', () => {
     expect(isTravelTypeKey('slow')).toBe(true);
     expect(isTravelTypeKey('SLOW')).toBe(false);
     expect(isTravelTypeKey('admin')).toBe(false);
+  });
+});
+
+describe('sample courses', () => {
+  it('give every type a four-stop day in time order', () => {
+    for (const key of TRAVEL_TYPE_KEYS) {
+      const times = SAMPLE_COURSES[key].map((stop) => stop.time);
+      expect(times).toHaveLength(4);
+      expect([...times].sort()).toEqual(times);
+    }
   });
 });
