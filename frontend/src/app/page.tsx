@@ -18,9 +18,14 @@ export default async function Home(): Promise<React.JSX.Element> {
     <main className={styles.page}>
       <header className={styles.header}>
         <Wordmark />
-        <Link className={styles.headerLogin} href="/auth/login">
-          로그인
-        </Link>
+        <nav className={styles.headerNav} aria-label="처음 화면 메뉴">
+          <Link className={styles.headerTest} href="/test">
+            여행자 유형 테스트
+          </Link>
+          <Link className={styles.headerLogin} href="/auth/login">
+            로그인
+          </Link>
+        </nav>
       </header>
 
       <div className={styles.body}>

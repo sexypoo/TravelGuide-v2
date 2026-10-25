@@ -1,0 +1,218 @@
+/* Travel type test pages (#42). One narrow column on every width so the
+ * result reads like the share card people post. */
+
+.page {
+  display: grid;
+  min-height: 100svh;
+  grid-template-rows: auto 1fr;
+  width: min(100%, calc(30rem + 2 * var(--page-gutter)));
+  margin: 0 auto;
+  padding: 0 max(var(--page-gutter), env(safe-area-inset-right)) 2.5rem
+    max(var(--page-gutter), env(safe-area-inset-left));
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.5rem;
+}
+
+.login {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
+  border-radius: var(--radius-md);
+  color: var(--ink-2);
+  font-weight: 650;
+}
+
+.login:hover {
+  background: rgba(40, 37, 49, 0.05);
+  color: var(--ink);
+}
+
+.main {
+  display: grid;
+  align-content: start;
+  padding-top: 0.25rem;
+}
+
+/* Result */
+.result {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.resultCard {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 1.75rem 1.25rem 1.5rem;
+  border-radius: var(--radius-2xl);
+  background: var(--type-color);
+  color: #fff;
+  text-align: center;
+}
+
+.resultYou {
+  margin: 0;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.resultName {
+  margin: 0;
+  font-size: var(--text-5xl);
+  font-weight: 800;
+}
+
+.resultCritter {
+  width: 8.5rem;
+  height: 8.5rem;
+}
+
+.resultTagline {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 650;
+}
+
+.traits {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.375rem;
+  margin: 0.375rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.traits li {
+  padding: 0.3125rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.18);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.description {
+  margin: 0 0 1rem;
+  color: var(--ink-2);
+}
+
+.sectionTitle {
+  margin: 0 0 0.75rem;
+  font-size: var(--text-xl);
+  font-weight: 750;
+}
+
+.match {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-sunk);
+}
+
+.match:hover {
+  background: var(--line);
+}
+
+.match span {
+  display: grid;
+  min-width: 0;
+}
+
+.match small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+
+.matchCritter {
+  width: 3rem;
+  height: 3rem;
+  flex: none;
+}
+
+.cta {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.375rem 1.25rem 1.25rem;
+  border-radius: var(--radius-2xl);
+  background: var(--ink);
+  color: #fff;
+}
+
+.ctaTitle {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: 750;
+}
+
+.ctaText {
+  margin: 0 0 0.5rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.ctaActions {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: center;
+}
+
+.ctaAgain {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 650;
+}
+
+.ctaAgain:hover {
+  color: #fff;
+}
+
+.others {
+  padding: 1.25rem 0.25rem 0;
+}
+
+.others ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.others a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.25rem;
+  padding: 0.375rem 0.75rem 0.375rem 0.375rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.others a[aria-current='page'] {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.others a:hover {
+  box-shadow: var(--shadow-raise);
+}
+
+.otherCritter {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+}
