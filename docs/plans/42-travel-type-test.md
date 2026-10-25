@@ -12,6 +12,7 @@
 ## Files
 
 - `frontend/src/lib/travel-test/content.ts`: 유형 8개, 질문 10개, 채점
+- `frontend/src/lib/travel-test/courses.ts`: 유형별 제주 예시 코스(AI 도움, 현지인 미확인 표시)
 - `frontend/src/lib/travel-test/share-card.ts`: 1080x1920 결과 카드 캔버스
 - `frontend/src/components/travel-test/`: 질문 화면, 공유 버튼, 임시 캐릭터
 - `frontend/src/app/test/`: `/test`, `/test/[type]` (정적 생성 8개)
@@ -31,6 +32,9 @@
 - `yarn lint`, `yarn typecheck`, `yarn test`, `yarn build`
 
 ## Risks
+
+- 예시 코스는 현지인이 확인하지 않은 내용이다. 화면에 밝히고, 장소 사실관계는
+  오너가 한 번 훑어봐야 한다.
 
 - 측정이 없다. 공유·완료 수를 보려면 오너가 방법을 정해야 한다
   (Vercel Web Analytics 같은 외부 도구, 또는 이벤트 테이블과 개인정보

@@ -18,6 +18,7 @@ test('a signed-out visitor finishes the travel type test and sees a result', asy
 
   await expect(page).toHaveURL(/\/test\/[a-z]+$/);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.getByText('아직 현지인이 확인하지 않았어요')).toBeVisible();
   await expect(
     page.getByRole('button', { name: '결과 공유하기' }),
   ).toBeVisible();
