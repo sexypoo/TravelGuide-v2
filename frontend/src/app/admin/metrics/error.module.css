@@ -1,0 +1,18 @@
+.root {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.25rem var(--page-gutter);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+@media (min-width: 1024px) {
+  .root {
+    padding: 2.5rem 3rem;
+  }
+}
