@@ -13,7 +13,7 @@ import {
   type ChatMessage,
   type MessagePage,
 } from '@/lib/api/messages';
-import { actionableErrorMessage } from '@/lib/api/problem-details';
+import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { mergeMessageIntoTimeline } from '@/lib/query/realtime-cache';
 import type { GooglePlace } from '@/lib/api/places';
@@ -24,6 +24,9 @@ import styles from './messages.module.css';
 type Attachment = 'image' | 'place' | null;
 
 function messageError(error: unknown): string {
+  if (error instanceof ApiProblem && error.code === 'UPLOAD_TOO_LARGE') {
+    return '사진은 10MB 이하로 선택해 주세요.';
+  }
   return actionableErrorMessage(
     error,
     '메시지를 보내지 못했습니다. 연결을 확인하고 다시 시도해 주세요.',
@@ -170,7 +173,16 @@ export function MessageComposer({
                   className="srOnly"
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
-                  onChange={(event) => setImage(event.target.files?.[0])}
+                  onChange={(event) => {
+                    const nextImage = event.target.files?.[0];
+                    if (nextImage && nextImage.size > 10 * 1024 * 1024) {
+                      setClientError('사진은 10MB 이하로 선택해 주세요.');
+                      event.target.value = '';
+                      return;
+                    }
+                    setImage(nextImage);
+                    setClientError('');
+                  }}
                 />
               </>
             ) : (
