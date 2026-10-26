@@ -72,6 +72,46 @@ describe('AnswerForm', () => {
     );
   });
 
+  it.each(['2000', '-5', '2.5'])(
+    'blocks wait minutes outside 0-1440 whole minutes (%s)',
+    (value) => {
+      renderForm('WAITING');
+      fireEvent.change(screen.getByRole('textbox'), {
+        target: { value: '현재 대기줄 상황을 직접 확인해서 알려드립니다.' },
+      });
+      fireEvent.change(screen.getByPlaceholderText('30'), {
+        target: { value },
+      });
+      fireEvent.click(screen.getByRole('button', { name: '답변 보내기' }));
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        '예상 대기 시간은 0분부터 1440분(24시간)까지 정수로 적어 주세요.',
+      );
+      expect(createAnswer).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ['0', 0],
+    ['1440', 1440],
+  ])('submits boundary wait minutes %s', async (value, expected) => {
+    jest.mocked(createAnswer).mockReturnValue(new Promise(() => undefined));
+    renderForm('WAITING');
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: '현재 대기줄 상황을 직접 확인해서 알려드립니다.' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('30'), {
+      target: { value },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '답변 보내기' }));
+    await waitFor(() =>
+      expect(createAnswer).toHaveBeenCalledWith(
+        'question-1',
+        expect.objectContaining({ waitMinutes: expected }),
+      ),
+    );
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
   it('blocks photos over 10MB before uploading them', async () => {
     jest.mocked(createAnswer).mockReturnValue(new Promise(() => undefined));
     renderForm();

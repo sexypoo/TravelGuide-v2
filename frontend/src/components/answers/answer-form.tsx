@@ -114,6 +114,15 @@ export function AnswerForm({
       setClientError('공식 정보의 HTTPS 주소를 함께 입력해 주세요.');
       return;
     }
+    if (waitMinutes) {
+      const minutes = Number(waitMinutes);
+      if (!Number.isInteger(minutes) || minutes < 0 || minutes > 1440) {
+        setClientError(
+          '예상 대기 시간은 0분부터 1440분(24시간)까지 정수로 적어 주세요.',
+        );
+        return;
+      }
+    }
     if (
       ['WAITING', 'CROWD'].includes(category) &&
       !waitMinutes &&
@@ -183,6 +192,7 @@ export function AnswerForm({
                   type="number"
                   min="0"
                   max="1440"
+                  step="1"
                   inputMode="numeric"
                   value={waitMinutes}
                   onChange={(event) => setWaitMinutes(event.target.value)}
