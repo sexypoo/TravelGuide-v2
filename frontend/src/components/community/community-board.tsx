@@ -40,6 +40,8 @@ export function CommunityBoard({
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const [composerOpen, setComposerOpen] = useState(false);
   const [pending, setPending] = useState(false);
 
@@ -48,21 +50,19 @@ export function CommunityBoard({
     async function loadFirstPage(): Promise<void> {
       setLoading(true);
       setError(undefined);
+      setLoadFailed(false);
+      // Drop the previous category's posts so they don't linger while the
+      // new category loads or after it fails.
+      setPosts([]);
+      setCursor(null);
       try {
         const page = await getCommunityPage(category);
         if (active) {
           setPosts(page.items);
           setCursor(page.nextCursor);
         }
-      } catch (loadError: unknown) {
-        if (active) {
-          setError(
-            actionableErrorMessage(
-              loadError,
-              '커뮤니티 글을 불러오지 못했습니다. 연결을 확인해 주세요.',
-            ),
-          );
-        }
+      } catch {
+        if (active) setLoadFailed(true);
       } finally {
         if (active) setLoading(false);
       }
@@ -71,7 +71,7 @@ export function CommunityBoard({
     return () => {
       active = false;
     };
-  }, [category]);
+  }, [category, reloadKey]);
 
   async function loadMore(): Promise<void> {
     if (cursor === null) return;
@@ -233,16 +233,7 @@ export function CommunityBoard({
           </Notice>
         </div>
       )}
-      {!loading && posts.length === 0 ? (
-        <Card>
-          <EmptyState
-            icon="community"
-            tone="iris"
-            title="아직 도착한 여행 정보가 없어요"
-            description="이 지역을 아는 첫 번째 여행자가 되어 주세요."
-          />
-        </Card>
-      ) : loading && posts.length === 0 ? (
+      {loading && posts.length === 0 ? (
         <Card padding="none" className={styles.feed} aria-busy="true">
           {[0, 1, 2].map((item) => (
             <div key={item} className={styles.skeleton} aria-hidden="true">
@@ -251,6 +242,34 @@ export function CommunityBoard({
               <span />
             </div>
           ))}
+        </Card>
+      ) : loadFailed && posts.length === 0 ? (
+        <Card className={styles.feed}>
+          <div role="alert">
+            <EmptyState
+              icon="alert"
+              title="커뮤니티 글을 불러오지 못했어요"
+              description="연결을 확인한 뒤 다시 시도해 주세요."
+              action={
+                <Button
+                  variant="secondary"
+                  icon="refresh"
+                  onClick={() => setReloadKey((key) => key + 1)}
+                >
+                  다시 불러오기
+                </Button>
+              }
+            />
+          </div>
+        </Card>
+      ) : posts.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon="community"
+            tone="iris"
+            title="아직 도착한 여행 정보가 없어요"
+            description="이 지역을 아는 첫 번째 여행자가 되어 주세요."
+          />
         </Card>
       ) : (
         <Card padding="none" className={styles.feed} aria-busy={loading}>

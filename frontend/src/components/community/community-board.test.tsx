@@ -94,4 +94,73 @@ describe('CommunityBoard', () => {
       screen.queryByRole('button', { name: '커뮤니티에 올리기' }),
     ).not.toBeInTheDocument();
   });
+  it('shows a retryable error instead of the empty state when the first page fails', async () => {
+    jest
+      .mocked(getCommunityPage)
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce({ items: [post], nextCursor: null });
+
+    render(<CommunityBoard currentUserId="viewer-1" />);
+
+    expect(
+      await screen.findByText('커뮤니티 글을 불러오지 못했어요'),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(
+      screen.queryByText('아직 도착한 여행 정보가 없어요'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: '이전 글 더 보기' }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '다시 불러오기' }));
+
+    expect(await screen.findByText(post.title)).toBeInTheDocument();
+    expect(getCommunityPage).toHaveBeenCalledTimes(2);
+    expect(getCommunityPage).toHaveBeenLastCalledWith(undefined);
+    expect(
+      screen.queryByText('커뮤니티 글을 불러오지 못했어요'),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('retries the selected category after a failed load', async () => {
+    jest
+      .mocked(getCommunityPage)
+      .mockResolvedValueOnce({ items: [post], nextCursor: null })
+      .mockRejectedValueOnce(new Error('network down'))
+      .mockResolvedValueOnce({ items: [], nextCursor: null });
+
+    render(<CommunityBoard currentUserId="viewer-1" />);
+    expect(await screen.findByText(post.title)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '맛집' }));
+    expect(
+      await screen.findByText('커뮤니티 글을 불러오지 못했어요'),
+    ).toBeInTheDocument();
+    // The previous category's posts must not linger behind the error.
+    expect(screen.queryByText(post.title)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '다시 불러오기' }));
+    expect(
+      await screen.findByText('아직 도착한 여행 정보가 없어요'),
+    ).toBeInTheDocument();
+    expect(getCommunityPage).toHaveBeenLastCalledWith('FOOD');
+  });
+
+  it('keeps the empty state for a successful load with no posts', async () => {
+    jest
+      .mocked(getCommunityPage)
+      .mockResolvedValue({ items: [], nextCursor: null });
+
+    render(<CommunityBoard currentUserId="viewer-1" />);
+
+    expect(
+      await screen.findByText('아직 도착한 여행 정보가 없어요'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('커뮤니티 글을 불러오지 못했어요'),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
 });
