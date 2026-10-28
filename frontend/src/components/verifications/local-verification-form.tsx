@@ -47,6 +47,12 @@ function distanceKm(
   return 6371 * 2 * Math.asin(Math.sqrt(value));
 }
 
+// The API and the Decimal(9, 6) columns accept at most 6 decimal places
+// (about 0.1 m); browsers report far more precision than that.
+function toCoordinate(degrees: number): number {
+  return Number(degrees.toFixed(6));
+}
+
 function locationFailure(error: GeolocationPositionError): string {
   if (error.code === error.PERMISSION_DENIED)
     return '위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해 주세요.';
@@ -94,8 +100,8 @@ export function LocalVerificationForm({
           return;
         }
         const captured = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude: toCoordinate(position.coords.latitude),
+          longitude: toCoordinate(position.coords.longitude),
           accuracy: position.coords.accuracy,
           capturedAt: new Date(position.timestamp).toISOString(),
         };
