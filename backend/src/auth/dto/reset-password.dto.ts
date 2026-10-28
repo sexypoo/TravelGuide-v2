@@ -7,7 +7,7 @@ export class ResetPasswordDto {
 
   @IsString()
   @Length(10, 72)
-  @Matches(/[A-Za-z]/, { message: 'password must contain a letter' })
-  @Matches(/\d/, { message: 'password must contain a number' })
+  @Matches(/[A-Za-z]/, { message: '비밀번호에 영문자를 넣어 주세요.' })
+  @Matches(/\d/, { message: '비밀번호에 숫자를 넣어 주세요.' })
   password!: string;
 }

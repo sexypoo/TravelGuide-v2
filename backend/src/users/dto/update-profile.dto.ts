@@ -20,7 +20,7 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   @Length(2, 20)
-  @Matches(/\S/u, { message: 'nickname must not be blank' })
+  @Matches(/\S/u, { message: '닉네임을 입력해 주세요.' })
   nickname?: string;
 
   @Transform(trimString)

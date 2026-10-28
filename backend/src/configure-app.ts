@@ -1,7 +1,6 @@
 import {
   HttpStatus,
   type INestApplication,
-  ValidationError,
   ValidationPipe,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -9,27 +8,12 @@ import type { CustomOrigin } from '@nestjs/common/interfaces/external/cors-optio
 import cookieParser from 'cookie-parser';
 import { ProblemDetailsFilter } from './common/http/problem-details.filter';
 import { ProblemException } from './common/http/problem.exception';
+import { firstValidationMessage } from './common/http/validation-message';
 import { requestIdMiddleware } from './common/http/request-id.middleware';
 import { securityHeadersMiddleware } from './common/http/security-headers.middleware';
 import { StructuredLogger } from './common/logging/structured-logger';
 import type { Environment } from './config/environment';
 import { ConfiguredIoAdapter } from './realtime/configured-io.adapter';
-
-function firstValidationMessage(errors: ValidationError[]): string {
-  for (const error of errors) {
-    const constraintMessage = Object.values(error.constraints ?? {})[0];
-    if (constraintMessage !== undefined) {
-      return constraintMessage;
-    }
-
-    const childMessage = firstValidationMessage(error.children ?? []);
-    if (childMessage !== '입력값을 확인해 주세요.') {
-      return childMessage;
-    }
-  }
-
-  return '입력값을 확인해 주세요.';
-}
 
 export function configureApp(app: INestApplication): void {
   app.useLogger(new StructuredLogger(process.env.NODE_ENV !== 'test'));
