@@ -25,6 +25,7 @@ export function PlacePicker({
   const marker = useRef<TravelGuideGoogleMarker | undefined>(undefined);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GooglePlace[]>([]);
+  const [searchedQuery, setSearchedQuery] = useState('');
   const [selected, setSelected] = useState<GooglePlace>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -115,11 +116,15 @@ export function PlacePicker({
       setError('장소 이름을 두 글자 이상 입력해 주세요.');
       return;
     }
+    const trimmedQuery = query.trim();
     setLoading(true);
     setError('');
     try {
-      setResults(await searchPlaces(query.trim(), JEJU_CENTER));
+      setResults(await searchPlaces(trimmedQuery, JEJU_CENTER));
+      setSearchedQuery(trimmedQuery);
     } catch (searchError: unknown) {
+      setResults([]);
+      setSearchedQuery('');
       setError(actionableErrorMessage(searchError, '장소를 찾지 못했어요.'));
     } finally {
       setLoading(false);
@@ -162,7 +167,10 @@ export function PlacePicker({
               placeholder="식당, 카페, 관광지를 검색하세요"
               aria-label="장소 검색어"
               enterKeyHint="search"
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setSearchedQuery('');
+              }}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
@@ -192,7 +200,7 @@ export function PlacePicker({
             <header className={styles.paneHead}>
               <strong id="place-picker-results-title">검색 결과</strong>
               <span>
-                {results.length > 0
+                {results.length > 0 || searchedQuery.length > 0
                   ? `${results.length}곳`
                   : '장소 이름을 입력하세요'}
               </span>
@@ -200,6 +208,11 @@ export function PlacePicker({
             <div className={styles.results} aria-live="polite">
               {loading ? (
                 <p className={styles.resultsState}>장소를 찾고 있어요…</p>
+              ) : results.length === 0 && searchedQuery.length > 0 ? (
+                <p className={styles.resultsState}>
+                  ‘{searchedQuery}’에 맞는 장소를 찾지 못했어요. 다른 이름이나
+                  동네로 검색해 보세요.
+                </p>
               ) : results.length === 0 ? (
                 <p className={styles.resultsState}>
                   보내고 싶은 장소를 검색해 보세요.

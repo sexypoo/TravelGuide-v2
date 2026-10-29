@@ -45,6 +45,54 @@ describe('PlacePicker', () => {
     expect(onSelect).toHaveBeenCalledWith(place);
   });
 
+  it('shows a not-found state when a search returns no places', async () => {
+    searchPlacesMock.mockResolvedValue([]);
+    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+
+    fireEvent.change(screen.getByLabelText('장소 검색어'), {
+      target: { value: '없는가게' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    expect(
+      await screen.findByText(
+        '‘없는가게’에 맞는 장소를 찾지 못했어요. 다른 이름이나 동네로 검색해 보세요.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText('0곳')).toBeInTheDocument();
+    expect(
+      screen.queryByText('보내고 싶은 장소를 검색해 보세요.'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('장소 이름을 입력하세요'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('clears previous results when a later search fails', async () => {
+    searchPlacesMock
+      .mockResolvedValueOnce([place])
+      .mockRejectedValueOnce(new Error('network down'));
+    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+
+    const input = screen.getByLabelText('장소 검색어');
+    fireEvent.change(input, { target: { value: '동백식당' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    expect(
+      await screen.findByRole('button', { name: /동백식당/ }),
+    ).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: '바다카페' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '장소를 찾지 못했어요.',
+    );
+    expect(
+      screen.queryByRole('button', { name: /동백식당/ }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/찾지 못했어요\. 다른 이름이나/)).toBeNull();
+  });
+
   it('validates short searches and closes without making a request', () => {
     const onClose = jest.fn();
     render(<PlacePicker onClose={onClose} onSelect={jest.fn()} />);
