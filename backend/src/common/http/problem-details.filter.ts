@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ProblemException, type ProblemDetails } from './problem.exception';
+import { uploadTooLargeDetail } from './validation-message';
 
 const titles: Readonly<Record<number, string>> = {
   [HttpStatus.BAD_REQUEST]: 'Bad Request',
@@ -77,7 +78,7 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const normalizedException = isUploadTooLarge
       ? new ProblemException(
           'UPLOAD_TOO_LARGE',
-          '증빙 파일은 5MB 이하여야 합니다.',
+          uploadTooLargeDetail(request.path),
           HttpStatus.BAD_REQUEST,
         )
       : exception;

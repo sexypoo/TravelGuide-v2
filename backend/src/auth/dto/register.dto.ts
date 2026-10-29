@@ -25,14 +25,14 @@ export class RegisterDto {
 
   @IsString()
   @Length(10, 72)
-  @Matches(/[A-Za-z]/, { message: 'password must contain a letter' })
-  @Matches(/\d/, { message: 'password must contain a number' })
+  @Matches(/[A-Za-z]/, { message: '비밀번호에 영문자를 넣어 주세요.' })
+  @Matches(/\d/, { message: '비밀번호에 숫자를 넣어 주세요.' })
   password!: string;
 
   @Transform(trimString)
   @IsString()
   @Length(2, 20)
-  @Matches(/\S/u, { message: 'nickname must not be blank' })
+  @Matches(/\S/u, { message: '닉네임을 입력해 주세요.' })
   nickname!: string;
 
   @IsBoolean()

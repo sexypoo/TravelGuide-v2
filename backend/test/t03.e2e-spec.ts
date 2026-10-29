@@ -200,6 +200,9 @@ describe('T03 verification and private storage', () => {
       })
       .expect(400);
     expect(record(tooLarge.body as unknown).code).toBe('UPLOAD_TOO_LARGE');
+    expect(record(tooLarge.body as unknown).detail).toBe(
+      '증빙 파일은 5MB 이하여야 합니다.',
+    );
 
     const executable = await base()
       .attach('proofFile', Buffer.from('MZ executable'), {
