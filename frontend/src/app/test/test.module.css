@@ -110,49 +110,6 @@
   font-weight: 750;
 }
 
-.courseNotice {
-  margin: -0.375rem 0 0.75rem;
-  color: var(--muted);
-  font-size: var(--text-xs);
-}
-
-.course {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.course li {
-  display: grid;
-  grid-template-columns: 3.25rem 1fr;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-top: 1px solid var(--line);
-}
-
-.course li:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.course time {
-  color: var(--type-color);
-  font-size: var(--text-sm);
-  font-variant-numeric: tabular-nums;
-  font-weight: 750;
-}
-
-.course span {
-  display: grid;
-  min-width: 0;
-}
-
-.course small {
-  color: var(--muted);
-  font-size: var(--text-xs);
-}
-
 .match {
   display: flex;
   align-items: center;

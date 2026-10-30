@@ -12,7 +12,8 @@
 ## Files
 
 - `frontend/src/lib/travel-test/content.ts`: 유형 8개, 질문 10개, 채점
-- `frontend/src/lib/travel-test/courses.ts`: 유형별 제주 예시 코스(AI 도움, 현지인 미확인 표시)
+- `frontend/src/lib/travel-test/courses.ts`: 유형별 예시 코스, 제주·부산·강릉·서울(AI 도움, 현지인 미확인 표시)
+- `frontend/src/components/travel-test/region-course.tsx`: 결과 화면 지역 선택
 - `frontend/src/lib/travel-test/share-card.ts`: 1080x1920 결과 카드 캔버스
 - `frontend/src/components/travel-test/`: 질문 화면, 공유 버튼, 임시 캐릭터
 - `frontend/src/app/test/`: `/test`, `/test/[type]` (정적 생성 8개)

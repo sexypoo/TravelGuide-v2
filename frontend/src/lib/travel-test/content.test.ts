@@ -6,7 +6,7 @@ import {
   TRAVEL_TYPE_KEYS,
   TRAVEL_TYPES,
 } from './content';
-import { SAMPLE_COURSES } from './courses';
+import { COURSE_REGIONS } from './courses';
 
 describe('travel type test content', () => {
   it('asks ten questions with four distinct types each', () => {
@@ -62,11 +62,19 @@ describe('isTravelTypeKey', () => {
 });
 
 describe('sample courses', () => {
-  it('give every type a four-stop day in time order', () => {
-    for (const key of TRAVEL_TYPE_KEYS) {
-      const times = SAMPLE_COURSES[key].map((stop) => stop.time);
-      expect(times).toHaveLength(4);
-      expect([...times].sort()).toEqual(times);
+  it('give every type a four-stop day in time order in every region', () => {
+    expect(COURSE_REGIONS.map((region) => region.name)).toEqual([
+      '제주',
+      '부산',
+      '강릉',
+      '서울',
+    ]);
+    for (const region of COURSE_REGIONS) {
+      for (const key of TRAVEL_TYPE_KEYS) {
+        const times = region.courses[key].map((stop) => stop.time);
+        expect(times).toHaveLength(4);
+        expect([...times].sort()).toEqual(times);
+      }
     }
   });
 });
