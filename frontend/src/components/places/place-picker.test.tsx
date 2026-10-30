@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { searchPlaces, type GooglePlace } from '@/lib/api/places';
 import { PlacePicker } from './place-picker';
 
@@ -18,6 +18,26 @@ const place: GooglePlace = {
   businessStatus: 'OPERATIONAL',
   openNow: true,
 };
+const otherPlace: GooglePlace = {
+  ...place,
+  id: 'ChIJ-other-place',
+  name: '바다해장국',
+  address: '제주시 항구로 2',
+};
+
+function deferred<T>(): {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (reason: unknown) => void;
+} {
+  let resolve: (value: T) => void = () => undefined;
+  let reject: (reason: unknown) => void = () => undefined;
+  const promise = new Promise<T>((onResolve, onReject) => {
+    resolve = onResolve;
+    reject = onReject;
+  });
+  return { promise, resolve, reject };
+}
 
 describe('PlacePicker', () => {
   beforeEach(() => {
@@ -91,6 +111,85 @@ describe('PlacePicker', () => {
       screen.queryByRole('button', { name: /동백식당/ }),
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/찾지 못했어요\. 다른 이름이나/)).toBeNull();
+  });
+
+  it('keeps the newest results when an older search resolves later', async () => {
+    const first = deferred<GooglePlace[]>();
+    const second = deferred<GooglePlace[]>();
+    searchPlacesMock
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
+    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+
+    const input = screen.getByLabelText('장소 검색어');
+    fireEvent.change(input, { target: { value: '동백식당' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    fireEvent.change(input, { target: { value: '바다해장국' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    await act(async () => second.resolve([otherPlace]));
+    expect(
+      await screen.findByRole('button', { name: /바다해장국/ }),
+    ).toBeInTheDocument();
+
+    await act(async () => first.resolve([place]));
+    expect(
+      screen.getByRole('button', { name: /바다해장국/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /동백식당/ }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('1곳')).toBeInTheDocument();
+  });
+
+  it('keeps the loading state until the newest search settles', async () => {
+    const first = deferred<GooglePlace[]>();
+    const second = deferred<GooglePlace[]>();
+    searchPlacesMock
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
+    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+
+    const input = screen.getByLabelText('장소 검색어');
+    fireEvent.change(input, { target: { value: '동백식당' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    fireEvent.change(input, { target: { value: '바다해장국' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    await act(async () => first.resolve([place]));
+    expect(screen.getByText('장소를 찾고 있어요…')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '검색' })).toBeDisabled();
+    expect(
+      screen.queryByRole('button', { name: /동백식당/ }),
+    ).not.toBeInTheDocument();
+
+    await act(async () => second.resolve([otherPlace]));
+    expect(
+      screen.getByRole('button', { name: /바다해장국/ }),
+    ).toBeInTheDocument();
+  });
+
+  it('ignores an older search that fails after a newer one succeeds', async () => {
+    const first = deferred<GooglePlace[]>();
+    const second = deferred<GooglePlace[]>();
+    searchPlacesMock
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
+    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+
+    const input = screen.getByLabelText('장소 검색어');
+    fireEvent.change(input, { target: { value: '동백식당' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    fireEvent.change(input, { target: { value: '바다해장국' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    await act(async () => second.resolve([otherPlace]));
+    await act(async () => first.reject(new Error('network down')));
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /바다해장국/ }),
+    ).toBeInTheDocument();
   });
 
   it('validates short searches and closes without making a request', () => {
