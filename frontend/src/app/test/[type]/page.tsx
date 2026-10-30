@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Critter } from '@/components/travel-test/critter';
+import { RegionCourse } from '@/components/travel-test/region-course';
 import { ShareActions } from '@/components/travel-test/share-actions';
 import { ButtonLink, Card } from '@/components/ui';
 import {
@@ -9,10 +10,6 @@ import {
   TRAVEL_TYPE_KEYS,
   TRAVEL_TYPES,
 } from '@/lib/travel-test/content';
-import {
-  SAMPLE_COURSE_REGION,
-  SAMPLE_COURSES,
-} from '@/lib/travel-test/courses';
 import { TestShell } from '../test-shell';
 import styles from '../test.module.css';
 
@@ -78,28 +75,7 @@ export default async function TravelTypeResultPage({
           <ShareActions type={type} />
         </Card>
 
-        <Card aria-labelledby="travel-type-course">
-          <h2 id="travel-type-course" className={styles.sectionTitle}>
-            {travelType.name}에게 추천하는 {SAMPLE_COURSE_REGION}의 하루
-          </h2>
-          <p className={styles.courseNotice}>
-            여쭈어가 고른 예시 코스예요. 아직 현지인이 확인하지 않았어요.
-          </p>
-          <ol
-            className={styles.course}
-            style={{ '--type-color': travelType.color } as React.CSSProperties}
-          >
-            {SAMPLE_COURSES[type].map((stop) => (
-              <li key={stop.time}>
-                <time>{stop.time}</time>
-                <span>
-                  <b>{stop.place}</b>
-                  <small>{stop.note}</small>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </Card>
+        <RegionCourse type={type} />
 
         <Card aria-labelledby="travel-type-match">
           <h2 id="travel-type-match" className={styles.sectionTitle}>
