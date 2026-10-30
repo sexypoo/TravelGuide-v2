@@ -23,6 +23,7 @@ export function PlacePicker({
   const mapElement = useRef<HTMLDivElement>(null);
   const map = useRef<TravelGuideGoogleMap | undefined>(undefined);
   const marker = useRef<TravelGuideGoogleMarker | undefined>(undefined);
+  const latestSearchId = useRef(0);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GooglePlace[]>([]);
   const [searchedQuery, setSearchedQuery] = useState('');
@@ -117,17 +118,23 @@ export function PlacePicker({
       return;
     }
     const trimmedQuery = query.trim();
+    // Only the most recently started search may update the screen.
+    const searchId = latestSearchId.current + 1;
+    latestSearchId.current = searchId;
     setLoading(true);
     setError('');
     try {
-      setResults(await searchPlaces(trimmedQuery, JEJU_CENTER));
+      const places = await searchPlaces(trimmedQuery, JEJU_CENTER);
+      if (searchId !== latestSearchId.current) return;
+      setResults(places);
       setSearchedQuery(trimmedQuery);
     } catch (searchError: unknown) {
+      if (searchId !== latestSearchId.current) return;
       setResults([]);
       setSearchedQuery('');
       setError(actionableErrorMessage(searchError, '장소를 찾지 못했어요.'));
     } finally {
-      setLoading(false);
+      if (searchId === latestSearchId.current) setLoading(false);
     }
   }
 
