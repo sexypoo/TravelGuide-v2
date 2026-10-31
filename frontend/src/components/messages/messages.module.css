@@ -724,3 +724,34 @@
 .down {
   transform: rotate(90deg);
 }
+
+/* Retry rows (#58): a refetch or older-page fetch failed but the loaded
+   conversation stays on screen. */
+.retryBar {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 45rem;
+  margin: 0 auto;
+  padding: 0.625rem 1rem 0;
+}
+
+.olderRetry {
+  width: 100%;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.retryRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.retryRow > :first-child {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.retryRow > :last-child {
+  flex: 0 0 auto;
+}

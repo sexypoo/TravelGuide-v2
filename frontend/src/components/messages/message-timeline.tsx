@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppIcon } from '@/components/common';
+import { Button, Notice } from '@/components/ui';
 import styles from './messages.module.css';
 import type { ChatMessage } from '@/lib/api/messages';
 import { formatChatDate } from '@/lib/questions/presentation';
@@ -126,7 +127,9 @@ export function MessageTimeline({
       </div>
     );
   }
-  if (query.isError) {
+  // Only replace the timeline when nothing has loaded yet. A failed refetch or
+  // older-page fetch keeps the loaded conversation and shows a retry row.
+  if (query.isError && query.data === undefined) {
     return (
       <div className={styles.state} role="alert">
         <strong>대화를 불러오지 못했어요</strong>
@@ -138,8 +141,30 @@ export function MessageTimeline({
     );
   }
 
+  const showOlderRetry =
+    query.isFetchNextPageError && !query.isFetchingNextPage;
+
   return (
     <div className={styles.frame}>
+      {query.isRefetchError && (
+        <div className={styles.retryBar}>
+          <div className={styles.retryRow}>
+            <Notice tone="warning" icon="alert" role="status">
+              최신 대화를 불러오지 못했어요. 보이는 대화가 최신이 아닐 수
+              있어요.
+            </Notice>
+            <Button
+              variant="secondary"
+              size="md"
+              icon="refresh"
+              disabled={query.isFetching}
+              onClick={() => void query.refetch()}
+            >
+              {query.isFetching ? '불러오는 중' : '다시 시도'}
+            </Button>
+          </div>
+        </div>
+      )}
       <div
         ref={timelineRef}
         className={styles.timeline}
@@ -147,17 +172,33 @@ export function MessageTimeline({
         onScroll={handleScroll}
       >
         <div className={styles.content}>
-          {query.hasNextPage && (
-            <button
-              className={styles.older}
-              type="button"
-              disabled={query.isFetchingNextPage}
-              onClick={() => void query.fetchNextPage()}
-            >
-              {query.isFetchingNextPage
-                ? '이전 대화 불러오는 중'
-                : '이전 대화 보기'}
-            </button>
+          {showOlderRetry ? (
+            <div className={`${styles.olderRetry} ${styles.retryRow}`}>
+              <Notice tone="warning" icon="alert" role="status">
+                이전 대화를 불러오지 못했어요.
+              </Notice>
+              <Button
+                variant="secondary"
+                size="md"
+                icon="refresh"
+                onClick={() => void query.fetchNextPage()}
+              >
+                다시 시도
+              </Button>
+            </div>
+          ) : (
+            query.hasNextPage && (
+              <button
+                className={styles.older}
+                type="button"
+                disabled={query.isFetchingNextPage}
+                onClick={() => void query.fetchNextPage()}
+              >
+                {query.isFetchingNextPage
+                  ? '이전 대화 불러오는 중'
+                  : '이전 대화 보기'}
+              </button>
+            )
           )}
           {messages.length === 0 ? (
             <div className={styles.state}>
