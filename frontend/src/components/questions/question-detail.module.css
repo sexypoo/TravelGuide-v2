@@ -247,3 +247,20 @@
   display: grid;
   gap: 0.625rem;
 }
+
+/* Retry row (#58): a refetch failed but the loaded topic stays on screen. */
+.retryRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.retryRow > :first-child {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.retryRow > :last-child {
+  flex: 0 0 auto;
+}

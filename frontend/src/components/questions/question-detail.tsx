@@ -72,7 +72,10 @@ export function QuestionDetailView({
       </DetailFrame>
     );
   }
-  if (query.isError) {
+  // Only replace the page when nothing has loaded yet. A failed refetch keeps
+  // the topic and the answer form (with its draft) mounted and shows a retry row.
+  const question = query.data;
+  if (question === undefined) {
     return (
       <DetailFrame room={room}>
         <Card>
@@ -97,7 +100,6 @@ export function QuestionDetailView({
     );
   }
 
-  const question = query.data;
   const canAnswer =
     room.access.canAnswer &&
     question.author.id !== currentUserId &&
@@ -124,6 +126,22 @@ export function QuestionDetailView({
             ? '인터넷 연결을 확인해 주세요. 연결되면 이 토픽을 자동으로 다시 불러와요.'
             : '실시간 연결을 복구 중이에요. 연결되면 이 토픽을 자동으로 다시 불러와요.'}
         </Notice>
+      )}
+      {query.isRefetchError && (
+        <div className={styles.retryRow}>
+          <Notice tone="warning" icon="alert" role="status">
+            토픽을 새로 불러오지 못했어요. 보이는 내용이 최신이 아닐 수 있어요.
+          </Notice>
+          <Button
+            variant="secondary"
+            size="md"
+            icon="refresh"
+            disabled={query.isFetching}
+            onClick={() => void query.refetch()}
+          >
+            {query.isFetching ? '불러오는 중' : '다시 시도'}
+          </Button>
+        </div>
       )}
       <Card as="article" className={styles.question}>
         <div className={styles.lead}>

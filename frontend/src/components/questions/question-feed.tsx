@@ -5,7 +5,7 @@ import {
   type QuestionCategory,
   type QuestionListStatus,
 } from '@/lib/api/questions';
-import { Button, EmptyState, uiStyles } from '@/components/ui';
+import { Button, EmptyState, Notice, uiStyles } from '@/components/ui';
 import { categoryLabels } from '@/lib/questions/presentation';
 import { useState } from 'react';
 import { useQuestions } from '@/lib/query/use-questions';
@@ -61,7 +61,10 @@ export function QuestionFeed({
       </>
     );
   }
-  if (query.isError) {
+  // Only replace the list when nothing has loaded yet. A failed refetch or
+  // next-page fetch keeps the loaded topics and shows a retry row.
+  const data = query.data;
+  if (data === undefined) {
     return (
       <>
         {filters}
@@ -86,11 +89,29 @@ export function QuestionFeed({
     );
   }
 
-  const questions = query.data.questions;
+  const questions = data.questions;
+  const refetchRetry = query.isRefetchError && (
+    <div className={`${styles.retryTop} ${styles.retryRow}`}>
+      <Notice tone="warning" icon="alert" role="status">
+        토픽 목록을 새로 불러오지 못했어요. 보이는 내용이 최신이 아닐 수 있어요.
+      </Notice>
+      <Button
+        variant="secondary"
+        size="md"
+        icon="refresh"
+        disabled={query.isFetching}
+        onClick={() => void query.refetch()}
+      >
+        {query.isFetching ? '불러오는 중' : '다시 시도'}
+      </Button>
+    </div>
+  );
+
   if (questions.length === 0) {
     return (
       <>
         {filters}
+        {refetchRetry}
         <div className={styles.state}>
           <EmptyState
             icon="topic"
@@ -114,6 +135,7 @@ export function QuestionFeed({
   return (
     <>
       {filters}
+      {refetchRetry}
       <div className={styles.feed}>
         {questions.map((question) => (
           <QuestionCard
@@ -123,15 +145,31 @@ export function QuestionFeed({
             canShare={canShare}
           />
         ))}
-        {query.hasNextPage && (
-          <Button
-            variant="ghost"
-            block
-            disabled={query.isFetchingNextPage}
-            onClick={() => void query.fetchNextPage()}
-          >
-            {query.isFetchingNextPage ? '불러오는 중' : '토픽 더 보기'}
-          </Button>
+        {query.isFetchNextPageError && !query.isFetchingNextPage ? (
+          <div className={styles.retryRow}>
+            <Notice tone="warning" icon="alert" role="status">
+              토픽을 더 불러오지 못했어요.
+            </Notice>
+            <Button
+              variant="secondary"
+              size="md"
+              icon="refresh"
+              onClick={() => void query.fetchNextPage()}
+            >
+              다시 시도
+            </Button>
+          </div>
+        ) : (
+          query.hasNextPage && (
+            <Button
+              variant="ghost"
+              block
+              disabled={query.isFetchingNextPage}
+              onClick={() => void query.fetchNextPage()}
+            >
+              {query.isFetchingNextPage ? '불러오는 중' : '토픽 더 보기'}
+            </Button>
+          )
         )}
       </div>
     </>
