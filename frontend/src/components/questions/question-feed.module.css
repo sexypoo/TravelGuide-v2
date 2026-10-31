@@ -42,3 +42,25 @@
     opacity: 0.55;
   }
 }
+
+/* Retry rows (#58): a refetch or next-page fetch failed but the loaded
+   topics stay on screen. */
+.retryTop {
+  margin: 0 0 0.625rem;
+}
+
+.retryRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.retryRow > :first-child {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.retryRow > :last-child {
+  flex: 0 0 auto;
+}

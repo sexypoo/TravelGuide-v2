@@ -1,17 +1,22 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { Answer, QuestionDetail } from '@/lib/api/questions';
 import type { Room } from '@/lib/api/rooms';
 import { QuestionDetailView } from './question-detail';
 
 let mockQuestion: QuestionDetail;
+let mockQueryState: Record<string, unknown> = {};
+const mockRefetch = jest.fn();
 
 jest.mock('../../lib/query/use-questions', () => ({
   useQuestion: () => ({
     isPending: false,
     isError: false,
+    isRefetchError: false,
+    isFetching: false,
     data: mockQuestion,
-    refetch: jest.fn(),
+    refetch: mockRefetch,
+    ...mockQueryState,
   }),
 }));
 jest.mock('../providers/realtime-provider', () => ({
@@ -93,19 +98,22 @@ function question(overrides: Partial<QuestionDetail> = {}): QuestionDetail {
   };
 }
 
-function renderDetail(currentUserId: string): void {
+function renderDetail(currentUserId: string): () => void {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
-  render(
+  // A fresh element each time so a rerender re-reads the mocked query state.
+  const view = (): React.JSX.Element => (
     <QueryClientProvider client={queryClient}>
       <QuestionDetailView
         questionId="question-1"
         room={room}
         currentUserId={currentUserId}
       />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
+  const { rerender } = render(view());
+  return () => rerender(view());
 }
 
 function resolvePanel(): HTMLElement | null {
@@ -117,6 +125,10 @@ function answerSubmit(): HTMLElement | null {
 }
 
 describe('QuestionDetailView', () => {
+  beforeEach(() => {
+    mockQueryState = {};
+  });
+
   it('shows the resolve panel and no answer form to the author of an open topic', () => {
     mockQuestion = question();
     renderDetail(AUTHOR_ID);
@@ -171,5 +183,61 @@ describe('QuestionDetailView', () => {
     ).toBeInTheDocument();
     expect(resolvePanel()).not.toBeInTheDocument();
     expect(answerSubmit()).not.toBeInTheDocument();
+  });
+
+  it('shows the full error card when the first load fails', () => {
+    mockQuestion = question();
+    mockQueryState = { isError: true, data: undefined };
+    renderDetail(LOCAL_ID);
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      '토픽을 불러오지 못했어요',
+    );
+    expect(answerSubmit()).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '다시 불러오기' }));
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the topic and the answer draft when a refetch fails', () => {
+    mockQuestion = question();
+    const rerender = renderDetail(LOCAL_ID);
+    const draft = '지금 매표소 줄이 짧아서 바로 올라갈 수 있어요.';
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: draft },
+    });
+
+    mockQueryState = { isError: true, isRefetchError: true };
+    rerender();
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {
+        name: '성산일출봉 지금 올라갈 수 있나요?',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen
+        .getByText(
+          '토픽을 새로 불러오지 못했어요. 보이는 내용이 최신이 아닐 수 있어요.',
+        )
+        .closest('[role="status"]'),
+    ).not.toBeNull();
+    expect(answerSubmit()).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveValue(draft);
+
+    fireEvent.click(screen.getByRole('button', { name: '다시 시도' }));
+    expect(mockRefetch).toHaveBeenCalledTimes(1);
+
+    mockQueryState = { isError: true, isRefetchError: true, isFetching: true };
+    rerender();
+    expect(screen.getByRole('button', { name: '불러오는 중' })).toBeDisabled();
+    expect(screen.getByRole('textbox')).toHaveValue(draft);
+
+    mockQueryState = {};
+    rerender();
+    expect(
+      screen.queryByRole('button', { name: '다시 시도' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveValue(draft);
   });
 });
