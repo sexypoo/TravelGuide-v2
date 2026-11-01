@@ -52,6 +52,8 @@ export function MessageComposer({
   const [placePickerOpen, setPlacePickerOpen] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<GooglePlace>();
   const [clientError, setClientError] = useState('');
+  // isPending lags a tick behind mutate(), so guard repeated sends with a ref.
+  const sending = useRef(false);
 
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -106,9 +108,13 @@ export function MessageComposer({
       setSelectedPlace(undefined);
       setClientError('');
     },
+    onSettled: () => {
+      sending.current = false;
+    },
   });
 
   function submit(): void {
+    if (sending.current) return;
     if (attachment === 'image' && !image)
       return setClientError('보낼 사진을 선택해 주세요.');
     if (attachment === 'place' && !selectedPlace)
@@ -116,6 +122,7 @@ export function MessageComposer({
     if (attachment === null && content.trim().length === 0)
       return setClientError('공유할 내용을 입력해 주세요.');
     setClientError('');
+    sending.current = true;
     mutation.mutate();
   }
 
@@ -310,10 +317,12 @@ export function MessageComposer({
             aria-describedby="room-message-help"
             onChange={(event) => setContent(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                if (!mutation.isPending) submit();
-              }
+              if (event.key !== 'Enter' || event.shiftKey) return;
+              // Korean IME: this Enter only finishes composing a character.
+              if (event.nativeEvent.isComposing || event.keyCode === 229)
+                return;
+              event.preventDefault();
+              submit();
             }}
           />
           <button

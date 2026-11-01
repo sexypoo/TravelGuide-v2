@@ -1,12 +1,23 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { createImageMessage } from '@/lib/api/messages';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
+import {
+  createImageMessage,
+  createMessage,
+  type ChatMessage,
+} from '@/lib/api/messages';
 import { ApiProblem } from '@/lib/api/problem-details';
 import { MessageComposer } from './message-composer';
 
 jest.mock('../../lib/api/messages', () => ({
   ...jest.requireActual('../../lib/api/messages'),
   createImageMessage: jest.fn(),
+  createMessage: jest.fn(),
 }));
 
 function imageFile(name: string, size: number): File {
@@ -134,5 +145,70 @@ describe('MessageComposer photo size', () => {
     );
     expect(screen.queryByText(/증빙/)).not.toBeInTheDocument();
     expect(createImageMessage).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('MessageComposer Enter key', () => {
+  beforeEach(() => jest.mocked(createMessage).mockReset());
+
+  function typeMessage(text: string): HTMLElement {
+    const input = screen.getByLabelText('방에 메시지 보내기');
+    fireEvent.change(input, { target: { value: text } });
+    return input;
+  }
+
+  it('does not send while a Korean IME is still composing', () => {
+    renderComposer();
+    const input = typeMessage('안녕하세요');
+
+    fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+    fireEvent.keyDown(input, { key: 'Enter', keyCode: 229 });
+
+    expect(createMessage).not.toHaveBeenCalled();
+  });
+
+  it('sends once on plain Enter and not on Shift+Enter', async () => {
+    jest.mocked(createMessage).mockReturnValue(new Promise(() => undefined));
+    renderComposer();
+    const input = typeMessage('안녕하세요');
+
+    fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
+    expect(createMessage).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => expect(createMessage).toHaveBeenCalledTimes(1));
+    expect(createMessage).toHaveBeenCalledWith('jeju', '안녕하세요');
+  });
+
+  it('sends only once when Enter is pressed twice before the response', async () => {
+    jest.mocked(createMessage).mockReturnValue(new Promise(() => undefined));
+    renderComposer();
+    const input = typeMessage('안녕하세요');
+
+    act(() => {
+      fireEvent.keyDown(input, { key: 'Enter' });
+      fireEvent.keyDown(input, { key: 'Enter' });
+    });
+
+    await waitFor(() => expect(createMessage).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(createMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets Enter send again after a failed send', async () => {
+    jest
+      .mocked(createMessage)
+      .mockRejectedValueOnce(new Error('network'))
+      .mockReturnValueOnce(new Promise<ChatMessage>(() => undefined));
+    renderComposer();
+    const input = typeMessage('안녕하세요');
+
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => expect(createMessage).toHaveBeenCalledTimes(2));
   });
 });
