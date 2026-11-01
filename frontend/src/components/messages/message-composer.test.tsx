@@ -157,12 +157,29 @@ describe('MessageComposer Enter key', () => {
     return input;
   }
 
-  it('does not send while a Korean IME is still composing', () => {
+  // mutate() runs mutationFn asynchronously, so flush before asserting "not sent".
+  async function flushMutations(): Promise<void> {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  }
+
+  it('does not send on Enter while a Korean IME is composing', async () => {
     renderComposer();
     const input = typeMessage('안녕하세요');
 
     fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+    await flushMutations();
+
+    expect(createMessage).not.toHaveBeenCalled();
+  });
+
+  it('does not send on Enter with the IME keyCode 229', async () => {
+    renderComposer();
+    const input = typeMessage('안녕하세요');
+
     fireEvent.keyDown(input, { key: 'Enter', keyCode: 229 });
+    await flushMutations();
 
     expect(createMessage).not.toHaveBeenCalled();
   });
@@ -173,6 +190,7 @@ describe('MessageComposer Enter key', () => {
     const input = typeMessage('안녕하세요');
 
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
+    await flushMutations();
     expect(createMessage).not.toHaveBeenCalled();
 
     fireEvent.keyDown(input, { key: 'Enter' });
@@ -191,9 +209,7 @@ describe('MessageComposer Enter key', () => {
     });
 
     await waitFor(() => expect(createMessage).toHaveBeenCalledTimes(1));
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+    await flushMutations();
     expect(createMessage).toHaveBeenCalledTimes(1);
   });
 

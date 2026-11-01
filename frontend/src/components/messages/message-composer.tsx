@@ -114,7 +114,7 @@ export function MessageComposer({
   });
 
   function submit(): void {
-    if (sending.current) return;
+    if (sending.current || mutation.isPending) return;
     if (attachment === 'image' && !image)
       return setClientError('보낼 사진을 선택해 주세요.');
     if (attachment === 'place' && !selectedPlace)
