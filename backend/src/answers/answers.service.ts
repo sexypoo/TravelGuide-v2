@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, QuestionStatus } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { basename } from 'node:path';
 import type { AuthenticatedUser } from '../auth/authenticated-user';
@@ -23,6 +23,44 @@ const answerInclude = {
   author: { select: { id: true, nickname: true } },
 } satisfies Prisma.AnswerInclude;
 type AnswerRecord = Prisma.AnswerGetPayload<{ include: typeof answerInclude }>;
+
+interface LockedQuestionRow {
+  authorId: string;
+  status: QuestionStatus;
+  expiresAt: Date;
+  removedAt: Date | null;
+}
+
+function isQuestionStatus(value: unknown): value is QuestionStatus {
+  return (
+    typeof value === 'string' &&
+    Object.values<string>(QuestionStatus).includes(value)
+  );
+}
+
+/** Narrows one raw `SELECT ... FOR SHARE` row from the Question table. */
+export function toLockedQuestionRow(value: unknown): LockedQuestionRow {
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'authorId' in value &&
+    'status' in value &&
+    'expiresAt' in value &&
+    'removedAt' in value &&
+    typeof value.authorId === 'string' &&
+    isQuestionStatus(value.status) &&
+    value.expiresAt instanceof Date &&
+    (value.removedAt === null || value.removedAt instanceof Date)
+  ) {
+    return {
+      authorId: value.authorId,
+      status: value.status,
+      expiresAt: value.expiresAt,
+      removedAt: value.removedAt,
+    };
+  }
+  throw new Error('Unexpected Question row shape');
+}
 
 export function normalizeSourceUrl(input: CreateAnswerDto): string | null {
   const value = input.sourceUrl;
@@ -141,18 +179,18 @@ export class AnswersService {
       this.prisma.$transaction(async (transaction) => {
         const lockKey = `answer:${user.id}:${questionId}`;
         await transaction.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
-        const question = await transaction.question.findUnique({
-          where: { id: questionId },
-          select: {
-            authorId: true,
-            status: true,
-            expiresAt: true,
-            removedAt: true,
-          },
-        });
-        if (question === null) {
+        // FOR SHARE conflicts with the row lock taken by resolve, accept, and
+        // admin removal updates, so an in-flight status change commits first
+        // and this read sees it. Concurrent answers share the lock.
+        const rows = await transaction.$queryRaw<unknown[]>`
+          SELECT "authorId", "status", "expiresAt", "removedAt"
+          FROM "Question"
+          WHERE "id" = ${questionId}
+          FOR SHARE`;
+        if (rows.length === 0) {
           throw this.questionNotFound();
         }
+        const question = toLockedQuestionRow(rows[0]);
         if (question.authorId === user.id) {
           throw new ProblemException(
             'CANNOT_ANSWER_OWN_QUESTION',

@@ -261,6 +261,107 @@ describe('T08 resolution, reports, and moderation', () => {
     expect(record(rejected.body as unknown).code).toBe('QUESTION_NOT_OPEN');
   });
 
+  async function answerIsWaitingOnLock(): Promise<boolean> {
+    const rows = await prisma.$queryRaw<{ waiting: bigint }[]>`
+      SELECT count(*) AS waiting
+      FROM pg_stat_activity
+      WHERE datname = current_database()
+        AND pid <> pg_backend_pid()
+        AND wait_event_type = 'Lock'
+        AND query ILIKE '%FOR SHARE%'`;
+    return (rows[0]?.waiting ?? BigInt(0)) > BigInt(0);
+  }
+
+  it('rejects an answer that commits after a concurrent resolve (#62)', async () => {
+    const owner = await createUser('race-owner');
+    const local = await createUser('race-local');
+    await approve(owner.id, VerificationType.TRAVELER);
+    await approve(local.id, VerificationType.LOCAL);
+    const questionId = await createTopic(
+      owner,
+      '해결 처리와 동시에 도착한 답변이 저장되지 않는지 확인하는 토픽입니다.',
+    );
+
+    let markUpdated: () => void = () => undefined;
+    const updated = new Promise<void>((resolve) => {
+      markUpdated = resolve;
+    });
+    let commitResolve: () => void = () => undefined;
+    const commitGate = new Promise<void>((resolve) => {
+      commitResolve = resolve;
+    });
+    const resolving = prisma.$transaction(
+      async (transaction) => {
+        await transaction.question.update({
+          where: { id: questionId },
+          data: { status: 'RESOLVED', resolvedAt: new Date() },
+        });
+        markUpdated();
+        await commitGate;
+      },
+      { timeout: 20_000 },
+    );
+
+    try {
+      await updated;
+      let settled = false;
+      const answering = Promise.resolve(
+        local.agent.post(`/api/v1/questions/${questionId}/answers`).send({
+          sourceType: 'ON_SITE_NOW',
+          content: '해결 처리 중에 보낸 답변은 저장되면 안 됩니다.',
+        }),
+      ).finally(() => {
+        settled = true;
+      });
+
+      const deadline = Date.now() + 10_000;
+      let waiting = false;
+      while (!settled && !waiting && Date.now() < deadline) {
+        waiting = await answerIsWaitingOnLock();
+        if (!waiting) {
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        }
+      }
+      expect({ waiting, settled }).toEqual({ waiting: true, settled: false });
+
+      commitResolve();
+      await resolving;
+      const response = await answering;
+      expect(response.status).toBe(409);
+      expect(record(response.body as unknown).code).toBe('QUESTION_NOT_OPEN');
+      expect(await prisma.answer.count({ where: { questionId } })).toBe(0);
+    } finally {
+      commitResolve();
+      await resolving.catch(() => undefined);
+    }
+  });
+
+  it('lets different locals answer the same open topic concurrently', async () => {
+    const owner = await createUser('parallel-owner');
+    const localA = await createUser('parallel-a');
+    const localB = await createUser('parallel-b');
+    await approve(owner.id, VerificationType.TRAVELER);
+    await approve(localA.id, VerificationType.LOCAL);
+    await approve(localB.id, VerificationType.LOCAL);
+    const questionId = await createTopic(
+      owner,
+      '여러 현지인이 동시에 답변해도 모두 저장되는지 확인하는 토픽입니다.',
+    );
+
+    const responses = await Promise.all(
+      [localA, localB].map((local) =>
+        Promise.resolve(
+          local.agent.post(`/api/v1/questions/${questionId}/answers`).send({
+            sourceType: 'ON_SITE_NOW',
+            content: '지금 현장에서 직접 확인한 상황을 알려드립니다.',
+          }),
+        ),
+      ),
+    );
+    expect(responses.map((response) => response.status)).toEqual([201, 201]);
+    expect(await prisma.answer.count({ where: { questionId } })).toBe(2);
+  });
+
   it('resolves an owned topic without accepting an answer', async () => {
     const owner = await createUser('resolve-owner');
     await approve(owner.id, VerificationType.TRAVELER);

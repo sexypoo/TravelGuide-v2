@@ -141,4 +141,47 @@ describe('answer image access and cleanup', () => {
       expect.stringMatching(/^answer-media\/room-id\//),
     );
   });
+  it('deletes an uploaded image when the locked topic is already resolved', async () => {
+    const transactionClient = {
+      $executeRaw: jest.fn().mockResolvedValue(1),
+      $queryRaw: jest.fn().mockResolvedValue([
+        {
+          authorId: 'owner-id',
+          status: 'RESOLVED',
+          expiresAt: new Date('2026-08-01T02:00:00.000Z'),
+          removedAt: null,
+        },
+      ]),
+      answer: { count: jest.fn(), create: jest.fn() },
+    };
+    const transaction = jest.fn(
+      (callback: (client: typeof transactionClient) => Promise<unknown>) =>
+        callback(transactionClient),
+    );
+    const { service, storage } = serviceWith({ transaction });
+
+    await expect(
+      service.create(
+        'question-id',
+        user,
+        {
+          content: '현장에서 직접 확인한 자세한 답변입니다.',
+          sourceType: AnswerSourceType.ON_SITE_NOW,
+        },
+        new Date('2026-08-01T00:10:00.000Z'),
+        {
+          originalname: '현장.png',
+          mimetype: 'image/png',
+          size: 8,
+          buffer: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+        },
+      ),
+    ).rejects.toMatchObject({ code: 'QUESTION_NOT_OPEN' });
+    expect(storage.putPrivate).toHaveBeenCalledTimes(1);
+    expect(transactionClient.$queryRaw).toHaveBeenCalledTimes(1);
+    expect(transactionClient.answer.create).not.toHaveBeenCalled();
+    expect(storage.delete).toHaveBeenCalledWith(
+      expect.stringMatching(/^answer-media\/room-id\//),
+    );
+  });
 });
