@@ -1,5 +1,5 @@
 import { ProblemException } from '../common/http/problem.exception';
-import { normalizeSourceUrl } from './answers.service';
+import { normalizeSourceUrl, toLockedQuestionRow } from './answers.service';
 
 function problemCode(callback: () => unknown): string {
   try {
@@ -48,5 +48,47 @@ describe('answer source URL', () => {
         sourceType: 'ON_SITE_NOW',
       }),
     ).toBeNull();
+  });
+});
+
+describe('locked topic row', () => {
+  const expiresAt = new Date('2026-08-01T02:00:00.000Z');
+
+  it('keeps a raw Question row with a known status', () => {
+    expect(
+      toLockedQuestionRow({
+        authorId: 'owner-id',
+        status: 'RESOLVED',
+        expiresAt,
+        removedAt: null,
+      }),
+    ).toEqual({
+      authorId: 'owner-id',
+      status: 'RESOLVED',
+      expiresAt,
+      removedAt: null,
+    });
+  });
+
+  it('rejects rows with unknown status or wrong column types', () => {
+    expect(() =>
+      toLockedQuestionRow({
+        authorId: 'owner-id',
+        status: 'CLOSED',
+        expiresAt,
+        removedAt: null,
+      }),
+    ).toThrow('Unexpected Question row shape');
+    expect(() =>
+      toLockedQuestionRow({
+        authorId: 'owner-id',
+        status: 'OPEN',
+        expiresAt: expiresAt.toISOString(),
+        removedAt: null,
+      }),
+    ).toThrow('Unexpected Question row shape');
+    expect(() => toLockedQuestionRow(undefined)).toThrow(
+      'Unexpected Question row shape',
+    );
   });
 });
