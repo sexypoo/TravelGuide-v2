@@ -21,7 +21,7 @@ export function applicationError(error: unknown): string {
       TRAVEL_END_DATE_IN_PAST: '오늘 이후의 여행 종료일을 선택해 주세요.',
       GPS_ACCURACY_TOO_LOW:
         '위치 정확도가 낮아요. 열린 장소에서 다시 확인해 주세요.',
-      OUTSIDE_DESTINATION_AREA: '현재 위치가 제주 인증 범위 밖이에요.',
+      OUTSIDE_DESTINATION_AREA: '현재 위치가 선택한 도시의 인증 범위 밖이에요.',
     };
     return (
       messages[error.code] ??

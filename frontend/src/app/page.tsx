@@ -69,10 +69,10 @@ export default async function Home(): Promise<React.JSX.Element> {
             로그인하면 이어지는 곳
           </h2>
           <ListRow
-            href="/auth/login?next=%2Fapp%2Frooms%2Fjeju"
+            href="/auth/login?next=%2Fapp%2Frooms"
             icon="room"
             tone="magenta"
-            title="제주 실시간 도움방"
+            title="도시별 실시간 도움방"
             description="인증하면 지금 상황을 물을 수 있어요."
           />
           <ListRow

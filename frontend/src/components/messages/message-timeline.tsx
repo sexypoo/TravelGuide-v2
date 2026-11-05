@@ -168,7 +168,7 @@ export function MessageTimeline({
       <div
         ref={timelineRef}
         className={styles.timeline}
-        aria-label="제주방 대화"
+        aria-label="도움방 대화"
         onScroll={handleScroll}
       >
         <div className={styles.content}>
@@ -205,7 +205,7 @@ export function MessageTimeline({
               <span className={styles.stateIcon} aria-hidden="true">
                 <AppIcon name="live" />
               </span>
-              <strong>제주의 첫 대화를 시작해 보세요</strong>
+              <strong>이 방의 첫 대화를 시작해 보세요</strong>
               <p>
                 지금 보고 들은 짧은 정보도 누군가의 다음 결정을 도울 수 있어요.
               </p>

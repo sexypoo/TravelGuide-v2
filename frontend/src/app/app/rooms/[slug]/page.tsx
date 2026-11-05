@@ -31,8 +31,8 @@ export default async function RoomPage({
       <PageHeader
         title={`${room.destination.nameKo} 도움방`}
         description="인증된 여행자와 현지인만 대화할 수 있어요."
-        backHref="/app"
-        backLabel="홈으로"
+        backHref="/app/rooms"
+        backLabel="도움방 목록"
       />
       <div className={styles.lockedStack}>
         <Card className={styles.lockedCard} aria-labelledby="room-lock-title">
@@ -47,9 +47,29 @@ export default async function RoomPage({
               ? '심사 결과는 참여 자격 화면에서 확인할 수 있어요.'
               : '여행자는 여행 일정과 예약 증빙으로, 현지인은 위치와 거주 증빙으로 인증해요.'}
           </p>
-          <ButtonLink href="/app/verifications" size="lg" block>
-            {pending ? '심사 현황 보기' : '인증 방법 확인하기'}
-          </ButtonLink>
+          {pending ? (
+            <ButtonLink href="/app/verifications" size="lg" block>
+              심사 현황 보기
+            </ButtonLink>
+          ) : (
+            <div className={styles.lockedActions}>
+              <ButtonLink
+                href={`/app/verifications/traveler?city=${encodeURIComponent(room.destination.slug)}`}
+                size="lg"
+                block
+              >
+                여행자로 인증하기
+              </ButtonLink>
+              <ButtonLink
+                href={`/app/verifications/local?city=${encodeURIComponent(room.destination.slug)}`}
+                variant="secondary"
+                size="lg"
+                block
+              >
+                현지인으로 인증하기
+              </ButtonLink>
+            </div>
+          )}
         </Card>
 
         <Card padding="list" aria-label="도움 지역">

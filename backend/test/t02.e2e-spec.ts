@@ -4,6 +4,7 @@ import { UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import type { Server } from 'node:http';
 import request from 'supertest';
+import { DESTINATIONS } from '../prisma/destinations';
 import { AppModule } from '../src/app.module';
 import { configureApp } from '../src/configure-app';
 import { PrismaService } from '../src/prisma/prisma.service';
@@ -50,9 +51,9 @@ describe('T02 destination, profile, and room shell', () => {
     await app.close();
   });
 
-  it('keeps the idempotent Jeju seed exact and singular', async () => {
-    expect(await prisma.destination.count()).toBe(1);
-    expect(await prisma.destinationRoom.count()).toBe(1);
+  it('keeps the idempotent destination seed exact, one room per city', async () => {
+    expect(await prisma.destination.count()).toBe(DESTINATIONS.length);
+    expect(await prisma.destinationRoom.count()).toBe(DESTINATIONS.length);
 
     const room = await prisma.destinationRoom.findUniqueOrThrow({
       where: { slug: 'jeju' },
@@ -89,8 +90,9 @@ describe('T02 destination, profile, and room shell', () => {
 
     const listResponse = await agent.get('/api/v1/rooms').expect(200);
     const rooms = asArray(listResponse.body as unknown);
-    expect(rooms).toHaveLength(1);
-    expect(asRecord(rooms[0])).toMatchObject({
+    expect(rooms).toHaveLength(DESTINATIONS.length);
+    const jeju = rooms.find((room) => asRecord(room).slug === 'jeju');
+    expect(asRecord(jeju)).toMatchObject({
       slug: 'jeju',
       title: '제주 실시간 여행 도움방',
       destination: {

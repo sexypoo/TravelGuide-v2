@@ -1,7 +1,14 @@
 import { Page, PageHeader } from '@/components/app/page';
 import { communityCategoryLabels } from '@/lib/community/presentation';
 import { LiveRoomCard } from '@/components/rooms/live-room-card';
-import { Card, Chip, EmptyState, ListRow, SectionHead } from '@/components/ui';
+import {
+  ButtonLink,
+  Card,
+  Chip,
+  EmptyState,
+  ListRow,
+  SectionHead,
+} from '@/components/ui';
 import type { CommunityPost } from '@/lib/api/community';
 import { getRecentCommunityPosts } from '@/lib/api/community.server';
 import type { QuestionPage } from '@/lib/api/questions';
@@ -12,6 +19,7 @@ import type { Verification } from '@/lib/api/verifications';
 import { getMyVerifications } from '@/lib/api/verifications.server';
 import { requireUser } from '@/lib/auth/session';
 import { formatRelativeTime } from '@/lib/questions/presentation';
+import { myRooms } from '@/lib/rooms/presentation';
 import { getQualificationPresentation } from '@/lib/verifications/presentation';
 import Link from 'next/link';
 import styles from './home.module.css';
@@ -67,11 +75,12 @@ function StatusChip({
 export default async function AppHome(): Promise<React.JSX.Element> {
   // Guard first so a signed-out redirect always carries next=/app.
   const user = await requireUser('/app');
-  const [rooms, verifications, posts] = await Promise.all([
+  const [allRooms, verifications, posts] = await Promise.all([
     getRooms(),
     getMyVerifications(),
     recentPosts(),
   ]);
+  const rooms = myRooms(allRooms);
   const feeds = await Promise.all(rooms.map(openQuestionsFor));
   const summarySource =
     verifications.find((item) => item.status === 'APPROVED') ??
@@ -107,8 +116,23 @@ export default async function AppHome(): Promise<React.JSX.Element> {
               <EmptyState
                 icon="room"
                 tone="iris"
-                title="열려 있는 도움방이 없어요"
-                description="지역이 준비되면 이곳에 표시돼요. 그동안 커뮤니티에서 물어보세요."
+                title={
+                  allRooms.length === 0
+                    ? '열려 있는 도움방이 없어요'
+                    : `도시 ${allRooms.length}곳의 도움방이 열려 있어요`
+                }
+                description={
+                  allRooms.length === 0
+                    ? '지역이 준비되면 이곳에 표시돼요. 그동안 커뮤니티에서 물어보세요.'
+                    : '여행할 도시나 사는 도시를 골라 인증하면 이곳에 바로 보여요.'
+                }
+                action={
+                  allRooms.length === 0 ? undefined : (
+                    <ButtonLink href="/app/rooms" size="md">
+                      도움방 고르기
+                    </ButtonLink>
+                  )
+                }
               />
             </Card>
           ) : (
@@ -132,6 +156,15 @@ export default async function AppHome(): Promise<React.JSX.Element> {
               title="여행자 커뮤니티"
               description="인증 없이도 묻고 나눌 수 있어요"
             />
+            {allRooms.length > 0 && (
+              <ListRow
+                href="/app/rooms"
+                icon="room"
+                tone="magenta"
+                title="도시별 도움방"
+                description={`${allRooms.length}개 도시에서 지금 상황을 물어볼 수 있어요`}
+              />
+            )}
             {qualifications.map((item) => (
               <ListRow
                 key={item.type}

@@ -1,7 +1,13 @@
 import 'server-only';
 
+import { unstable_rethrow } from 'next/navigation';
+
 import { fetchProtectedApi } from './protected-server';
-import { parseQuestionPage, type QuestionPage } from './questions';
+import {
+  parseQuestion,
+  parseQuestionPage,
+  type QuestionPage,
+} from './questions';
 
 export async function getOpenQuestions(
   roomSlug: string,
@@ -14,4 +20,21 @@ export async function getOpenQuestions(
     '/app',
   );
   return parseQuestionPage(await response.json());
+}
+
+/** The room a question belongs to, or null when it can't be read (#68). */
+export async function getQuestionRoomId(
+  questionId: string,
+): Promise<string | null> {
+  const safeId = encodeURIComponent(questionId);
+  try {
+    const response = await fetchProtectedApi(
+      `/api/v1/questions/${safeId}`,
+      `/app/questions/${safeId}`,
+    );
+    return parseQuestion(await response.json()).roomId;
+  } catch (error) {
+    unstable_rethrow(error);
+    return null;
+  }
 }
