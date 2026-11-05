@@ -17,6 +17,14 @@ function placeMapUrl(place: GooglePlace): string {
   );
 }
 
+function locationFailure(error: GeolocationPositionError): string {
+  if (error.code === error.PERMISSION_DENIED)
+    return '위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해 주세요.';
+  if (error.code === error.TIMEOUT)
+    return '위치 확인 시간이 초과됐어요. 열린 장소에서 다시 시도해 주세요.';
+  return '현재 위치를 확인할 수 없어요. 기기의 위치 서비스를 확인해 주세요.';
+}
+
 export function NearbyPlacesExplorer(): React.JSX.Element {
   const mapElement = useRef<HTMLDivElement>(null);
   const map = useRef<TravelGuideGoogleMap | undefined>(undefined);
@@ -74,6 +82,10 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
   }, [mapReady, places]);
 
   function findNearby(): void {
+    // A new search must never leave the previous location's list or markers
+    // on screen, so a failed re-search shows the failure state instead.
+    setPlaces([]);
+    setSelectedId(undefined);
     if (!navigator.geolocation) {
       setError('이 브라우저에서는 현재 위치를 확인할 수 없어요.');
       return;
@@ -104,9 +116,9 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
           )
           .finally(() => setLoading(false));
       },
-      () => {
+      (cause) => {
         setLoading(false);
-        setError('위치 권한을 허용한 뒤 다시 시도해 주세요.');
+        setError(locationFailure(cause));
       },
       { enableHighAccuracy: true, timeout: 10000 },
     );
