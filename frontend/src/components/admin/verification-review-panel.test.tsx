@@ -86,4 +86,52 @@ describe('VerificationReviewPanel', () => {
     );
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it('starts fresh when another verification is selected', () => {
+    const { rerender } = render(
+      <VerificationReviewPanel verification={verification} />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '반려 검토' }));
+    fireEvent.change(screen.getByLabelText('반려 사유'), {
+      target: { value: '첫 번째 신청을 위해 쓴 반려 사유입니다.' },
+    });
+    rerender(
+      <VerificationReviewPanel
+        verification={{ ...verification, id: 'verification-2' }}
+      />,
+    );
+    expect(screen.getByRole('button', { name: '승인 검토' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: '반려 검토' })).toBeEnabled();
+    expect(screen.queryByLabelText('반려 사유')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('반려 사유를 확인해 주세요.'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('lets the next verification be approved after one succeeds', async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200 } as Response);
+    const { rerender } = render(
+      <VerificationReviewPanel verification={verification} />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '승인 검토' }));
+    fireEvent.click(screen.getByRole('button', { name: '승인 확정' }));
+    await waitFor(() => expect(refreshMock).toHaveBeenCalledTimes(1));
+    rerender(
+      <VerificationReviewPanel
+        verification={{ ...verification, id: 'verification-2' }}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '승인 검토' }));
+    const confirmButton = screen.getByRole('button', { name: '승인 확정' });
+    expect(confirmButton).toBeEnabled();
+    fireEvent.click(confirmButton);
+    await waitFor(() => expect(refreshMock).toHaveBeenCalledTimes(2));
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/api/v1/admin/verifications/verification-2/review',
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ decision: 'APPROVE', reason: null }),
+      }),
+    );
+  });
 });

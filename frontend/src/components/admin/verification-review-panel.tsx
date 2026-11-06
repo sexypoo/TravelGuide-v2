@@ -27,7 +27,22 @@ function formatDate(value: string | null): string {
       }).format(new Date(value));
 }
 
+// Selecting another item only changes ?selected=, which keeps client state
+// in the App Router. Keying the body by id gives each item a fresh panel.
 export function VerificationReviewPanel({
+  verification,
+}: {
+  verification: AdminVerification;
+}): React.JSX.Element {
+  return (
+    <VerificationReviewPanelBody
+      key={verification.id}
+      verification={verification}
+    />
+  );
+}
+
+function VerificationReviewPanelBody({
   verification,
 }: {
   verification: AdminVerification;
@@ -66,6 +81,7 @@ export function VerificationReviewPanel({
       setMessage(
         actionableErrorMessage(error, '심사 결과를 저장하지 못했습니다.'),
       );
+    } finally {
       setPending(false);
     }
   }
