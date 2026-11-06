@@ -12,9 +12,9 @@ test('traveler verification form stays within a 390px viewport', async ({
 
   await loginAs(page);
 
-  await page.goto('/app/verifications/traveler');
+  await page.goto('/app/verifications/traveler?city=jeju');
   await expect(
-    page.getByRole('heading', { name: '여행자 인증 신청' }),
+    page.getByRole('heading', { name: '제주 여행자 인증' }),
   ).toBeVisible();
 
   const layout = await page.evaluate(() => {

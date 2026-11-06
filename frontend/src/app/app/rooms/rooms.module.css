@@ -1,0 +1,7 @@
+/* City room list (#68). */
+
+.stack {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 45rem;
+}

@@ -33,8 +33,11 @@ test('locked room introduction keeps gutters from phone to desktop', async ({
       page.getByRole('heading', { name: '인증하면 제주 도움방이 열려요' }),
     ).toBeVisible();
     await expect(
-      page.getByRole('link', { name: '인증 방법 확인하기' }),
-    ).toHaveAttribute('href', '/app/verifications');
+      page.getByRole('link', { name: '여행자로 인증하기' }),
+    ).toHaveAttribute('href', '/app/verifications/traveler?city=jeju');
+    await expect(
+      page.getByRole('link', { name: '현지인으로 인증하기' }),
+    ).toHaveAttribute('href', '/app/verifications/local?city=jeju');
     // The chat itself is not rendered for a locked visitor.
     await expect(page.locator('#room-message')).toHaveCount(0);
 

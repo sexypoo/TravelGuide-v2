@@ -46,7 +46,7 @@ describe('qualification presentation', () => {
       '제주 여행자 인증 완료',
     );
     expect(getQualificationPresentation(verifications, 'LOCAL')).toMatchObject({
-      title: '제주에 살고 있나요?',
+      title: '그 도시에 살거나 공부하고 있나요?',
       href: '/app/verifications/local',
     });
   });

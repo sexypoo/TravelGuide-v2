@@ -35,8 +35,8 @@ describe('public home gateway', () => {
       '/auth/register',
     );
     expect(
-      screen.getByRole('link', { name: /제주 실시간 도움방/ }),
-    ).toHaveAttribute('href', '/auth/login?next=%2Fapp%2Frooms%2Fjeju');
+      screen.getByRole('link', { name: /도시별 실시간 도움방/ }),
+    ).toHaveAttribute('href', '/auth/login?next=%2Fapp%2Frooms');
     expect(
       screen.getByRole('link', { name: /여행자 커뮤니티/ }),
     ).toHaveAttribute('href', '/auth/login?next=%2Fapp%2Fcommunity');

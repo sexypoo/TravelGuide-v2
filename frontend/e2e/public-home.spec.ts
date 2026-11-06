@@ -29,8 +29,8 @@ for (const viewport of viewports) {
       page.getByRole('link', { name: /계정 만들기/ }),
     ).toHaveAttribute('href', '/auth/register');
     await expect(
-      page.getByRole('link', { name: /제주 실시간 도움방/ }),
-    ).toHaveAttribute('href', '/auth/login?next=%2Fapp%2Frooms%2Fjeju');
+      page.getByRole('link', { name: /도시별 실시간 도움방/ }),
+    ).toHaveAttribute('href', '/auth/login?next=%2Fapp%2Frooms');
     await expect(page.locator('.landingHero')).toHaveCount(0);
     await expect(page.getByText('서비스 정상 연결')).toBeVisible();
 

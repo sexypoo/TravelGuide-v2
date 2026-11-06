@@ -1,7 +1,6 @@
 import { Page, PageHeader } from '@/components/app/page';
 import {
   Card,
-  Chip,
   EmptyState,
   ListRow,
   Notice,
@@ -21,21 +20,18 @@ const choices: ReadonlyArray<{
   type: VerificationType;
   title: string;
   description: string;
-  pendingDescription: string;
   href: string;
 }> = [
   {
     type: 'TRAVELER',
     title: '여행자 인증',
     description: '일정과 예약 증빙으로 신청해요. 승인되면 질문할 수 있어요.',
-    pendingDescription: '여행자 신청을 심사하고 있어요.',
     href: '/app/verifications/traveler',
   },
   {
     type: 'LOCAL',
     title: '현지인 인증',
-    description: '위치와 연고 증빙으로 신청해요. 승인되면 답변할 수 있어요.',
-    pendingDescription: '현지인 신청을 심사하고 있어요.',
+    description: '위치와 거주·학업 증빙으로 신청해요. 교환학생도 할 수 있어요.',
     href: '/app/verifications/local',
   },
 ];
@@ -54,10 +50,11 @@ export default async function VerificationsPage({
       : query.submitted === 'local'
         ? '현지인'
         : null;
-  const pendingTypes = new Set(
+  // Pending is per city: a pending London request doesn't block Prague.
+  const pendingKeys = new Set(
     verifications
       .filter((item) => item.status === 'PENDING')
-      .map((item) => item.type),
+      .map((item) => `${item.type}:${item.destination.id}`),
   );
 
   return (
@@ -90,7 +87,9 @@ export default async function VerificationsPage({
                   <li key={item.id}>
                     <VerificationStatusCard
                       verification={item}
-                      canReapply={!pendingTypes.has(item.type)}
+                      canReapply={
+                        !pendingKeys.has(`${item.type}:${item.destination.id}`)
+                      }
                     />
                   </li>
                 ))}
@@ -112,27 +111,16 @@ export default async function VerificationsPage({
           <section aria-labelledby="new-verification">
             <SectionHead id="new-verification" title="새로 신청하기" />
             <Card padding="list">
-              {choices.map((choice) =>
-                pendingTypes.has(choice.type) ? (
-                  <ListRow
-                    key={choice.type}
-                    icon={choice.type === 'TRAVELER' ? 'map' : 'home'}
-                    tone={choice.type === 'TRAVELER' ? 'magenta' : 'iris'}
-                    title={choice.title}
-                    description={choice.pendingDescription}
-                    trailing={<Chip tone="warning">심사 중</Chip>}
-                  />
-                ) : (
-                  <ListRow
-                    key={choice.type}
-                    href={choice.href}
-                    icon={choice.type === 'TRAVELER' ? 'map' : 'home'}
-                    tone={choice.type === 'TRAVELER' ? 'magenta' : 'iris'}
-                    title={choice.title}
-                    description={choice.description}
-                  />
-                ),
-              )}
+              {choices.map((choice) => (
+                <ListRow
+                  key={choice.type}
+                  href={choice.href}
+                  icon={choice.type === 'TRAVELER' ? 'map' : 'home'}
+                  tone={choice.type === 'TRAVELER' ? 'magenta' : 'iris'}
+                  title={choice.title}
+                  description={choice.description}
+                />
+              ))}
             </Card>
           </section>
 
