@@ -24,7 +24,17 @@ const decisionLabels: Record<ReportReviewDecision, string> = {
   DISMISS: '신고 기각',
 };
 
+// Selecting another item only changes ?selected=, which keeps client state
+// in the App Router. Keying the body by id gives each item a fresh panel.
 export function ReportReviewPanel({
+  report,
+}: {
+  report: AdminReport;
+}): React.JSX.Element {
+  return <ReportReviewPanelBody key={report.id} report={report} />;
+}
+
+function ReportReviewPanelBody({
   report,
 }: {
   report: AdminReport;
@@ -50,6 +60,7 @@ export function ReportReviewPanel({
       setMessage(
         actionableErrorMessage(error, '신고 처리 결과를 저장하지 못했습니다.'),
       );
+    } finally {
       setPending(false);
     }
   }
