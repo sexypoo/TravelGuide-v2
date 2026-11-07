@@ -14,6 +14,8 @@ import { reportReasonLabels } from './report-reason-labels';
 import styles from './report-menu.module.css';
 
 const reasonLabels = reportReasonLabels;
+const focusableSelector =
+  'button:not([disabled]), select:not([disabled]), textarea:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
 
 export interface ReportTargetOption {
   type: ReportTargetType;
@@ -35,9 +37,23 @@ export function ReportMenu({
   const [complete, setComplete] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const confirmRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (open) closeRef.current?.focus();
+  }, [open]);
+
+  useEffect(() => {
+    if (complete) confirmRef.current?.focus();
+  }, [complete]);
+
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open]);
 
   if (targets.length === 0) return null;
@@ -74,6 +90,22 @@ export function ReportMenu({
     }
   }
 
+  function trapFocus(event: React.KeyboardEvent<HTMLDivElement>): void {
+    const focusable = Array.from(
+      event.currentTarget.querySelectorAll<HTMLElement>(focusableSelector),
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last?.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first?.focus();
+    }
+  }
+
   function close(): void {
     setOpen(false);
     setMessage(undefined);
@@ -97,6 +129,7 @@ export function ReportMenu({
         aria-label="신고하기"
         onKeyDown={(event) => {
           if (event.key === 'Escape') close();
+          else if (event.key === 'Tab') trapFocus(event);
         }}
       >
         <IconButton
@@ -111,7 +144,7 @@ export function ReportMenu({
             <IconTile icon="check" tone="iris" />
             <strong>신고가 접수됐어요</strong>
             <p>운영자가 내용을 확인하기 전까지 자동으로 숨기지 않습니다.</p>
-            <Button block onClick={close}>
+            <Button ref={confirmRef} block onClick={close}>
               확인
             </Button>
           </div>

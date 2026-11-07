@@ -52,4 +52,55 @@ describe('ReportMenu', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
   });
+
+  it('keeps Tab and Shift+Tab inside the dialog', async () => {
+    render(
+      <ReportMenu
+        targets={[{ type: 'QUESTION', id: 'question-1', label: '이 토픽' }]}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '신고' }));
+    const dialog = screen.getByRole('dialog');
+    const closeButton = screen.getByRole('button', { name: '신고 창 닫기' });
+    const submitButton = screen.getByRole('button', { name: '신고 접수하기' });
+    await waitFor(() => expect(closeButton).toHaveFocus());
+
+    submitButton.focus();
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(closeButton).toHaveFocus();
+
+    fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
+    expect(submitButton).toHaveFocus();
+  });
+
+  it('moves focus to the confirm button after a successful report', async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 201 } as Response);
+    render(
+      <ReportMenu
+        targets={[{ type: 'QUESTION', id: 'question-1', label: '이 토픽' }]}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '신고' }));
+    const submitButton = screen.getByRole('button', { name: '신고 접수하기' });
+    submitButton.focus();
+    fireEvent.click(submitButton);
+
+    const confirmButton = await screen.findByRole('button', { name: '확인' });
+    await waitFor(() => expect(confirmButton).toHaveFocus());
+  });
+
+  it('locks page scroll while open and restores it after closing', () => {
+    document.body.style.overflow = 'auto';
+    render(
+      <ReportMenu
+        targets={[{ type: 'QUESTION', id: 'question-1', label: '이 토픽' }]}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '신고' }));
+    expect(document.body.style.overflow).toBe('hidden');
+
+    fireEvent.click(screen.getByRole('button', { name: '신고 창 닫기' }));
+    expect(document.body.style.overflow).toBe('auto');
+    document.body.style.overflow = '';
+  });
 });
