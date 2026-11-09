@@ -240,4 +240,45 @@ describe('QuestionDetailView', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByRole('textbox')).toHaveValue(draft);
   });
+
+  it('drops the photo the realtime cache keeps on a hidden topic', () => {
+    mockQuestion = question({
+      status: 'REMOVED',
+      content: '운영 정책에 따라 숨김 처리된 질문입니다.',
+      image: {
+        url: '/api/v1/media/question-photo',
+        originalName: 'gate.jpg',
+        mimeType: 'image/jpeg',
+      },
+      answers: [],
+      answerCount: 0,
+    });
+    renderDetail(LOCAL_ID);
+
+    expect(
+      screen.getByRole('heading', {
+        name: '운영 정책에 따라 숨김 처리된 질문입니다.',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('img', { name: /토픽 첨부 사진/ }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('gate.jpg')).not.toBeInTheDocument();
+  });
+
+  it('shows the photo on a visible topic', () => {
+    mockQuestion = question({
+      image: {
+        url: '/api/v1/media/question-photo',
+        originalName: 'gate.jpg',
+        mimeType: 'image/jpeg',
+      },
+    });
+    renderDetail(LOCAL_ID);
+
+    expect(
+      screen.getByRole('img', { name: '현장 토픽 첨부 사진' }),
+    ).toHaveAttribute('src', '/api/v1/media/question-photo');
+    expect(screen.getByText('gate.jpg')).toBeInTheDocument();
+  });
 });

@@ -77,4 +77,60 @@ describe('AnswerCard', () => {
       screen.queryByRole('link', { name: /공개 프로필 보기/ }),
     ).not.toBeInTheDocument();
   });
+
+  it('drops the photo and field observation the realtime cache keeps on a hidden answer', () => {
+    const { container } = render(
+      <AnswerCard
+        answer={{
+          ...answer,
+          content: '운영 정책에 따라 숨김 처리된 답변입니다.',
+          sourceUrl: null,
+          removed: true,
+          image: {
+            url: '/api/v1/media/answer-photo',
+            originalName: 'queue.jpg',
+            mimeType: 'image/jpeg',
+          },
+          observation: {
+            waitMinutes: 20,
+            crowdLevel: 'BUSY',
+            entryStatus: 'OPEN',
+            observedAt: '2026-08-01T00:05:00.000Z',
+          },
+        }}
+        accepted={false}
+        currentUserId="traveler-1"
+      />,
+    );
+    expect(screen.getByText('숨김 처리된 답변')).toBeInTheDocument();
+    expect(container.querySelector('img')).toBeNull();
+    expect(screen.queryByText('현장 확인 사진')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('현장 관찰 정보')).not.toBeInTheDocument();
+    expect(screen.queryByText('20분')).not.toBeInTheDocument();
+  });
+
+  it('shows the photo and field observation on a visible answer', () => {
+    render(
+      <AnswerCard
+        answer={{
+          ...answer,
+          image: {
+            url: '/api/v1/media/answer-photo',
+            originalName: 'queue.jpg',
+            mimeType: 'image/jpeg',
+          },
+          observation: {
+            waitMinutes: 20,
+            crowdLevel: null,
+            entryStatus: null,
+            observedAt: '2026-08-01T00:05:00.000Z',
+          },
+        }}
+        accepted={false}
+        currentUserId="traveler-1"
+      />,
+    );
+    expect(screen.getByRole('img', { name: 'queue.jpg' })).toBeInTheDocument();
+    expect(screen.getByLabelText('현장 관찰 정보')).toHaveTextContent('20분');
+  });
 });
