@@ -95,8 +95,8 @@ export default async function TravelTypeResultPage({
             여행 중 막히면, 지금 그곳을 아는 사람에게
           </h2>
           <p className={styles.ctaText}>
-            인증된 제주 현지인과 여행자가 모인 도움방에서 지금 상황을 물어볼 수
-            있어요.
+            도시마다 인증된 현지인과 여행자가 모인 도움방에서 지금 상황을 물어볼
+            수 있어요.
           </p>
           <div className={styles.ctaActions}>
             <ButtonLink href="/auth/register" variant="light" size="lg" block>

@@ -40,8 +40,8 @@ function steps(): HTMLElement[] {
 
 describe('VerificationStatusCard (VER-003)', () => {
   it.each([
-    ['TRAVELER', base, '/app/verifications/traveler'],
-    ['LOCAL', local, '/app/verifications/local'],
+    ['TRAVELER', base, '/app/verifications/traveler?city=jeju'],
+    ['LOCAL', local, '/app/verifications/local?city=jeju'],
   ] as const)(
     'shows the rejection reason and a %s reapply link',
     (_type, verification, href) => {

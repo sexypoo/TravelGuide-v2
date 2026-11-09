@@ -106,7 +106,7 @@ describe('MessageTimeline live follow behavior', () => {
         onPromote={jest.fn()}
       />,
     );
-    const timeline = screen.getByLabelText('제주방 대화');
+    const timeline = screen.getByLabelText('도움방 대화');
     expect(timeline.querySelector('.content')).toBeInTheDocument();
     dimensions(timeline, {
       scrollHeight: 1000,
@@ -139,7 +139,7 @@ describe('MessageTimeline live follow behavior', () => {
         onPromote={jest.fn()}
       />,
     );
-    const timeline = screen.getByLabelText('제주방 대화');
+    const timeline = screen.getByLabelText('도움방 대화');
     dimensions(timeline, {
       scrollHeight: 1000,
       clientHeight: 400,
@@ -183,7 +183,7 @@ describe('MessageTimeline live follow behavior', () => {
         onPromote={jest.fn()}
       />,
     );
-    const timeline = screen.getByLabelText('제주방 대화');
+    const timeline = screen.getByLabelText('도움방 대화');
     dimensions(timeline, {
       scrollHeight: 1000,
       clientHeight: 400,
@@ -217,7 +217,7 @@ describe('MessageTimeline live follow behavior', () => {
         onPromote={jest.fn()}
       />,
     );
-    const timeline = screen.getByLabelText('제주방 대화');
+    const timeline = screen.getByLabelText('도움방 대화');
     dimensions(timeline, {
       scrollHeight: 1000,
       clientHeight: 400,
@@ -299,7 +299,7 @@ describe('MessageTimeline fetch errors', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(
       '대화를 불러오지 못했어요',
     );
-    expect(screen.queryByLabelText('제주방 대화')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('도움방 대화')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '다시 불러오기' }));
     expect(refetch).toHaveBeenCalledTimes(1);
   });
@@ -329,7 +329,7 @@ describe('MessageTimeline fetch errors', () => {
     );
     expect(notice.closest('[role="status"]')).not.toBeNull();
     // The row sits above the scrolling timeline, not inside it.
-    expect(screen.getByLabelText('제주방 대화')).not.toContainElement(notice);
+    expect(screen.getByLabelText('도움방 대화')).not.toContainElement(notice);
 
     fireEvent.click(screen.getByRole('button', { name: '다시 시도' }));
     expect(refetch).toHaveBeenCalledTimes(1);

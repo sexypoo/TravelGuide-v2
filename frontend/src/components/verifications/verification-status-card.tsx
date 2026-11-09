@@ -112,7 +112,7 @@ export function VerificationStatusCard({
               <ButtonLink
                 variant="secondary"
                 size="sm"
-                href={`/app/verifications/${isTraveler ? 'traveler' : 'local'}`}
+                href={`/app/verifications/${isTraveler ? 'traveler' : 'local'}?city=${encodeURIComponent(verification.destination.slug)}`}
               >
                 새로 신청하기
               </ButtonLink>

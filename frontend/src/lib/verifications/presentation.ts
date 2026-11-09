@@ -50,12 +50,12 @@ export function getQualificationPresentation(
         action: '여행자 인증 시작',
         body: '여행 일정과 증빙을 준비해 질문할 수 있어요.',
         href: '/app/verifications/traveler',
-        title: '제주를 여행 중인가요?',
+        title: '여행 중인가요?',
       }
     : {
         action: '현지인 인증 시작',
         body: '현재 위치와 거주 증빙을 준비해 답변할 수 있어요.',
         href: '/app/verifications/local',
-        title: '제주에 살고 있나요?',
+        title: '그 도시에 살거나 공부하고 있나요?',
       };
 }

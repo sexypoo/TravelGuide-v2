@@ -22,7 +22,7 @@ const items: readonly NavItem[] = [
     matches: (pathname) => pathname === '/app',
   },
   {
-    href: '/app/rooms/jeju',
+    href: '/app/rooms',
     label: '도움방',
     icon: 'room',
     matches: (pathname) =>

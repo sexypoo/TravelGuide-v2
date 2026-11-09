@@ -10,21 +10,22 @@ description: Run TravelGuide's PostgreSQL, backend integration tests, Playwright
 The project database runs in Docker from `backend/docker-compose.yml`
 (PostgreSQL 16, user/password/db `travelguide` by default).
 
-On the owner's Mac a Homebrew PostgreSQL already holds port 5432 and has no
-`travelguide` role, so URLs pointing at 5432 fail with Prisma `P1010`. Run the
-project database on 5433 instead, without editing any file:
+On the owner's Mac Homebrew PostgreSQL holds port 5432 and, since 2026-11,
+also 5433; neither has the `travelguide` role, so those URLs fail with Prisma
+`P1010`. Check with `lsof -nP -iTCP:5434 -sTCP:LISTEN` and run the project
+database on a free port (5434 below) without editing any file:
 
 ```bash
 docker info >/dev/null 2>&1 || open -a Docker   # then wait for the daemon
-cd backend && POSTGRES_PORT=5433 docker compose up -d --wait
+cd backend && POSTGRES_PORT=5434 docker compose up -d --wait
 ```
 
-Then load `backend/.env` and point both URLs at 5433 in the same shell:
+Then load `backend/.env` and point both URLs at 5434 in the same shell:
 
 ```bash
 set -a && . ../backend/.env && set +a
-export TEST_DATABASE_URL=${TEST_DATABASE_URL/localhost:5432/localhost:5433}
-export DATABASE_URL=${DATABASE_URL/localhost:5432/localhost:5433}
+export TEST_DATABASE_URL=${TEST_DATABASE_URL/localhost:5432/localhost:5434}
+export DATABASE_URL=${DATABASE_URL/localhost:5432/localhost:5434}
 ```
 
 Never print the contents of `.env` files.
@@ -50,6 +51,9 @@ corepack yarn playwright test e2e/x.spec.ts
 
 Playwright starts the API on 3101 and the web app on 3100 itself
 (`frontend/playwright.config.ts`); don't start them yourself.
+
+Don't build the frontend in a shell that loaded `backend/.env`: its
+`NODE_ENV=test` breaks `next build`. Use `env -u NODE_ENV corepack yarn verify`.
 
 The dev server rewrites `frontend/next-env.d.ts`. Restore it afterwards:
 

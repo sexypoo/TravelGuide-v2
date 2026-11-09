@@ -1,5 +1,6 @@
 import { PrismaClient, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { DESTINATIONS, roomTitle } from './destinations';
 import {
   readInitialAdminConfig,
   type InitialAdminConfig,
@@ -34,39 +35,23 @@ async function ensureInitialAdmin(config: InitialAdminConfig): Promise<void> {
 
 async function seed(): Promise<void> {
   const initialAdmin = readInitialAdminConfig();
-  const destination = await prisma.destination.upsert({
-    where: { slug: 'jeju' },
-    create: {
-      slug: 'jeju',
-      nameKo: '제주',
-      countryCode: 'KR',
-      timezone: 'Asia/Seoul',
-      centerLatitude: '33.3617',
-      centerLongitude: '126.5292',
-      radiusKm: '80',
-    },
-    update: {
-      nameKo: '제주',
-      countryCode: 'KR',
-      timezone: 'Asia/Seoul',
-      centerLatitude: '33.3617',
-      centerLongitude: '126.5292',
-      radiusKm: '80',
-    },
-  });
-
-  await prisma.destinationRoom.upsert({
-    where: { slug: 'jeju' },
-    create: {
-      slug: 'jeju',
-      title: '제주 실시간 여행 도움방',
-      destinationId: destination.id,
-    },
-    update: {
-      title: '제주 실시간 여행 도움방',
-      destinationId: destination.id,
-    },
-  });
+  for (const seed of DESTINATIONS) {
+    const { slug, ...fields } = seed;
+    const destination = await prisma.destination.upsert({
+      where: { slug },
+      create: { slug, ...fields },
+      update: fields,
+    });
+    await prisma.destinationRoom.upsert({
+      where: { slug },
+      create: {
+        slug,
+        title: roomTitle(seed.nameKo),
+        destinationId: destination.id,
+      },
+      update: { title: roomTitle(seed.nameKo), destinationId: destination.id },
+    });
+  }
 
   if (initialAdmin !== undefined) await ensureInitialAdmin(initialAdmin);
 }

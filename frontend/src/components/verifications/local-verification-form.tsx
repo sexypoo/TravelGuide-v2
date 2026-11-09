@@ -107,13 +107,13 @@ export function LocalVerificationForm({
         };
         if (distanceKm(captured, destination.center) > destination.radiusKm) {
           setLocationMessage(
-            '현재 위치가 제주 인증 범위 밖이에요. 제주 안에서 다시 확인해 주세요.',
+            `현재 위치가 ${destination.nameKo} 인증 범위 밖이에요. ${destination.nameKo} 안에서 다시 확인해 주세요.`,
           );
           return;
         }
         setLocation(captured);
         setLocationMessage(
-          `제주 안에서 확인했어요. 정확도 ${Math.round(captured.accuracy)}m`,
+          `${destination.nameKo} 안에서 확인했어요. 정확도 ${Math.round(captured.accuracy)}m`,
         );
       },
       (positionError) => {
@@ -130,9 +130,13 @@ export function LocalVerificationForm({
     event.preventDefault();
     const fileError = proofError(proof);
     if (location === undefined)
-      return setError('제주 안에서 현재 위치를 먼저 확인해 주세요.');
+      return setError(
+        `${destination.nameKo} 안에서 현재 위치를 먼저 확인해 주세요.`,
+      );
     if (note.trim().length < 30)
-      return setError('제주와의 관계를 30자 이상 적어 주세요.');
+      return setError(
+        `${destination.nameKo}와의 관계를 30자 이상 적어 주세요.`,
+      );
     if (fileError !== undefined) return setError(fileError);
     if (!consent)
       return setError('증빙 사용 목적과 개인정보 안내에 동의해 주세요.');
@@ -251,7 +255,7 @@ export function LocalVerificationForm({
             rows={5}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="제주에서 생활한 기간과 잘 아는 지역 등을 30자 이상 적어 주세요."
+            placeholder={`${destination.nameKo}에서 생활하거나 공부한 기간, 잘 아는 동네 등을 30자 이상 적어 주세요.`}
           />
         </label>
         <ProofPicker label="연고 증빙 선택" file={proof} onChange={setProof} />
