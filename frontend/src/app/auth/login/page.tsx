@@ -32,6 +32,7 @@ export default async function LoginPage({
       alternateHref="/auth/register"
       alternatePrompt="아직 계정이 없나요?"
       alternateLabel="계정 만들기"
+      nextPath={nextPath}
     >
       <AuthForm
         mode="login"

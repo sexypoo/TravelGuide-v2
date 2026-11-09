@@ -2,11 +2,25 @@ import { redirect } from 'next/navigation';
 import { AuthForm } from '@/components/auth/auth-form';
 import { AuthShell } from '@/components/auth/auth-shell';
 import { getCurrentUser } from '@/lib/auth/session';
+import { safeNextPath } from '@/lib/auth/safe-next-path';
 
-export default async function RegisterPage(): Promise<React.JSX.Element> {
-  const user = await getCurrentUser();
+interface RegisterPageProps {
+  searchParams: Promise<{
+    next?: string | string[];
+  }>;
+}
+
+export default async function RegisterPage({
+  searchParams,
+}: RegisterPageProps): Promise<React.JSX.Element> {
+  const [user, parameters] = await Promise.all([
+    getCurrentUser(),
+    searchParams,
+  ]);
+  // The signed-in redirect, the sign-up form, and the login link share this.
+  const nextPath = safeNextPath(parameters.next);
   if (user !== null) {
-    redirect(user.isAdmin ? '/admin' : '/app');
+    redirect(user.isAdmin ? '/admin' : nextPath);
   }
 
   return (
@@ -17,8 +31,9 @@ export default async function RegisterPage(): Promise<React.JSX.Element> {
       alternateHref="/auth/login"
       alternatePrompt="이미 계정이 있나요?"
       alternateLabel="로그인"
+      nextPath={nextPath}
     >
-      <AuthForm mode="register" />
+      <AuthForm mode="register" nextPath={nextPath} />
     </AuthShell>
   );
 }

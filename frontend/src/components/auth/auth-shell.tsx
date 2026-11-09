@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AppIcon } from '@/components/common';
 import { Wordmark } from '@/components/brand/wordmark';
+import { safeNextPath } from '@/lib/auth/safe-next-path';
 import styles from './auth.module.css';
 
 interface AuthShellProps {
@@ -10,6 +11,8 @@ interface AuthShellProps {
   alternateHref: '/auth/login' | '/auth/register' | '/auth/forgot-password';
   alternateLabel: string;
   alternatePrompt: string;
+  /** Where to go after auth; carried on the alternate link when not `/app`. */
+  nextPath?: string;
   children: React.ReactNode;
 }
 
@@ -20,8 +23,10 @@ export function AuthShell({
   alternateHref,
   alternateLabel,
   alternatePrompt,
+  nextPath,
   children,
 }: AuthShellProps): React.JSX.Element {
+  const href = alternateLinkHref(alternateHref, nextPath);
   return (
     <main className={styles.page}>
       <div className={styles.inner}>
@@ -40,10 +45,23 @@ export function AuthShell({
           </div>
           <div className={styles.card}>{children}</div>
           <p className={styles.alternate}>
-            {alternatePrompt} <Link href={alternateHref}>{alternateLabel}</Link>
+            {alternatePrompt} <Link href={href}>{alternateLabel}</Link>
           </p>
         </section>
       </div>
     </main>
   );
+}
+
+const defaultNextPath = '/app';
+
+// Re-narrows `next` here too so the link can never carry an off-site target.
+function alternateLinkHref(
+  alternateHref: AuthShellProps['alternateHref'],
+  nextPath: string | undefined,
+): string {
+  if (nextPath === undefined) return alternateHref;
+  const next = safeNextPath(nextPath);
+  if (next === defaultNextPath) return alternateHref;
+  return `${alternateHref}?${new URLSearchParams({ next }).toString()}`;
 }

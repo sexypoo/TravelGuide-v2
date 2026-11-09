@@ -11,12 +11,6 @@ jest.mock('../../../lib/auth/session', () => ({
   getCurrentUser: jest.fn(),
 }));
 
-jest.mock('../../../components/auth/auth-shell', () => ({
-  AuthShell: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
-}));
-
 jest.mock('../../../components/auth/auth-form', () => ({
   AuthForm: ({ nextPath }: { nextPath: string }) => (
     <form aria-label="로그인" data-next-path={nextPath} />
@@ -97,6 +91,32 @@ describe('login page for a signed-in visitor', () => {
       expect(screen.getByRole('form', { name: '로그인' })).toHaveAttribute(
         'data-next-path',
         nextPath,
+      );
+    },
+  );
+
+  it.each([
+    {
+      next: '/app/rooms/jeju',
+      href: '/auth/register?next=%2Fapp%2Frooms%2Fjeju',
+    },
+    {
+      next: '/app/questions/q-1?tab=answers',
+      href: '/auth/register?next=%2Fapp%2Fquestions%2Fq-1%3Ftab%3Danswers',
+    },
+    { next: '/app', href: '/auth/register' },
+    { next: undefined, href: '/auth/register' },
+    ...unsafeNextValues.map((next) => ({ next, href: '/auth/register' })),
+  ])(
+    'keeps next=$next on the sign-up link as $href',
+    async ({ next, href }) => {
+      mockedGetCurrentUser.mockResolvedValue(null);
+
+      render(await LoginPage({ searchParams: Promise.resolve({ next }) }));
+
+      expect(screen.getByRole('link', { name: '계정 만들기' })).toHaveAttribute(
+        'href',
+        href,
       );
     },
   );
