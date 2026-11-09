@@ -1,3 +1,4 @@
+import type { Locale } from '@/i18n/config';
 import type {
   AnswerSourceType,
   QuestionCategory,
@@ -52,8 +53,13 @@ export const sourceLabels: Record<AnswerSourceType, string> = {
   PERSONAL_OPINION: '개인 의견',
 };
 
-export function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat('ko-KR', {
+const intlLocale: Readonly<Record<Locale, string>> = {
+  ko: 'ko-KR',
+  en: 'en-US',
+};
+
+export function formatDateTime(value: string, locale: Locale = 'ko'): string {
+  return new Intl.DateTimeFormat(intlLocale[locale], {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -65,6 +71,7 @@ export function formatDateTime(value: string): string {
 export function formatTopicCardTime(
   value: string,
   reference = new Date(),
+  locale: Locale = 'ko',
 ): string {
   const timeZone = 'Asia/Seoul';
   const calendarDay = new Intl.DateTimeFormat('en-CA', {
@@ -75,49 +82,51 @@ export function formatTopicCardTime(
   });
   const createdAt = new Date(value);
   if (calendarDay.format(createdAt) === calendarDay.format(reference)) {
-    const time = new Intl.DateTimeFormat('ko-KR', {
+    const time = new Intl.DateTimeFormat(intlLocale[locale], {
       hour: 'numeric',
       minute: '2-digit',
       timeZone,
     }).format(createdAt);
-    return `오늘 ${time}`;
+    return locale === 'en' ? `Today ${time}` : `오늘 ${time}`;
   }
-  return new Intl.DateTimeFormat('ko-KR', {
+  return new Intl.DateTimeFormat(intlLocale[locale], {
     month: 'short',
     day: 'numeric',
     timeZone,
   }).format(createdAt);
 }
 
-/** "방금", "12분 전", "3시간 전", then a short date. */
+/** "방금", "12분 전", "3시간 전" (or English), then a short date. */
 export function formatRelativeTime(
   value: string,
   reference = new Date(),
+  locale: Locale = 'ko',
 ): string {
   const minutes = Math.floor(
     (reference.getTime() - new Date(value).getTime()) / 60_000,
   );
-  if (minutes < 1) return '방금';
-  if (minutes < 60) return `${minutes}분 전`;
+  const en = locale === 'en';
+  if (minutes < 1) return en ? 'just now' : '방금';
+  if (minutes < 60) return en ? `${minutes} min ago` : `${minutes}분 전`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}시간 전`;
-  return new Intl.DateTimeFormat('ko-KR', {
+  if (hours < 24) return en ? `${hours} hr ago` : `${hours}시간 전`;
+  return new Intl.DateTimeFormat(intlLocale[locale], {
     month: 'short',
     day: 'numeric',
     timeZone: 'Asia/Seoul',
   }).format(new Date(value));
 }
 
-export function formatChatTime(value: string): string {
-  return new Intl.DateTimeFormat('ko-KR', {
+export function formatChatTime(value: string, locale: Locale = 'ko'): string {
+  return new Intl.DateTimeFormat(intlLocale[locale], {
     hour: '2-digit',
     minute: '2-digit',
     timeZone: 'Asia/Seoul',
   }).format(new Date(value));
 }
 
-export function formatChatDate(value: string): string {
-  return new Intl.DateTimeFormat('ko-KR', {
+export function formatChatDate(value: string, locale: Locale = 'ko'): string {
+  return new Intl.DateTimeFormat(intlLocale[locale], {
     month: 'long',
     day: 'numeric',
     weekday: 'short',
@@ -125,8 +134,11 @@ export function formatChatDate(value: string): string {
   }).format(new Date(value));
 }
 
-export function formatVerifiedDate(value: string): string {
-  return new Intl.DateTimeFormat('ko-KR', {
+export function formatVerifiedDate(
+  value: string,
+  locale: Locale = 'ko',
+): string {
+  return new Intl.DateTimeFormat(intlLocale[locale], {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
