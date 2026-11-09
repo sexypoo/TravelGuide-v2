@@ -66,8 +66,13 @@ why in the plan.
 - Public responses use explicit DTOs, never raw Prisma objects.
 - Keep API names and enum values consistent with the spec.
 - Every async screen has loading, empty, success, and error states.
-- UI copy is Korean, plain, and friendly. No raw enum values or decorative
-  English labels in the UI.
+- UI copy is Korean and English (ADR-054): put every user-visible string in
+  `frontend/src/i18n/messages/{ko,en}/<area>.ts` and read it with
+  `getMessages()` (server) or `useMessages()` (client). Korean is plain and
+  friendly; English is natural, not literal. No raw enum values. Admin
+  screens stay Korean-only.
+- New Korean API error details need an English entry in
+  `backend/src/common/http/english-details.ts` (its spec enforces this).
 
 ## Commands
 
