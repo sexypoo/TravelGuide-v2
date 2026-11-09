@@ -8,6 +8,7 @@ import {
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
 import { Button } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
 import {
   acceptAnswer,
   resolveQuestion,
@@ -31,6 +32,8 @@ export function TopicResolutionActions({
   question: QuestionDetail;
   roomSlug: string;
 }): React.JSX.Element {
+  const messages = useMessages();
+  const t = messages.topics.resolution;
   const queryClient = useQueryClient();
   const [decision, setDecision] = useState<Decision>();
   const mutation = useMutation({
@@ -59,17 +62,14 @@ export function TopicResolutionActions({
       ? question.answers.find((answer) => answer.id === decision.answerId)
       : undefined;
   const error = mutation.isError
-    ? actionableErrorMessage(
-        mutation.error,
-        '해결 상태를 저장하지 못했습니다. 연결을 확인해 주세요.',
-      )
+    ? actionableErrorMessage(mutation.error, t.failed)
     : undefined;
 
   return (
-    <section className={styles.panel} aria-label="토픽 해결 결정">
+    <section className={styles.panel} aria-label={t.panelLabel}>
       <header className={styles.head}>
-        <h2>도움이 됐다면 해결을 남겨주세요</h2>
-        <p>채택은 한 번만 가능하며 이후에는 새 답변을 받을 수 없어요.</p>
+        <h2>{t.title}</h2>
+        <p>{t.description}</p>
       </header>
       {decision === undefined ? (
         <div className={styles.choices}>
@@ -86,7 +86,9 @@ export function TopicResolutionActions({
               >
                 <AppIcon name="check" />
                 <span>
-                  <strong>{answer.author.nickname}</strong>이 답변 채택
+                  {t.acceptBefore}
+                  <strong>{answer.author.nickname}</strong>
+                  {t.acceptAfter}
                 </span>
               </button>
             ))}
@@ -96,17 +98,19 @@ export function TopicResolutionActions({
             onClick={() => setDecision({ kind: 'RESOLVE' })}
           >
             <AppIcon name="minus" />
-            <span>답변 없이 해결됨으로 표시</span>
+            <span>{t.resolveWithout}</span>
           </button>
         </div>
       ) : (
         <div className={styles.confirm}>
           <strong>
             {decision.kind === 'ACCEPT'
-              ? `${selectedAnswer?.author.nickname ?? '선택한 현지인'}님의 답변을 채택할까요?`
-              : '답변 채택 없이 이 토픽을 해결할까요?'}
+              ? t.confirmAccept(
+                  selectedAnswer?.author.nickname ?? t.selectedFallback,
+                )
+              : t.confirmResolve}
           </strong>
-          <p>완료 후에는 채택을 바꾸거나 토픽을 다시 열 수 없어요.</p>
+          <p>{t.irreversible}</p>
           {error !== undefined && (
             <p className={styles.error} role="alert">
               {error}
@@ -121,17 +125,17 @@ export function TopicResolutionActions({
               }}
               disabled={mutation.isPending}
             >
-              취소
+              {messages.common.cancel}
             </Button>
             <Button
               onClick={() => mutation.mutate(decision)}
               disabled={mutation.isPending}
             >
               {mutation.isPending
-                ? '저장 중…'
+                ? t.saving
                 : decision.kind === 'ACCEPT'
-                  ? '채택하고 해결'
-                  : '해결 확정'}
+                  ? t.acceptAndResolve
+                  : t.resolve}
             </Button>
           </div>
         </div>

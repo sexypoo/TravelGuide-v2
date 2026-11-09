@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import {
   removeOwnProfileImage,
@@ -12,7 +14,6 @@ import {
   type UpdateProfileInput,
   TRAVEL_STYLES,
   travelStyleEmojis,
-  travelStyleLabels,
 } from '@/lib/api/profile';
 import { AppIcon } from '@/components/common';
 import styles from './profile.module.css';
@@ -26,29 +27,30 @@ interface ProfileErrors {
   bio?: string;
 }
 
-function validate(input: UpdateProfileInput): ProfileErrors {
+type FormMessages = Messages['profile']['form'];
+
+function validate(input: UpdateProfileInput, t: FormMessages): ProfileErrors {
   const errors: ProfileErrors = {};
   if (input.nickname.length < 2 || input.nickname.length > 20) {
-    errors.nickname = '닉네임은 공백을 제외하고 2~20자로 입력해 주세요.';
+    errors.nickname = t.nicknameInvalid;
   }
   if ((input.bio?.length ?? 0) > 300) {
-    errors.bio = '소개는 300자 이하로 입력해 주세요.';
+    errors.bio = t.bioTooLong;
   }
   return errors;
 }
 
-function saveError(error: unknown): string {
+function saveError(error: unknown, t: FormMessages): string {
   if (error instanceof ApiProblem && error.code === 'NICKNAME_ALREADY_EXISTS') {
-    return '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해 주세요.';
+    return t.nicknameTaken;
   }
-  return actionableErrorMessage(
-    error,
-    '프로필을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.',
-  );
+  return actionableErrorMessage(error, t.saveFailed);
 }
 
 export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
   const router = useRouter();
+  const messages = useMessages().profile;
+  const t = messages.form;
   const [nickname, setNickname] = useState(profile.nickname);
   const [bio, setBio] = useState(profile.bio ?? '');
   const [travelStyles, setTravelStyles] = useState<TravelStyle[]>(
@@ -75,14 +77,14 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
       setMessage({
         type: 'error',
-        text: 'JPEG, PNG, WebP 사진만 사용할 수 있어요.',
+        text: t.photoTypeInvalid,
       });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       setMessage({
         type: 'error',
-        text: '프로필 사진은 5MB 이하로 골라주세요.',
+        text: t.photoTooLarge,
       });
       return;
     }
@@ -95,10 +97,10 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
           ? null
           : `${updated.profileImageUrl}?v=${encodeURIComponent(updated.updatedAt)}`,
       );
-      setMessage({ type: 'success', text: '프로필 사진을 바꿨어요.' });
+      setMessage({ type: 'success', text: t.photoChanged });
       router.refresh();
     } catch (error: unknown) {
-      setMessage({ type: 'error', text: saveError(error) });
+      setMessage({ type: 'error', text: saveError(error, t) });
     } finally {
       setIsAvatarSaving(false);
     }
@@ -110,10 +112,10 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
     try {
       await removeOwnProfileImage();
       setProfileImageUrl(null);
-      setMessage({ type: 'success', text: '프로필 사진을 지웠어요.' });
+      setMessage({ type: 'success', text: t.photoRemoved });
       router.refresh();
     } catch (error: unknown) {
-      setMessage({ type: 'error', text: saveError(error) });
+      setMessage({ type: 'error', text: saveError(error, t) });
     } finally {
       setIsAvatarSaving(false);
     }
@@ -130,7 +132,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
       bio: bio.trim().length === 0 ? null : bio.trim(),
       travelStyles,
     };
-    const nextErrors = validate(input);
+    const nextErrors = validate(input, t);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
       return;
@@ -142,11 +144,11 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
       setNickname(updated.nickname);
       setBio(updated.bio ?? '');
       setTravelStyles(updated.travelStyles);
-      setMessage({ type: 'success', text: '프로필을 저장했습니다.' });
+      setMessage({ type: 'success', text: t.saved });
       setIsSaving(false);
       router.refresh();
     } catch (error: unknown) {
-      setMessage({ type: 'error', text: saveError(error) });
+      setMessage({ type: 'error', text: saveError(error, t) });
       setIsSaving(false);
     }
   }
@@ -161,22 +163,24 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
       <section className={styles.photo} aria-labelledby="profile-photo-title">
         <span className={styles.avatar}>
           {profileImageUrl === null ? (
-            <span aria-hidden="true">{Array.from(nickname)[0] ?? '여'}</span>
+            <span aria-hidden="true">
+              {Array.from(nickname)[0] ?? t.avatarFallback}
+            </span>
           ) : (
             // Authenticated media is intentionally loaded from the same-origin API.
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={profileImageUrl} alt="현재 프로필 사진" />
+            <img src={profileImageUrl} alt={t.currentPhotoAlt} />
           )}
         </span>
         <div className={styles.photoCopy}>
-          <strong id="profile-photo-title">프로필 사진</strong>
+          <strong id="profile-photo-title">{t.photoTitle}</strong>
           <div className={styles.photoActions}>
             <label
               className={styles.secondary}
               data-disabled={isAvatarSaving || undefined}
             >
               <AppIcon name="image" />
-              {isAvatarSaving ? '사진 저장 중' : '사진 선택'}
+              {isAvatarSaving ? t.photoSaving : t.photoPick}
               <input
                 className="srOnly"
                 type="file"
@@ -192,17 +196,17 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
                 disabled={isAvatarSaving}
                 onClick={() => void handleAvatarRemove()}
               >
-                사진 지우기
+                {t.photoRemove}
               </button>
             )}
           </div>
-          <small>JPEG, PNG, WebP 파일, 최대 5MB</small>
+          <small>{t.photoHint}</small>
         </div>
       </section>
 
       <div className={styles.field}>
         <div className={styles.fieldLabel}>
-          <label htmlFor="profile-nickname">닉네임</label>
+          <label htmlFor="profile-nickname">{t.nickname}</label>
           <span>{Array.from(nickname).length}/20</span>
         </div>
         <input
@@ -227,9 +231,9 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
       <fieldset className={styles.styles}>
         <legend>
           <span className={styles.stylesLabel}>
-            나의 여행 스타일
+            {t.travelStyles}
             <span aria-live="polite">
-              최대 5개, {travelStyles.length}개 선택
+              {t.travelStylesCount(travelStyles.length)}
             </span>
           </span>
         </legend>
@@ -252,7 +256,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
                 }
               >
                 <span aria-hidden="true">{travelStyleEmojis[style]}</span>
-                <span>{travelStyleLabels[style]}</span>
+                <span>{messages.travelStyles[style]}</span>
                 {selected && <AppIcon name="check" />}
               </button>
             );
@@ -262,7 +266,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
 
       <div className={styles.field}>
         <div className={styles.fieldLabel}>
-          <label htmlFor="profile-bio">짧은 소개</label>
+          <label htmlFor="profile-bio">{t.bio}</label>
           <span>{Array.from(bio).length}/300</span>
         </div>
         <textarea
@@ -272,13 +276,13 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
           onChange={(event) => setBio(event.target.value)}
           maxLength={300}
           rows={5}
-          placeholder="다른 사용자에게 보여줄 간단한 소개를 적어 주세요."
+          placeholder={t.bioPlaceholder}
           aria-invalid={errors.bio !== undefined}
           aria-describedby={errors.bio === undefined ? 'bio-help' : 'bio-error'}
         />
         {errors.bio === undefined ? (
           <p id="bio-help" className={styles.help}>
-            이메일과 인증 증빙은 공개되지 않아요.
+            {t.bioHelp}
           </p>
         ) : (
           <p id="bio-error" className={styles.fieldError}>
@@ -299,7 +303,7 @@ export function ProfileForm({ profile }: ProfileFormProps): React.JSX.Element {
       )}
 
       <button className={styles.primary} type="submit" disabled={isSaving}>
-        {isSaving ? '저장 중' : '변경 내용 저장'}
+        {isSaving ? t.saving : t.submit}
       </button>
     </form>
   );

@@ -7,6 +7,7 @@ import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { loadGoogleMaps } from '@/lib/maps/google-maps-loader';
 import { AppIcon } from '@/components/common';
 import { Button, IconButton, Notice } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
 import styles from './place-picker.module.css';
 
 const JEJU_CENTER = { latitude: 33.4996, longitude: 126.5312 };
@@ -31,6 +32,9 @@ export function PlacePicker({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
+  const t = useMessages();
+  const copy = t.places.picker;
+  const mapLoadFailed = copy.mapLoadFailed;
 
   useEffect(() => {
     const previouslyFocused =
@@ -90,12 +94,12 @@ export function PlacePicker({
           zoomControl: true,
         });
       })
-      .catch(() => setError('지도를 불러오지 못했어요.'));
+      .catch(() => setError(mapLoadFailed));
     return () => {
       active = false;
       marker.current?.setMap(null);
     };
-  }, [apiKey]);
+  }, [apiKey, mapLoadFailed]);
 
   function showPlace(place: GooglePlace): void {
     setSelected(place);
@@ -114,7 +118,7 @@ export function PlacePicker({
 
   async function runSearch(): Promise<void> {
     if (query.trim().length < 2) {
-      setError('장소 이름을 두 글자 이상 입력해 주세요.');
+      setError(copy.queryTooShort);
       return;
     }
     const trimmedQuery = query.trim();
@@ -132,7 +136,7 @@ export function PlacePicker({
       if (searchId !== latestSearchId.current) return;
       setResults([]);
       setSearchedQuery('');
-      setError(actionableErrorMessage(searchError, '장소를 찾지 못했어요.'));
+      setError(actionableErrorMessage(searchError, copy.searchFailed));
     } finally {
       if (searchId === latestSearchId.current) setLoading(false);
     }
@@ -157,12 +161,10 @@ export function PlacePicker({
         <header className={styles.header}>
           <span className={styles.grabber} aria-hidden="true" />
           <div className={styles.headerText}>
-            <h2 id="place-picker-title">장소 보내기</h2>
-            <p id="place-picker-description">
-              이름으로 찾고 지도 위치를 확인한 뒤 공유하세요.
-            </p>
+            <h2 id="place-picker-title">{copy.title}</h2>
+            <p id="place-picker-description">{copy.description}</p>
           </div>
-          <IconButton icon="close" label="장소 선택 닫기" onClick={onClose} />
+          <IconButton icon="close" label={copy.close} onClick={onClose} />
         </header>
 
         <div className={`${styles.search} placePickerSearch`}>
@@ -171,8 +173,8 @@ export function PlacePicker({
             <input
               ref={searchInput}
               value={query}
-              placeholder="식당, 카페, 관광지를 검색하세요"
-              aria-label="장소 검색어"
+              placeholder={copy.searchPlaceholder}
+              aria-label={copy.searchLabel}
               enterKeyHint="search"
               onChange={(event) => {
                 setQuery(event.target.value);
@@ -187,7 +189,7 @@ export function PlacePicker({
             />
           </label>
           <Button disabled={loading} onClick={() => void runSearch()}>
-            검색
+            {copy.search}
           </Button>
         </div>
 
@@ -205,25 +207,24 @@ export function PlacePicker({
             aria-labelledby="place-picker-results-title"
           >
             <header className={styles.paneHead}>
-              <strong id="place-picker-results-title">검색 결과</strong>
+              <strong id="place-picker-results-title">
+                {copy.resultsTitle}
+              </strong>
               <span>
                 {results.length > 0 || searchedQuery.length > 0
-                  ? `${results.length}곳`
-                  : '장소 이름을 입력하세요'}
+                  ? copy.resultsCount(results.length)
+                  : copy.resultsHint}
               </span>
             </header>
             <div className={styles.results} aria-live="polite">
               {loading ? (
-                <p className={styles.resultsState}>장소를 찾고 있어요…</p>
+                <p className={styles.resultsState}>{copy.searching}</p>
               ) : results.length === 0 && searchedQuery.length > 0 ? (
                 <p className={styles.resultsState}>
-                  ‘{searchedQuery}’에 맞는 장소를 찾지 못했어요. 다른 이름이나
-                  동네로 검색해 보세요.
+                  {copy.noResults(searchedQuery)}
                 </p>
               ) : results.length === 0 ? (
-                <p className={styles.resultsState}>
-                  보내고 싶은 장소를 검색해 보세요.
-                </p>
+                <p className={styles.resultsState}>{copy.startHint}</p>
               ) : (
                 results.map((place) => (
                   <button
@@ -239,7 +240,7 @@ export function PlacePicker({
                     <div className={styles.resultText}>
                       <strong>{place.name}</strong>
                       <small>
-                        {place.address ?? place.category ?? '주소 정보 없음'}
+                        {place.address ?? place.category ?? t.places.noAddress}
                       </small>
                     </div>
                     {place.openNow !== null && (
@@ -248,7 +249,7 @@ export function PlacePicker({
                           place.openNow ? styles.open : styles.closedHours
                         }
                       >
-                        {place.openNow ? '영업 중' : '영업 종료'}
+                        {place.openNow ? copy.openNow : copy.closed}
                       </b>
                     )}
                   </button>
@@ -262,19 +263,19 @@ export function PlacePicker({
             aria-labelledby="place-picker-map-title"
           >
             <header className={styles.paneHead}>
-              <strong id="place-picker-map-title">지도 미리보기</strong>
-              <span>{selected?.name ?? '선택한 장소가 여기에 표시돼요'}</span>
+              <strong id="place-picker-map-title">{copy.mapTitle}</strong>
+              <span>{selected?.name ?? copy.mapHint}</span>
             </header>
             {apiKey.length === 0 ? (
               <div className={`${styles.map} ${styles.mapUnavailable}`}>
                 <AppIcon name="map" />
-                <p>지도 API 키를 설정하면 지도가 표시됩니다.</p>
+                <p>{copy.mapNoKey}</p>
               </div>
             ) : (
               <div
                 ref={mapElement}
                 className={styles.map}
-                aria-label="장소 지도"
+                aria-label={copy.mapLabel}
               />
             )}
           </section>
@@ -290,23 +291,20 @@ export function PlacePicker({
               <AppIcon name="pin" />
             </span>
             <div className={styles.resultText}>
-              <strong>{selected?.name ?? '아직 선택한 장소가 없어요'}</strong>
-              <small>
-                {selected?.address ??
-                  '검색 결과에서 장소를 선택하면 바로 보낼 수 있어요.'}
-              </small>
+              <strong>{selected?.name ?? copy.noSelection}</strong>
+              <small>{selected?.address ?? copy.noSelectionHint}</small>
             </div>
           </div>
           <div className={styles.footerActions}>
             <Button variant="secondary" onClick={onClose}>
-              취소
+              {t.common.cancel}
             </Button>
             <Button
               icon="check"
               disabled={selected === undefined}
               onClick={() => selected !== undefined && onSelect(selected)}
             >
-              {selected === undefined ? '장소 선택' : '이 장소 보내기'}
+              {selected === undefined ? copy.select : copy.send}
             </Button>
           </div>
         </footer>

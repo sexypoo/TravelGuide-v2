@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
+import { useMessages } from '@/i18n/client';
 import { shareTopicMessage, type MessagePage } from '@/lib/api/messages';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
@@ -20,6 +21,7 @@ export function TopicShareButton({
   roomSlug: string;
   questionId: string;
 }): React.JSX.Element {
+  const t = useMessages().topics.share;
   const queryClient = useQueryClient();
   const [sent, setSent] = useState(false);
   const mutation = useMutation({
@@ -41,19 +43,19 @@ export function TopicShareButton({
         disabled={mutation.isPending}
         aria-label={
           mutation.isPending
-            ? '채팅에 공유 중'
+            ? t.sharingLabel
             : sent
-              ? '채팅에 다시 공유하기'
-              : '채팅에 공유하기'
+              ? t.reshareLabel
+              : t.shareLabel
         }
         onClick={() => mutation.mutate()}
       >
         <AppIcon name="send" />
-        {mutation.isPending ? '공유 중' : sent ? '다시 공유' : '공유'}
+        {mutation.isPending ? t.sharing : sent ? t.reshare : t.share}
       </button>
       {mutation.isError && (
         <span className={styles.error} role="alert">
-          {actionableErrorMessage(mutation.error, '토픽을 보내지 못했어요.')}
+          {actionableErrorMessage(mutation.error, t.failed)}
         </span>
       )}
     </div>

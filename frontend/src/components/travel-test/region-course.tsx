@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui';
-import { TRAVEL_TYPES, type TravelTypeKey } from '@/lib/travel-test/content';
-import { COURSE_REGIONS } from '@/lib/travel-test/courses';
+import { useLocale, useMessages } from '@/i18n/client';
+import { travelTypesFor, type TravelTypeKey } from '@/lib/travel-test/content';
+import { courseRegionsFor } from '@/lib/travel-test/courses';
 import styles from './travel-test.module.css';
 
 /** Sample day course for a travel type, with a region picker (#42). */
@@ -13,20 +14,22 @@ export function RegionCourse({
 }: {
   type: TravelTypeKey;
 }): React.JSX.Element | null {
-  const [regionKey, setRegionKey] = useState(COURSE_REGIONS[0]?.key);
+  const locale = useLocale();
+  const t = useMessages().travelTest.course;
+  const regions = courseRegionsFor(locale);
+  const [regionKey, setRegionKey] = useState(regions[0]?.key);
   const region =
-    COURSE_REGIONS.find((candidate) => candidate.key === regionKey) ??
-    COURSE_REGIONS[0];
+    regions.find((candidate) => candidate.key === regionKey) ?? regions[0];
   if (region === undefined) return null;
-  const travelType = TRAVEL_TYPES[type];
+  const travelType = travelTypesFor(locale)[type];
 
   return (
     <Card aria-labelledby="travel-type-course">
       <h2 id="travel-type-course" className={styles.courseTitle}>
-        {travelType.name}에게 추천하는 {region.name}의 하루
+        {t.title(travelType.name, region.name)}
       </h2>
-      <div className={styles.regions} role="group" aria-label="지역 고르기">
-        {COURSE_REGIONS.map((candidate) => (
+      <div className={styles.regions} role="group" aria-label={t.regionsLabel}>
+        {regions.map((candidate) => (
           <button
             key={candidate.key}
             type="button"
@@ -38,9 +41,7 @@ export function RegionCourse({
           </button>
         ))}
       </div>
-      <p className={styles.courseNotice}>
-        여쭈어가 고른 예시 코스예요. 아직 현지인이 확인하지 않았어요.
-      </p>
+      <p className={styles.courseNotice}>{t.notice}</p>
       <ol
         className={styles.course}
         style={{ '--type-color': travelType.color } as React.CSSProperties}
@@ -59,7 +60,7 @@ export function RegionCourse({
         className={styles.courseRoom}
         href={`/app/rooms/${encodeURIComponent(region.key)}`}
       >
-        {region.name} 도움방에서 현지인에게 물어보기
+        {t.askRoom(region.name)}
       </Link>
     </Card>
   );

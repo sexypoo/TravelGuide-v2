@@ -10,19 +10,26 @@ export interface PreorderFieldErrors {
   privacyConsent?: string;
 }
 
+import { ko } from '@/i18n/messages/ko';
+
+type PreorderValidationMessages = typeof ko.legal.preorder.validation;
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function validatePreorder(input: PreorderDraft): PreorderFieldErrors {
+export function validatePreorder(
+  input: PreorderDraft,
+  messages: PreorderValidationMessages = ko.legal.preorder.validation,
+): PreorderFieldErrors {
   const errors: PreorderFieldErrors = {};
   const name = input.name.trim();
   const email = input.email.trim();
-  if (name.length === 0) errors.name = '이름을 입력해 주세요.';
-  else if (name.length > 30) errors.name = '이름은 30자 이내로 입력해 주세요.';
+  if (name.length === 0) errors.name = messages.nameMissing;
+  else if (name.length > 30) errors.name = messages.nameTooLong;
   if (!EMAIL_PATTERN.test(email) || email.length > 320) {
-    errors.email = '올바른 이메일 주소를 입력해 주세요.';
+    errors.email = messages.email;
   }
   if (!input.privacyConsent) {
-    errors.privacyConsent = '개인정보 수집 동의가 필요합니다.';
+    errors.privacyConsent = messages.privacyConsent;
   }
   return errors;
 }

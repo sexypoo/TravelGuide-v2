@@ -10,10 +10,9 @@ import {
   type ReportReason,
   type ReportTargetType,
 } from '@/lib/api/reports';
-import { reportReasonLabels } from './report-reason-labels';
+import { useMessages } from '@/i18n/client';
 import styles from './report-menu.module.css';
 
-const reasonLabels = reportReasonLabels;
 const focusableSelector =
   'button:not([disabled]), select:not([disabled]), textarea:not([disabled]), input:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
 
@@ -28,6 +27,7 @@ export function ReportMenu({
 }: {
   targets: ReportTargetOption[];
 }): React.JSX.Element | null {
+  const t = useMessages().chat.report;
   const [open, setOpen] = useState(false);
   const [targetIndex, setTargetIndex] = useState(0);
   const [reason, setReason] = useState<ReportReason>('FALSE_INFORMATION');
@@ -65,7 +65,7 @@ export function ReportMenu({
     event.preventDefault();
     const trimmed = detail.trim();
     if (reason === 'OTHER' && trimmed.length < 10) {
-      setMessage('기타 사유는 10자 이상 입력해 주세요.');
+      setMessage(t.otherTooShort);
       return;
     }
     setPending(true);
@@ -79,12 +79,7 @@ export function ReportMenu({
       });
       setComplete(true);
     } catch (error: unknown) {
-      setMessage(
-        actionableErrorMessage(
-          error,
-          '신고를 접수하지 못했습니다. 연결을 확인해 주세요.',
-        ),
-      );
+      setMessage(actionableErrorMessage(error, t.submitFailed));
     } finally {
       setPending(false);
     }
@@ -126,7 +121,7 @@ export function ReportMenu({
         className={styles.sheet}
         role="dialog"
         aria-modal="true"
-        aria-label="신고하기"
+        aria-label={t.dialogLabel}
         onKeyDown={(event) => {
           if (event.key === 'Escape') close();
           else if (event.key === 'Tab') trapFocus(event);
@@ -136,16 +131,16 @@ export function ReportMenu({
           ref={closeRef}
           className={styles.close}
           icon="close"
-          label="신고 창 닫기"
+          label={t.closeLabel}
           onClick={close}
         />
         {complete ? (
           <div className={styles.complete} role="status">
             <IconTile icon="check" tone="iris" />
-            <strong>신고가 접수됐어요</strong>
-            <p>운영자가 내용을 확인하기 전까지 자동으로 숨기지 않습니다.</p>
+            <strong>{t.completeTitle}</strong>
+            <p>{t.completeBody}</p>
             <Button ref={confirmRef} block onClick={close}>
-              확인
+              {t.confirm}
             </Button>
           </div>
         ) : (
@@ -155,12 +150,12 @@ export function ReportMenu({
             onSubmit={(event) => void submit(event)}
           >
             <header className={styles.header}>
-              <h2>신고하기</h2>
-              <p>정확한 대상을 선택하면 운영자가 더 빠르게 확인할 수 있어요.</p>
+              <h2>{t.title}</h2>
+              <p>{t.description}</p>
             </header>
             {targets.length > 1 && (
               <label className={styles.field}>
-                <span>신고 대상</span>
+                <span>{t.target}</span>
                 <select
                   value={targetIndex}
                   onChange={(event) =>
@@ -176,7 +171,7 @@ export function ReportMenu({
               </label>
             )}
             <label className={styles.field}>
-              <span>신고 사유</span>
+              <span>{t.reason}</span>
               <select
                 value={reason}
                 onChange={(event) =>
@@ -185,22 +180,22 @@ export function ReportMenu({
               >
                 {reportReasons.map((item) => (
                   <option key={item} value={item}>
-                    {reasonLabels[item]}
+                    {t.reasons[item]}
                   </option>
                 ))}
               </select>
             </label>
             <label className={styles.field}>
               <span>
-                자세한 내용{' '}
-                <small>{reason === 'OTHER' ? '필수' : '선택'}</small>
+                {t.detail}{' '}
+                <small>{reason === 'OTHER' ? t.required : t.optional}</small>
               </span>
               <textarea
                 rows={4}
                 maxLength={300}
                 value={detail}
                 onChange={(event) => setDetail(event.target.value)}
-                placeholder="운영자가 확인할 상황을 적어 주세요."
+                placeholder={t.detailPlaceholder}
                 aria-invalid={message !== undefined}
                 aria-describedby={
                   message === undefined ? undefined : 'report-error'
@@ -213,7 +208,7 @@ export function ReportMenu({
               </p>
             )}
             <Button type="submit" size="lg" block disabled={pending}>
-              {pending ? '접수 중…' : '신고 접수하기'}
+              {pending ? t.submitting : t.submit}
             </Button>
           </form>
         )}
@@ -229,7 +224,7 @@ export function ReportMenu({
         type="button"
         onClick={() => setOpen(true)}
       >
-        신고
+        {t.trigger}
       </button>
       {open && createPortal(sheet, document.body)}
     </div>

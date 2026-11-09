@@ -9,6 +9,7 @@ import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { usePlaceFavorites } from '@/lib/query/use-place-favorites';
 import { AppIcon } from '@/components/common';
+import { useMessages } from '@/i18n/client';
 import styles from './favorite.module.css';
 
 export function PlaceFavoriteButton({
@@ -19,6 +20,7 @@ export function PlaceFavoriteButton({
   placeName: string;
 }): React.JSX.Element {
   const favorites = usePlaceFavorites();
+  const copy = useMessages().places.favorite;
   const queryClient = useQueryClient();
   const saved = favorites.data?.find(
     (favorite) => favorite.sourceMessageId === messageId,
@@ -34,24 +36,28 @@ export function PlaceFavoriteButton({
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: queryKeys.placeFavorites }),
   });
-  const label = saved === undefined ? '찜하기' : '찜했어요';
+  const label = saved === undefined ? copy.save : copy.saved;
 
   return (
     <span className={`${styles.control} placeFavoriteControl`}>
       <button
         type="button"
         className={styles.button}
-        aria-label={`${placeName} ${saved === undefined ? '찜하기' : '찜 해제'}`}
+        aria-label={
+          saved === undefined
+            ? copy.saveLabel(placeName)
+            : copy.removeLabel(placeName)
+        }
         aria-pressed={saved !== undefined}
         disabled={favorites.isPending || mutation.isPending}
         onClick={() => mutation.mutate()}
       >
         <AppIcon name={saved === undefined ? 'heart' : 'heart-filled'} />
-        {mutation.isPending ? '저장 중' : label}
+        {mutation.isPending ? copy.saving : label}
       </button>
       {mutation.isError && (
         <small className={styles.error} role="alert">
-          {actionableErrorMessage(mutation.error, '장소를 저장하지 못했어요.')}
+          {actionableErrorMessage(mutation.error, copy.saveFailed)}
         </small>
       )}
     </span>

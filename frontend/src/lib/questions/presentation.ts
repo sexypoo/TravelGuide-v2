@@ -1,57 +1,72 @@
 import type { Locale } from '@/i18n/config';
+import { messagesFor } from '@/i18n/messages';
+import { topics as koTopics } from '@/i18n/messages/ko/topics';
 import type {
   AnswerSourceType,
+  CrowdLevel,
+  EntryStatus,
   QuestionCategory,
   QuestionStatus,
   QuestionUrgency,
 } from '../api/questions';
 
-export const categoryLabels: Record<QuestionCategory, string> = {
-  WEATHER: '날씨',
-  TRANSPORT: '교통·이동',
-  FOOD: '맛집·카페',
-  PLACE: '장소 추천',
-  WAITING: '대기 현황',
-  CROWD: '혼잡도',
-  OPEN_HOURS: '운영 여부',
-  EVENT: '행사·이벤트',
-  SAFETY: '안전',
-  OTHER: '기타',
-};
+type TopicLabels = ReturnType<typeof messagesFor>['topics']['labels'];
 
-export const crowdLabels = {
-  QUIET: '여유',
-  MODERATE: '보통',
-  BUSY: '많음',
-  VERY_BUSY: '매우 많음',
-} as const;
+/** All topic label maps (category, urgency, status, crowd, entry, source, badge) for a locale. */
+export function topicLabels(locale: Locale = 'ko'): TopicLabels {
+  return messagesFor(locale).topics.labels;
+}
 
-export const entryLabels = {
-  OPEN: '입장 가능',
-  LIMITED: '제한 입장',
-  PAUSED: '입장 일시 중단',
-  CLOSED: '입장 마감',
-  UNKNOWN: '확인 필요',
-} as const;
+export function categoryLabel(
+  value: QuestionCategory,
+  locale: Locale = 'ko',
+): string {
+  return topicLabels(locale).category[value];
+}
 
-export const urgencyLabels: Record<QuestionUrgency, string> = {
-  NORMAL: '오늘 중',
-  URGENT: '1시간 내',
-};
+export function urgencyLabel(
+  value: QuestionUrgency,
+  locale: Locale = 'ko',
+): string {
+  return topicLabels(locale).urgency[value];
+}
 
-export const statusLabels: Record<QuestionStatus, string> = {
-  OPEN: '진행 중',
-  RESOLVED: '해결됨',
-  REMOVED: '숨김',
-  EXPIRED: '마감됨',
-};
+export function statusLabel(
+  value: QuestionStatus,
+  locale: Locale = 'ko',
+): string {
+  return topicLabels(locale).status[value];
+}
 
-export const sourceLabels: Record<AnswerSourceType, string> = {
-  ON_SITE_NOW: '지금 직접 확인',
-  RECENT_EXPERIENCE: '최근 경험',
-  OFFICIAL_SOURCE: '공식 정보',
-  PERSONAL_OPINION: '개인 의견',
-};
+export function crowdLabel(value: CrowdLevel, locale: Locale = 'ko'): string {
+  return topicLabels(locale).crowd[value];
+}
+
+export function entryLabel(value: EntryStatus, locale: Locale = 'ko'): string {
+  return topicLabels(locale).entry[value];
+}
+
+export function sourceLabel(
+  value: AnswerSourceType,
+  locale: Locale = 'ko',
+): string {
+  return topicLabels(locale).source[value];
+}
+
+// Korean maps kept for existing callers; prefer the locale-aware helpers.
+// Read from the Korean dictionary file directly so module cycles stay safe.
+export const categoryLabels: Readonly<Record<QuestionCategory, string>> =
+  koTopics.labels.category;
+export const crowdLabels: Readonly<Record<CrowdLevel, string>> =
+  koTopics.labels.crowd;
+export const entryLabels: Readonly<Record<EntryStatus, string>> =
+  koTopics.labels.entry;
+export const urgencyLabels: Readonly<Record<QuestionUrgency, string>> =
+  koTopics.labels.urgency;
+export const statusLabels: Readonly<Record<QuestionStatus, string>> =
+  koTopics.labels.status;
+export const sourceLabels: Readonly<Record<AnswerSourceType, string>> =
+  koTopics.labels.source;
 
 const intlLocale: Readonly<Record<Locale, string>> = {
   ko: 'ko-KR',

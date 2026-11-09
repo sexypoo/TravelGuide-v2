@@ -17,13 +17,9 @@ import {
   EmptyState,
   Notice,
 } from '@/components/ui';
+import { useLocale, useMessages } from '@/i18n/client';
 import type { Room } from '@/lib/api/rooms';
-import {
-  categoryLabels,
-  formatDateTime,
-  statusLabels,
-  urgencyLabels,
-} from '@/lib/questions/presentation';
+import { formatDateTime } from '@/lib/questions/presentation';
 import { useQuestion } from '@/lib/query/use-questions';
 import { ParticipantChip, participantAvatarTone } from './participant-chip';
 import styles from './question-detail.module.css';
@@ -35,13 +31,14 @@ function DetailFrame({
   room: Room;
   children: React.ReactNode;
 }): React.JSX.Element {
+  const t = useMessages().topics.detail;
   return (
     <Page>
       <div className={styles.frame}>
         <PageHeader
-          title="토픽"
+          title={t.title}
           backHref={`/app/rooms/${room.slug}`}
-          backLabel={`${room.destination.nameKo} 도움방`}
+          backLabel={t.backLabel(room.destination.nameKo)}
         />
         <div className={styles.column}>{children}</div>
       </div>
@@ -58,13 +55,18 @@ export function QuestionDetailView({
   room: Room;
   currentUserId: string;
 }): React.JSX.Element {
+  const messages = useMessages();
+  const locale = useLocale();
+  const t = messages.topics.detail;
+  const shared = messages.topics.shared;
+  const labels = messages.topics.labels;
   const connectionState = useRoomRealtime(room.slug, true);
   const query = useQuestion(questionId);
 
   if (query.isPending) {
     return (
       <DetailFrame room={room}>
-        <div className={styles.skeleton} aria-label="토픽 상세를 불러오는 중">
+        <div className={styles.skeleton} aria-label={t.loadingLabel}>
           <span />
           <span />
           <span />
@@ -82,15 +84,15 @@ export function QuestionDetailView({
           <div role="alert">
             <EmptyState
               icon="alert"
-              title="토픽을 불러오지 못했어요"
-              description="토픽이 삭제되었거나 연결이 잠시 불안정할 수 있어요."
+              title={shared.loadErrorTitle}
+              description={t.loadErrorDescription}
               action={
                 <Button
                   variant="secondary"
                   icon="refresh"
                   onClick={() => void query.refetch()}
                 >
-                  다시 불러오기
+                  {shared.reload}
                 </Button>
               }
             />
@@ -122,15 +124,13 @@ export function QuestionDetailView({
     <DetailFrame room={room}>
       {connectionState !== 'connected' && (
         <Notice tone="warning" icon="refresh" role="status">
-          {connectionState === 'offline'
-            ? '인터넷 연결을 확인해 주세요. 연결되면 이 토픽을 자동으로 다시 불러와요.'
-            : '실시간 연결을 복구 중이에요. 연결되면 이 토픽을 자동으로 다시 불러와요.'}
+          {connectionState === 'offline' ? t.offline : t.reconnecting}
         </Notice>
       )}
       {query.isRefetchError && (
         <div className={styles.retryRow}>
           <Notice tone="warning" icon="alert" role="status">
-            토픽을 새로 불러오지 못했어요. 보이는 내용이 최신이 아닐 수 있어요.
+            {t.refetchFailed}
           </Notice>
           <Button
             variant="secondary"
@@ -139,25 +139,29 @@ export function QuestionDetailView({
             disabled={query.isFetching}
             onClick={() => void query.refetch()}
           >
-            {query.isFetching ? '불러오는 중' : '다시 시도'}
+            {query.isFetching ? messages.common.loading : messages.common.retry}
           </Button>
         </div>
       )}
       <Card as="article" className={styles.question}>
         <div className={styles.lead}>
           <span className={styles.category}>
-            {categoryLabels[question.category]}
+            {labels.category[question.category]}
           </span>
           <span className={styles.chips}>
             {question.urgency === 'URGENT' && (
               <Chip tone="traveler" icon="clock">
-                {urgencyLabels.URGENT}
+                {labels.urgency.URGENT}
               </Chip>
             )}
-            <Chip tone={statusTone}>{statusLabels[question.status]}</Chip>
+            <Chip tone={statusTone}>{labels.status[question.status]}</Chip>
           </span>
         </div>
-        <h2 className={styles.content}>{question.content}</h2>
+        <h2 className={styles.content}>
+          {question.status === 'REMOVED'
+            ? messages.topics.hidden.topic
+            : question.content}
+        </h2>
         {question.areaText !== null && (
           <p className={styles.area}>
             <AppIcon name="pin" /> {question.areaText}
@@ -170,17 +174,17 @@ export function QuestionDetailView({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={question.image.url}
-              alt={`${question.areaText ?? '현장'} 토픽 첨부 사진`}
+              alt={shared.photoAlt(question.areaText)}
             />
             <figcaption>
-              <strong>현장 사진</strong>
+              <strong>{shared.photo}</strong>
               <span>{question.image.originalName}</span>
             </figcaption>
           </figure>
         )}
         {question.safetyNotice !== null && (
           <div className={styles.safety}>
-            <strong>긴급 상황 안내</strong>
+            <strong>{t.safetyTitle}</strong>
             <p>{question.safetyNotice}</p>
           </div>
         )}
@@ -197,13 +201,13 @@ export function QuestionDetailView({
               </span>
               <span className={styles.time}>
                 <time dateTime={question.createdAt}>
-                  {formatDateTime(question.createdAt)}
+                  {formatDateTime(question.createdAt, locale)}
                 </time>{' '}
-                ·{' '}
+                · {t.closesBefore}
                 <time dateTime={question.expiresAt}>
-                  {formatDateTime(question.expiresAt)}
-                </time>{' '}
-                마감
+                  {formatDateTime(question.expiresAt, locale)}
+                </time>
+                {t.closesAfter}
               </span>
             </div>
           </div>
@@ -218,11 +222,15 @@ export function QuestionDetailView({
               {!isOwner && question.status !== 'REMOVED' && (
                 <ReportMenu
                   targets={[
-                    { type: 'QUESTION', id: question.id, label: '이 토픽' },
+                    {
+                      type: 'QUESTION',
+                      id: question.id,
+                      label: t.reportQuestion,
+                    },
                     {
                       type: 'USER',
                       id: question.author.id,
-                      label: `${question.author.nickname} 사용자`,
+                      label: shared.reportUser(question.author.nickname),
                     },
                   ]}
                 />
@@ -242,13 +250,13 @@ export function QuestionDetailView({
           <div>
             <strong>
               {question.acceptedAnswerId === null
-                ? '작성자가 해결된 상황으로 확인했어요'
-                : '작성자가 도움이 된 답변을 채택했어요'}
+                ? t.resolvedWithoutAnswer
+                : t.resolvedAccepted}
             </strong>
             <p>
               {question.resolvedAt === null
-                ? '이 토픽은 해결됨으로 마무리되었어요.'
-                : `${formatDateTime(question.resolvedAt)}에 해결되었어요.`}
+                ? t.resolvedDefault
+                : t.resolvedAt(formatDateTime(question.resolvedAt, locale))}
             </p>
           </div>
         </div>
@@ -257,17 +265,17 @@ export function QuestionDetailView({
       <section className={styles.answers} aria-labelledby="answer-thread-title">
         <div className={styles.answersHead}>
           <h2 id="answer-thread-title">
-            참여자 답변 {question.answers.length}
+            {t.answersTitle(question.answers.length)}
           </h2>
-          <span>먼저 도착한 순서</span>
+          <span>{t.answersOrder}</span>
         </div>
         {question.answers.length === 0 ? (
           <Card>
             <EmptyState
               icon="live"
               tone="iris"
-              title="아직 도착한 답변이 없어요"
-              description="실시간 연결을 유지하고 있어요. 참여자의 첫 답변이 오면 바로 보여드릴게요."
+              title={t.emptyTitle}
+              description={t.emptyDescription}
             />
           </Card>
         ) : (

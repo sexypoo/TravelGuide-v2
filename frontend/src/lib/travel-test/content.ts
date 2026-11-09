@@ -1,7 +1,13 @@
+import type { Locale } from '@/i18n/config';
 import type { TravelStyle } from '@/lib/api/profile';
+import {
+  TRAVEL_TEST_QUESTION_TEXT_EN,
+  TRAVEL_TYPE_TEXT_EN,
+} from './content.en';
 
 // Travel type test (#42, ADR-052). Types are region-neutral; each answer
-// gives one point to one type.
+// gives one point to one type. The Korean text lives here with the structure;
+// other languages only swap the text (`content.en.ts`, #80).
 
 export const TRAVEL_TYPE_KEYS = [
   'dawn',
@@ -26,11 +32,15 @@ export type TravelTypeGlyph =
   | 'map'
   | 'bag';
 
-export type TravelType = {
+/** The parts of a type that change with the language. */
+export type TravelTypeText = {
   name: string;
   tagline: string;
   description: string;
   traits: readonly [string, string, string];
+};
+
+export type TravelType = TravelTypeText & {
   styles: readonly TravelStyle[];
   match: TravelTypeKey;
   color: string;
@@ -233,6 +243,45 @@ export const TRAVEL_TEST_QUESTIONS: readonly TravelTestQuestion[] = [
     ],
   },
 ];
+
+function withText(key: TravelTypeKey): TravelType {
+  return { ...TRAVEL_TYPES[key], ...TRAVEL_TYPE_TEXT_EN[key] };
+}
+
+const TRAVEL_TYPES_EN: Record<TravelTypeKey, TravelType> = {
+  dawn: withText('dawn'),
+  food: withText('food'),
+  slow: withText('slow'),
+  mood: withText('mood'),
+  night: withText('night'),
+  spont: withText('spont'),
+  plan: withText('plan'),
+  market: withText('market'),
+};
+
+const TRAVEL_TEST_QUESTIONS_EN: readonly TravelTestQuestion[] =
+  TRAVEL_TEST_QUESTIONS.map((question, index) => {
+    const text = TRAVEL_TEST_QUESTION_TEXT_EN[index];
+    return {
+      text: text?.text ?? question.text,
+      options: question.options.map((option, optionIndex) => ({
+        label: text?.options[optionIndex] ?? option.label,
+        type: option.type,
+      })),
+    };
+  });
+
+export function travelTypesFor(
+  locale: Locale,
+): Record<TravelTypeKey, TravelType> {
+  return locale === 'en' ? TRAVEL_TYPES_EN : TRAVEL_TYPES;
+}
+
+export function travelTestQuestionsFor(
+  locale: Locale,
+): readonly TravelTestQuestion[] {
+  return locale === 'en' ? TRAVEL_TEST_QUESTIONS_EN : TRAVEL_TEST_QUESTIONS;
+}
 
 export function isTravelTypeKey(value: string): value is TravelTypeKey {
   return (TRAVEL_TYPE_KEYS as readonly string[]).includes(value);

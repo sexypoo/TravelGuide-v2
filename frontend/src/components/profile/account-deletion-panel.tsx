@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import { deleteOwnAccount } from '@/lib/api/profile';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import styles from './profile.module.css';
@@ -11,32 +13,36 @@ interface AccountDeletionPanelProps {
   hasPassword: boolean;
 }
 
-const CONFIRMATION = '계정 삭제';
+// The API only accepts its own phrase. The user types the phrase in their
+// language, and the request always carries this one (#80).
+const API_CONFIRMATION = '계정 삭제';
 
-function deletionErrorMessage(error: unknown): string {
+function deletionErrorMessage(
+  error: unknown,
+  t: Messages['profile']['deletion'],
+): string {
   if (
     error instanceof ApiProblem &&
     error.code === 'ACCOUNT_DELETION_REAUTH_FAILED'
   ) {
-    return '현재 비밀번호가 맞지 않습니다.';
+    return t.reauthFailed;
   }
-  return actionableErrorMessage(
-    error,
-    '계정을 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.',
-  );
+  return actionableErrorMessage(error, t.failed);
 }
 
 export function AccountDeletionPanel({
   hasPassword,
 }: AccountDeletionPanelProps): React.JSX.Element {
   const router = useRouter();
+  const messages = useMessages();
+  const t = messages.profile.deletion;
   const [expanded, setExpanded] = useState(false);
   const [confirmation, setConfirmation] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ready =
-    confirmation.trim() === CONFIRMATION &&
+    confirmation.trim() === t.confirmationPhrase &&
     (!hasPassword || password.length > 0) &&
     !submitting;
 
@@ -49,13 +55,13 @@ export function AccountDeletionPanel({
     setError(null);
     try {
       await deleteOwnAccount({
-        confirmation: confirmation.trim(),
+        confirmation: API_CONFIRMATION,
         ...(hasPassword ? { password } : {}),
       });
       router.replace('/account-deletion?deleted=true');
       router.refresh();
     } catch (caught: unknown) {
-      setError(deletionErrorMessage(caught));
+      setError(deletionErrorMessage(caught, t));
       setSubmitting(false);
     }
   }
@@ -64,13 +70,13 @@ export function AccountDeletionPanel({
     <section className={styles.section} aria-labelledby="account-title">
       <header className={styles.sectionHeader}>
         <div>
-          <h2 id="account-title">계정 관리</h2>
-          <p>개인정보 처리방침과 계정 삭제 방법을 확인할 수 있어요.</p>
+          <h2 id="account-title">{t.title}</h2>
+          <p>{t.description}</p>
         </div>
       </header>
-      <nav className={styles.accountLinks} aria-label="계정 정책">
-        <Link href="/privacy">개인정보 처리방침</Link>
-        <Link href="/account-deletion">삭제 안내</Link>
+      <nav className={styles.accountLinks} aria-label={t.policiesLabel}>
+        <Link href="/privacy">{t.privacy}</Link>
+        <Link href="/account-deletion">{t.guide}</Link>
       </nav>
 
       {!expanded ? (
@@ -79,26 +85,23 @@ export function AccountDeletionPanel({
           type="button"
           onClick={() => setExpanded(true)}
         >
-          계정 삭제 살펴보기
+          {t.open}
         </button>
       ) : (
         <form method="post" className={styles.deletion} onSubmit={submit}>
           <div>
-            <strong>삭제하면 되돌릴 수 없습니다.</strong>
-            <p>
-              프로필과 인증, 질문·답변·채팅·커뮤니티 콘텐츠, 여행 기록과 찜,
-              비공개 증빙 및 업로드 파일이 함께 삭제됩니다.
-            </p>
-            <ol aria-label="계정 삭제 범위">
-              <li>계정</li>
-              <li>공개 콘텐츠</li>
-              <li>비공개 증빙·업로드</li>
+            <strong>{t.warningTitle}</strong>
+            <p>{t.warningBody}</p>
+            <ol aria-label={t.scopeLabel}>
+              {t.scope.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
             </ol>
           </div>
 
           {hasPassword ? (
             <label>
-              <span>현재 비밀번호</span>
+              <span>{t.currentPassword}</span>
               <input
                 className={styles.control}
                 autoComplete="current-password"
@@ -110,15 +113,14 @@ export function AccountDeletionPanel({
               />
             </label>
           ) : (
-            <p>
-              소셜 로그인으로 만든 계정입니다. 연결된 로그인 정보도 함께
-              해제됩니다.
-            </p>
+            <p>{t.socialAccount}</p>
           )}
 
           <label>
             <span>
-              확인을 위해 <b>{CONFIRMATION}</b>를 입력해 주세요.
+              {t.confirmBefore}
+              <b>{t.confirmationPhrase}</b>
+              {t.confirmAfter}
             </span>
             <input
               className={styles.control}
@@ -147,14 +149,14 @@ export function AccountDeletionPanel({
                 setError(null);
               }}
             >
-              취소
+              {messages.common.cancel}
             </button>
             <button
               className={styles.dangerButton}
               type="submit"
               disabled={!ready}
             >
-              {submitting ? '삭제 중…' : '계정 영구 삭제'}
+              {submitting ? t.deleting : t.submit}
             </button>
           </div>
         </form>

@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { communityCategoryLabels } from '@/lib/community/presentation';
+import { communityCategoryLabelsFor } from '@/lib/community/presentation';
+import { useLocale, useMessages } from '@/i18n/client';
 import { AppIcon } from '@/components/common';
 import { Page, PageHeader } from '@/components/app/page';
 import {
@@ -26,10 +27,6 @@ import {
 } from '@/lib/api/community';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 
-function date(value: string): string {
-  return formatRelativeTime(value);
-}
-
 export function CommunityBoard({
   currentUserId,
 }: {
@@ -44,6 +41,10 @@ export function CommunityBoard({
   const [reloadKey, setReloadKey] = useState(0);
   const [composerOpen, setComposerOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const t = useMessages();
+  const locale = useLocale();
+  const copy = t.community.board;
+  const categoryLabels = communityCategoryLabelsFor(locale);
 
   useEffect(() => {
     let active = true;
@@ -82,12 +83,7 @@ export function CommunityBoard({
       setPosts((current) => [...current, ...page.items]);
       setCursor(page.nextCursor);
     } catch (loadError: unknown) {
-      setError(
-        actionableErrorMessage(
-          loadError,
-          '이전 글을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
-        ),
-      );
+      setError(actionableErrorMessage(loadError, copy.loadMoreFailed));
     } finally {
       setLoading(false);
     }
@@ -116,24 +112,19 @@ export function CommunityBoard({
       formElement.reset();
       setComposerOpen(false);
     } catch (submitError: unknown) {
-      setError(
-        actionableErrorMessage(
-          submitError,
-          '게시글을 올리지 못했습니다. 입력 내용과 연결을 확인해 주세요.',
-        ),
-      );
+      setError(actionableErrorMessage(submitError, copy.submitFailed));
     } finally {
       setPending(false);
     }
   }
 
-  const composeLabel = composerOpen ? '작성 닫기' : '글쓰기';
+  const composeLabel = composerOpen ? copy.composeClose : copy.compose;
 
   return (
     <Page>
       <PageHeader
-        title="커뮤니티"
-        description="인증 없이도 여행 정보를 편하게 묻고 나눠요."
+        title={t.community.title}
+        description={copy.description}
         actions={
           <span className={styles.webCompose}>
             <Button
@@ -148,46 +139,44 @@ export function CommunityBoard({
       />
 
       {composerOpen && (
-        <Card className={styles.composerCard} aria-label="새 글 쓰기">
+        <Card className={styles.composerCard} aria-label={copy.composerLabel}>
           <form
             className={styles.form}
             method="post"
             onSubmit={(event) => void submit(event)}
           >
             <div className={styles.formHead}>
-              <strong>어떤 여행 정보를 나눌까요?</strong>
-              <span>
-                연락처나 정확한 숙소 위치 같은 개인정보는 적지 마세요.
-              </span>
+              <strong>{copy.formHeading}</strong>
+              <span>{copy.formPrivacy}</span>
             </div>
             <div className={styles.formRow}>
               <label className={styles.field}>
-                <span>분류</span>
+                <span>{copy.category}</span>
                 <select name="category" defaultValue="TRAVEL_TIP">
                   {communityCategories.map((item) => (
                     <option key={item} value={item}>
-                      {communityCategoryLabels[item]}
+                      {categoryLabels[item]}
                     </option>
                   ))}
                 </select>
               </label>
               <label className={styles.field}>
                 <span>
-                  지역 <small>선택</small>
+                  {copy.area} <small>{copy.areaOptional}</small>
                 </span>
                 <input
                   name="areaText"
                   maxLength={60}
-                  placeholder="예: 부산, 도쿄"
+                  placeholder={copy.areaPlaceholder}
                 />
               </label>
             </div>
             <label className={styles.field}>
-              <span>제목</span>
+              <span>{copy.postTitle}</span>
               <input name="title" minLength={5} maxLength={100} required />
             </label>
             <label className={styles.field}>
-              <span>내용</span>
+              <span>{copy.content}</span>
               <textarea
                 name="content"
                 minLength={10}
@@ -197,7 +186,7 @@ export function CommunityBoard({
               />
             </label>
             <Button type="submit" size="lg" block disabled={pending}>
-              {pending ? '올리는 중…' : '커뮤니티에 올리기'}
+              {pending ? copy.submitting : copy.submit}
             </Button>
           </form>
         </Card>
@@ -205,14 +194,14 @@ export function CommunityBoard({
 
       <div
         className={`${uiStyles.filters} ${styles.filters}`}
-        aria-label="게시글 분류"
+        aria-label={copy.filtersLabel}
       >
         <button
           type="button"
           aria-pressed={category === undefined}
           onClick={() => setCategory(undefined)}
         >
-          전체
+          {copy.all}
         </button>
         {communityCategories.map((item) => (
           <button
@@ -221,7 +210,7 @@ export function CommunityBoard({
             aria-pressed={category === item}
             onClick={() => setCategory(item)}
           >
-            {communityCategoryLabels[item]}
+            {categoryLabels[item]}
           </button>
         ))}
       </div>
@@ -248,15 +237,15 @@ export function CommunityBoard({
           <div role="alert">
             <EmptyState
               icon="alert"
-              title="커뮤니티 글을 불러오지 못했어요"
-              description="연결을 확인한 뒤 다시 시도해 주세요."
+              title={copy.loadFailedTitle}
+              description={t.community.loadFailedDescription}
               action={
                 <Button
                   variant="secondary"
                   icon="refresh"
                   onClick={() => setReloadKey((key) => key + 1)}
                 >
-                  다시 불러오기
+                  {t.community.reload}
                 </Button>
               }
             />
@@ -267,8 +256,8 @@ export function CommunityBoard({
           <EmptyState
             icon="community"
             tone="iris"
-            title="아직 도착한 여행 정보가 없어요"
-            description="이 지역을 아는 첫 번째 여행자가 되어 주세요."
+            title={copy.emptyTitle}
+            description={copy.emptyDescription}
           />
         </Card>
       ) : (
@@ -282,21 +271,25 @@ export function CommunityBoard({
                 <span className={styles.by}>
                   <Avatar name={post.author.nickname} size="sm" tone="iris" />
                   <b>{post.author.nickname}</b>
-                  <span>{date(post.createdAt)}</span>
+                  <span>
+                    {formatRelativeTime(post.createdAt, undefined, locale)}
+                  </span>
                 </span>
-                <h2 className={styles.title}>{post.title}</h2>
-                <p className={styles.preview}>{post.content}</p>
+                <h2 className={styles.title}>
+                  {post.removed ? t.community.hidden.postTitle : post.title}
+                </h2>
+                <p className={styles.preview}>
+                  {post.removed ? t.community.hidden.post : post.content}
+                </p>
               </Link>
               <footer className={styles.foot}>
-                <Chip tone="plum">
-                  {communityCategoryLabels[post.category]}
-                </Chip>
+                <Chip tone="plum">{categoryLabels[post.category]}</Chip>
                 {post.areaText !== null && (
                   <Chip icon="pin">{post.areaText}</Chip>
                 )}
                 <span className={styles.comments}>
                   <AppIcon name="community" />
-                  <span className="srOnly">댓글</span>
+                  <span className="srOnly">{copy.comments}</span>
                   {post.commentCount}
                 </span>
                 {post.author.id !== currentUserId && !post.removed && (
@@ -306,7 +299,7 @@ export function CommunityBoard({
                         {
                           type: 'COMMUNITY_POST',
                           id: post.id,
-                          label: '이 게시글',
+                          label: t.community.reportPost,
                         },
                       ]}
                     />
@@ -325,7 +318,7 @@ export function CommunityBoard({
           onClick={() => void loadMore()}
           disabled={loading}
         >
-          {loading ? '불러오는 중…' : '이전 글 더 보기'}
+          {loading ? copy.loadingMore : copy.loadMore}
         </Button>
       )}
 
@@ -340,7 +333,7 @@ export function CommunityBoard({
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         >
-          글쓰기
+          {copy.compose}
         </Button>
       )}
     </Page>

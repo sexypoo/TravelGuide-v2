@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { I18nProvider } from '../../i18n/client';
 import { registerPreorder } from '../../lib/api/preorders';
 import { PreorderForm } from './preorder-form';
 
@@ -45,5 +46,30 @@ describe('PreorderForm', () => {
       email: 'traveler@example.com',
       privacyConsent: true,
     });
+  });
+});
+
+describe('PreorderForm in English', () => {
+  beforeEach(() => registerPreorderMock.mockReset());
+
+  it('shows English labels and field errors', () => {
+    render(
+      <I18nProvider locale="en">
+        <PreorderForm />
+      </I18nProvider>,
+    );
+    expect(screen.getByLabelText('Name')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Pre-register now/ }));
+
+    expect(screen.getByText('Please enter your name.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Please enter a valid email address.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Please agree to the collection of personal information.',
+      ),
+    ).toBeInTheDocument();
+    expect(registerPreorderMock).not.toHaveBeenCalled();
   });
 });

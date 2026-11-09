@@ -1,14 +1,21 @@
+import type { Locale } from '@/i18n/config';
 import type { TravelTypeKey } from './content';
+import { COURSE_TEXT_EN } from './courses.en';
 
 // Sample day courses per travel type and region (#42, ADR-052). Written by the
 // team with AI help, not by verified locals; the UI says so. Replace each
 // with a verified local's course as they come in (#14). Keep notes free of
-// exact hours, prices, or schedules that go stale.
+// exact hours, prices, or schedules that go stale. The Korean text lives here
+// with the times; other languages only swap the text (`courses.en.ts`, #80).
 
-export type CourseStop = {
-  time: string;
+/** The parts of a stop that change with the language. */
+export type CourseStopText = {
   place: string;
   note: string;
+};
+
+export type CourseStop = CourseStopText & {
+  time: string;
 };
 
 type RegionCourses = Record<TravelTypeKey, readonly CourseStop[]>;
@@ -709,8 +716,10 @@ const SEOUL: RegionCourses = {
   ],
 };
 
+export type CourseRegionKey = 'jeju' | 'busan' | 'gangneung' | 'seoul';
+
 export type CourseRegion = {
-  key: string;
+  key: CourseRegionKey;
   name: string;
   courses: RegionCourses;
 };
@@ -722,3 +731,33 @@ export const COURSE_REGIONS: readonly CourseRegion[] = [
   { key: 'gangneung', name: '강릉', courses: GANGNEUNG },
   { key: 'seoul', name: '서울', courses: SEOUL },
 ];
+
+function englishRegion(region: CourseRegion): CourseRegion {
+  const text = COURSE_TEXT_EN[region.key];
+  const stops = (type: TravelTypeKey): readonly CourseStop[] =>
+    region.courses[type].map((stop, index) => ({
+      time: stop.time,
+      ...(text.courses[type][index] ?? stop),
+    }));
+  return {
+    key: region.key,
+    name: text.name,
+    courses: {
+      dawn: stops('dawn'),
+      food: stops('food'),
+      slow: stops('slow'),
+      mood: stops('mood'),
+      night: stops('night'),
+      spont: stops('spont'),
+      plan: stops('plan'),
+      market: stops('market'),
+    },
+  };
+}
+
+const COURSE_REGIONS_EN: readonly CourseRegion[] =
+  COURSE_REGIONS.map(englishRegion);
+
+export function courseRegionsFor(locale: Locale): readonly CourseRegion[] {
+  return locale === 'en' ? COURSE_REGIONS_EN : COURSE_REGIONS;
+}

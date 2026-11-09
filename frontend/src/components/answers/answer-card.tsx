@@ -6,13 +6,11 @@ import {
 } from '@/components/questions/participant-chip';
 import { ReportMenu } from '@/components/reports/report-menu';
 import { Avatar, Chip } from '@/components/ui';
+import { useLocale, useMessages } from '@/i18n/client';
 import type { Answer, AnswerSourceType } from '@/lib/api/questions';
 import {
   formatDateTime,
   formatVerifiedDate,
-  sourceLabels,
-  crowdLabels,
-  entryLabels,
 } from '@/lib/questions/presentation';
 import styles from './answer-card.module.css';
 
@@ -32,6 +30,10 @@ export function AnswerCard({
   accepted: boolean;
   currentUserId: string;
 }): React.JSX.Element {
+  const messages = useMessages();
+  const locale = useLocale();
+  const t = messages.topics.answerCard;
+  const labels = messages.topics.labels;
   return (
     <article
       className={styles.card}
@@ -41,7 +43,7 @@ export function AnswerCard({
       {accepted && (
         <div className={styles.accepted}>
           <Chip tone="success" icon="check">
-            채택된 답변
+            {t.accepted}
           </Chip>
         </div>
       )}
@@ -49,7 +51,7 @@ export function AnswerCard({
         {answer.removed ? (
           <span className={styles.removedLabel}>
             <AppIcon name="minus" />
-            숨김 처리된 답변
+            {t.removed}
           </span>
         ) : (
           <>
@@ -62,7 +64,7 @@ export function AnswerCard({
                 <Link
                   className={styles.name}
                   href={`/app/users/${encodeURIComponent(answer.author.id)}`}
-                  aria-label={`${answer.author.nickname} 공개 프로필 보기`}
+                  aria-label={t.profileLabel(answer.author.nickname)}
                 >
                   {answer.author.nickname}
                 </Link>
@@ -70,46 +72,54 @@ export function AnswerCard({
               </span>
               <span className={styles.sub}>
                 <time dateTime={answer.createdAt}>
-                  {formatDateTime(answer.createdAt)}
+                  {formatDateTime(answer.createdAt, locale)}
                 </time>
                 <span aria-hidden="true">·</span>
-                <span>{formatVerifiedDate(answer.author.verifiedAt)} 인증</span>
+                <span>
+                  {t.verifiedOn(
+                    formatVerifiedDate(answer.author.verifiedAt, locale),
+                  )}
+                </span>
               </span>
             </div>
           </>
         )}
       </header>
-      <p className={styles.content}>{answer.content}</p>
+      <p className={styles.content}>
+        {answer.removed ? messages.topics.hidden.answer : answer.content}
+      </p>
       {/* The realtime cache keeps media on hidden answers until refetch. */}
       {!answer.removed && answer.image && (
         <figure className={styles.evidence}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={answer.image.url} alt={answer.image.originalName} />
-          <figcaption>현장 확인 사진</figcaption>
+          <figcaption>{t.photoCaption}</figcaption>
         </figure>
       )}
       {!answer.removed && answer.observation && (
-        <div className={styles.observation} aria-label="현장 관찰 정보">
+        <div className={styles.observation} aria-label={t.observationLabel}>
           {answer.observation.waitMinutes !== null && (
             <span>
-              <small>대기</small>
-              <strong>{answer.observation.waitMinutes}분</strong>
+              <small>{t.wait}</small>
+              <strong>{t.waitValue(answer.observation.waitMinutes)}</strong>
             </span>
           )}
           {answer.observation.crowdLevel !== null && (
             <span>
-              <small>혼잡</small>
-              <strong>{crowdLabels[answer.observation.crowdLevel]}</strong>
+              <small>{t.crowd}</small>
+              <strong>{labels.crowd[answer.observation.crowdLevel]}</strong>
             </span>
           )}
           {answer.observation.entryStatus !== null && (
             <span>
-              <small>입장</small>
-              <strong>{entryLabels[answer.observation.entryStatus]}</strong>
+              <small>{t.entry}</small>
+              <strong>{labels.entry[answer.observation.entryStatus]}</strong>
             </span>
           )}
           <time dateTime={answer.observation.observedAt}>
-            {formatDateTime(answer.observation.observedAt)} 확인
+            {messages.topics.shared.checkedAt(
+              formatDateTime(answer.observation.observedAt, locale),
+            )}
           </time>
         </div>
       )}
@@ -117,7 +127,7 @@ export function AnswerCard({
         <footer className={styles.footer}>
           {!answer.removed && (
             <Chip icon={sourceIcons[answer.sourceType]}>
-              {sourceLabels[answer.sourceType]}
+              {labels.source[answer.sourceType]}
             </Chip>
           )}
           {answer.sourceUrl !== null && (
@@ -127,18 +137,20 @@ export function AnswerCard({
               target="_blank"
               rel="noopener noreferrer"
             >
-              공식 출처 열기 <AppIcon name="external" />
+              {t.openSource} <AppIcon name="external" />
             </a>
           )}
           {answer.author.id !== currentUserId && !answer.removed && (
             <span className={styles.report}>
               <ReportMenu
                 targets={[
-                  { type: 'ANSWER', id: answer.id, label: '이 답변' },
+                  { type: 'ANSWER', id: answer.id, label: t.reportAnswer },
                   {
                     type: 'USER',
                     id: answer.author.id,
-                    label: `${answer.author.nickname} 사용자`,
+                    label: messages.topics.shared.reportUser(
+                      answer.author.nickname,
+                    ),
                   },
                 ]}
               />

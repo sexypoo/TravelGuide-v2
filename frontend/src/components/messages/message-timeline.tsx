@@ -8,6 +8,7 @@ import type { ChatMessage } from '@/lib/api/messages';
 import { formatChatDate } from '@/lib/questions/presentation';
 import { useMessages } from '@/lib/query/use-messages';
 import { MessageCard } from './message-card';
+import { useLocale, useMessages as useDictionary } from '@/i18n/client';
 
 function dateKey(value: string): string {
   return new Intl.DateTimeFormat('en-CA', {
@@ -47,6 +48,10 @@ export function MessageTimeline({
   currentUserId: string;
   onPromote: (message: ChatMessage) => void;
 }): React.JSX.Element {
+  const dictionary = useDictionary();
+  const t = dictionary.chat.timeline;
+  const common = dictionary.common;
+  const locale = useLocale();
   const query = useMessages(roomSlug);
   const timelineRef = useRef<HTMLDivElement>(null);
   const previousLastId = useRef<string | undefined>(undefined);
@@ -120,7 +125,7 @@ export function MessageTimeline({
 
   if (query.isPending) {
     return (
-      <div className={styles.skeleton} aria-label="대화를 불러오는 중">
+      <div className={styles.skeleton} aria-label={t.loading}>
         <span />
         <span />
         <span />
@@ -132,10 +137,10 @@ export function MessageTimeline({
   if (query.isError && query.data === undefined) {
     return (
       <div className={styles.state} role="alert">
-        <strong>대화를 불러오지 못했어요</strong>
-        <span>연결을 확인한 뒤 다시 시도해 주세요.</span>
+        <strong>{t.loadFailedTitle}</strong>
+        <span>{t.loadFailedBody}</span>
         <button type="button" onClick={() => void query.refetch()}>
-          다시 불러오기
+          {t.reload}
         </button>
       </div>
     );
@@ -150,8 +155,7 @@ export function MessageTimeline({
         <div className={styles.retryBar}>
           <div className={styles.retryRow}>
             <Notice tone="warning" icon="alert" role="status">
-              최신 대화를 불러오지 못했어요. 보이는 대화가 최신이 아닐 수
-              있어요.
+              {t.refetchFailed}
             </Notice>
             <Button
               variant="secondary"
@@ -160,7 +164,7 @@ export function MessageTimeline({
               disabled={query.isFetching}
               onClick={() => void query.refetch()}
             >
-              {query.isFetching ? '불러오는 중' : '다시 시도'}
+              {query.isFetching ? common.loading : common.retry}
             </Button>
           </div>
         </div>
@@ -168,14 +172,14 @@ export function MessageTimeline({
       <div
         ref={timelineRef}
         className={styles.timeline}
-        aria-label="도움방 대화"
+        aria-label={t.label}
         onScroll={handleScroll}
       >
         <div className={styles.content}>
           {showOlderRetry ? (
             <div className={`${styles.olderRetry} ${styles.retryRow}`}>
               <Notice tone="warning" icon="alert" role="status">
-                이전 대화를 불러오지 못했어요.
+                {t.olderFailed}
               </Notice>
               <Button
                 variant="secondary"
@@ -183,7 +187,7 @@ export function MessageTimeline({
                 icon="refresh"
                 onClick={() => void query.fetchNextPage()}
               >
-                다시 시도
+                {common.retry}
               </Button>
             </div>
           ) : (
@@ -194,9 +198,7 @@ export function MessageTimeline({
                 disabled={query.isFetchingNextPage}
                 onClick={() => void query.fetchNextPage()}
               >
-                {query.isFetchingNextPage
-                  ? '이전 대화 불러오는 중'
-                  : '이전 대화 보기'}
+                {query.isFetchingNextPage ? t.olderLoading : t.olderShow}
               </button>
             )
           )}
@@ -205,10 +207,8 @@ export function MessageTimeline({
               <span className={styles.stateIcon} aria-hidden="true">
                 <AppIcon name="live" />
               </span>
-              <strong>이 방의 첫 대화를 시작해 보세요</strong>
-              <p>
-                지금 보고 들은 짧은 정보도 누군가의 다음 결정을 도울 수 있어요.
-              </p>
+              <strong>{t.emptyTitle}</strong>
+              <p>{t.emptyBody}</p>
             </div>
           ) : (
             messages.map((message, index) => {
@@ -220,7 +220,7 @@ export function MessageTimeline({
                 <div key={message.id}>
                   {showDate && (
                     <div className={styles.dateDivider}>
-                      <span>{formatChatDate(message.createdAt)}</span>
+                      <span>{formatChatDate(message.createdAt, locale)}</span>
                     </div>
                   )}
                   <MessageCard
@@ -238,10 +238,11 @@ export function MessageTimeline({
         <button
           className={styles.newMessages}
           type="button"
-          aria-label={`새 메시지 ${unreadCount}개, 최신 대화로 이동`}
+          aria-label={t.newMessagesLabel(unreadCount)}
           onClick={() => moveToLatest(scrollBehavior())}
         >
-          <AppIcon name="arrow-right" className={styles.down} />새 메시지
+          <AppIcon name="arrow-right" className={styles.down} />
+          {t.newMessages}
           <strong>{unreadCount}</strong>
         </button>
       )}

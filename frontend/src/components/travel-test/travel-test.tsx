@@ -4,10 +4,12 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
 import { Button } from '@/components/ui';
+import { useLocale, useMessages } from '@/i18n/client';
 import {
   scoreTravelTest,
   TRAVEL_TEST_QUESTIONS,
   TRAVEL_TYPE_KEYS,
+  travelTestQuestionsFor,
   type TravelTypeKey,
 } from '@/lib/travel-test/content';
 import { Critter } from './critter';
@@ -17,6 +19,8 @@ const TOTAL = TRAVEL_TEST_QUESTIONS.length;
 
 export function TravelTest(): React.JSX.Element {
   const router = useRouter();
+  const t = useMessages().travelTest;
+  const questions = travelTestQuestionsFor(useLocale());
   const [step, setStep] = useState(-1);
   const [answers, setAnswers] = useState<TravelTypeKey[]>([]);
   const [finishing, setFinishing] = useState(false);
@@ -44,26 +48,24 @@ export function TravelTest(): React.JSX.Element {
             <Critter key={key} type={key} className={styles.castItem} />
           ))}
         </div>
-        <p className={styles.kicker}>여쭈어 여행자 유형 테스트</p>
+        <p className={styles.kicker}>{t.intro.kicker}</p>
         <h1 id="travel-test-title" className={styles.title}>
-          나는 어떤
+          {t.intro.titleLine1}
           <br />
-          여행자일까?
+          {t.intro.titleLine2}
         </h1>
-        <p className={styles.lede}>
-          질문 10개로 내 여행 유형을 알아보고, 친구와 결과를 나눠 보세요.
-        </p>
-        <p className={styles.meta}>1분 · 로그인 없이 · 유형 8가지</p>
+        <p className={styles.lede}>{t.intro.lede}</p>
+        <p className={styles.meta}>{t.intro.meta}</p>
         <Button size="lg" block onClick={() => setStep(0)}>
-          시작하기
+          {t.intro.start}
         </Button>
       </section>
     );
   }
 
-  const question = TRAVEL_TEST_QUESTIONS[step];
+  const question = questions[step];
   if (question === undefined) {
-    return <p className={styles.lede}>결과를 계산하고 있어요.</p>;
+    return <p className={styles.lede}>{t.quiz.calculating}</p>;
   }
 
   return (
@@ -73,14 +75,14 @@ export function TravelTest(): React.JSX.Element {
           type="button"
           className={styles.back}
           onClick={() => setStep(step - 1)}
-          aria-label={step === 0 ? '처음 화면으로' : '이전 질문'}
+          aria-label={step === 0 ? t.quiz.backToIntro : t.quiz.previous}
         >
           <AppIcon name="arrow-left" />
         </button>
         <div
           className={styles.bar}
           role="progressbar"
-          aria-label="진행도"
+          aria-label={t.quiz.progress}
           aria-valuemin={1}
           aria-valuemax={TOTAL}
           aria-valuenow={step + 1}

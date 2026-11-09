@@ -25,6 +25,8 @@
 
 .nav nav {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.25rem;
   margin-right: -0.625rem;
 }
@@ -72,6 +74,14 @@
   color: var(--ink-2);
   font-size: var(--text-md);
   line-height: 1.6;
+}
+
+.translationNotice {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
 }
 
 .document > section {

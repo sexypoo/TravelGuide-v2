@@ -1,6 +1,9 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import { AppIcon, type AppIconName } from '@/components/common';
 import { Button, Card, IconTile, Notice } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
 import styles from './verification.module.css';
 
 export function FormCard({
@@ -28,8 +31,9 @@ export function PrepareCard({
 }: {
   items: ReadonlyArray<{ icon: AppIconName; title: string; text: string }>;
 }): React.JSX.Element {
+  const t = useMessages().verifications.form;
   return (
-    <Card className={styles.formCard} aria-label="신청 전에 준비할 것">
+    <Card className={styles.formCard} aria-label={t.prepareLabel}>
       <ul className={styles.prepare}>
         {items.map((item) => (
           <li key={item.title}>
@@ -54,6 +58,7 @@ export function ProofPicker({
   file: File | undefined;
   onChange: (file: File | undefined) => void;
 }): React.JSX.Element {
+  const t = useMessages().verifications.form;
   return (
     <label
       className={styles.upload}
@@ -64,10 +69,10 @@ export function ProofPicker({
       </span>
       <span className={styles.uploadText}>
         <strong>{label}</strong>
-        <small>{file?.name ?? 'JPEG, PNG, PDF 파일, 최대 5MB'}</small>
+        <small>{file?.name ?? t.proofHint}</small>
       </span>
       <span className={styles.uploadAction} aria-hidden="true">
-        {file === undefined ? '파일 고르기' : '바꾸기'}
+        {file === undefined ? t.proofPick : t.proofChange}
       </span>
       <input
         className="srOnly"
@@ -115,6 +120,7 @@ export function FormFooter({
   pending: boolean;
   label: string;
 }): React.JSX.Element {
+  const t = useMessages().verifications.form;
   return (
     <div className={styles.footer}>
       {error !== undefined && (
@@ -125,8 +131,7 @@ export function FormFooter({
       <Button type="submit" size="lg" block disabled={pending}>
         {pending ? (
           <>
-            <span className={styles.spinner} aria-hidden="true" /> 신청 보내는
-            중
+            <span className={styles.spinner} aria-hidden="true" /> {t.sending}
           </>
         ) : (
           label

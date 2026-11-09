@@ -1,17 +1,21 @@
+'use client';
+
 import Link from 'next/link';
+import { useLocale, useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import type { QuestionPage } from '@/lib/api/questions';
 import type { Room } from '@/lib/api/rooms';
 import { formatRelativeTime } from '@/lib/questions/presentation';
+import { destinationName } from '@/lib/rooms/presentation';
 import { ButtonLink } from '@/components/ui';
 import styles from './live-room-card.module.css';
 
-function openCountLabel(page: QuestionPage): string {
-  if (page.items.length === 0) return '아직 진행 중인 토픽이 없어요';
-  const count =
-    page.nextCursor === null
-      ? `${page.items.length}개`
-      : `${page.items.length}개 이상`;
-  return `진행 중인 토픽 ${count}`;
+function openCountLabel(
+  page: QuestionPage,
+  t: Messages['rooms']['card'],
+): string {
+  if (page.items.length === 0) return t.noTopics;
+  return t.openTopics(page.items.length, page.nextCursor !== null);
 }
 
 /**
@@ -27,7 +31,12 @@ export function LiveRoomCard({
   openQuestions: QuestionPage | null;
   now?: Date;
 }): React.JSX.Element {
-  const name = `${room.destination.nameKo} 도움방`;
+  const messages = useMessages();
+  const locale = useLocale();
+  const t = messages.rooms.card;
+  const name = messages.rooms.roomName(
+    destinationName(room.destination, locale),
+  );
   const href = `/app/rooms/${room.slug}`;
   const { access } = room;
 
@@ -38,22 +47,18 @@ export function LiveRoomCard({
       <section className={styles.card} aria-labelledby={`room-${room.id}`}>
         <p className={styles.status}>
           <span className={styles.dotIdle} aria-hidden="true" />
-          {access.labelKo}
+          {messages.rooms.access[access.status]}
         </p>
         <h2 className={styles.title} id={`room-${room.id}`}>
           {name}
         </h2>
-        <p className={styles.sub}>
-          {pending
-            ? '심사가 끝나면 인증된 여행자, 현지인과 바로 대화할 수 있어요.'
-            : '인증한 여행자와 현지인만 들어와 지금 상황을 묻고 답해요.'}
-        </p>
+        <p className={styles.sub}>{pending ? t.pendingSub : t.lockedSub}</p>
         <div className={styles.actions}>
           <ButtonLink href="/app/verifications" variant="light" size="lg">
-            {pending ? '심사 현황 보기' : '인증하고 참여하기'}
+            {pending ? t.viewReview : t.verifyAndJoin}
           </ButtonLink>
           <Link className={styles.secondary} href={href}>
-            방 소개 보기
+            {t.viewIntro}
           </Link>
         </div>
       </section>
@@ -64,17 +69,15 @@ export function LiveRoomCard({
     <section className={styles.card} aria-labelledby={`room-${room.id}`}>
       <p className={styles.status}>
         <span className={styles.dotLive} aria-hidden="true" />
-        {openQuestions === null
-          ? '지금 열려 있어요'
-          : openCountLabel(openQuestions)}
+        {openQuestions === null ? t.live : openCountLabel(openQuestions, t)}
       </p>
       <h2 className={styles.title} id={`room-${room.id}`}>
         {name}
       </h2>
-      <p className={styles.sub}>인증된 여행자와 현지인이 지금 상황을 나눠요.</p>
+      <p className={styles.sub}>{t.liveSub}</p>
 
       {openQuestions !== null && openQuestions.items.length > 0 && (
-        <ul className={styles.feed} aria-label="진행 중인 토픽">
+        <ul className={styles.feed} aria-label={t.feedLabel}>
           {openQuestions.items.map((question) => (
             <li key={question.id}>
               <Link
@@ -86,14 +89,16 @@ export function LiveRoomCard({
                     {question.content}
                   </span>
                   <span className={styles.questionMeta}>
-                    {formatRelativeTime(question.createdAt, now)}에 올라왔어요
+                    {t.postedAt(
+                      formatRelativeTime(question.createdAt, now, locale),
+                    )}
                   </span>
                 </span>
                 <span
                   className={styles.answers}
-                  aria-label={`답변 ${question.answerCount}개`}
+                  aria-label={t.answersLabel(question.answerCount)}
                 >
-                  답 {question.answerCount}
+                  {t.answersShort(question.answerCount)}
                 </span>
               </Link>
             </li>
@@ -103,7 +108,7 @@ export function LiveRoomCard({
 
       <div className={styles.actions}>
         <ButtonLink href={href} variant="light" size="lg">
-          방 들어가기
+          {t.enter}
         </ButtonLink>
       </div>
     </section>

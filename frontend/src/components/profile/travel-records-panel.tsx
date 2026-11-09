@@ -2,6 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import type { Locale } from '@/i18n/config';
+import { useLocale, useMessages } from '@/i18n/client';
 import {
   createTravelRecord,
   deleteTravelRecord,
@@ -12,6 +14,7 @@ import {
 } from '@/lib/api/travel-records';
 import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
+import { intlLocale } from '@/lib/verifications/presentation';
 import { AppIcon } from '@/components/common';
 import styles from './profile.module.css';
 
@@ -23,8 +26,8 @@ const emptyInput: SaveTravelRecordInput = {
   note: null,
 };
 
-function formatPeriod(record: TravelRecord): string {
-  const format = new Intl.DateTimeFormat('ko-KR', {
+function formatPeriod(record: TravelRecord, locale: Locale): string {
+  const format = new Intl.DateTimeFormat(intlLocale(locale), {
     month: 'short',
     day: 'numeric',
     timeZone: 'UTC',
@@ -35,6 +38,9 @@ function formatPeriod(record: TravelRecord): string {
 }
 
 export function TravelRecordsPanel(): React.JSX.Element {
+  const messages = useMessages();
+  const t = messages.profile.records;
+  const locale = useLocale();
   const client = useQueryClient();
   const records = useQuery({
     queryKey: queryKeys.travelRecords,
@@ -57,9 +63,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
       await client.invalidateQueries({ queryKey: queryKeys.travelRecords });
     },
     onError: (error: unknown) =>
-      setFormError(
-        actionableErrorMessage(error, '여행 기록을 저장하지 못했어요.'),
-      ),
+      setFormError(actionableErrorMessage(error, t.saveFailed)),
   });
   const remove = useMutation({
     mutationFn: deleteTravelRecord,
@@ -91,7 +95,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
     event.preventDefault();
     setFormError('');
     if (input.endedOn < input.startedOn) {
-      setFormError('여행 종료일은 시작일보다 빠를 수 없어요.');
+      setFormError(t.endBeforeStart);
       return;
     }
     save.mutate();
@@ -101,11 +105,11 @@ export function TravelRecordsPanel(): React.JSX.Element {
     <section className={styles.section} aria-labelledby="travel-records-title">
       <header className={styles.sectionHeader}>
         <div>
-          <h2 id="travel-records-title">나의 여행 기록</h2>
-          <p>기억하고 싶은 여행을 짧게 남겨 두세요. 나에게만 보여요.</p>
+          <h2 id="travel-records-title">{t.title}</h2>
+          <p>{t.description}</p>
         </div>
         <button className={styles.secondary} type="button" onClick={openCreate}>
-          <AppIcon name="add" /> 기록 추가
+          <AppIcon name="add" /> {t.add}
         </button>
       </header>
 
@@ -113,12 +117,12 @@ export function TravelRecordsPanel(): React.JSX.Element {
         <form method="post" className={styles.recordForm} onSubmit={submit}>
           <div className={styles.recordFormHeading}>
             <strong>
-              {editingId === undefined ? '새 여행 기록' : '여행 기록 수정'}
+              {editingId === undefined ? t.newTitle : t.editTitle}
             </strong>
             <button
               className={styles.textButton}
               type="button"
-              aria-label="여행 기록 폼 닫기"
+              aria-label={t.closeForm}
               onClick={() => setIsFormOpen(false)}
             >
               <AppIcon name="close" />
@@ -126,14 +130,14 @@ export function TravelRecordsPanel(): React.JSX.Element {
           </div>
           <div className={styles.recordGrid}>
             <label className={styles.field}>
-              기록 제목
+              {t.recordTitle}
               <input
                 className={styles.control}
                 required
                 minLength={2}
                 maxLength={80}
                 value={input.title}
-                placeholder="예: 봄날의 제주"
+                placeholder={t.recordTitlePlaceholder}
                 onChange={(event) =>
                   setInput((current) => ({
                     ...current,
@@ -143,14 +147,14 @@ export function TravelRecordsPanel(): React.JSX.Element {
               />
             </label>
             <label className={styles.field}>
-              여행지
+              {t.destination}
               <input
                 className={styles.control}
                 required
                 minLength={2}
                 maxLength={80}
                 value={input.destination}
-                placeholder="예: 제주"
+                placeholder={t.destinationPlaceholder}
                 onChange={(event) =>
                   setInput((current) => ({
                     ...current,
@@ -160,7 +164,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
               />
             </label>
             <label className={styles.field}>
-              시작일
+              {t.startedOn}
               <input
                 className={styles.control}
                 required
@@ -175,7 +179,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
               />
             </label>
             <label className={styles.field}>
-              종료일
+              {t.endedOn}
               <input
                 className={styles.control}
                 required
@@ -192,13 +196,13 @@ export function TravelRecordsPanel(): React.JSX.Element {
             </label>
           </div>
           <label className={styles.field}>
-            짧은 메모 (선택)
+            {t.note}
             <textarea
               className={styles.control}
               rows={3}
               maxLength={500}
               value={input.note ?? ''}
-              placeholder="가장 기억에 남은 순간을 적어보세요."
+              placeholder={t.notePlaceholder}
               onChange={(event) =>
                 setInput((current) => ({
                   ...current,
@@ -218,43 +222,43 @@ export function TravelRecordsPanel(): React.JSX.Element {
               type="button"
               onClick={() => setIsFormOpen(false)}
             >
-              취소
+              {messages.common.cancel}
             </button>
             <button
               className={styles.secondary}
               type="submit"
               disabled={save.isPending}
             >
-              {save.isPending ? '저장 중' : '기록 저장'}
+              {save.isPending ? t.saving : t.save}
             </button>
           </div>
         </form>
       )}
 
       {records.isPending ? (
-        <p className={styles.state}>여행 기록을 불러오는 중이에요.</p>
+        <p className={styles.state}>{t.loading}</p>
       ) : records.isError ? (
         <div className={styles.state} role="alert">
-          <strong>기록을 불러오지 못했어요.</strong>
+          <strong>{t.loadFailed}</strong>
           <button
             className={styles.textButton}
             type="button"
             onClick={() => void records.refetch()}
           >
-            다시 시도
+            {messages.common.retry}
           </button>
         </div>
       ) : records.data.length === 0 ? (
-        <p className={styles.state}>
-          아직 기록이 없어요. 여행지와 날짜, 한 줄의 기억이면 충분해요.
-        </p>
+        <p className={styles.state}>{t.empty}</p>
       ) : (
         <ol className={styles.rows}>
           {records.data.map((record) => (
             <li key={record.id}>
               <article className={styles.record}>
                 <h3>{record.title}</h3>
-                <time dateTime={record.startedOn}>{formatPeriod(record)}</time>
+                <time dateTime={record.startedOn}>
+                  {formatPeriod(record, locale)}
+                </time>
                 <span className={styles.recordPlace}>{record.destination}</span>
                 {record.note && <p>{record.note}</p>}
                 <div>
@@ -263,7 +267,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
                     type="button"
                     onClick={() => openEdit(record)}
                   >
-                    수정
+                    {t.edit}
                   </button>
                   <button
                     className={styles.textButton}
@@ -271,7 +275,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
                     disabled={remove.isPending}
                     onClick={() => remove.mutate(record.id)}
                   >
-                    삭제
+                    {t.remove}
                   </button>
                 </div>
               </article>
@@ -281,10 +285,7 @@ export function TravelRecordsPanel(): React.JSX.Element {
       )}
       {remove.isError && (
         <p className={styles.error} role="alert">
-          {actionableErrorMessage(
-            remove.error,
-            '여행 기록을 삭제하지 못했어요.',
-          )}
+          {actionableErrorMessage(remove.error, t.deleteFailed)}
         </p>
       )}
     </section>

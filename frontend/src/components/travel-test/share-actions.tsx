@@ -2,7 +2,8 @@
 
 import { useRef, useState } from 'react';
 import { Button } from '@/components/ui';
-import { TRAVEL_TYPES, type TravelTypeKey } from '@/lib/travel-test/content';
+import { useLocale, useMessages } from '@/i18n/client';
+import { travelTypesFor, type TravelTypeKey } from '@/lib/travel-test/content';
 import { renderShareCard } from '@/lib/travel-test/share-card';
 import { Critter } from './critter';
 import styles from './travel-test.module.css';
@@ -21,31 +22,27 @@ export function ShareActions({
   const critterRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<Status>(null);
   const [saving, setSaving] = useState(false);
-  const travelType = TRAVEL_TYPES[type];
+  const locale = useLocale();
+  const t = useMessages().travelTest.share;
+  const travelType = travelTypesFor(locale)[type];
 
   async function shareLink(): Promise<void> {
     const url = window.location.href;
-    const text = `나는 ${travelType.name}! 너는 어떤 여행자야?`;
+    const text = t.text(travelType.name);
     try {
       if (typeof navigator.share === 'function') {
         await navigator.share({
-          title: '여쭈어 여행자 유형 테스트',
+          title: t.title,
           text,
           url,
         });
         return;
       }
       await navigator.clipboard.writeText(`${text} ${url}`);
-      setStatus({
-        tone: 'info',
-        text: '링크를 복사했어요. 친구에게 붙여 넣어 보세요.',
-      });
+      setStatus({ tone: 'info', text: t.copied });
     } catch (error) {
       if (isAbort(error)) return;
-      setStatus({
-        tone: 'error',
-        text: '공유하지 못했어요. 주소창의 링크를 복사해 주세요.',
-      });
+      setStatus({ tone: 'error', text: t.shareFailed });
     }
   }
 
@@ -55,7 +52,7 @@ export function ShareActions({
     setSaving(true);
     setStatus(null);
     try {
-      const blob = await renderShareCard(type, svg);
+      const blob = await renderShareCard(type, svg, locale);
       const file = new File([blob], `yeojjueo-${type}.png`, {
         type: 'image/png',
       });
@@ -69,16 +66,10 @@ export function ShareActions({
       link.download = file.name;
       link.click();
       URL.revokeObjectURL(url);
-      setStatus({
-        tone: 'info',
-        text: '이미지를 저장했어요. 스토리에 올려 보세요.',
-      });
+      setStatus({ tone: 'info', text: t.saved });
     } catch (error) {
       if (isAbort(error)) return;
-      setStatus({
-        tone: 'error',
-        text: '이미지를 만들지 못했어요. 잠시 후 다시 시도해 주세요.',
-      });
+      setStatus({ tone: 'error', text: t.saveFailed });
     } finally {
       setSaving(false);
     }
@@ -88,7 +79,7 @@ export function ShareActions({
     <div className={styles.share}>
       <div className={styles.shareButtons}>
         <Button icon="send" onClick={() => void shareLink()}>
-          결과 공유하기
+          {t.shareButton}
         </Button>
         <Button
           variant="secondary"
@@ -96,7 +87,7 @@ export function ShareActions({
           disabled={saving}
           onClick={() => void saveImage()}
         >
-          {saving ? '만드는 중…' : '이미지로 저장'}
+          {saving ? t.saving : t.saveButton}
         </Button>
       </div>
       <p

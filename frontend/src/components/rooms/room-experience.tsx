@@ -10,6 +10,8 @@ import {
   uiStyles,
 } from '@/components/ui';
 import styles from './room.module.css';
+import { useLocale, useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import { MessageComposer } from '@/components/messages/message-composer';
 import { MessageTimeline } from '@/components/messages/message-timeline';
 import { useRoomRealtime } from '@/components/providers/realtime-provider';
@@ -19,19 +21,13 @@ import { QuestionFeed } from '@/components/questions/question-feed';
 import type { ChatMessage } from '@/lib/api/messages';
 import type { QuestionListStatus } from '@/lib/api/questions';
 import type { Room } from '@/lib/api/rooms';
+import { destinationName } from '@/lib/rooms/presentation';
 
-const connectionCopy = {
-  connecting: '연결 확인 중',
-  connected: '실시간 연결됨',
-  reconnecting: '다시 연결 중',
-  offline: '실시간 연결 끊김',
-} as const;
-
-function roleLabel(room: Room): string {
-  if (room.access.participantKind === 'BOTH') return '여행자 · 현지인 인증';
-  if (room.access.participantKind === 'LOCAL') return '인증 현지인';
-  if (room.access.participantKind === 'TRAVELER') return '인증 여행자';
-  return '관리자 · 읽기 전용';
+function roleLabel(
+  room: Room,
+  t: Messages['rooms']['experience']['role'],
+): string {
+  return t[room.access.participantKind ?? 'none'];
 }
 
 export function RoomExperience({
@@ -46,6 +42,10 @@ export function RoomExperience({
   const [topicComposerOpen, setTopicComposerOpen] = useState(false);
   const [sourceMessage, setSourceMessage] = useState<ChatMessage>();
   const connectionState = useRoomRealtime(room.slug, true);
+  const messages = useMessages();
+  const locale = useLocale();
+  const t = messages.rooms.experience;
+  const city = destinationName(room.destination, locale);
 
   function openDirectTopic(): void {
     setSourceMessage(undefined);
@@ -79,9 +79,9 @@ export function RoomExperience({
   return (
     <div className={styles.room} data-testid="room-experience">
       <header className={styles.bar}>
-        <IconLink href="/app" icon="chevron-left" label="홈으로" />
+        <IconLink href="/app" icon="chevron-left" label={t.home} />
         <div className={styles.barText}>
-          <h1>{room.destination.nameKo} 도움방</h1>
+          <h1>{messages.rooms.roomName(city)}</h1>
           <p>
             <span
               className={styles.connection}
@@ -90,15 +90,15 @@ export function RoomExperience({
             />
             <span role="status">
               {connectionState === 'connected'
-                ? '인증된 여행자와 현지인만 대화해요'
-                : connectionCopy[connectionState]}
+                ? t.connectedNote
+                : t.connection[connectionState]}
             </span>
           </p>
         </div>
         <div className={styles.barActions}>
           <span className={styles.role}>
             <Chip tone={roleTone} icon="check">
-              {roleLabel(room)}
+              {roleLabel(room, t.role)}
             </Chip>
           </span>
           <RoomNotificationControl />
@@ -106,14 +106,18 @@ export function RoomExperience({
       </header>
 
       <div className={styles.tabs}>
-        <div className={uiStyles.segmented} role="tablist" aria-label="방 보기">
+        <div
+          className={uiStyles.segmented}
+          role="tablist"
+          aria-label={t.viewTabs}
+        >
           <button
             type="button"
             role="tab"
             aria-selected={mobileView === 'chat'}
             onClick={() => setMobileView('chat')}
           >
-            대화
+            {t.chatTab}
           </button>
           <button
             type="button"
@@ -121,7 +125,7 @@ export function RoomExperience({
             aria-selected={mobileView === 'topics'}
             onClick={() => setMobileView('topics')}
           >
-            실시간 토픽
+            {t.topicsTab}
           </button>
         </div>
       </div>
@@ -129,15 +133,15 @@ export function RoomExperience({
       <div className={styles.workspace} data-mobile-view={mobileView}>
         <section
           className={styles.stage}
-          aria-label={`${room.destination.nameKo} 대화`}
+          aria-label={t.conversationLabel(city)}
         >
-          <h2 className="srOnly">실시간 대화</h2>
+          <h2 className="srOnly">{t.liveChatHeading}</h2>
           {connectionState !== 'connected' && (
             <div className={styles.notice} aria-live="polite">
               <Notice tone="warning" icon="refresh">
                 {connectionState === 'offline'
-                  ? '인터넷 연결을 확인해 주세요. 연결되면 놓친 대화를 자동으로 다시 불러와요.'
-                  : '실시간 연결을 복구하고 있어요. 연결되면 놓친 대화를 자동으로 다시 불러와요.'}
+                  ? t.offlineNotice
+                  : t.reconnectingNotice}
               </Notice>
             </div>
           )}
@@ -158,10 +162,10 @@ export function RoomExperience({
 
         <aside className={styles.rail} aria-labelledby="topic-rail-title">
           <header className={styles.railHead}>
-            <h2 id="topic-rail-title">진행 중인 토픽</h2>
+            <h2 id="topic-rail-title">{t.openTopics}</h2>
             {room.access.canCreateTopic && (
               <Button size="sm" icon="add" onClick={openDirectTopic}>
-                새 토픽
+                {t.newTopic}
               </Button>
             )}
           </header>
@@ -171,7 +175,7 @@ export function RoomExperience({
               <IconButton
                 className={styles.trayClose}
                 icon="close"
-                label="토픽 작성 닫기"
+                label={t.closeComposer}
                 onClick={closeComposer}
               />
               <QuestionComposer
@@ -186,7 +190,7 @@ export function RoomExperience({
           <div
             className={`${uiStyles.segmented} ${styles.railStatus}`}
             role="tablist"
-            aria-label="토픽 상태"
+            aria-label={t.topicStatus}
           >
             <button
               type="button"
@@ -194,7 +198,7 @@ export function RoomExperience({
               aria-selected={status === 'OPEN'}
               onClick={() => setStatus('OPEN')}
             >
-              진행 중
+              {t.open}
             </button>
             <button
               type="button"
@@ -202,7 +206,7 @@ export function RoomExperience({
               aria-selected={status === 'RESOLVED'}
               onClick={() => setStatus('RESOLVED')}
             >
-              해결됨
+              {t.resolved}
             </button>
           </div>
           <QuestionFeed

@@ -1,11 +1,15 @@
+'use client';
+
 import { Page } from '@/components/app/page';
+import { useMessages } from '@/i18n/client';
 import styles from './loading.module.css';
 
 export default function AppLoading(): React.JSX.Element {
+  const t = useMessages();
   return (
     <Page>
       <div className={styles.root} role="status" aria-busy="true">
-        <span className="srOnly">화면을 불러오는 중이에요</span>
+        <span className="srOnly">{t.home.loading}</span>
         <div className={styles.header} aria-hidden="true">
           <span className={`${styles.block} ${styles.title}`} />
           <span className={`${styles.block} ${styles.copy}`} />

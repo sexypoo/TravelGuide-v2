@@ -1,25 +1,24 @@
 'use client';
 
 import { AppIcon } from '@/components/common';
+import { useMessages } from '@/i18n/client';
 
 interface AppErrorProps {
   reset: () => void;
   title?: string;
 }
 
-export function AppError({
-  reset,
-  title = '화면을 불러오지 못했어요',
-}: AppErrorProps): React.JSX.Element {
+export function AppError({ reset, title }: AppErrorProps): React.JSX.Element {
+  const t = useMessages().home.error;
   return (
     <section className="appError" role="alert">
       <span aria-hidden="true">
         <AppIcon name="alert" />
       </span>
-      <h1>{title}</h1>
-      <p>연결 상태를 확인한 뒤 다시 시도해 주세요.</p>
+      <h1>{title ?? t.title}</h1>
+      <p>{t.description}</p>
       <button type="button" onClick={reset}>
-        다시 불러오기
+        {t.retry}
       </button>
     </section>
   );

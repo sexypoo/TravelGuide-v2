@@ -1,3 +1,4 @@
+import { ko } from '@/i18n/messages/ko';
 import type { UserRole } from './auth-contract';
 import { requestForm, requestJson, requestVoid } from './client';
 import { isIsoDate, isRecord } from './runtime';
@@ -17,18 +18,9 @@ export const TRAVEL_STYLES = [
 
 export type TravelStyle = (typeof TRAVEL_STYLES)[number];
 
-export const travelStyleLabels: Readonly<Record<TravelStyle, string>> = {
-  FOOD_EXPLORER: '맛집 탐방',
-  SLOW_TRAVEL: '느린 여행',
-  NATURE: '자연·휴양',
-  CULTURE_ART: '문화·예술',
-  ACTIVITY: '액티비티',
-  NIGHTLIFE: '야간 여행',
-  SHOPPING: '쇼핑',
-  PHOTO: '사진 여행',
-  SOLO: '혼자 여행',
-  FAMILY: '가족 여행',
-};
+/** Korean labels; screens use `t.profile.travelStyles` for the current locale. */
+export const travelStyleLabels: Readonly<Record<TravelStyle, string>> =
+  ko.profile.travelStyles;
 
 export const travelStyleEmojis: Readonly<Record<TravelStyle, string>> = {
   FOOD_EXPLORER: '🍜',

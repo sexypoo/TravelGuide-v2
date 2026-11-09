@@ -1,5 +1,8 @@
 import { Page, PageHeader } from '@/components/app/page';
-import { communityCategoryLabels } from '@/lib/community/presentation';
+import type { Locale } from '@/i18n/config';
+import type { Messages } from '@/i18n/messages';
+import { getLocale, getMessages } from '@/i18n/server';
+import { communityCategoryLabelsFor } from '@/lib/community/presentation';
 import { LiveRoomCard } from '@/components/rooms/live-room-card';
 import {
   ButtonLink,
@@ -19,7 +22,7 @@ import type { Verification } from '@/lib/api/verifications';
 import { getMyVerifications } from '@/lib/api/verifications.server';
 import { requireUser } from '@/lib/auth/session';
 import { formatRelativeTime } from '@/lib/questions/presentation';
-import { myRooms } from '@/lib/rooms/presentation';
+import { destinationName, myRooms } from '@/lib/rooms/presentation';
 import { getQualificationPresentation } from '@/lib/verifications/presentation';
 import Link from 'next/link';
 import styles from './home.module.css';
@@ -42,14 +45,14 @@ async function recentPosts(): Promise<CommunityPost[] | null> {
   }
 }
 
-function participantLabel(verification: Verification): string {
-  return verification.type === 'TRAVELER' ? '여행자' : '현지인';
-}
-
 function StatusChip({
   verification,
+  t,
+  locale,
 }: {
   verification: Verification | undefined;
+  t: Messages['home']['status'];
+  locale: Locale;
 }): React.JSX.Element {
   if (verification?.status === 'APPROVED') {
     return (
@@ -57,24 +60,29 @@ function StatusChip({
         tone={verification.type === 'LOCAL' ? 'local' : 'traveler'}
         icon="check"
       >
-        {verification.destination.nameKo} {participantLabel(verification)} 인증
-        완료
+        {t.approved(
+          destinationName(verification.destination, locale),
+          verification.type,
+        )}
       </Chip>
     );
   }
   if (verification?.status === 'PENDING') {
     return (
       <Chip tone="warning" icon="clock">
-        {participantLabel(verification)} 인증 심사 중
+        {t.pending(verification.type)}
       </Chip>
     );
   }
-  return <Chip icon="info">아직 인증 전이에요</Chip>;
+  return <Chip icon="info">{t.none}</Chip>;
 }
 
 export default async function AppHome(): Promise<React.JSX.Element> {
   // Guard first so a signed-out redirect always carries next=/app.
   const user = await requireUser('/app');
+  const [messages, locale] = await Promise.all([getMessages(), getLocale()]);
+  const t = messages.home;
+  const categoryLabels = communityCategoryLabelsFor(locale);
   const [allRooms, verifications, posts] = await Promise.all([
     getRooms(),
     getMyVerifications(),
@@ -89,23 +97,32 @@ export default async function AppHome(): Promise<React.JSX.Element> {
     .filter((type) => type !== summarySource?.type)
     .map((type) => ({
       type,
-      ...getQualificationPresentation(verifications, type),
+      ...getQualificationPresentation(verifications, type, locale),
     }));
-  const place = rooms[0]?.destination.nameKo;
+  const firstRoom = rooms[0];
+  const place =
+    firstRoom === undefined
+      ? undefined
+      : destinationName(firstRoom.destination, locale);
+  const [headingLead, headingTail] = t.heading(place);
   const now = new Date();
 
   return (
     <Page>
-      <PageHeader title="홈" brand />
+      <PageHeader title={t.title} brand />
 
       <div className={styles.greeting}>
-        <p>{user.nickname}님, 반가워요</p>
+        <p>{t.greeting(user.nickname)}</p>
         <h2>
-          {place === undefined ? '여행지에서' : `오늘 ${place}에서`}
-          <br className={styles.mobileBreak} /> 무엇이 궁금하세요?
+          {headingLead}
+          <br className={styles.mobileBreak} /> {headingTail}
         </h2>
         <Link className={styles.status} href="/app/verifications">
-          <StatusChip verification={summarySource} />
+          <StatusChip
+            verification={summarySource}
+            t={t.status}
+            locale={locale}
+          />
         </Link>
       </div>
 
@@ -118,18 +135,18 @@ export default async function AppHome(): Promise<React.JSX.Element> {
                 tone="iris"
                 title={
                   allRooms.length === 0
-                    ? '열려 있는 도움방이 없어요'
-                    : `도시 ${allRooms.length}곳의 도움방이 열려 있어요`
+                    ? t.noRooms.title
+                    : t.pickRoom.title(allRooms.length)
                 }
                 description={
                   allRooms.length === 0
-                    ? '지역이 준비되면 이곳에 표시돼요. 그동안 커뮤니티에서 물어보세요.'
-                    : '여행할 도시나 사는 도시를 골라 인증하면 이곳에 바로 보여요.'
+                    ? t.noRooms.description
+                    : t.pickRoom.description
                 }
                 action={
                   allRooms.length === 0 ? undefined : (
                     <ButtonLink href="/app/rooms" size="md">
-                      도움방 고르기
+                      {t.pickRoom.action}
                     </ButtonLink>
                   )
                 }
@@ -148,21 +165,21 @@ export default async function AppHome(): Promise<React.JSX.Element> {
         </div>
 
         <div className={styles.side}>
-          <Card padding="list" aria-label="다른 방법으로 참여하기">
+          <Card padding="list" aria-label={t.ways.label}>
             <ListRow
               href="/app/community"
               icon="community"
               tone="iris"
-              title="여행자 커뮤니티"
-              description="인증 없이도 묻고 나눌 수 있어요"
+              title={t.ways.communityTitle}
+              description={t.ways.communityDescription}
             />
             {allRooms.length > 0 && (
               <ListRow
                 href="/app/rooms"
                 icon="room"
                 tone="magenta"
-                title="도시별 도움방"
-                description={`${allRooms.length}개 도시에서 지금 상황을 물어볼 수 있어요`}
+                title={t.ways.roomsTitle}
+                description={t.ways.roomsDescription(allRooms.length)}
               />
             )}
             {qualifications.map((item) => (
@@ -185,17 +202,17 @@ export default async function AppHome(): Promise<React.JSX.Element> {
             <div className={styles.postsHead}>
               <SectionHead
                 id="recent-posts"
-                title="커뮤니티 새 글"
-                action={<Link href="/app/community">전체 보기</Link>}
+                title={t.posts.title}
+                action={<Link href="/app/community">{t.posts.viewAll}</Link>}
               />
             </div>
             {posts === null ? (
-              <p className={styles.postsNote}>새 글을 불러오지 못했어요.</p>
+              <p className={styles.postsNote}>{t.posts.failed}</p>
             ) : posts.length === 0 ? (
               <EmptyState
                 icon="pencil"
-                title="아직 글이 없어요"
-                description="여행 중 궁금한 걸 처음으로 물어보세요."
+                title={t.posts.emptyTitle}
+                description={t.posts.emptyDescription}
               />
             ) : (
               <ul className={styles.postList}>
@@ -204,9 +221,11 @@ export default async function AppHome(): Promise<React.JSX.Element> {
                     <Link href={`/app/community/${post.id}`}>
                       <span className={styles.postTitle}>{post.title}</span>
                       <span className={styles.postMeta}>
-                        <span>{communityCategoryLabels[post.category]}</span>
-                        <span>댓글 {post.commentCount}</span>
-                        <span>{formatRelativeTime(post.createdAt, now)}</span>
+                        <span>{categoryLabels[post.category]}</span>
+                        <span>{t.posts.comments(post.commentCount)}</span>
+                        <span>
+                          {formatRelativeTime(post.createdAt, now, locale)}
+                        </span>
                       </span>
                     </Link>
                   </li>

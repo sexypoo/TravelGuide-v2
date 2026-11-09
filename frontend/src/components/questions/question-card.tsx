@@ -1,12 +1,8 @@
 import Link from 'next/link';
+import { useLocale, useMessages } from '@/i18n/client';
 import { participantBadgeLabel } from '@/lib/api/participants';
 import type { Question } from '@/lib/api/questions';
-import {
-  categoryLabels,
-  formatRelativeTime,
-  statusLabels,
-  urgencyLabels,
-} from '@/lib/questions/presentation';
+import { formatRelativeTime } from '@/lib/questions/presentation';
 import { TopicShareButton } from './topic-share-button';
 import styles from './question-card.module.css';
 
@@ -19,6 +15,9 @@ export function QuestionCard({
   roomSlug?: string;
   canShare?: boolean;
 }): React.JSX.Element {
+  const t = useMessages();
+  const locale = useLocale();
+  const labels = t.topics.labels;
   const showShare = canShare && roomSlug && question.status !== 'REMOVED';
   return (
     <article
@@ -29,19 +28,23 @@ export function QuestionCard({
       <Link className={styles.link} href={`/app/questions/${question.id}`}>
         <span className={styles.lead}>
           <span className={styles.category}>
-            {categoryLabels[question.category]}
+            {labels.category[question.category]}
             {question.urgency === 'URGENT' && (
-              <span className={styles.urgent}>{urgencyLabels.URGENT}</span>
+              <span className={styles.urgent}>{labels.urgency.URGENT}</span>
             )}
           </span>
           <span
             className={styles.status}
             data-status={question.status.toLowerCase()}
           >
-            {statusLabels[question.status]}
+            {labels.status[question.status]}
           </span>
         </span>
-        <span className={styles.content}>{question.content}</span>
+        <span className={styles.content}>
+          {question.status === 'REMOVED'
+            ? t.topics.hidden.topic
+            : question.content}
+        </span>
         {question.areaText !== null && (
           <span className={styles.area}>{question.areaText}</span>
         )}
@@ -51,9 +54,9 @@ export function QuestionCard({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={question.image.url}
-              alt={`${question.areaText ?? '현장'} 토픽 첨부 사진`}
+              alt={t.topics.shared.photoAlt(question.areaText)}
             />
-            <span>현장 사진</span>
+            <span>{t.topics.shared.photo}</span>
           </span>
         )}
         <span
@@ -61,14 +64,14 @@ export function QuestionCard({
           data-share={showShare ? 'true' : undefined}
         >
           <span>
-            답변 <strong>{question.answerCount}</strong>
+            {t.topics.card.answers} <strong>{question.answerCount}</strong>
           </span>
           <time dateTime={question.createdAt}>
-            {formatRelativeTime(question.createdAt)}
+            {formatRelativeTime(question.createdAt, undefined, locale)}
           </time>
           <span
             className={styles.author}
-            aria-label={`${question.author.nickname} · ${participantBadgeLabel(question.author.badge)}`}
+            aria-label={`${question.author.nickname} · ${participantBadgeLabel(question.author.badge, locale)}`}
           >
             {question.author.nickname}
           </span>

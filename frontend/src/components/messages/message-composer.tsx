@@ -19,18 +19,17 @@ import { mergeMessageIntoTimeline } from '@/lib/query/realtime-cache';
 import type { GooglePlace } from '@/lib/api/places';
 import { PlacePicker } from '@/components/places/place-picker';
 import { AppIcon } from '@/components/common';
+import { useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import styles from './messages.module.css';
 
 type Attachment = 'image' | 'place' | null;
 
-function messageError(error: unknown): string {
+function messageError(error: unknown, t: Messages['chat']['composer']): string {
   if (error instanceof ApiProblem && error.code === 'UPLOAD_TOO_LARGE') {
-    return '사진은 10MB 이하로 선택해 주세요.';
+    return t.imageTooLarge;
   }
-  return actionableErrorMessage(
-    error,
-    '메시지를 보내지 못했습니다. 연결을 확인하고 다시 시도해 주세요.',
-  );
+  return actionableErrorMessage(error, t.sendFailed);
 }
 
 export function MessageComposer({
@@ -40,6 +39,7 @@ export function MessageComposer({
   roomSlug: string;
   onCreateTopic?: () => void;
 }): React.JSX.Element {
+  const t = useMessages().chat.composer;
   const queryClient = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
   const messageInput = useRef<HTMLTextAreaElement>(null);
@@ -115,12 +115,11 @@ export function MessageComposer({
 
   function submit(): void {
     if (sending.current || mutation.isPending) return;
-    if (attachment === 'image' && !image)
-      return setClientError('보낼 사진을 선택해 주세요.');
+    if (attachment === 'image' && !image) return setClientError(t.imageMissing);
     if (attachment === 'place' && !selectedPlace)
-      return setClientError('보낼 장소를 지도에서 선택해 주세요.');
+      return setClientError(t.placeMissing);
     if (attachment === null && content.trim().length === 0)
-      return setClientError('공유할 내용을 입력해 주세요.');
+      return setClientError(t.contentMissing);
     setClientError('');
     sending.current = true;
     mutation.mutate();
@@ -132,7 +131,7 @@ export function MessageComposer({
   }
 
   const error =
-    clientError || (mutation.isError ? messageError(mutation.error) : '');
+    clientError || (mutation.isError ? messageError(mutation.error, t) : '');
 
   return (
     <form
@@ -145,12 +144,12 @@ export function MessageComposer({
     >
       <div className={styles.composerInner}>
         <label className="srOnly" htmlFor="room-message">
-          방에 메시지 보내기
+          {t.inputLabel}
         </label>
         {attachment !== null && (
           <section
             className={styles.tray}
-            aria-label={attachment === 'image' ? '사진 첨부' : '장소 공유'}
+            aria-label={attachment === 'image' ? t.imageTray : t.placeTray}
           >
             <button
               className={styles.trayClose}
@@ -160,20 +159,20 @@ export function MessageComposer({
                 setImage(undefined);
                 setSelectedPlace(undefined);
               }}
-              aria-label="첨부 닫기"
+              aria-label={t.closeTray}
             >
               <AppIcon name="close" />
             </button>
             {attachment === 'image' ? (
               <>
-                <strong>사진 보내기</strong>
-                <p>JPEG, PNG, WebP · 최대 10MB</p>
+                <strong>{t.imageTitle}</strong>
+                <p>{t.imageHint}</p>
                 <button
                   className={styles.traySelect}
                   type="button"
                   onClick={() => fileInput.current?.click()}
                 >
-                  {image ? image.name : '사진 선택'}
+                  {image ? image.name : t.chooseImage}
                 </button>
                 <input
                   ref={fileInput}
@@ -183,7 +182,7 @@ export function MessageComposer({
                   onChange={(event) => {
                     const nextImage = event.target.files?.[0];
                     if (nextImage && nextImage.size > 10 * 1024 * 1024) {
-                      setClientError('사진은 10MB 이하로 선택해 주세요.');
+                      setClientError(t.imageTooLarge);
                       event.target.value = '';
                       return;
                     }
@@ -194,8 +193,8 @@ export function MessageComposer({
               </>
             ) : (
               <>
-                <strong>장소 보내기</strong>
-                <p>{selectedPlace?.address ?? 'Google 지도에서 선택한 장소'}</p>
+                <strong>{t.placeTitle}</strong>
+                <p>{selectedPlace?.address ?? t.placeFallback}</p>
                 <div className={styles.placePreview}>
                   <span aria-hidden="true">
                     <AppIcon name="pin" />
@@ -205,7 +204,7 @@ export function MessageComposer({
                     type="button"
                     onClick={() => setPlacePickerOpen(true)}
                   >
-                    다른 장소
+                    {t.changePlace}
                   </button>
                 </div>
               </>
@@ -218,11 +217,11 @@ export function MessageComposer({
             className={styles.menu}
             id="message-action-menu"
             role="menu"
-            aria-label="메시지에 추가"
+            aria-label={t.menuLabel}
           >
             <header className={styles.menuHead}>
-              <span>여행 도구</span>
-              <small>대화에 무엇을 더할까요?</small>
+              <span>{t.menuTitle}</span>
+              <small>{t.menuSubtitle}</small>
             </header>
             <button
               type="button"
@@ -239,8 +238,8 @@ export function MessageComposer({
                 <AppIcon name="image" />
               </span>
               <span>
-                <strong>사진</strong>
-                <small>현장 모습을 함께 보내요</small>
+                <strong>{t.menuImage}</strong>
+                <small>{t.menuImageHint}</small>
               </span>
             </button>
             <button
@@ -258,8 +257,8 @@ export function MessageComposer({
                 <AppIcon name="pin" />
               </span>
               <span>
-                <strong>장소</strong>
-                <small>현재 위치와 장소를 알려요</small>
+                <strong>{t.menuPlace}</strong>
+                <small>{t.menuPlaceHint}</small>
               </span>
             </button>
             {onCreateTopic && (
@@ -279,8 +278,8 @@ export function MessageComposer({
                   <AppIcon name="topic" />
                 </span>
                 <span>
-                  <strong>토픽</strong>
-                  <small>답변이 필요한 이야기를 시작해요</small>
+                  <strong>{t.menuTopic}</strong>
+                  <small>{t.menuTopicHint}</small>
                 </span>
               </button>
             )}
@@ -291,7 +290,7 @@ export function MessageComposer({
             ref={addButton}
             className={styles.round}
             type="button"
-            aria-label="사진, 장소 또는 토픽 추가"
+            aria-label={t.addLabel}
             aria-haspopup="menu"
             aria-controls="message-action-menu"
             aria-expanded={menuOpen}
@@ -308,10 +307,10 @@ export function MessageComposer({
             rows={1}
             placeholder={
               attachment === 'image'
-                ? '사진 설명을 덧붙여 보세요 (선택)'
+                ? t.imagePlaceholder
                 : attachment === 'place'
-                  ? '장소에 대한 설명을 덧붙여 보세요 (선택)'
-                  : '지금 상황을 나눠 보세요'
+                  ? t.placePlaceholder
+                  : t.textPlaceholder
             }
             aria-invalid={error.length > 0}
             aria-describedby="room-message-help"
@@ -332,14 +331,12 @@ export function MessageComposer({
           >
             <AppIcon name="send" />
             <span className="srOnly">
-              {mutation.isPending ? '메시지 보내는 중' : '메시지 보내기'}
+              {mutation.isPending ? t.sending : t.send}
             </span>
           </button>
         </div>
         <footer className={styles.help} id="room-message-help">
-          <span className={styles.keyHint}>
-            Enter 전송 · Shift+Enter 줄바꿈
-          </span>
+          <span className={styles.keyHint}>{t.keyHint}</span>
           <span>{Array.from(content).length}/500</span>
         </footer>
         {error && (

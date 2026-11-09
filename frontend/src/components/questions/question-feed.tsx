@@ -6,7 +6,7 @@ import {
   type QuestionListStatus,
 } from '@/lib/api/questions';
 import { Button, EmptyState, Notice, uiStyles } from '@/components/ui';
-import { categoryLabels } from '@/lib/questions/presentation';
+import { useMessages } from '@/i18n/client';
 import { useState } from 'react';
 import { useQuestions } from '@/lib/query/use-questions';
 import { QuestionCard } from './question-card';
@@ -21,20 +21,22 @@ export function QuestionFeed({
   status: QuestionListStatus;
   canShare?: boolean;
 }): React.JSX.Element {
+  const messages = useMessages();
+  const t = messages.topics.feed;
   const [category, setCategory] = useState<QuestionCategory>();
   const query = useQuestions(roomSlug, status, category);
 
   const filters = (
     <div
       className={`${uiStyles.filters} ${styles.filters}`}
-      aria-label="토픽 종류 필터"
+      aria-label={t.filtersLabel}
     >
       <button
         type="button"
         aria-pressed={category === undefined}
         onClick={() => setCategory(undefined)}
       >
-        전체
+        {t.all}
       </button>
       {questionCategories.map((item) => (
         <button
@@ -43,7 +45,7 @@ export function QuestionFeed({
           aria-pressed={category === item}
           onClick={() => setCategory(item)}
         >
-          {categoryLabels[item]}
+          {messages.topics.labels.category[item]}
         </button>
       ))}
     </div>
@@ -53,7 +55,7 @@ export function QuestionFeed({
     return (
       <>
         {filters}
-        <div className={styles.skeleton} aria-label="토픽을 불러오는 중">
+        <div className={styles.skeleton} aria-label={t.loadingLabel}>
           <span />
           <span />
           <span />
@@ -71,8 +73,8 @@ export function QuestionFeed({
         <div className={styles.state} role="alert">
           <EmptyState
             icon="alert"
-            title="토픽을 불러오지 못했어요"
-            description="연결을 확인한 뒤 다시 시도해 주세요."
+            title={messages.topics.shared.loadErrorTitle}
+            description={t.loadErrorDescription}
             action={
               <Button
                 variant="secondary"
@@ -80,7 +82,7 @@ export function QuestionFeed({
                 icon="refresh"
                 onClick={() => void query.refetch()}
               >
-                다시 불러오기
+                {messages.topics.shared.reload}
               </Button>
             }
           />
@@ -93,7 +95,7 @@ export function QuestionFeed({
   const refetchRetry = query.isRefetchError && (
     <div className={`${styles.retryTop} ${styles.retryRow}`}>
       <Notice tone="warning" icon="alert" role="status">
-        토픽 목록을 새로 불러오지 못했어요. 보이는 내용이 최신이 아닐 수 있어요.
+        {t.refetchFailed}
       </Notice>
       <Button
         variant="secondary"
@@ -102,7 +104,7 @@ export function QuestionFeed({
         disabled={query.isFetching}
         onClick={() => void query.refetch()}
       >
-        {query.isFetching ? '불러오는 중' : '다시 시도'}
+        {query.isFetching ? messages.common.loading : messages.common.retry}
       </Button>
     </div>
   );
@@ -116,15 +118,11 @@ export function QuestionFeed({
           <EmptyState
             icon="topic"
             tone="iris"
-            title={
-              status === 'OPEN'
-                ? '아직 진행 중인 토픽이 없어요'
-                : '아직 해결된 토픽이 없어요'
-            }
+            title={status === 'OPEN' ? t.emptyOpenTitle : t.emptyResolvedTitle}
             description={
               status === 'OPEN'
-                ? '대화에서 중요한 상황을 토픽으로 이어가 보세요.'
-                : '답변을 통해 해결된 토픽이 이곳에 모여요.'
+                ? t.emptyOpenDescription
+                : t.emptyResolvedDescription
             }
           />
         </div>
@@ -148,7 +146,7 @@ export function QuestionFeed({
         {query.isFetchNextPageError && !query.isFetchingNextPage ? (
           <div className={styles.retryRow}>
             <Notice tone="warning" icon="alert" role="status">
-              토픽을 더 불러오지 못했어요.
+              {t.moreFailed}
             </Notice>
             <Button
               variant="secondary"
@@ -156,7 +154,7 @@ export function QuestionFeed({
               icon="refresh"
               onClick={() => void query.fetchNextPage()}
             >
-              다시 시도
+              {messages.common.retry}
             </Button>
           </div>
         ) : (
@@ -167,7 +165,7 @@ export function QuestionFeed({
               disabled={query.isFetchingNextPage}
               onClick={() => void query.fetchNextPage()}
             >
-              {query.isFetchingNextPage ? '불러오는 중' : '토픽 더 보기'}
+              {query.isFetchingNextPage ? messages.common.loading : t.more}
             </Button>
           )
         )}

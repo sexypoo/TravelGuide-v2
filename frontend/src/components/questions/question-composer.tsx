@@ -8,6 +8,8 @@ import {
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
 import { Button } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import {
   shareTopicMessage,
   type ChatMessage,
@@ -22,7 +24,6 @@ import {
   type QuestionUrgency,
 } from '@/lib/api/questions';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
-import { categoryLabels, urgencyLabels } from '@/lib/questions/presentation';
 import { queryKeys } from '@/lib/query/keys';
 import {
   markMessagePromoted,
@@ -31,23 +32,14 @@ import {
 } from '@/lib/query/realtime-cache';
 import styles from './composer.module.css';
 
-function questionError(error: unknown): string {
+function questionError(
+  error: unknown,
+  t: Messages['topics']['composer'],
+): string {
   if (error instanceof ApiProblem) {
-    if (error.code === 'OPEN_QUESTION_LIMIT_REACHED') {
-      return '진행 중인 토픽은 한 방에서 최대 3개까지 만들 수 있어요.';
-    }
-    if (error.code === 'ROOM_PARTICIPANT_VERIFICATION_REQUIRED') {
-      return '유효한 여행자 또는 현지인 인증을 다시 확인해 주세요.';
-    }
-    if (error.code === 'MESSAGE_ALREADY_PROMOTED') {
-      return '이미 토픽으로 만든 메시지입니다.';
-    }
-    return actionableErrorMessage(
-      error,
-      '토픽을 만들지 못했습니다. 연결을 확인하고 다시 시도해 주세요.',
-    );
+    return t.errors[error.code] ?? actionableErrorMessage(error, t.failed);
   }
-  return '토픽을 만들지 못했습니다. 연결을 확인하고 다시 시도해 주세요.';
+  return t.failed;
 }
 
 export function QuestionComposer({
@@ -59,6 +51,9 @@ export function QuestionComposer({
   sourceMessage?: ChatMessage;
   onCreated?: (result: { autoShared: boolean }) => void;
 }): React.JSX.Element {
+  const messages = useMessages();
+  const t = messages.topics.composer;
+  const labels = messages.topics.labels;
   const queryClient = useQueryClient();
   const [category, setCategory] =
     useState<CreateQuestionInput['category']>('PLACE');
@@ -115,7 +110,7 @@ export function QuestionComposer({
     const trimmedContent = content.trim();
     const trimmedArea = areaText.trim();
     if (Array.from(trimmedContent).length < 20) {
-      setClientError('상황을 이해할 수 있도록 내용을 20자 이상 적어 주세요.');
+      setClientError(t.tooShort);
       return;
     }
     setClientError('');
@@ -130,22 +125,16 @@ export function QuestionComposer({
   }
 
   const message =
-    clientError || (mutation.isError ? questionError(mutation.error) : '');
+    clientError || (mutation.isError ? questionError(mutation.error, t) : '');
 
   return (
     <form method="post" className={styles.form} onSubmit={submit} noValidate>
       <header className={styles.head}>
-        <h2>
-          {sourceMessage === undefined
-            ? '새 토픽 만들기'
-            : '이 메시지를 토픽으로 잇기'}
-        </h2>
-        <p>
-          답변과 해결 과정을 남길 가치가 있는 상황을 구체적으로 정리해 주세요.
-        </p>
+        <h2>{sourceMessage === undefined ? t.titleNew : t.titleFromMessage}</h2>
+        <p>{t.description}</p>
       </header>
       <fieldset className={styles.choices}>
-        <legend>토픽 종류</legend>
+        <legend>{t.categoryLegend}</legend>
         <div className={styles.options}>
           {questionCategories.map((item) => (
             <label key={item} className={styles.option}>
@@ -156,13 +145,13 @@ export function QuestionComposer({
                 checked={category === item}
                 onChange={() => setCategory(item)}
               />
-              <span>{categoryLabels[item]}</span>
+              <span>{labels.category[item]}</span>
             </label>
           ))}
         </div>
       </fieldset>
       <fieldset className={styles.choices}>
-        <legend>답변이 필요한 시간</legend>
+        <legend>{t.urgencyLegend}</legend>
         <div className={styles.options}>
           {(['NORMAL', 'URGENT'] as const).map((item) => (
             <label key={item} className={styles.option}>
@@ -173,19 +162,19 @@ export function QuestionComposer({
                 checked={urgency === item}
                 onChange={() => setUrgency(item)}
               />
-              <span>{urgencyLabels[item]}</span>
+              <span>{labels.urgency[item]}</span>
             </label>
           ))}
         </div>
       </fieldset>
       <label className={styles.field}>
         <span className={styles.label}>
-          지역·장소 <small>선택</small>
+          {t.area} <small>{t.optional}</small>
         </span>
         <input
           value={areaText}
           maxLength={60}
-          placeholder="예: 제주공항 1층, 서귀포 중문"
+          placeholder={t.areaPlaceholder}
           onChange={(event) => setAreaText(event.target.value)}
         />
       </label>
@@ -193,14 +182,14 @@ export function QuestionComposer({
         <>
           <label className={styles.field}>
             <span className={styles.label}>
-              토픽 내용 <small>{Array.from(content).length}/1000</small>
+              {t.content} <small>{Array.from(content).length}/1000</small>
             </span>
             <textarea
               value={content}
               minLength={20}
               maxLength={1000}
               rows={6}
-              placeholder="현재 상황, 이미 확인한 내용, 결정해야 하는 시간을 함께 적어 주세요."
+              placeholder={t.contentPlaceholder}
               aria-describedby="question-composer-help"
               aria-invalid={message.length > 0}
               onChange={(event) => setContent(event.target.value)}
@@ -212,13 +201,13 @@ export function QuestionComposer({
                 <AppIcon name="image" />
               </span>
               <div>
-                <strong>현장 사진</strong>
-                <small>상황을 확인할 사진 한 장 · 최대 10MB</small>
+                <strong>{messages.topics.shared.photo}</strong>
+                <small>{t.photoHint}</small>
               </div>
             </div>
             {image === undefined ? (
               <label className={styles.pickerButton}>
-                사진 선택
+                {messages.topics.shared.pickPhoto}
                 <input
                   className="srOnly"
                   type="file"
@@ -226,7 +215,7 @@ export function QuestionComposer({
                   onChange={(event) => {
                     const nextImage = event.target.files?.[0];
                     if (nextImage && nextImage.size > 10 * 1024 * 1024) {
-                      setClientError('사진은 10MB 이하로 선택해 주세요.');
+                      setClientError(messages.topics.shared.photoTooLarge);
                       event.target.value = '';
                       return;
                     }
@@ -239,7 +228,7 @@ export function QuestionComposer({
               <div className={styles.pickerSelected}>
                 <span title={image.name}>{image.name}</span>
                 <button type="button" onClick={() => setImage(undefined)}>
-                  제거
+                  {t.removePhoto}
                 </button>
               </div>
             )}
@@ -247,12 +236,12 @@ export function QuestionComposer({
         </>
       ) : (
         <div className={styles.preview}>
-          <span>원본 메시지</span>
+          <span>{t.sourceMessage}</span>
           <p>{sourceMessage.content}</p>
         </div>
       )}
       <p id="question-composer-help" className={styles.help}>
-        안전 카테고리의 즉시 위험 상황은 답변보다 112·119에 먼저 연락하세요.
+        {t.safetyHelp}
       </p>
       {message.length > 0 && (
         <p className={styles.error} role="alert">
@@ -260,7 +249,7 @@ export function QuestionComposer({
         </p>
       )}
       <Button type="submit" size="lg" block disabled={mutation.isPending}>
-        {mutation.isPending ? '토픽 만드는 중' : '토픽 만들기'}
+        {mutation.isPending ? t.submitting : t.submit}
       </Button>
     </form>
   );

@@ -7,10 +7,13 @@ import { queryKeys } from '@/lib/query/keys';
 import { usePlaceFavorites } from '@/lib/query/use-place-favorites';
 import { AppIcon } from '@/components/common';
 import { Button, Card, EmptyState, IconTile, Notice } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
 import styles from './saved.module.css';
 
 export function SavedPlacesList(): React.JSX.Element {
   const favorites = usePlaceFavorites();
+  const t = useMessages();
+  const copy = t.places.saved;
   const queryClient = useQueryClient();
   const remove = useMutation({
     mutationFn: removePlaceFavorite,
@@ -23,7 +26,7 @@ export function SavedPlacesList(): React.JSX.Element {
       <div className={styles.stack}>
         <Card>
           <p className={styles.state} role="status">
-            찜한 장소를 불러오는 중이에요.
+            {copy.loading}
           </p>
         </Card>
       </div>
@@ -36,15 +39,15 @@ export function SavedPlacesList(): React.JSX.Element {
           <div role="alert">
             <EmptyState
               icon="alert"
-              title="찜한 장소를 불러오지 못했어요"
-              description="연결을 확인한 뒤 다시 시도해 주세요."
+              title={copy.loadFailedTitle}
+              description={copy.loadFailedDescription}
               action={
                 <Button
                   variant="secondary"
                   icon="refresh"
                   onClick={() => void favorites.refetch()}
                 >
-                  다시 불러오기
+                  {t.places.reload}
                 </Button>
               }
             />
@@ -60,8 +63,8 @@ export function SavedPlacesList(): React.JSX.Element {
           <EmptyState
             icon="heart"
             tone="magenta"
-            title="아직 찜한 장소가 없어요"
-            description="실시간방에서 받은 장소 카드의 찜 버튼을 눌러 보세요."
+            title={copy.emptyTitle}
+            description={copy.emptyDescription}
           />
         </Card>
       </div>
@@ -70,7 +73,7 @@ export function SavedPlacesList(): React.JSX.Element {
 
   return (
     <div className={styles.stack}>
-      <Card padding="list" aria-label="찜한 장소 목록">
+      <Card padding="list" aria-label={copy.listLabel}>
         <ul className={styles.list}>
           {favorites.data.map((favorite) => (
             <li key={favorite.id}>
@@ -87,7 +90,7 @@ export function SavedPlacesList(): React.JSX.Element {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    지도에서 보기 <AppIcon name="external" />
+                    {copy.viewOnMap} <AppIcon name="external" />
                   </a>
                   <Button
                     variant="ghost"
@@ -95,7 +98,7 @@ export function SavedPlacesList(): React.JSX.Element {
                     disabled={remove.isPending}
                     onClick={() => remove.mutate(favorite.id)}
                   >
-                    찜 해제
+                    {copy.remove}
                   </Button>
                 </div>
               </article>
@@ -105,7 +108,7 @@ export function SavedPlacesList(): React.JSX.Element {
       </Card>
       {remove.isError && (
         <Notice tone="danger" icon="alert" role="alert">
-          {actionableErrorMessage(remove.error, '찜을 해제하지 못했어요.')}
+          {actionableErrorMessage(remove.error, copy.removeFailed)}
         </Notice>
       )}
     </div>
