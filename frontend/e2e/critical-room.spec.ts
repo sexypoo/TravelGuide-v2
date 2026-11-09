@@ -24,10 +24,12 @@ test('traveler and local exchange a topic and recover a missed answer', async ({
 }) => {
   test.setTimeout(120_000);
   const travelerContext = await browser.newContext({
+    locale: 'ko-KR',
     baseURL: 'http://127.0.0.1:3100',
     viewport: { width: 1440, height: 900 },
   });
   const localContext = await browser.newContext({
+    locale: 'ko-KR',
     baseURL: 'http://127.0.0.1:3100',
     viewport: { width: 1440, height: 900 },
   });
@@ -179,6 +181,7 @@ test('mobile room keeps the composer in the viewport without horizontal overflow
 }) => {
   test.setTimeout(90_000);
   const context = await browser.newContext({
+    locale: 'ko-KR',
     baseURL: 'http://127.0.0.1:3100',
     viewport: { width: 390, height: 844 },
   });

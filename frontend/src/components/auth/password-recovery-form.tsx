@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
 import { ButtonLink, Button, Notice } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import { requestPasswordReset, resetPassword } from '@/lib/api/auth-client';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import styles from './auth.module.css';
@@ -13,23 +15,23 @@ interface PasswordRecoveryFormProps {
   token?: string;
 }
 
-function messageFor(error: unknown): string {
-  if (!(error instanceof ApiProblem)) {
-    return '연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.';
-  }
+function messageFor(error: unknown, t: Messages): string {
+  if (!(error instanceof ApiProblem)) return t.errors.network;
   if (error.code === 'PASSWORD_RESET_TOKEN_INVALID') {
-    return '재설정 링크가 만료되었거나 이미 사용되었습니다. 새 링크를 받아 주세요.';
+    return t.auth.recovery.expired;
   }
   if (error.code === 'PASSWORD_EMAIL_UNAVAILABLE') {
-    return '현재 메일을 보낼 수 없습니다. 잠시 후 다시 시도해 주세요.';
+    return t.auth.recovery.mailUnavailable;
   }
-  return actionableErrorMessage(error, '요청을 처리하지 못했습니다.');
+  return actionableErrorMessage(error, t.auth.recovery.failed);
 }
 
 export function PasswordRecoveryForm({
   mode,
   token,
 }: PasswordRecoveryFormProps): React.JSX.Element {
+  const t = useMessages();
+  const r = t.auth.recovery;
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +50,7 @@ export function PasswordRecoveryForm({
         .trim()
         .toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/u.test(email) || email.length > 320) {
-        setFieldError('올바른 이메일 주소를 입력해 주세요.');
+        setFieldError(r.invalidEmail);
         return;
       }
       setIsSubmitting(true);
@@ -56,7 +58,7 @@ export function PasswordRecoveryForm({
         await requestPasswordReset(email);
         setCompleted(true);
       } catch (error: unknown) {
-        setFormError(messageFor(error));
+        setFormError(messageFor(error, t));
       } finally {
         setIsSubmitting(false);
       }
@@ -71,15 +73,15 @@ export function PasswordRecoveryForm({
       !/[A-Za-z]/u.test(password) ||
       !/\d/u.test(password)
     ) {
-      setFieldError('영문과 숫자를 포함해 10~72자로 입력해 주세요.');
+      setFieldError(t.auth.validation.passwordRule);
       return;
     }
     if (password !== confirmation) {
-      setFieldError('새 비밀번호가 서로 일치하지 않습니다.');
+      setFieldError(r.mismatch);
       return;
     }
     if (token === undefined || !/^[A-Za-z0-9_-]{43}$/u.test(token)) {
-      setFormError('재설정 링크가 올바르지 않습니다. 새 링크를 받아 주세요.');
+      setFormError(r.invalidLink);
       return;
     }
     setIsSubmitting(true);
@@ -87,7 +89,7 @@ export function PasswordRecoveryForm({
       await resetPassword(token, password);
       setCompleted(true);
     } catch (error: unknown) {
-      setFormError(messageFor(error));
+      setFormError(messageFor(error, t));
     } finally {
       setIsSubmitting(false);
     }
@@ -99,16 +101,10 @@ export function PasswordRecoveryForm({
         <span className={styles.completeIcon} aria-hidden="true">
           <AppIcon name="check" />
         </span>
-        <h2>
-          {mode === 'forgot' ? '메일을 확인해 주세요' : '비밀번호가 변경됐어요'}
-        </h2>
-        <p>
-          {mode === 'forgot'
-            ? '가입 여부와 관계없이 같은 안내를 보여드려요. 계정이 있다면 30분 동안 사용할 수 있는 링크를 보냈습니다.'
-            : '새 비밀번호로 다시 로그인해 주세요. 기존 로그인 세션은 안전하게 종료됩니다.'}
-        </p>
+        <h2>{mode === 'forgot' ? r.sentTitle : r.doneTitle}</h2>
+        <p>{mode === 'forgot' ? r.sentBody : r.doneBody}</p>
         <ButtonLink href="/auth/login" size="lg" block>
-          로그인으로 돌아가기
+          {r.backToLogin}
         </ButtonLink>
       </section>
     );
@@ -123,7 +119,7 @@ export function PasswordRecoveryForm({
     >
       {mode === 'forgot' ? (
         <div className={styles.field}>
-          <label htmlFor="email">가입한 이메일</label>
+          <label htmlFor="email">{r.emailLabel}</label>
           <input
             id="email"
             name="email"
@@ -139,24 +135,24 @@ export function PasswordRecoveryForm({
       ) : (
         <>
           <div className={styles.field}>
-            <label htmlFor="password">새 비밀번호</label>
+            <label htmlFor="password">{r.newPassword}</label>
             <input
               id="password"
               name="password"
               type="password"
               autoComplete="new-password"
-              placeholder="영문과 숫자를 포함해 10자 이상"
+              placeholder={t.auth.form.passwordPlaceholderRegister}
               aria-invalid={fieldError !== null}
             />
           </div>
           <div className={styles.field}>
-            <label htmlFor="passwordConfirmation">새 비밀번호 확인</label>
+            <label htmlFor="passwordConfirmation">{r.confirmPassword}</label>
             <input
               id="passwordConfirmation"
               name="passwordConfirmation"
               type="password"
               autoComplete="new-password"
-              placeholder="한 번 더 입력해 주세요"
+              placeholder={r.confirmPlaceholder}
               aria-invalid={fieldError !== null}
               aria-describedby={
                 fieldError === null ? undefined : 'recovery-field-error'
@@ -184,13 +180,13 @@ export function PasswordRecoveryForm({
         disabled={isSubmitting}
       >
         {isSubmitting
-          ? '처리 중'
+          ? t.common.processing
           : mode === 'forgot'
-            ? '재설정 메일 받기'
-            : '새 비밀번호 저장'}
+            ? r.sendMail
+            : r.savePassword}
       </Button>
       <p className={styles.help}>
-        <Link href="/auth/login">로그인으로 돌아가기</Link>
+        <Link href="/auth/login">{r.backToLogin}</Link>
       </p>
     </form>
   );

@@ -1,6 +1,9 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import { Wordmark } from '@/components/brand/wordmark';
 import { IconLink } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
 import styles from './shell.module.css';
 
 export function Page({ children }: { children: ReactNode }): React.JSX.Element {
@@ -16,7 +19,7 @@ export function PageHeader({
   title,
   description,
   backHref,
-  backLabel = '뒤로',
+  backLabel,
   actions,
   brand = false,
   titleId,
@@ -29,6 +32,7 @@ export function PageHeader({
   actions?: ReactNode;
   brand?: boolean;
 }): React.JSX.Element {
+  const t = useMessages();
   return (
     <header
       className={`${styles.header}${brand ? ` ${styles['header--brand']}` : ''}`}
@@ -38,7 +42,7 @@ export function PageHeader({
           className={styles.headerBack}
           href={backHref}
           icon="chevron-left"
-          label={backLabel}
+          label={backLabel ?? t.common.back}
         />
       )}
       <div className={styles.headerText}>

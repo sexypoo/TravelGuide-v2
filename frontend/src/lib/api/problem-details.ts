@@ -1,3 +1,4 @@
+import { currentMessages } from '@/i18n/runtime';
 import { isRecord } from './runtime';
 
 export interface ProblemDetails {
@@ -37,7 +38,7 @@ export function parseProblemDetails(
     title: 'Request failed',
     status: fallbackStatus,
     code: 'HTTP_ERROR',
-    detail: '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+    detail: currentMessages().errors.generic,
     requestId: 'unknown',
   };
 }
@@ -63,10 +64,10 @@ export function actionableErrorMessage(
   if (!(error instanceof ApiProblem)) return fallback;
   if (error.code === 'RATE_LIMIT_EXCEEDED') return error.message;
   if (error.status === 401) {
-    return '로그인이 만료되었습니다. 다시 로그인해 주세요.';
+    return currentMessages().errors.sessionExpired;
   }
   if (error.status >= 500) {
-    return '서버 연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.';
+    return currentMessages().errors.serverDown;
   }
   return error.message;
 }

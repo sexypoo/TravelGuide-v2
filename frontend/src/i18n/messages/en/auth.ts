@@ -1,0 +1,95 @@
+import type { Messages } from '../types';
+
+export const auth: Messages['auth'] = {
+  login: {
+    eyebrow: 'Welcome back',
+    title: 'Log in',
+    description: 'Pick up the tips and conversations you need on your trip.',
+    alternatePrompt: "Don't have an account?",
+    alternateLabel: 'Create account',
+  },
+  register: {
+    eyebrow: 'Your first step to sharing travel tips',
+    title: 'Create account',
+    description: 'You can use the community right after signing up.',
+    alternatePrompt: 'Already have an account?',
+    alternateLabel: 'Log in',
+  },
+  forgot: {
+    eyebrow: 'Recover your account',
+    title: 'Reset password',
+    description: "We'll email you a secure link that works for 30 minutes.",
+    alternatePrompt: "Don't have an account?",
+    alternateLabel: 'Create account',
+  },
+  reset: {
+    eyebrow: 'Choose a new password',
+    title: 'Change password',
+    description: "Enter a new password you don't use anywhere else.",
+    alternatePrompt: 'Problem with the link?',
+    alternateLabel: 'Get a new link',
+  },
+  backToStart: 'Start',
+  form: {
+    email: 'Email',
+    nickname: 'Nickname',
+    nicknamePlaceholder: '2 to 20 characters',
+    password: 'Password',
+    passwordPlaceholderRegister:
+      'At least 10 characters with letters and numbers',
+    passwordPlaceholderLogin: 'Enter your password',
+    termsRequired: 'Required',
+    termsText: 'I agree to the Terms of Service and the Privacy Policy.',
+    termsMissing: 'Please agree to the required terms.',
+    socialFailed:
+      "We couldn't finish social login. Try again or use another way to sign in.",
+    or: 'Or continue with',
+    socialLabel: 'Social login',
+    google: 'Continue with Google',
+    kakao: 'Continue with Kakao',
+    apple: 'Continue with Apple',
+    forgotPrompt: 'Forgot your password?',
+    forgotLink: 'Reset it',
+    submittingRegister: 'Creating your account.',
+    submittingLogin: 'Logging you in.',
+  },
+  errors: {
+    EMAIL_ALREADY_EXISTS: 'This email is already registered. Please log in.',
+    NICKNAME_ALREADY_EXISTS:
+      'This nickname is taken. Please choose another one.',
+    INVALID_CREDENTIALS: 'The email or password is incorrect.',
+    VALIDATION_FAILED: 'Please check what you entered.',
+  },
+  validation: {
+    email: 'Please check the email format.',
+    passwordMissing: 'Please enter your password.',
+    passwordRule: 'Use 10 to 72 characters with both letters and numbers.',
+    nickname: 'Use 2 to 20 characters, not counting spaces.',
+    terms: 'Please agree to the required terms to continue.',
+  },
+  logout: 'Log out',
+  loggingOut: 'Logging out',
+  logoutFailed: "We couldn't log you out. Please try again.",
+  recovery: {
+    expired:
+      'This reset link has expired or was already used. Please get a new one.',
+    mailUnavailable: "We can't send email right now. Please try again shortly.",
+    failed: "We couldn't complete that.",
+    invalidEmail: 'Please enter a valid email address.',
+    mismatch: "The new passwords don't match.",
+    invalidLink: 'This reset link is invalid. Please get a new one.',
+    sentTitle: 'Check your email',
+    doneTitle: 'Your password has been changed',
+    sentBody:
+      "We show the same message whether or not you have an account. If you do, we've sent a link that works for 30 minutes.",
+    doneBody:
+      'Log in again with your new password. Your other sessions have been signed out.',
+    backToLogin: 'Back to log in',
+    emailLabel: 'Your account email',
+    newPassword: 'New password',
+    confirmPassword: 'Confirm new password',
+    confirmPlaceholder: 'Enter it once more',
+    sendMail: 'Send reset email',
+    savePassword: 'Save new password',
+  },
+};

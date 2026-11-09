@@ -1,0 +1,22 @@
+export const publicHome = {
+  menuLabel: '처음 화면 메뉴',
+  travelTest: '여행자 유형 테스트',
+  titleLine1: '여행이 틀어지는 순간,',
+  titleLine2: '지금 그곳을 아는 사람에게 묻다.',
+  lede: '인증한 여행자와 현지인이 모인 도움방에서 지금 상황을 물어보세요.',
+  stepsLabel: '서비스 이용 순서',
+  steps: ['인증', '질문', '여러 현지인의 답변'],
+  firstTime: '처음이신가요?',
+  destinationsTitle: '로그인하면 이어지는 곳',
+  roomsTitle: '도시별 실시간 도움방',
+  roomsDescription: '인증하면 지금 상황을 물을 수 있어요.',
+  communityTitle: '여행자 커뮤니티',
+  communityDescription: '인증 없이 여행 정보를 묻고 나눌 수 있어요.',
+  verificationTitle: '여행자·현지인 인증',
+  verificationDescription: '도움방에 참여할 자격을 신청해요.',
+  safety:
+    '긴급 구조나 의료 상담이 필요하면 119 등 공식 기관에 먼저 연락해 주세요.',
+  policyLabel: '정책 안내',
+  privacy: '개인정보 처리방침',
+  accountDeletion: '계정 삭제',
+};

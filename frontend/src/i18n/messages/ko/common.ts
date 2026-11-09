@@ -1,0 +1,22 @@
+export const common = {
+  back: '뒤로',
+  retry: '다시 시도',
+  loading: '불러오는 중',
+  processing: '처리 중',
+  save: '저장',
+  cancel: '취소',
+  close: '닫기',
+  brandHome: '여쭈어 홈',
+  languageSwitch: 'English',
+  languageSwitchLabel: '영어로 보기',
+  login: '로그인',
+  register: '계정 만들기',
+  connectionChecking: '서비스 연결 확인 중',
+  connectionOk: '서비스 정상 연결',
+  connectionDown: '서비스 연결 안 됨',
+  connectionRecheck: '다시 확인',
+  metaTitle: '여쭈어 (여JJU) — 여행지의 지금을 나누는 커뮤니티',
+  metaTemplate: '%s | 여쭈어',
+  metaDescription:
+    '여행 정보를 편하게 나누고, 인증된 참여자와 여행지의 지금을 확인하는 커뮤니티',
+};

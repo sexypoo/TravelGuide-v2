@@ -6,8 +6,9 @@ describe('RootLayout', () => {
     expect(viewport.interactiveWidget).toBe('resizes-content');
   });
 
-  it('ignores attributes injected onto the body before hydration', () => {
-    const layout = RootLayout({ children: <main>content</main> });
+  it('ignores attributes injected onto the body before hydration', async () => {
+    const layout = await RootLayout({ children: <main>content</main> });
+    expect(layout.props.lang).toBe('ko');
     const body = layout.props.children;
 
     expect(layout.props['data-scroll-behavior']).toBe('smooth');

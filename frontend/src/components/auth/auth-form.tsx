@@ -14,6 +14,8 @@ import {
   type RegisterInput,
   type SocialProvider,
 } from '@/lib/api/auth-client';
+import { useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import {
   validateLogin,
@@ -32,23 +34,10 @@ function hasErrors(errors: AuthFieldErrors): boolean {
   return Object.values(errors).some((message) => message !== undefined);
 }
 
-function errorMessage(error: unknown): string {
-  if (!(error instanceof ApiProblem)) {
-    return '연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.';
-  }
-  const messages: Readonly<Record<string, string>> = {
-    EMAIL_ALREADY_EXISTS: '이미 가입된 이메일입니다. 로그인해 주세요.',
-    NICKNAME_ALREADY_EXISTS:
-      '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해 주세요.',
-    INVALID_CREDENTIALS: '이메일 또는 비밀번호가 올바르지 않습니다.',
-    VALIDATION_FAILED: '입력한 내용을 다시 확인해 주세요.',
-  };
+function errorMessage(error: unknown, t: Messages): string {
+  if (!(error instanceof ApiProblem)) return t.errors.network;
   return (
-    messages[error.code] ??
-    actionableErrorMessage(
-      error,
-      '요청을 처리하지 못했습니다. 다시 시도해 주세요.',
-    )
+    t.auth.errors[error.code] ?? actionableErrorMessage(error, t.errors.generic)
   );
 }
 
@@ -91,13 +80,16 @@ function Field({
   );
 }
 
-function providerContent(provider: SocialProvider): {
+function providerContent(
+  t: Messages['auth']['form'],
+  provider: SocialProvider,
+): {
   mark: string;
   label: string;
 } {
-  if (provider === 'google') return { mark: 'G', label: 'Google로 계속하기' };
-  if (provider === 'kakao') return { mark: 'K', label: '카카오로 계속하기' };
-  return { mark: '●', label: 'Apple로 계속하기' };
+  if (provider === 'google') return { mark: 'G', label: t.google };
+  if (provider === 'kakao') return { mark: 'K', label: t.kakao };
+  return { mark: '●', label: t.apple };
 }
 
 export function AuthForm({
@@ -106,6 +98,8 @@ export function AuthForm({
   socialError = false,
 }: AuthFormProps): React.JSX.Element {
   const router = useRouter();
+  const t = useMessages();
+  const f = t.auth.form;
   const [errors, setErrors] = useState<AuthFieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -135,7 +129,7 @@ export function AuthForm({
     if (isRegister && !termsAgreed) {
       setErrors((current) => ({
         ...current,
-        termsAgreed: '필수 약관에 동의해 주세요.',
+        termsAgreed: f.termsMissing,
       }));
       return;
     }
@@ -157,13 +151,16 @@ export function AuthForm({
     const nickname = String(form.get('nickname') ?? '').trim();
     const submittedTermsAgreed = form.get('termsAgreed') === 'on';
     const validationErrors = isRegister
-      ? validateRegistration({
-          email,
-          password,
-          nickname,
-          termsAgreed: submittedTermsAgreed,
-        })
-      : validateLogin({ email, password });
+      ? validateRegistration(
+          {
+            email,
+            password,
+            nickname,
+            termsAgreed: submittedTermsAgreed,
+          },
+          t.auth.validation,
+        )
+      : validateLogin({ email, password }, t.auth.validation);
 
     setErrors(validationErrors);
     if (hasErrors(validationErrors)) return;
@@ -185,7 +182,7 @@ export function AuthForm({
       router.replace(nextPath);
       router.refresh();
     } catch (error: unknown) {
-      setFormError(errorMessage(error));
+      setFormError(errorMessage(error, t));
       setIsSubmitting(false);
     }
   }
@@ -199,7 +196,7 @@ export function AuthForm({
     >
       <Field
         id="email"
-        label="이메일"
+        label={f.email}
         type="email"
         autoComplete="email"
         placeholder="name@example.com"
@@ -208,20 +205,22 @@ export function AuthForm({
       {isRegister && (
         <Field
           id="nickname"
-          label="닉네임"
+          label={f.nickname}
           type="text"
           autoComplete="nickname"
-          placeholder="2~20자로 입력해 주세요"
+          placeholder={f.nicknamePlaceholder}
           error={errors.nickname}
         />
       )}
       <Field
         id="password"
-        label="비밀번호"
+        label={f.password}
         type="password"
         autoComplete={isRegister ? 'new-password' : 'current-password'}
         placeholder={
-          isRegister ? '영문과 숫자를 포함해 10자 이상' : '비밀번호 입력'
+          isRegister
+            ? f.passwordPlaceholderRegister
+            : f.passwordPlaceholderLogin
         }
         error={errors.password}
       />
@@ -247,8 +246,7 @@ export function AuthForm({
               }
             />
             <span>
-              <strong>필수</strong> 서비스 이용약관과 개인정보 처리방침에
-              동의합니다.
+              <strong>{f.termsRequired}</strong> {f.termsText}
             </span>
           </label>
           {errors.termsAgreed !== undefined && (
@@ -261,8 +259,7 @@ export function AuthForm({
 
       {(formError !== null || socialError) && (
         <Notice tone="danger" icon="alert" role="alert">
-          {formError ??
-            '소셜 로그인을 완료하지 못했습니다. 다시 시도하거나 다른 방법을 이용해 주세요.'}
+          {formError ?? f.socialFailed}
         </Notice>
       )}
 
@@ -275,23 +272,24 @@ export function AuthForm({
       >
         {isSubmitting ? (
           <>
-            <span className={styles.spinner} aria-hidden="true" /> 처리 중
+            <span className={styles.spinner} aria-hidden="true" />{' '}
+            {t.common.processing}
           </>
         ) : isRegister ? (
-          '계정 만들기'
+          t.common.register
         ) : (
-          '로그인'
+          t.common.login
         )}
       </Button>
 
       {capabilities !== null && capabilities.socialProviders.length > 0 && (
         <div className={styles.social}>
           <div className={styles.divider} aria-hidden="true">
-            <span>또는 간편하게</span>
+            <span>{f.or}</span>
           </div>
-          <div className={styles.socialButtons} aria-label="소셜 로그인">
+          <div className={styles.socialButtons} aria-label={f.socialLabel}>
             {capabilities.socialProviders.map((provider) => {
-              const content = providerContent(provider);
+              const content = providerContent(f, provider);
               return (
                 <button
                   className={`${styles.socialButton} ${styles[`social--${provider}`] ?? ''}`}
@@ -312,13 +310,15 @@ export function AuthForm({
 
       {!isRegister && capabilities?.passwordReset === true && (
         <p className={styles.help}>
-          비밀번호가 기억나지 않나요?{' '}
-          <Link href="/auth/forgot-password">비밀번호 재설정</Link>
+          {f.forgotPrompt}{' '}
+          <Link href="/auth/forgot-password">{f.forgotLink}</Link>
         </p>
       )}
       <p className={styles.status} aria-live="polite">
         {isSubmitting
-          ? `${isRegister ? '가입' : '로그인'} 요청을 처리하고 있습니다.`
+          ? isRegister
+            ? f.submittingRegister
+            : f.submittingLogin
           : ''}
       </p>
     </form>

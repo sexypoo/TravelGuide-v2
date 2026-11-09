@@ -3,13 +3,13 @@ import { redirect } from 'next/navigation';
 import { ApiConnectionStatus } from '@/components/api-connection-status';
 import { Wordmark } from '@/components/brand/wordmark';
 import { ButtonLink, Card, ListRow } from '@/components/ui';
+import { LocaleSwitch } from '@/components/common/locale-switch';
+import { getMessages } from '@/i18n/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import styles from './public-home.module.css';
 
-const steps = ['인증', '질문', '여러 현지인의 답변'];
-
 export default async function Home(): Promise<React.JSX.Element> {
-  const user = await getCurrentUser();
+  const [user, t] = await Promise.all([getCurrentUser(), getMessages()]);
   if (user !== null) {
     redirect(user.isAdmin ? '/admin' : '/app');
   }
@@ -18,12 +18,13 @@ export default async function Home(): Promise<React.JSX.Element> {
     <main className={styles.page}>
       <header className={styles.header}>
         <Wordmark />
-        <nav className={styles.headerNav} aria-label="처음 화면 메뉴">
+        <nav className={styles.headerNav} aria-label={t.publicHome.menuLabel}>
+          <LocaleSwitch />
           <Link className={styles.headerTest} href="/test">
-            여행자 유형 테스트
+            {t.publicHome.travelTest}
           </Link>
           <Link className={styles.headerLogin} href="/auth/login">
-            로그인
+            {t.common.login}
           </Link>
         </nav>
       </header>
@@ -31,15 +32,13 @@ export default async function Home(): Promise<React.JSX.Element> {
       <div className={styles.body}>
         <section className={styles.hero} aria-labelledby="guest-title">
           <h1 id="guest-title" className={styles.title}>
-            <span>여행이 틀어지는 순간,</span>{' '}
-            <span>지금 그곳을 아는 사람에게 묻다.</span>
+            <span>{t.publicHome.titleLine1}</span>{' '}
+            <span>{t.publicHome.titleLine2}</span>
           </h1>
-          <p className={styles.lede}>
-            인증한 여행자와 현지인이 모인 도움방에서 지금 상황을 물어보세요.
-          </p>
+          <p className={styles.lede}>{t.publicHome.lede}</p>
 
-          <ol className={styles.steps} aria-label="서비스 이용 순서">
-            {steps.map((step) => (
+          <ol className={styles.steps} aria-label={t.publicHome.stepsLabel}>
+            {t.publicHome.steps.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
@@ -52,10 +51,10 @@ export default async function Home(): Promise<React.JSX.Element> {
               size="lg"
               block
             >
-              로그인
+              {t.common.login}
             </ButtonLink>
             <Link className={styles.register} href="/auth/register">
-              처음이신가요? <strong>계정 만들기</strong>
+              {t.publicHome.firstTime} <strong>{t.common.register}</strong>
             </Link>
           </div>
         </section>
@@ -66,42 +65,39 @@ export default async function Home(): Promise<React.JSX.Element> {
           aria-labelledby="destinations-title"
         >
           <h2 id="destinations-title" className={styles.destinationsTitle}>
-            로그인하면 이어지는 곳
+            {t.publicHome.destinationsTitle}
           </h2>
           <ListRow
             href="/auth/login?next=%2Fapp%2Frooms"
             icon="room"
             tone="magenta"
-            title="도시별 실시간 도움방"
-            description="인증하면 지금 상황을 물을 수 있어요."
+            title={t.publicHome.roomsTitle}
+            description={t.publicHome.roomsDescription}
           />
           <ListRow
             href="/auth/login?next=%2Fapp%2Fcommunity"
             icon="community"
             tone="iris"
-            title="여행자 커뮤니티"
-            description="인증 없이 여행 정보를 묻고 나눌 수 있어요."
+            title={t.publicHome.communityTitle}
+            description={t.publicHome.communityDescription}
           />
           <ListRow
             href="/auth/login?next=%2Fapp%2Fverifications"
             icon="shield"
             tone="plum"
-            title="여행자·현지인 인증"
-            description="도움방에 참여할 자격을 신청해요."
+            title={t.publicHome.verificationTitle}
+            description={t.publicHome.verificationDescription}
           />
         </Card>
       </div>
 
       <footer className={styles.footer}>
-        <p className={styles.safety}>
-          긴급 구조나 의료 상담이 필요하면 119 등 공식 기관에 먼저 연락해
-          주세요.
-        </p>
+        <p className={styles.safety}>{t.publicHome.safety}</p>
         <div className={styles.footerMeta}>
           <ApiConnectionStatus />
-          <nav aria-label="정책 안내">
-            <Link href="/privacy">개인정보 처리방침</Link>
-            <Link href="/account-deletion">계정 삭제</Link>
+          <nav aria-label={t.publicHome.policyLabel}>
+            <Link href="/privacy">{t.publicHome.privacy}</Link>
+            <Link href="/account-deletion">{t.publicHome.accountDeletion}</Link>
           </nav>
         </div>
       </footer>

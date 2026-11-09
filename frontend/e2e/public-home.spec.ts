@@ -10,6 +10,7 @@ for (const viewport of viewports) {
     browser,
   }) => {
     const context = await browser.newContext({
+      locale: 'ko-KR',
       baseURL: 'http://127.0.0.1:3100',
       viewport: { width: viewport.width, height: viewport.height },
     });

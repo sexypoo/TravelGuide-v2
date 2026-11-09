@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import { AppIcon } from '@/components/common';
+import { useMessages } from '@/i18n/client';
 import styles from './wordmark.module.css';
 
 export function Wordmark({
@@ -9,11 +12,12 @@ export function Wordmark({
   href?: string;
   inverse?: boolean;
 }): React.JSX.Element {
+  const t = useMessages();
   return (
     <Link
       className={`${styles.wordmark}${inverse ? ` ${styles.inverse}` : ''}`}
       href={href}
-      aria-label="여쭈어 홈"
+      aria-label={t.common.brandHome}
     >
       <span className={styles.mark} aria-hidden="true">
         <AppIcon name="mark" />

@@ -13,11 +13,16 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: 'http://127.0.0.1:3100',
+    // Korean by default; English specs set their own locale (#80).
+    locale: 'ko-KR',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
   projects: [
-    { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'] } },
+    {
+      name: 'desktop-chromium',
+      use: { ...devices['Desktop Chrome'], locale: 'ko-KR' },
+    },
   ],
   webServer: [
     {

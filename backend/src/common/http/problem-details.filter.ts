@@ -8,7 +8,8 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { ProblemException, type ProblemDetails } from './problem.exception';
-import { uploadTooLargeDetail } from './validation-message';
+import { englishDetail } from './english-details';
+import { issueMessage, uploadTooLargeDetail } from './validation-message';
 
 const titles: Readonly<Record<number, string>> = {
   [HttpStatus.BAD_REQUEST]: 'Bad Request',
@@ -59,6 +60,13 @@ function getHttpDetail(exception: HttpException): string {
   }
 
   return exception.message;
+}
+
+/** The web app's language cookie (#80); anything else means Korean. */
+function requestLocale(request: Request): 'ko' | 'en' {
+  const cookies: unknown = request.cookies;
+  if (typeof cookies !== 'object' || cookies === null) return 'ko';
+  return (cookies as Record<string, unknown>).locale === 'en' ? 'en' : 'ko';
 }
 
 @Catch()
@@ -112,6 +120,14 @@ export class ProblemDetailsFilter implements ExceptionFilter {
             : '서버에서 요청을 처리하지 못했습니다.',
       requestId,
     };
+
+    if (requestLocale(request) === 'en') {
+      problem.detail =
+        normalizedException instanceof ProblemException &&
+        normalizedException.validation !== undefined
+          ? issueMessage(normalizedException.validation, 'en')
+          : englishDetail(problem.detail, status);
+    }
 
     response.status(status).json(problem);
   }

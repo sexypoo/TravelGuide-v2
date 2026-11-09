@@ -2,11 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useMessages } from '@/i18n/client';
 import { logout } from '@/lib/api/auth-client';
 import styles from './auth.module.css';
 
 export function LogoutButton(): React.JSX.Element {
   const router = useRouter();
+  const t = useMessages();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +20,7 @@ export function LogoutButton(): React.JSX.Element {
       router.replace('/auth/login');
       router.refresh();
     } catch {
-      setError('로그아웃하지 못했습니다. 다시 시도해 주세요.');
+      setError(t.auth.logoutFailed);
       setIsPending(false);
     }
   }
@@ -31,7 +33,7 @@ export function LogoutButton(): React.JSX.Element {
         onClick={() => void handleLogout()}
         disabled={isPending}
       >
-        {isPending ? '로그아웃 중' : '로그아웃'}
+        {isPending ? t.auth.loggingOut : t.auth.logout}
       </button>
       <span className={styles.logoutError} aria-live="polite">
         {error}
