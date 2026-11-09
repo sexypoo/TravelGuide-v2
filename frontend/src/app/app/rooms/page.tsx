@@ -5,13 +5,12 @@ import {
   type ChipTone,
   EmptyState,
   ListRow,
-  Notice,
   SectionHead,
 } from '@/components/ui';
-import type { RoomAccessStatus } from '@/lib/api/rooms';
+import type { Room, RoomAccessStatus } from '@/lib/api/rooms';
 import { getRooms } from '@/lib/api/rooms.server';
 import { requireUser } from '@/lib/auth/session';
-import { groupRoomsByCountry } from '@/lib/rooms/presentation';
+import { splitRooms } from '@/lib/rooms/presentation';
 import styles from './rooms.module.css';
 
 const statusTone: Readonly<Record<RoomAccessStatus, ChipTone>> = {
@@ -21,25 +20,40 @@ const statusTone: Readonly<Record<RoomAccessStatus, ChipTone>> = {
   VERIFICATION_REQUIRED: 'neutral',
 };
 
+function RoomRows({ rooms }: { rooms: readonly Room[] }): React.JSX.Element {
+  return (
+    <Card padding="list">
+      {rooms.map((room) => (
+        <ListRow
+          key={room.id}
+          href={`/app/rooms/${encodeURIComponent(room.slug)}`}
+          icon="room"
+          tone={room.access.canViewContent ? 'magenta' : 'neutral'}
+          title={`${room.destination.nameKo} 도움방`}
+          trailing={
+            <Chip tone={statusTone[room.access.status]}>
+              {room.access.labelKo}
+            </Chip>
+          }
+        />
+      ))}
+    </Card>
+  );
+}
+
 export default async function RoomsPage(): Promise<React.JSX.Element> {
   await requireUser('/app/rooms');
-  const rooms = await getRooms();
-  const groups = groupRoomsByCountry(rooms);
+  const { domestic, temporary } = splitRooms(await getRooms());
 
   return (
     <Page>
       <PageHeader
         title="도움방"
-        description="도시마다 그곳에 사는 사람에게 지금 상황을 물어볼 수 있어요."
+        description="여행지마다 그곳에 사는 사람에게 지금 상황을 물어볼 수 있어요."
       />
 
       <div className={styles.stack}>
-        <Notice tone="info" icon="info">
-          그 도시에 살거나 공부하고 있다면 현지인으로 인증하고 답해 주세요.
-          교환학생도 현지인으로 신청할 수 있어요.
-        </Notice>
-
-        {groups.length === 0 ? (
+        {domestic.length === 0 && temporary.length === 0 ? (
           <Card>
             <EmptyState
               icon="room"
@@ -49,33 +63,24 @@ export default async function RoomsPage(): Promise<React.JSX.Element> {
             />
           </Card>
         ) : (
-          groups.map((group) => (
-            <section
-              key={group.countryCode}
-              aria-labelledby={`rooms-${group.countryCode}`}
-            >
-              <SectionHead
-                id={`rooms-${group.countryCode}`}
-                title={group.name}
-              />
-              <Card padding="list">
-                {group.rooms.map((room) => (
-                  <ListRow
-                    key={room.id}
-                    href={`/app/rooms/${encodeURIComponent(room.slug)}`}
-                    icon="room"
-                    tone={room.access.canViewContent ? 'magenta' : 'neutral'}
-                    title={`${room.destination.nameKo} 도움방`}
-                    trailing={
-                      <Chip tone={statusTone[room.access.status]}>
-                        {room.access.labelKo}
-                      </Chip>
-                    }
-                  />
-                ))}
-              </Card>
-            </section>
-          ))
+          <>
+            {domestic.length > 0 && (
+              <section aria-labelledby="rooms-domestic">
+                <SectionHead id="rooms-domestic" title="국내 여행지" />
+                <RoomRows rooms={domestic} />
+              </section>
+            )}
+            {temporary.length > 0 && (
+              <section aria-labelledby="rooms-temporary">
+                <SectionHead id="rooms-temporary" title="임시 운영" />
+                <p className={styles.note}>
+                  해외 교환학생이 직접 운영해 보는 방이에요. 언제든 닫힐 수
+                  있어요.
+                </p>
+                <RoomRows rooms={temporary} />
+              </section>
+            )}
+          </>
         )}
       </div>
     </Page>

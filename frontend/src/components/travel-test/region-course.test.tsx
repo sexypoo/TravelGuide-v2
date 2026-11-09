@@ -32,5 +32,10 @@ describe('RegionCourse', () => {
         '여쭈어가 고른 예시 코스예요. 아직 현지인이 확인하지 않았어요.',
       ),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', {
+        name: '부산 도움방에서 현지인에게 물어보기',
+      }),
+    ).toHaveAttribute('href', '/app/rooms/busan');
   });
 });

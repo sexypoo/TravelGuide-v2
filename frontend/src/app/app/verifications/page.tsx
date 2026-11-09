@@ -31,7 +31,8 @@ const choices: ReadonlyArray<{
   {
     type: 'LOCAL',
     title: '현지인 인증',
-    description: '위치와 거주·학업 증빙으로 신청해요. 교환학생도 할 수 있어요.',
+    description:
+      '위치와 거주·학업 증빙으로 신청해요. 승인되면 답변할 수 있어요.',
     href: '/app/verifications/local',
   },
 ];

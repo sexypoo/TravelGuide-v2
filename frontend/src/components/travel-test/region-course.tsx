@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Card } from '@/components/ui';
 import { TRAVEL_TYPES, type TravelTypeKey } from '@/lib/travel-test/content';
 import { COURSE_REGIONS } from '@/lib/travel-test/courses';
@@ -54,6 +55,12 @@ export function RegionCourse({
           </li>
         ))}
       </ol>
+      <Link
+        className={styles.courseRoom}
+        href={`/app/rooms/${encodeURIComponent(region.key)}`}
+      >
+        {region.name} 도움방에서 현지인에게 물어보기
+      </Link>
     </Card>
   );
 }

@@ -21,7 +21,7 @@ export default async function LocalVerificationPage({
       <Page>
         <PageHeader
           title="현지인 인증 신청"
-          description="어느 도시에 살거나 공부하고 있나요? 교환학생도 신청할 수 있어요."
+          description="어느 도시에 살거나 공부하고 있나요? 승인되면 그 도시 도움방에서 답할 수 있어요."
           backHref="/app/verifications"
           backLabel="참여 자격"
         />

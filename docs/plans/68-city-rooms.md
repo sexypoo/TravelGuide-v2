@@ -1,16 +1,18 @@
-# 68 유럽 교환학생 도시 도움방
+# 68 국내 여행지 도움방 + 교환학생 임시 방
 
 ## Goal
 
-제주 1개 방을 여러 도시 방으로 넓힌다. 첫 대상은 유럽 한국인 교환학생
-(자기 도시에선 현지인, 방학엔 여행자). 결정은 ADR-053.
+제주 1개 방을 여행자 유형 테스트 지역과 같은 국내 4개 방(제주·부산·강릉·서울)으로
+넓히고, 오너 도시 마르부르크를 임시 방으로 둔다. 결정은 ADR-053
+(유럽 10개 도시 초안은 오너 피드백으로 축소).
 
 ## Files
 
 - `backend/prisma/destinations.ts` (+spec): 도시 목록, seed가 배포마다 upsert
 - `backend/prisma/seed.ts`: 목록을 돌며 여행지와 방 upsert
-- `frontend/src/lib/rooms/presentation.ts` (+test): 나라별 묶기, 내 방, `?city=`
+- `frontend/src/lib/rooms/presentation.ts` (+test): 국내(테스트 지역 순서)/임시 나누기, 내 방, `?city=`
 - `frontend/src/app/app/rooms/page.tsx`: 도움방 목록, 하단 메뉴 연결
+- `frontend/src/components/travel-test/region-course.tsx`: 코스 아래 같은 도시 도움방 링크
 - `frontend/src/app/app/page.tsx`: 홈은 내 방만, 없으면 고르기 안내
 - `frontend/src/app/app/verifications/{traveler,local}/page.tsx`,
   `components/verifications/city-picker.tsx`: 도시 고르기
@@ -32,4 +34,4 @@
 
 - 방이 많아 빈 방이 보인다. 목록에 상태를 보이고 홈에는 내 방만 둔다.
 - 토픽 상세는 서버에서 토픽을 한 번 더 읽어 방을 찾는다.
-- 아이슬란드 반경 300km는 넓다. 현지인 인증은 관리자 심사가 최종 판단이다.
+- 배포 뒤 seed에서 도시를 빼도 DB에서는 지워지지 않는다.

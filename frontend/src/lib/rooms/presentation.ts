@@ -1,52 +1,35 @@
 import type { Room } from '@/lib/api/rooms';
+import { COURSE_REGIONS } from '@/lib/travel-test/courses';
 
-// Grouping and labels for the city room list (#68).
+// How the room list is ordered and split (#68, ADR-053). Domestic rooms follow
+// the travel test's region order so a test result leads to the same city.
 
-const countryNames: Readonly<Record<string, string>> = {
-  KR: '한국',
-  DE: '독일',
-  GB: '영국',
-  IS: '아이슬란드',
-  CZ: '체코',
-  AT: '오스트리아',
-  HU: '헝가리',
-  IT: '이탈리아',
-  CH: '스위스',
-  FR: '프랑스',
-  ES: '스페인',
-  NL: '네덜란드',
-};
+const regionOrder: readonly string[] = COURSE_REGIONS.map(
+  (region) => region.key,
+);
 
-export function countryName(countryCode: string): string {
-  return countryNames[countryCode] ?? countryCode;
+function domesticRank(room: Room): number {
+  const index = regionOrder.indexOf(room.destination.slug);
+  return index === -1 ? regionOrder.length : index;
 }
 
-export interface CountryRooms {
-  countryCode: string;
-  name: string;
-  rooms: Room[];
+export interface RoomSections {
+  domestic: Room[];
+  temporary: Room[];
 }
 
-/** Rooms grouped by country: Korea first, then countries by Korean name. */
-export function groupRoomsByCountry(rooms: readonly Room[]): CountryRooms[] {
-  const groups = new Map<string, Room[]>();
-  for (const room of rooms) {
-    const code = room.destination.countryCode;
-    groups.set(code, [...(groups.get(code) ?? []), room]);
-  }
-  return [...groups.entries()]
-    .map(([countryCode, items]) => ({
-      countryCode,
-      name: countryName(countryCode),
-      rooms: [...items].sort((a, b) =>
-        a.destination.nameKo.localeCompare(b.destination.nameKo, 'ko'),
-      ),
-    }))
-    .sort((a, b) => {
-      if (a.countryCode === 'KR') return -1;
-      if (b.countryCode === 'KR') return 1;
-      return a.name.localeCompare(b.name, 'ko');
-    });
+/** Domestic rooms in test-region order; rooms abroad are temporary. */
+export function splitRooms(rooms: readonly Room[]): RoomSections {
+  const byName = (a: Room, b: Room): number =>
+    a.destination.nameKo.localeCompare(b.destination.nameKo, 'ko');
+  return {
+    domestic: rooms
+      .filter((room) => room.destination.countryCode === 'KR')
+      .sort((a, b) => domesticRank(a) - domesticRank(b) || byName(a, b)),
+    temporary: rooms
+      .filter((room) => room.destination.countryCode !== 'KR')
+      .sort(byName),
+  };
 }
 
 /** Rooms the user can enter or is waiting on, for the home screen. */
