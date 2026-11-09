@@ -163,7 +163,8 @@ export function QuestionDetailView({
             <AppIcon name="pin" /> {question.areaText}
           </p>
         )}
-        {question.image !== null && (
+        {/* The realtime cache keeps media on hidden topics until refetch. */}
+        {question.status !== 'REMOVED' && question.image !== null && (
           <figure className={styles.evidence}>
             {/* Protected room media is served by the authenticated API route. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}

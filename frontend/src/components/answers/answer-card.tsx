@@ -80,14 +80,15 @@ export function AnswerCard({
         )}
       </header>
       <p className={styles.content}>{answer.content}</p>
-      {answer.image && (
+      {/* The realtime cache keeps media on hidden answers until refetch. */}
+      {!answer.removed && answer.image && (
         <figure className={styles.evidence}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={answer.image.url} alt={answer.image.originalName} />
           <figcaption>현장 확인 사진</figcaption>
         </figure>
       )}
-      {answer.observation && (
+      {!answer.removed && answer.observation && (
         <div className={styles.observation} aria-label="현장 관찰 정보">
           {answer.observation.waitMinutes !== null && (
             <span>
