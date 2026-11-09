@@ -30,7 +30,10 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { SocialCallbackDto, SocialStartQueryDto } from './dto/social-auth.dto';
+import {
+  parseSocialCallback,
+  SocialStartQueryDto,
+} from './dto/social-auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RateLimit } from '../common/rate-limit/rate-limit.decorator';
 import { RateLimitGuard } from '../common/rate-limit/rate-limit.guard';
@@ -142,22 +145,25 @@ export class AuthController {
   @Get('oauth/:provider/callback')
   async socialCallbackGet(
     @Param('provider') provider: string,
-    @Query() query: SocialCallbackDto,
+    @Query() query: Record<string, unknown>,
     @Res() response: Response,
   ): Promise<void> {
     await this.completeSocialCallback(response, {
       provider,
-      ...query,
+      ...parseSocialCallback(query),
     });
   }
 
   @Post('oauth/:provider/callback')
   async socialCallbackPost(
     @Param('provider') provider: string,
-    @Body() body: SocialCallbackDto,
+    @Body() body: Record<string, unknown>,
     @Res() response: Response,
   ): Promise<void> {
-    await this.completeSocialCallback(response, { provider, ...body });
+    await this.completeSocialCallback(response, {
+      provider,
+      ...parseSocialCallback(body),
+    });
   }
 
   @Get('me')

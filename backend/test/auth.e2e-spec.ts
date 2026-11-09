@@ -295,6 +295,29 @@ describe('Authentication', () => {
     expect(created.email).toBe('social-new@example.com');
   });
 
+  it('accepts provider callbacks that carry extra fields (#76)', async () => {
+    // Google adds scope, authuser, and prompt; Apple may post user. These
+    // must reach the callback (here an invalid state) instead of a 400.
+    const google = await request(server)
+      .get('/api/v1/auth/oauth/google/callback')
+      .query({
+        state: 'not-a-valid-state',
+        code: 'code',
+        scope: 'email profile openid',
+        authuser: '0',
+        prompt: 'consent',
+      })
+      .expect(302);
+    expect(google.headers.location).toContain('/auth/login?socialError=failed');
+
+    const apple = await request(server)
+      .post('/api/v1/auth/oauth/apple/callback')
+      .type('form')
+      .send({ state: 'x', code: 'y', user: '{"name":{"firstName":"A"}}' })
+      .expect(302);
+    expect(apple.headers.location).toContain('/auth/login?socialError=failed');
+  });
+
   it('returns request-correlated validation problems', async () => {
     const response = await request(server)
       .post('/api/v1/auth/register')
