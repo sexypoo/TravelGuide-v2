@@ -7,6 +7,8 @@ jest.mock('../../lib/api/places', () => ({
 }));
 
 const searchPlacesMock = jest.mocked(searchPlaces);
+const jejuCenter = { latitude: 33.3617, longitude: 126.5292 };
+const busanCenter = { latitude: 35.1796, longitude: 129.0756 };
 const place: GooglePlace = {
   id: 'ChIJ-google-place',
   name: '동백식당',
@@ -48,7 +50,13 @@ describe('PlacePicker', () => {
   it('searches, selects, and confirms a Google place', async () => {
     const onSelect = jest.fn();
     searchPlacesMock.mockResolvedValue([place]);
-    render(<PlacePicker onClose={jest.fn()} onSelect={onSelect} />);
+    render(
+      <PlacePicker
+        center={jejuCenter}
+        onClose={jest.fn()}
+        onSelect={onSelect}
+      />,
+    );
 
     fireEvent.change(screen.getByLabelText('장소 검색어'), {
       target: { value: '동백식당' },
@@ -56,18 +64,41 @@ describe('PlacePicker', () => {
     fireEvent.click(screen.getByRole('button', { name: '검색' }));
 
     expect(await screen.findByText('제주시 바다로 1')).toBeInTheDocument();
-    expect(searchPlacesMock).toHaveBeenCalledWith('동백식당', {
-      latitude: 33.4996,
-      longitude: 126.5312,
-    });
+    expect(searchPlacesMock).toHaveBeenCalledWith('동백식당', jejuCenter);
     fireEvent.click(screen.getByRole('button', { name: /동백식당/ }));
     fireEvent.click(screen.getByRole('button', { name: '이 장소 보내기' }));
     expect(onSelect).toHaveBeenCalledWith(place);
   });
 
+  it('searches around the center of the current room, not Jeju', async () => {
+    searchPlacesMock.mockResolvedValue([]);
+    render(
+      <PlacePicker
+        center={busanCenter}
+        onClose={jest.fn()}
+        onSelect={jest.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText('장소 검색어'), {
+      target: { value: '돼지국밥' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    expect(await screen.findByText('0곳')).toBeInTheDocument();
+    expect(searchPlacesMock).toHaveBeenCalledTimes(1);
+    expect(searchPlacesMock).toHaveBeenCalledWith('돼지국밥', busanCenter);
+  });
+
   it('shows a not-found state when a search returns no places', async () => {
     searchPlacesMock.mockResolvedValue([]);
-    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+    render(
+      <PlacePicker
+        center={jejuCenter}
+        onClose={jest.fn()}
+        onSelect={jest.fn()}
+      />,
+    );
 
     fireEvent.change(screen.getByLabelText('장소 검색어'), {
       target: { value: '없는가게' },
@@ -92,7 +123,13 @@ describe('PlacePicker', () => {
     searchPlacesMock
       .mockResolvedValueOnce([place])
       .mockRejectedValueOnce(new Error('network down'));
-    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+    render(
+      <PlacePicker
+        center={jejuCenter}
+        onClose={jest.fn()}
+        onSelect={jest.fn()}
+      />,
+    );
 
     const input = screen.getByLabelText('장소 검색어');
     fireEvent.change(input, { target: { value: '동백식당' } });
@@ -119,7 +156,13 @@ describe('PlacePicker', () => {
     searchPlacesMock
       .mockReturnValueOnce(first.promise)
       .mockReturnValueOnce(second.promise);
-    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+    render(
+      <PlacePicker
+        center={jejuCenter}
+        onClose={jest.fn()}
+        onSelect={jest.fn()}
+      />,
+    );
 
     const input = screen.getByLabelText('장소 검색어');
     fireEvent.change(input, { target: { value: '동백식당' } });
@@ -148,7 +191,13 @@ describe('PlacePicker', () => {
     searchPlacesMock
       .mockReturnValueOnce(first.promise)
       .mockReturnValueOnce(second.promise);
-    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+    render(
+      <PlacePicker
+        center={jejuCenter}
+        onClose={jest.fn()}
+        onSelect={jest.fn()}
+      />,
+    );
 
     const input = screen.getByLabelText('장소 검색어');
     fireEvent.change(input, { target: { value: '동백식당' } });
@@ -175,7 +224,13 @@ describe('PlacePicker', () => {
     searchPlacesMock
       .mockReturnValueOnce(first.promise)
       .mockReturnValueOnce(second.promise);
-    render(<PlacePicker onClose={jest.fn()} onSelect={jest.fn()} />);
+    render(
+      <PlacePicker
+        center={jejuCenter}
+        onClose={jest.fn()}
+        onSelect={jest.fn()}
+      />,
+    );
 
     const input = screen.getByLabelText('장소 검색어');
     fireEvent.change(input, { target: { value: '동백식당' } });
@@ -194,7 +249,13 @@ describe('PlacePicker', () => {
 
   it('validates short searches and closes without making a request', () => {
     const onClose = jest.fn();
-    render(<PlacePicker onClose={onClose} onSelect={jest.fn()} />);
+    render(
+      <PlacePicker
+        center={jejuCenter}
+        onClose={onClose}
+        onSelect={jest.fn()}
+      />,
+    );
 
     fireEvent.change(screen.getByLabelText('장소 검색어'), {
       target: { value: '제' },
@@ -213,7 +274,11 @@ describe('PlacePicker', () => {
     const onClose = jest.fn();
     const view = render(
       <form data-testid="composer-host">
-        <PlacePicker onClose={onClose} onSelect={jest.fn()} />
+        <PlacePicker
+          center={jejuCenter}
+          onClose={onClose}
+          onSelect={jest.fn()}
+        />
       </form>,
     );
 

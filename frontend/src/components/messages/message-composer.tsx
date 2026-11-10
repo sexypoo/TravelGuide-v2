@@ -17,7 +17,10 @@ import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { mergeMessageIntoTimeline } from '@/lib/query/realtime-cache';
 import type { GooglePlace } from '@/lib/api/places';
-import { PlacePicker } from '@/components/places/place-picker';
+import {
+  PlacePicker,
+  type PlacePickerCenter,
+} from '@/components/places/place-picker';
 import { AppIcon } from '@/components/common';
 import styles from './messages.module.css';
 
@@ -35,9 +38,11 @@ function messageError(error: unknown): string {
 
 export function MessageComposer({
   roomSlug,
+  placeCenter,
   onCreateTopic,
 }: {
   roomSlug: string;
+  placeCenter: PlacePickerCenter;
   onCreateTopic?: () => void;
 }): React.JSX.Element {
   const queryClient = useQueryClient();
@@ -350,6 +355,7 @@ export function MessageComposer({
       </div>
       {placePickerOpen && (
         <PlacePicker
+          center={placeCenter}
           onClose={closePlacePicker}
           onSelect={(place) => {
             setSelectedPlace(place);
