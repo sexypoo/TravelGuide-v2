@@ -11,6 +11,7 @@ import {
   createMessage,
   type ChatMessage,
 } from '@/lib/api/messages';
+import { searchPlaces } from '@/lib/api/places';
 import { ApiProblem } from '@/lib/api/problem-details';
 import { MessageComposer } from './message-composer';
 
@@ -19,6 +20,12 @@ jest.mock('../../lib/api/messages', () => ({
   createImageMessage: jest.fn(),
   createMessage: jest.fn(),
 }));
+jest.mock('../../lib/api/places', () => ({
+  searchPlaces: jest.fn(),
+}));
+
+const jejuCenter = { latitude: 33.3617, longitude: 126.5292 };
+const busanCenter = { latitude: 35.1796, longitude: 129.0756 };
 
 function imageFile(name: string, size: number): File {
   const file = new File(['x'], name, { type: 'image/jpeg' });
@@ -38,13 +45,20 @@ function openPhotoTray(): HTMLInputElement {
   return input;
 }
 
-function renderComposer(onCreateTopic = jest.fn()): typeof onCreateTopic {
+function renderComposer(
+  onCreateTopic = jest.fn(),
+  placeCenter = jejuCenter,
+): typeof onCreateTopic {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   render(
     <QueryClientProvider client={queryClient}>
-      <MessageComposer roomSlug="jeju" onCreateTopic={onCreateTopic} />
+      <MessageComposer
+        roomSlug="jeju"
+        placeCenter={placeCenter}
+        onCreateTopic={onCreateTopic}
+      />
     </QueryClientProvider>,
   );
   return onCreateTopic;
@@ -96,6 +110,24 @@ describe('MessageComposer action menu', () => {
       screen.getByText('지도 API 키를 설정하면 지도가 표시됩니다.'),
     ).toBeInTheDocument();
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+
+  it('searches places around the room it was given', async () => {
+    jest.mocked(searchPlaces).mockReset().mockResolvedValue([]);
+    renderComposer(jest.fn(), busanCenter);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: '사진, 장소 또는 토픽 추가' }),
+    );
+    fireEvent.click(screen.getByRole('menuitem', { name: /장소/ }));
+    fireEvent.change(screen.getByLabelText('장소 검색어'), {
+      target: { value: '돼지국밥' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() =>
+      expect(searchPlaces).toHaveBeenCalledWith('돼지국밥', busanCenter),
+    );
   });
 });
 

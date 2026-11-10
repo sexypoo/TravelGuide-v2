@@ -9,12 +9,18 @@ import { AppIcon } from '@/components/common';
 import { Button, IconButton, Notice } from '@/components/ui';
 import styles from './place-picker.module.css';
 
-const JEJU_CENTER = { latitude: 33.4996, longitude: 126.5312 };
+export interface PlacePickerCenter {
+  latitude: number;
+  longitude: number;
+}
 
 export function PlacePicker({
+  center,
   onClose,
   onSelect,
 }: {
+  /** Opening map center and search bias: the current room's destination. */
+  center: PlacePickerCenter;
   onClose: () => void;
   onSelect: (place: GooglePlace) => void;
 }): React.JSX.Element {
@@ -31,6 +37,8 @@ export function PlacePicker({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
+  // The map only reads its starting center once, when it is created.
+  const initialCenter = useRef(center);
 
   useEffect(() => {
     const previouslyFocused =
@@ -84,7 +92,10 @@ export function PlacePicker({
       .then((google) => {
         if (!active || mapElement.current === null) return;
         map.current = new google.maps.Map(mapElement.current, {
-          center: { lat: JEJU_CENTER.latitude, lng: JEJU_CENTER.longitude },
+          center: {
+            lat: initialCenter.current.latitude,
+            lng: initialCenter.current.longitude,
+          },
           zoom: 12,
           disableDefaultUI: true,
           zoomControl: true,
@@ -124,7 +135,10 @@ export function PlacePicker({
     setLoading(true);
     setError('');
     try {
-      const places = await searchPlaces(trimmedQuery, JEJU_CENTER);
+      const places = await searchPlaces(trimmedQuery, {
+        latitude: center.latitude,
+        longitude: center.longitude,
+      });
       if (searchId !== latestSearchId.current) return;
       setResults(places);
       setSearchedQuery(trimmedQuery);
