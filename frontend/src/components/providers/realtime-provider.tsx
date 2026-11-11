@@ -33,6 +33,7 @@ import {
 } from '@/lib/realtime/protocol';
 import { createRecentIds } from '@/lib/realtime/recent-ids';
 import { useMessages } from '@/i18n/client';
+import { isGeneratedMessageContent } from '@/components/messages/generated-content';
 import {
   incrementFeedAnswerCount,
   markMessagePromoted,
@@ -149,7 +150,7 @@ export function RealtimeProvider({
         currentUserId,
         title: copy.messageTitle(message.author.nickname),
         body:
-          message.content ||
+          (isGeneratedMessageContent(message) ? '' : message.content) ||
           (message.type === 'IMAGE'
             ? copy.sharedImage
             : message.type === 'PLACE'

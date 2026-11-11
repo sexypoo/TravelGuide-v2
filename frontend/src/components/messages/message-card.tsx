@@ -6,10 +6,8 @@ import { ReportMenu } from '@/components/reports/report-menu';
 import { PlaceFavoriteButton } from '@/components/places/place-favorite-button';
 import { AppIcon } from '@/components/common';
 import { useLocale, useMessages } from '@/i18n/client';
+import { isGeneratedMessageContent } from './generated-content';
 import styles from './messages.module.css';
-
-// The API stores this caption when a photo is sent without one; it is data, not UI copy.
-const DEFAULT_IMAGE_CAPTION = '사진을 공유했습니다.';
 
 export function MessageCard({
   message,
@@ -23,6 +21,9 @@ export function MessageCard({
   const t = useMessages().chat.card;
   const locale = useLocale();
   const labels = topicLabels(locale);
+  const writtenContent = isGeneratedMessageContent(message)
+    ? ''
+    : message.content;
   const canPromote =
     message.type === 'TEXT' &&
     own &&
@@ -71,11 +72,9 @@ export function MessageCard({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={message.image.url}
-              alt={message.content || message.image.originalName}
+              alt={writtenContent || message.image.originalName}
             />
-            {message.content && message.content !== DEFAULT_IMAGE_CAPTION && (
-              <p>{message.content}</p>
-            )}
+            {writtenContent && <p>{writtenContent}</p>}
           </div>
         ) : message.type === 'PLACE' && message.place !== null ? (
           <div className={styles.attachment}>
@@ -93,8 +92,8 @@ export function MessageCard({
                 {message.place.address}
               </span>
             )}
-            {message.content && (
-              <p className={styles.attachmentNote}>{message.content}</p>
+            {writtenContent && (
+              <p className={styles.attachmentNote}>{writtenContent}</p>
             )}
             <footer className={styles.attachmentFooter}>
               <a href={placeMapUrl} target="_blank" rel="noopener noreferrer">

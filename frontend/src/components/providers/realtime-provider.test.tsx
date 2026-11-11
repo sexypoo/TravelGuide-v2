@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen } from '@testing-library/react';
 import { io } from 'socket.io-client';
+import { I18nProvider } from '@/i18n/client';
 import { deliverRealtimeNotification } from '@/lib/notifications/browser-notifications';
 import { queryKeys } from '@/lib/query/keys';
 import {
@@ -156,5 +157,69 @@ describe('RealtimeProvider', () => {
 
     act(() => socketHandlers.get('room.message.created')?.(envelope));
     expect(deliverRealtimeNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses localized copy instead of server-generated content in notifications', () => {
+    const queryClient = new QueryClient();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <I18nProvider locale="en">
+          <RealtimeProvider currentUserId="traveler-1">
+            <Probe />
+          </RealtimeProvider>
+        </I18nProvider>
+      </QueryClientProvider>,
+    );
+    const place = {
+      name: 'Dongbaek Sikdang',
+      address: null,
+      latitude: 33.5,
+      longitude: 126.5,
+      googlePlaceId: null,
+    };
+    const events = [
+      {
+        ...message('message-image'),
+        type: 'IMAGE',
+        content: '사진을 공유했습니다.',
+        image: {
+          url: '/api/v1/messages/message-image/image',
+          originalName: 'jeju.webp',
+          mimeType: 'image/webp',
+        },
+      },
+      {
+        ...message('message-place'),
+        type: 'PLACE',
+        content: 'Dongbaek Sikdang 장소를 공유했습니다.',
+        place,
+      },
+      {
+        ...message('message-note'),
+        type: 'PLACE',
+        content: 'Great grilled mackerel.',
+        place,
+      },
+    ];
+
+    events.forEach((payload, index) => {
+      act(() =>
+        socketHandlers.get('room.message.created')?.({
+          eventId: `event-${index}`,
+          roomSlug: 'jeju',
+          occurredAt: '2026-08-02T00:00:00.000Z',
+          payload,
+        }),
+      );
+    });
+
+    const bodies = jest
+      .mocked(deliverRealtimeNotification)
+      .mock.calls.map(([notification]) => notification.body);
+    expect(bodies).toEqual([
+      'Shared a photo.',
+      'Shared a place.',
+      'Great grilled mackerel.',
+    ]);
   });
 });
