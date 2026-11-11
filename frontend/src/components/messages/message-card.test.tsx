@@ -145,6 +145,37 @@ describe('MessageCard topic handoff', () => {
     ).toBeInTheDocument();
   });
 
+  it('hides the generated place note but keeps a written note', () => {
+    const placeMessage: ChatMessage = {
+      ...message,
+      type: 'PLACE',
+      content: '동백식당 장소를 공유했습니다.',
+      place: {
+        googlePlaceId: null,
+        name: '동백식당',
+        address: null,
+        latitude: 33.5,
+        longitude: 126.5,
+      },
+    };
+    const { container, rerender } = render(
+      <MessageCard message={placeMessage} own onPromote={jest.fn()} />,
+    );
+    expect(screen.getByText('동백식당')).toBeInTheDocument();
+    expect(container.querySelector('.attachmentNote')).toBeNull();
+
+    rerender(
+      <MessageCard
+        message={{ ...placeMessage, content: '고등어구이가 좋아요.' }}
+        own
+        onPromote={jest.fn()}
+      />,
+    );
+    expect(container.querySelector('.attachmentNote')).toHaveTextContent(
+      '고등어구이가 좋아요.',
+    );
+  });
+
   it('hides the generated image caption but keeps a written caption', () => {
     const imageMessage: ChatMessage = {
       ...message,
@@ -175,6 +206,51 @@ describe('MessageCard topic handoff', () => {
 });
 
 describe('MessageCard in English', () => {
+  it('does not show server-generated Korean defaults for photos and places', () => {
+    const { container, rerender } = render(
+      <I18nProvider locale="en">
+        <MessageCard
+          message={{
+            ...message,
+            type: 'IMAGE',
+            content: '사진을 공유했습니다.',
+            image: {
+              url: '/api/v1/messages/message-1/image',
+              originalName: 'jeju.webp',
+              mimeType: 'image/webp',
+            },
+          }}
+          own
+          onPromote={jest.fn()}
+        />
+      </I18nProvider>,
+    );
+    expect(screen.getByRole('img')).toHaveAttribute('alt', 'jeju.webp');
+
+    rerender(
+      <I18nProvider locale="en">
+        <MessageCard
+          message={{
+            ...message,
+            type: 'PLACE',
+            content: 'Dongbaek Sikdang 장소를 공유했습니다.',
+            place: {
+              googlePlaceId: null,
+              name: 'Dongbaek Sikdang',
+              address: null,
+              latitude: 33.5,
+              longitude: 126.5,
+            },
+          }}
+          own
+          onPromote={jest.fn()}
+        />
+      </I18nProvider>,
+    );
+    expect(screen.getByText('Dongbaek Sikdang')).toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/공유했습니다/u);
+  });
+
   it('shows chat and report copy in English', () => {
     const { rerender } = render(
       <I18nProvider locale="en">
