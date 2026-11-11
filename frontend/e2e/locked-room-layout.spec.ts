@@ -7,6 +7,7 @@ test('locked room introduction keeps gutters from phone to desktop', async ({
 }) => {
   test.setTimeout(60_000);
   const context = await browser.newContext({
+    locale: 'ko-KR',
     baseURL: 'http://127.0.0.1:3100',
   });
   const page = await context.newPage();

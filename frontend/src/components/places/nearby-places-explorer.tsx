@@ -6,6 +6,8 @@ import { actionableErrorMessage } from '@/lib/api/problem-details';
 import { loadGoogleMaps } from '@/lib/maps/google-maps-loader';
 import { AppIcon } from '@/components/common';
 import { Button, Card, EmptyState, IconTile, Notice } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import styles from './nearby.module.css';
 
 const DEFAULT_CENTER = { latitude: 37.5665, longitude: 126.978 };
@@ -17,12 +19,13 @@ function placeMapUrl(place: GooglePlace): string {
   );
 }
 
-function locationFailure(error: GeolocationPositionError): string {
-  if (error.code === error.PERMISSION_DENIED)
-    return '위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해 주세요.';
-  if (error.code === error.TIMEOUT)
-    return '위치 확인 시간이 초과됐어요. 열린 장소에서 다시 시도해 주세요.';
-  return '현재 위치를 확인할 수 없어요. 기기의 위치 서비스를 확인해 주세요.';
+function locationFailure(
+  error: GeolocationPositionError,
+  copy: Messages['places']['nearby'],
+): string {
+  if (error.code === error.PERMISSION_DENIED) return copy.locationDenied;
+  if (error.code === error.TIMEOUT) return copy.locationTimeout;
+  return copy.locationUnavailable;
 }
 
 export function NearbyPlacesExplorer(): React.JSX.Element {
@@ -36,6 +39,9 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState('');
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
+  const t = useMessages();
+  const copy = t.places.nearby;
+  const mapLoadFailed = copy.mapLoadFailed;
 
   useEffect(() => {
     if (apiKey.length === 0 || mapElement.current === null) return;
@@ -54,16 +60,12 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
         });
         setMapReady(true);
       })
-      .catch(() =>
-        setError(
-          '지도를 불러오지 못했어요. 가까운 식당은 목록으로 확인할 수 있어요.',
-        ),
-      );
+      .catch(() => setError(mapLoadFailed));
     return () => {
       active = false;
       markers.current.forEach((marker) => marker.setMap(null));
     };
-  }, [apiKey]);
+  }, [apiKey, mapLoadFailed]);
 
   useEffect(() => {
     const currentMap = map.current;
@@ -87,7 +89,7 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
     setPlaces([]);
     setSelectedId(undefined);
     if (!navigator.geolocation) {
-      setError('이 브라우저에서는 현재 위치를 확인할 수 없어요.');
+      setError(copy.noGeolocation);
       return;
     }
     setLoading(true);
@@ -110,15 +112,13 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
             setSelectedId(items[0]?.id);
           })
           .catch((cause: unknown) =>
-            setError(
-              actionableErrorMessage(cause, '근처 식당을 찾지 못했어요.'),
-            ),
+            setError(actionableErrorMessage(cause, copy.searchFailed)),
           )
           .finally(() => setLoading(false));
       },
       (cause) => {
         setLoading(false);
-        setError(locationFailure(cause));
+        setError(locationFailure(cause, copy));
       },
       { enableHighAccuracy: true, timeout: 10000 },
     );
@@ -132,15 +132,12 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
 
   return (
     <div className={styles.layout}>
-      <Card className={styles.locate} aria-label="현재 위치로 찾기">
+      <Card className={styles.locate} aria-label={copy.locateLabel}>
         <div className={styles.locateText}>
           <IconTile icon="pin" tone="iris" />
           <div>
-            <h2>현재 위치로 찾아요</h2>
-            <p>
-              버튼을 누르면 위치 권한을 물어봐요. 위치는 검색에만 쓰고 서버에
-              저장하지 않아요.
-            </p>
+            <h2>{copy.locateHeading}</h2>
+            <p>{copy.locateDescription}</p>
           </div>
         </div>
         <Button
@@ -151,10 +148,10 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
           onClick={findNearby}
         >
           {loading
-            ? '주변을 찾는 중…'
+            ? copy.searching
             : hasSearched
-              ? '현재 위치로 다시 찾기'
-              : '내 주변 보기'}
+              ? copy.searchAgain
+              : copy.searchStart}
         </Button>
       </Card>
 
@@ -170,15 +167,15 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
             <div className={styles.mapFallback} data-unavailable>
               <EmptyState
                 icon="map"
-                title="지도를 표시할 수 없어요"
-                description="가까운 식당은 목록으로 확인할 수 있어요."
+                title={copy.mapUnavailableTitle}
+                description={copy.mapUnavailableDescription}
               />
             </div>
           ) : (
             <div
               ref={mapElement}
               className={styles.map}
-              aria-label="내 주변 영업 중 식당 지도"
+              aria-label={copy.mapLabel}
             />
           )}
         </Card>
@@ -188,27 +185,28 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
             {!hasSearched ? (
               <EmptyState
                 icon="search"
-                title="아직 찾아본 곳이 없어요"
-                description="내 주변 보기를 누르면 가까운 식당이 여기에 나와요."
+                title={copy.idleTitle}
+                description={copy.idleDescription}
               />
             ) : loading ? (
-              <p className={styles.status}>가까운 식당을 찾고 있어요…</p>
+              <p className={styles.status}>{copy.loadingList}</p>
             ) : places.length === 0 && error ? (
               <EmptyState
                 icon="alert"
-                title="목록을 불러오지 못했어요"
-                description="위 안내를 확인한 뒤 다시 찾아 보세요."
+                title={copy.listFailedTitle}
+                description={copy.listFailedDescription}
               />
             ) : places.length === 0 ? (
               <EmptyState
                 icon="pin"
-                title="근처에 문 연 식당이 없어요"
-                description="1.5km 안에 영업 중인 식당이 없어요. 조금 이동한 뒤 다시 찾아 보세요."
+                title={copy.emptyTitle}
+                description={copy.emptyDescription}
               />
             ) : (
               <>
                 <h2 className={styles.resultsHeading}>
-                  가까운 순서 <span>{places.length}곳</span>
+                  {copy.resultsHeading}{' '}
+                  <span>{copy.resultsCount(places.length)}</span>
                 </h2>
                 <ol className={styles.list}>
                   {places.map((place, index) => (
@@ -230,7 +228,7 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
                           <span>
                             {place.address ??
                               place.category ??
-                              '주소 정보 없음'}
+                              t.places.noAddress}
                           </span>
                         </span>
                       </button>
@@ -239,7 +237,7 @@ export function NearbyPlacesExplorer(): React.JSX.Element {
                         href={placeMapUrl(place)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={`${place.name} Google 지도에서 보기`}
+                        aria-label={copy.openInGoogleMaps(place.name)}
                       >
                         <AppIcon name="external" />
                       </a>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useMessages } from '@/i18n/client';
 import { getLiveHealth, type HealthResponse } from '@/lib/api/health';
 
 type ConnectionState =
@@ -9,6 +10,7 @@ type ConnectionState =
   | { state: 'error' };
 
 export function ApiConnectionStatus(): React.JSX.Element {
+  const t = useMessages();
   const [connection, setConnection] = useState<ConnectionState>({
     state: 'loading',
   });
@@ -41,13 +43,13 @@ export function ApiConnectionStatus(): React.JSX.Element {
       aria-live="polite"
     >
       <span className="apiStatus__dot" aria-hidden="true" />
-      {connection.state === 'loading' && '서비스 연결 확인 중'}
-      {connection.state === 'connected' && '서비스 정상 연결'}
+      {connection.state === 'loading' && t.common.connectionChecking}
+      {connection.state === 'connected' && t.common.connectionOk}
       {connection.state === 'error' && (
         <>
-          서비스 연결 안 됨
+          {t.common.connectionDown}
           <button type="button" onClick={() => void checkConnection()}>
-            다시 확인
+            {t.common.connectionRecheck}
           </button>
         </>
       )}

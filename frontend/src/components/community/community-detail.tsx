@@ -15,7 +15,8 @@ import { formatRelativeTime } from '@/lib/questions/presentation';
 import styles from './community.module.css';
 import { useEffect, useState } from 'react';
 import { ReportMenu } from '@/components/reports/report-menu';
-import { communityCategoryLabels } from '@/lib/community/presentation';
+import { communityCategoryLabelsFor } from '@/lib/community/presentation';
+import { useLocale, useMessages } from '@/i18n/client';
 import {
   createCommunityComment,
   getCommunityPost,
@@ -45,6 +46,9 @@ export function CommunityDetail({
   const [retrying, setRetrying] = useState(false);
   const [commentError, setCommentError] = useState<string>();
   const [pending, setPending] = useState(false);
+  const t = useMessages();
+  const locale = useLocale();
+  const copy = t.community.detail;
 
   useEffect(() => {
     let active = true;
@@ -94,9 +98,7 @@ export function CommunityDetail({
       );
       form.reset();
     } catch (submitError: unknown) {
-      setCommentError(
-        actionableErrorMessage(submitError, '댓글을 올리지 못했어요.'),
-      );
+      setCommentError(actionableErrorMessage(submitError, copy.commentFailed));
     } finally {
       setPending(false);
     }
@@ -106,9 +108,9 @@ export function CommunityDetail({
     return (
       <Page>
         <PageHeader
-          title="커뮤니티"
+          title={t.community.title}
           backHref="/app/community"
-          backLabel="여행자 커뮤니티"
+          backLabel={copy.backLabel}
         />
         <div className={styles.detail}>
           <Card>
@@ -116,11 +118,11 @@ export function CommunityDetail({
               <div role="status">
                 <EmptyState
                   icon="search"
-                  title="글을 찾을 수 없어요"
-                  description="삭제됐거나 주소가 잘못됐을 수 있어요."
+                  title={copy.notFoundTitle}
+                  description={copy.notFoundDescription}
                   action={
                     <ButtonLink variant="secondary" href="/app/community">
-                      커뮤니티 목록으로
+                      {copy.backToList}
                     </ButtonLink>
                   }
                 />
@@ -129,8 +131,8 @@ export function CommunityDetail({
               <div role="alert">
                 <EmptyState
                   icon="alert"
-                  title="게시글을 불러오지 못했어요"
-                  description="연결을 확인한 뒤 다시 시도해 주세요."
+                  title={copy.loadFailedTitle}
+                  description={t.community.loadFailedDescription}
                   action={
                     <Button
                       variant="secondary"
@@ -138,14 +140,14 @@ export function CommunityDetail({
                       disabled={retrying}
                       onClick={retry}
                     >
-                      {retrying ? '불러오는 중…' : '다시 불러오기'}
+                      {retrying ? copy.reloading : t.community.reload}
                     </Button>
                   }
                 />
               </div>
             ) : (
               <p className={styles.removed} role="status">
-                게시글을 불러오는 중…
+                {copy.loading}
               </p>
             )}
           </Card>
@@ -157,36 +159,44 @@ export function CommunityDetail({
   return (
     <Page>
       <PageHeader
-        title="커뮤니티"
+        title={t.community.title}
         backHref="/app/community"
-        backLabel="여행자 커뮤니티"
+        backLabel={copy.backLabel}
       />
       <div className={styles.detail}>
         <Card as="article" className={styles.article}>
           <div className={styles.articleMeta}>
-            <Chip tone="plum">{communityCategoryLabels[post.category]}</Chip>
+            <Chip tone="plum">
+              {communityCategoryLabelsFor(locale)[post.category]}
+            </Chip>
             {post.areaText !== null && <Chip icon="pin">{post.areaText}</Chip>}
           </div>
-          <h1>{post.title}</h1>
+          <h1>{post.removed ? t.community.hidden.postTitle : post.title}</h1>
           <p
             className={`${styles.articleBody}${post.removed ? ` ${styles.removed}` : ''}`}
           >
-            {post.content}
+            {post.removed ? t.community.hidden.post : post.content}
           </p>
           <footer className={styles.articleFoot}>
             <span className={styles.by}>
               <Avatar name={post.author.nickname} size="sm" tone="iris" />
               <b>{post.author.nickname}</b>
-              <span>{formatRelativeTime(post.createdAt)}</span>
+              <span>
+                {formatRelativeTime(post.createdAt, undefined, locale)}
+              </span>
             </span>
             {post.author.id !== currentUserId && !post.removed && (
               <ReportMenu
                 targets={[
-                  { type: 'COMMUNITY_POST', id: post.id, label: '이 게시글' },
+                  {
+                    type: 'COMMUNITY_POST',
+                    id: post.id,
+                    label: t.community.reportPost,
+                  },
                   {
                     type: 'USER',
                     id: post.author.id,
-                    label: `${post.author.nickname} 사용자`,
+                    label: copy.reportUser(post.author.nickname),
                   },
                 ]}
               />
@@ -197,12 +207,10 @@ export function CommunityDetail({
         <Card aria-labelledby="community-comments-title">
           <SectionHead
             id="community-comments-title"
-            title={`댓글 ${post.comments.length}`}
+            title={copy.commentsTitle(post.comments.length)}
           />
           {post.comments.length === 0 ? (
-            <p className={styles.removed}>
-              아직 댓글이 없어요. 알고 있는 정보를 보태 주세요.
-            </p>
+            <p className={styles.removed}>{copy.noComments}</p>
           ) : (
             <ul className={styles.commentList}>
               {post.comments.map((comment) => (
@@ -222,12 +230,12 @@ export function CommunityDetail({
                               {
                                 type: 'COMMUNITY_COMMENT',
                                 id: comment.id,
-                                label: '이 댓글',
+                                label: copy.reportComment,
                               },
                               {
                                 type: 'USER',
                                 id: comment.author.id,
-                                label: `${comment.author.nickname} 사용자`,
+                                label: copy.reportUser(comment.author.nickname),
                               },
                             ]}
                           />
@@ -235,7 +243,9 @@ export function CommunityDetail({
                       )}
                   </span>
                   <p className={comment.removed ? styles.removed : undefined}>
-                    {comment.content}
+                    {comment.removed
+                      ? t.community.hidden.comment
+                      : comment.content}
                   </p>
                 </li>
               ))}
@@ -249,7 +259,7 @@ export function CommunityDetail({
               onSubmit={(event) => void submit(event)}
             >
               <label className={styles.field} htmlFor="community-comment">
-                <span>댓글로 경험을 보태세요</span>
+                <span>{copy.commentLabel}</span>
               </label>
               <div className={styles.field}>
                 <textarea
@@ -258,11 +268,11 @@ export function CommunityDetail({
                   maxLength={500}
                   rows={3}
                   required
-                  placeholder="질문에 답하거나 최신 정보를 덧붙여 주세요."
+                  placeholder={copy.commentPlaceholder}
                 />
               </div>
               <Button type="submit" disabled={pending}>
-                {pending ? '올리는 중…' : '댓글 올리기'}
+                {pending ? copy.commentSubmitting : copy.commentSubmit}
               </Button>
             </form>
           )}

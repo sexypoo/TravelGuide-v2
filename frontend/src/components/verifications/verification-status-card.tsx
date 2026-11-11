@@ -1,3 +1,5 @@
+'use client';
+
 import { AppIcon } from '@/components/common';
 import {
   ButtonLink,
@@ -7,16 +9,11 @@ import {
   Notice,
   type ChipTone,
 } from '@/components/ui';
+import type { Locale } from '@/i18n/config';
+import { useLocale, useMessages } from '@/i18n/client';
 import type { Verification, VerificationStatus } from '@/lib/api/verifications';
+import { destinationName, intlLocale } from '@/lib/verifications/presentation';
 import styles from './verification.module.css';
-
-const labels = {
-  PENDING: '심사 중',
-  APPROVED: '승인 완료',
-  REJECTED: '반려됨',
-  REVOKED: '자격 회수',
-  EXPIRED: '기간 만료',
-} as const;
 
 const tones: Readonly<Record<VerificationStatus, ChipTone>> = {
   PENDING: 'warning',
@@ -28,20 +25,22 @@ const tones: Readonly<Record<VerificationStatus, ChipTone>> = {
 
 type StepState = 'done' | 'current' | 'upcoming';
 
-function date(value: string | null): string | null {
+function date(value: string | null, locale: Locale): string | null {
   if (value === null) return null;
-  return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'medium' }).format(
-    new Date(value),
-  );
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    dateStyle: 'medium',
+  }).format(new Date(value));
 }
 
 function steps(
   status: VerificationStatus,
+  labels: readonly string[],
 ): ReadonlyArray<{ label: string; state: StepState }> {
+  const [submitted = '', review = '', join = ''] = labels;
   return [
-    { label: '제출', state: 'done' },
-    { label: '심사', state: status === 'PENDING' ? 'current' : 'done' },
-    { label: '참여', state: status === 'APPROVED' ? 'done' : 'upcoming' },
+    { label: submitted, state: 'done' },
+    { label: review, state: status === 'PENDING' ? 'current' : 'done' },
+    { label: join, state: status === 'APPROVED' ? 'done' : 'upcoming' },
   ];
 }
 
@@ -53,12 +52,15 @@ export function VerificationStatusCard({
   /** False while a PENDING application of the same type exists (VER-001). */
   canReapply: boolean;
 }): React.JSX.Element {
+  const t = useMessages().verifications.status;
+  const locale = useLocale();
   const isTraveler = verification.type === 'TRAVELER';
+  const city = destinationName(verification.destination, locale);
   const validity = isTraveler
-    ? `${date(verification.startsAt)} – ${date(verification.endsAt)}`
+    ? `${date(verification.startsAt, locale)} – ${date(verification.endsAt, locale)}`
     : verification.expiresAt === null
-      ? '승인 후 90일 동안 유효'
-      : `${date(verification.expiresAt)}까지 유효`;
+      ? t.validDefault
+      : t.validUntil(date(verification.expiresAt, locale) ?? '');
 
   return (
     <Card as="article" className={styles.status}>
@@ -68,13 +70,10 @@ export function VerificationStatusCard({
             icon={isTraveler ? 'map' : 'home'}
             tone={isTraveler ? 'magenta' : 'iris'}
           />
-          <h3>
-            {verification.destination.nameKo} {isTraveler ? '여행자' : '현지인'}{' '}
-            인증
-          </h3>
+          <h3>{isTraveler ? t.travelerTitle(city) : t.localTitle(city)}</h3>
         </div>
         <Chip tone={tones[verification.status]}>
-          {labels[verification.status]}
+          {t.labels[verification.status]}
         </Chip>
       </div>
       <p className={styles.validity}>
@@ -83,10 +82,10 @@ export function VerificationStatusCard({
       </p>
       <ol
         className={styles.progress}
-        aria-label="인증 진행 상태"
+        aria-label={t.progressLabel}
         data-status={verification.status}
       >
-        {steps(verification.status).map((step, index) => (
+        {steps(verification.status, t.steps).map((step, index) => (
           <li
             key={step.label}
             data-state={step.state}
@@ -103,7 +102,7 @@ export function VerificationStatusCard({
         verification.rejectionReason !== null && (
           <div className={styles.reason}>
             <Notice tone="danger" icon="alert">
-              <strong className={styles.reasonTitle}>다시 확인할 내용</strong>
+              <strong className={styles.reasonTitle}>{t.reasonTitle}</strong>
               <span className={styles.reasonText}>
                 {verification.rejectionReason}
               </span>
@@ -114,13 +113,13 @@ export function VerificationStatusCard({
                 size="sm"
                 href={`/app/verifications/${isTraveler ? 'traveler' : 'local'}?city=${encodeURIComponent(verification.destination.slug)}`}
               >
-                새로 신청하기
+                {t.reapply}
               </ButtonLink>
             )}
           </div>
         )}
       {verification.status === 'REVOKED' && (
-        <p className={styles.support}>자격 관련 문의는 운영팀에 알려 주세요.</p>
+        <p className={styles.support}>{t.revoked}</p>
       )}
     </Card>
   );

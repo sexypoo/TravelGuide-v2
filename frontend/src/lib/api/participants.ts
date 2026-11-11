@@ -1,3 +1,6 @@
+import type { Locale } from '@/i18n/config';
+import { messagesFor } from '@/i18n/messages';
+
 export type ParticipantKind = 'TRAVELER' | 'LOCAL' | 'BOTH';
 export type ParticipantBadge =
   | 'VERIFIED_TRAVELER'
@@ -18,8 +21,9 @@ export function isParticipantBadge(value: unknown): value is ParticipantBadge {
   );
 }
 
-export function participantBadgeLabel(badge: ParticipantBadge): string {
-  if (badge === 'VERIFIED_TRAVELER') return '인증 여행자';
-  if (badge === 'VERIFIED_LOCAL') return '인증 현지인';
-  return '여행자 · 현지인 인증';
+export function participantBadgeLabel(
+  badge: ParticipantBadge,
+  locale: Locale = 'ko',
+): string {
+  return messagesFor(locale).topics.labels.badge[badge];
 }

@@ -1,3 +1,4 @@
+import type { Locale } from '@/i18n/config';
 import type { Room } from '@/lib/api/rooms';
 import { COURSE_REGIONS } from '@/lib/travel-test/courses';
 
@@ -44,4 +45,25 @@ export function roomForCity(
 ): Room | undefined {
   if (typeof city !== 'string') return undefined;
   return rooms.find((room) => room.destination.slug === city);
+}
+
+// City names are data from the API in Korean. English gets a fixed name for
+// the cities we run rooms in, and falls back to the Korean name (#80).
+const englishCityNames: Readonly<Record<string, string>> = {
+  jeju: 'Jeju',
+  busan: 'Busan',
+  gangneung: 'Gangneung',
+  seoul: 'Seoul',
+  marburg: 'Marburg',
+};
+
+/** The destination's display name in the given locale. */
+export function destinationName(
+  destination: { slug?: string; nameKo: string },
+  locale: Locale = 'ko',
+): string {
+  if (locale === 'en' && destination.slug !== undefined) {
+    return englishCityNames[destination.slug] ?? destination.nameKo;
+  }
+  return destination.nameKo;
 }

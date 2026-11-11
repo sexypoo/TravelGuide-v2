@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ChatMessage } from '@/lib/api/messages';
+import { I18nProvider } from '@/i18n/client';
 import { MessageCard } from './message-card';
 
 jest.mock('../places/place-favorite-button', () => ({
@@ -170,5 +171,55 @@ describe('MessageCard topic handoff', () => {
     expect(container.querySelector('.image p')).toHaveTextContent(
       '오늘 협재 바다예요.',
     );
+  });
+});
+
+describe('MessageCard in English', () => {
+  it('shows chat and report copy in English', () => {
+    const { rerender } = render(
+      <I18nProvider locale="en">
+        <MessageCard message={message} own onPromote={jest.fn()} />
+      </I18nProvider>,
+    );
+    expect(screen.getByText('Me')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Turn this message into a topic' }),
+    ).toBeInTheDocument();
+
+    rerender(
+      <I18nProvider locale="en">
+        <MessageCard
+          message={{
+            ...message,
+            removed: true,
+            content: '운영 정책에 따라 숨김 처리된 메시지입니다.',
+          }}
+          own
+          onPromote={jest.fn()}
+        />
+      </I18nProvider>,
+    );
+    expect(
+      screen.getByText('This message was hidden under our community rules.'),
+    ).toBeInTheDocument();
+
+    rerender(
+      <I18nProvider locale="en">
+        <MessageCard message={message} own={false} onPromote={jest.fn()} />
+      </I18nProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Report' }));
+    const dialog = screen.getByRole('dialog', { name: 'Report' });
+    expect(dialog).toHaveTextContent('What to report');
+    expect(
+      screen.getByRole('option', { name: 'User 제주여행자' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'False information' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Send report' }),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/신고|답변|토픽/u);
   });
 });

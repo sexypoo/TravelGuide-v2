@@ -1,16 +1,15 @@
 import Link from 'next/link';
 import type { ChatMessage } from '@/lib/api/messages';
 import { participantBadgeLabel } from '@/lib/api/participants';
-import { formatChatTime } from '@/lib/questions/presentation';
-import {
-  categoryLabels,
-  statusLabels,
-  urgencyLabels,
-} from '@/lib/questions/presentation';
+import { formatChatTime, topicLabels } from '@/lib/questions/presentation';
 import { ReportMenu } from '@/components/reports/report-menu';
 import { PlaceFavoriteButton } from '@/components/places/place-favorite-button';
 import { AppIcon } from '@/components/common';
+import { useLocale, useMessages } from '@/i18n/client';
 import styles from './messages.module.css';
+
+// The API stores this caption when a photo is sent without one; it is data, not UI copy.
+const DEFAULT_IMAGE_CAPTION = '사진을 공유했습니다.';
 
 export function MessageCard({
   message,
@@ -21,6 +20,9 @@ export function MessageCard({
   own: boolean;
   onPromote: (message: ChatMessage) => void;
 }): React.JSX.Element {
+  const t = useMessages().chat.card;
+  const locale = useLocale();
+  const labels = topicLabels(locale);
   const canPromote =
     message.type === 'TEXT' &&
     own &&
@@ -46,22 +48,22 @@ export function MessageCard({
           className={`${styles.avatar} ${styles[`avatar--${badgeKind}`]}`}
           aria-hidden="true"
         >
-          {Array.from(message.author.nickname)[0] ?? '제'}
+          {Array.from(message.author.nickname)[0] ?? t.avatarFallback}
         </span>
       )}
       <div className={styles.body}>
         <header className={styles.meta}>
-          <strong>{own ? '나' : message.author.nickname}</strong>
+          <strong>{own ? t.me : message.author.nickname}</strong>
           <span className={`${styles.badge} ${styles[`badge--${badgeKind}`]}`}>
-            {participantBadgeLabel(message.author.badge)}
+            {participantBadgeLabel(message.author.badge, locale)}
           </span>
           <time dateTime={message.createdAt}>
-            {formatChatTime(message.createdAt)}
+            {formatChatTime(message.createdAt, locale)}
           </time>
         </header>
         {message.removed ? (
           <div className={`${styles.bubble} ${styles.removed}`}>
-            <p>{message.content}</p>
+            <p>{t.removed}</p>
           </div>
         ) : message.type === 'IMAGE' && message.image !== null ? (
           <div className={`${styles.bubble} ${styles.image}`}>
@@ -71,7 +73,7 @@ export function MessageCard({
               src={message.image.url}
               alt={message.content || message.image.originalName}
             />
-            {message.content && message.content !== '사진을 공유했습니다.' && (
+            {message.content && message.content !== DEFAULT_IMAGE_CAPTION && (
               <p>{message.content}</p>
             )}
           </div>
@@ -80,7 +82,7 @@ export function MessageCard({
             <div className={styles.attachmentKind}>
               <span>
                 <AppIcon name="pin" />
-                장소 추천
+                {t.placeKind}
               </span>
             </div>
             <strong className={styles.attachmentTitle}>
@@ -96,7 +98,7 @@ export function MessageCard({
             )}
             <footer className={styles.attachmentFooter}>
               <a href={placeMapUrl} target="_blank" rel="noopener noreferrer">
-                지도에서 보기 <AppIcon name="external" />
+                {t.openMap} <AppIcon name="external" />
               </a>
               <PlaceFavoriteButton
                 messageId={message.id}
@@ -112,12 +114,12 @@ export function MessageCard({
             <span className={styles.attachmentKind}>
               <span>
                 <AppIcon name="topic" />
-                {categoryLabels[message.sharedTopic.category]} 토픽
+                {t.topicKind(labels.category[message.sharedTopic.category])}
               </span>
               <span
                 className={`${styles.status} ${styles[`status--${message.sharedTopic.status.toLowerCase()}`]}`}
               >
-                {statusLabels[message.sharedTopic.status]}
+                {labels.status[message.sharedTopic.status]}
               </span>
             </span>
             <strong className={styles.attachmentTitle}>
@@ -131,14 +133,16 @@ export function MessageCard({
             )}
             <span className={styles.attachmentFacts}>
               <span>
-                답변<b>{message.sharedTopic.answerCount}개</b>
+                {t.answersLabel}
+                <b>{t.answerCount(message.sharedTopic.answerCount)}</b>
               </span>
               <span>
-                요청<b>{urgencyLabels[message.sharedTopic.urgency]}</b>
+                {t.urgencyLabel}
+                <b>{labels.urgency[message.sharedTopic.urgency]}</b>
               </span>
             </span>
             <span className={styles.attachmentFooter}>
-              <span>답변과 현황 보기</span>
+              <span>{t.viewTopic}</span>
               <AppIcon name="chevron-right" />
             </span>
           </Link>
@@ -152,7 +156,7 @@ export function MessageCard({
             className={styles.followUp}
             href={`/app/questions/${message.topicId}`}
           >
-            토픽으로 이어짐
+            {t.followUpLinked}
           </Link>
         ) : canPromote ? (
           <button
@@ -160,17 +164,17 @@ export function MessageCard({
             type="button"
             onClick={() => onPromote(message)}
           >
-            이 메시지를 토픽으로 만들기
+            {t.promote}
           </button>
         ) : null}
         {!own && !message.removed && (
           <ReportMenu
             targets={[
-              { type: 'MESSAGE', id: message.id, label: '이 메시지' },
+              { type: 'MESSAGE', id: message.id, label: t.reportMessage },
               {
                 type: 'USER',
                 id: message.author.id,
-                label: `${message.author.nickname} 사용자`,
+                label: t.reportUser(message.author.nickname),
               },
             ]}
           />

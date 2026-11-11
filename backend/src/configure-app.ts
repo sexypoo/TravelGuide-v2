@@ -8,7 +8,10 @@ import type { CustomOrigin } from '@nestjs/common/interfaces/external/cors-optio
 import cookieParser from 'cookie-parser';
 import { ProblemDetailsFilter } from './common/http/problem-details.filter';
 import { ProblemException } from './common/http/problem.exception';
-import { firstValidationMessage } from './common/http/validation-message';
+import {
+  firstValidationIssue,
+  issueMessage,
+} from './common/http/validation-message';
 import { requestIdMiddleware } from './common/http/request-id.middleware';
 import { securityHeadersMiddleware } from './common/http/security-headers.middleware';
 import { StructuredLogger } from './common/logging/structured-logger';
@@ -37,12 +40,15 @@ export function configureApp(app: INestApplication): void {
   app.useGlobalFilters(new ProblemDetailsFilter());
   app.useGlobalPipes(
     new ValidationPipe({
-      exceptionFactory: (errors): ProblemException =>
-        new ProblemException(
+      exceptionFactory: (errors): ProblemException => {
+        const issue = firstValidationIssue(errors);
+        return new ProblemException(
           'VALIDATION_FAILED',
-          firstValidationMessage(errors),
+          issueMessage(issue, 'ko'),
           HttpStatus.BAD_REQUEST,
-        ),
+          issue,
+        );
+      },
       forbidNonWhitelisted: true,
       transform: true,
       whitelist: true,

@@ -2,6 +2,7 @@
 
 import { Page } from '@/components/app/page';
 import { Button, Card, EmptyState } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
 import styles from './error.module.css';
 
 export default function ErrorPage({
@@ -9,6 +10,7 @@ export default function ErrorPage({
 }: {
   reset: () => void;
 }): React.JSX.Element {
+  const t = useMessages().home.error;
   return (
     <Page>
       <div className={styles.root}>
@@ -16,8 +18,8 @@ export default function ErrorPage({
           <div role="alert">
             <EmptyState
               icon="alert"
-              title="화면을 불러오지 못했어요"
-              description="연결 상태를 확인한 뒤 다시 시도해 주세요."
+              title={t.title}
+              description={t.description}
               action={
                 <Button
                   variant="primary"
@@ -25,7 +27,7 @@ export default function ErrorPage({
                   icon="refresh"
                   onClick={reset}
                 >
-                  다시 불러오기
+                  {t.retry}
                 </Button>
               }
             />

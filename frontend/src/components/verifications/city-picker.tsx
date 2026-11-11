@@ -1,10 +1,12 @@
 import { Card, ListRow, SectionHead } from '@/components/ui';
+import { getLocale, getMessages } from '@/i18n/server';
 import type { Room } from '@/lib/api/rooms';
 import { splitRooms } from '@/lib/rooms/presentation';
+import { destinationName } from '@/lib/verifications/presentation';
 import styles from './verification.module.css';
 
 /** Lists every city so a verification form knows its destination (#68). */
-export function CityPicker({
+export async function CityPicker({
   rooms,
   basePath,
   description,
@@ -12,11 +14,20 @@ export function CityPicker({
   rooms: readonly Room[];
   basePath: string;
   description: (room: Room) => string;
-}): React.JSX.Element {
+}): Promise<React.JSX.Element> {
+  const [t, locale] = await Promise.all([getMessages(), getLocale()]);
   const { domestic, temporary } = splitRooms(rooms);
   const sections = [
-    { id: 'city-domestic', title: '국내 여행지', rooms: domestic },
-    { id: 'city-temporary', title: '임시 운영', rooms: temporary },
+    {
+      id: 'city-domestic',
+      title: t.verifications.picker.domestic,
+      rooms: domestic,
+    },
+    {
+      id: 'city-temporary',
+      title: t.verifications.picker.temporary,
+      rooms: temporary,
+    },
   ].filter((section) => section.rooms.length > 0);
 
   return (
@@ -31,7 +42,7 @@ export function CityPicker({
                 href={`${basePath}?city=${encodeURIComponent(room.destination.slug)}`}
                 icon="pin"
                 tone="iris"
-                title={room.destination.nameKo}
+                title={destinationName(room.destination, locale)}
                 description={description(room)}
               />
             ))}

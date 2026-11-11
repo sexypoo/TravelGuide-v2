@@ -5,8 +5,21 @@ import {
   TRAVEL_TEST_QUESTIONS,
   TRAVEL_TYPE_KEYS,
   TRAVEL_TYPES,
+  travelTestQuestionsFor,
+  travelTypesFor,
 } from './content';
-import { COURSE_REGIONS } from './courses';
+import { COURSE_REGIONS, courseRegionsFor } from './courses';
+
+const HANGUL = /[가-힣]/u;
+
+function texts(value: unknown): string[] {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.flatMap(texts);
+  if (typeof value === 'object' && value !== null) {
+    return Object.values(value).flatMap(texts);
+  }
+  return [];
+}
 
 describe('travel type test content', () => {
   it('asks ten questions with four distinct types each', () => {
@@ -76,5 +89,60 @@ describe('sample courses', () => {
         expect([...times].sort()).toEqual(times);
       }
     }
+  });
+});
+
+describe('English travel test data (#80)', () => {
+  it('keeps Korean as the default and the original objects', () => {
+    expect(travelTypesFor('ko')).toBe(TRAVEL_TYPES);
+    expect(travelTestQuestionsFor('ko')).toBe(TRAVEL_TEST_QUESTIONS);
+    expect(courseRegionsFor('ko')).toBe(COURSE_REGIONS);
+  });
+
+  it('swaps only the text of types and keeps their structure', () => {
+    const en = travelTypesFor('en');
+    for (const key of TRAVEL_TYPE_KEYS) {
+      const english = en[key];
+      const korean = TRAVEL_TYPES[key];
+      expect([
+        english.styles,
+        english.match,
+        english.color,
+        english.glyph,
+      ]).toEqual([korean.styles, korean.match, korean.color, korean.glyph]);
+      expect(english.traits).toHaveLength(3);
+    }
+    expect(texts(en).filter((text) => HANGUL.test(text))).toEqual([]);
+  });
+
+  it('asks the same questions with the same scoring', () => {
+    const en = travelTestQuestionsFor('en');
+    expect(en).toHaveLength(TRAVEL_TEST_QUESTIONS.length);
+    en.forEach((question, index) => {
+      expect(question.options.map((option) => option.type)).toEqual(
+        TRAVEL_TEST_QUESTIONS[index]?.options.map((option) => option.type),
+      );
+    });
+    expect(texts(en).filter((text) => HANGUL.test(text))).toEqual([]);
+  });
+
+  it('keeps regions, times, and stop counts and leaves no Korean', () => {
+    const en = courseRegionsFor('en');
+    expect(en.map((region) => region.name)).toEqual([
+      'Jeju',
+      'Busan',
+      'Gangneung',
+      'Seoul',
+    ]);
+    en.forEach((region, index) => {
+      const korean = COURSE_REGIONS[index];
+      expect(region.key).toBe(korean?.key);
+      for (const key of TRAVEL_TYPE_KEYS) {
+        expect(region.courses[key].map((stop) => stop.time)).toEqual(
+          korean?.courses[key].map((stop) => stop.time),
+        );
+      }
+    });
+    expect(texts(en).filter((text) => HANGUL.test(text))).toEqual([]);
   });
 });

@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { AppIcon } from '@/components/common';
 import composer from '@/components/questions/composer.module.css';
 import { Button } from '@/components/ui';
+import { useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import {
   createAnswer,
   createAnswerWithImage,
@@ -15,31 +17,28 @@ import {
   type QuestionDetail,
 } from '@/lib/api/questions';
 import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
-import { sourceLabels } from '@/lib/questions/presentation';
 import { queryKeys } from '@/lib/query/keys';
 import { mergeAnswerIntoDetail } from '@/lib/query/realtime-cache';
 import styles from './answer-form.module.css';
 
-function answerError(error: unknown): string {
+function answerError(
+  error: unknown,
+  t: Messages['topics']['answerForm'],
+): string {
   if (error instanceof ApiProblem) {
-    const messages: Partial<Record<string, string>> = {
-      ANSWER_LIMIT_REACHED: '이 질문에는 답변을 최대 3개까지 남길 수 있어요.',
-      QUESTION_EXPIRED: '답변하는 동안 질문이 마감되었습니다.',
-      QUESTION_NOT_OPEN: '이미 해결되었거나 닫힌 질문입니다.',
-      SOURCE_URL_REQUIRED: '공식 정보의 HTTPS 주소를 입력해 주세요.',
-      INVALID_SOURCE_URL: '출처 주소는 https://로 시작해야 합니다.',
-      UPLOAD_TOO_LARGE: '사진은 10MB 이하로 선택해 주세요.',
-    };
-    return (
-      messages[error.code] ??
-      actionableErrorMessage(
-        error,
-        '답변을 보내지 못했습니다. 연결을 확인하고 다시 시도해 주세요.',
-      )
-    );
+    return t.errors[error.code] ?? actionableErrorMessage(error, t.failed);
   }
-  return '답변을 보내지 못했습니다. 연결을 확인하고 다시 시도해 주세요.';
+  return t.failed;
 }
+
+const crowdLevels: CrowdLevel[] = ['QUIET', 'MODERATE', 'BUSY', 'VERY_BUSY'];
+const entryStatuses: EntryStatus[] = [
+  'OPEN',
+  'LIMITED',
+  'PAUSED',
+  'CLOSED',
+  'UNKNOWN',
+];
 
 const sourceTypes: AnswerSourceType[] = [
   'ON_SITE_NOW',
@@ -57,6 +56,9 @@ export function AnswerForm({
   roomSlug: string;
   category: QuestionCategory;
 }): React.JSX.Element {
+  const messages = useMessages();
+  const t = messages.topics.answerForm;
+  const labels = messages.topics.labels;
   const queryClient = useQueryClient();
   const [sourceType, setSourceType] = useState<AnswerSourceType>('ON_SITE_NOW');
   const [sourceUrl, setSourceUrl] = useState('');
@@ -107,19 +109,17 @@ export function AnswerForm({
   function submit(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     if (Array.from(content.trim()).length < 10) {
-      setClientError('현지 상황을 이해할 수 있도록 10자 이상 적어 주세요.');
+      setClientError(t.tooShort);
       return;
     }
     if (sourceType === 'OFFICIAL_SOURCE' && sourceUrl.trim().length === 0) {
-      setClientError('공식 정보의 HTTPS 주소를 함께 입력해 주세요.');
+      setClientError(t.sourceUrlMissing);
       return;
     }
     if (waitMinutes) {
       const minutes = Number(waitMinutes);
       if (!Number.isInteger(minutes) || minutes < 0 || minutes > 1440) {
-        setClientError(
-          '예상 대기 시간은 0분부터 1440분(24시간)까지 정수로 적어 주세요.',
-        );
+        setClientError(t.waitInvalid);
         return;
       }
     }
@@ -129,7 +129,7 @@ export function AnswerForm({
       !crowdLevel &&
       !entryStatus
     ) {
-      setClientError('대기 시간, 혼잡도, 입장 상태 중 하나 이상 알려주세요.');
+      setClientError(t.observationMissing);
       return;
     }
     setClientError('');
@@ -137,7 +137,7 @@ export function AnswerForm({
   }
 
   const message =
-    clientError || (mutation.isError ? answerError(mutation.error) : '');
+    clientError || (mutation.isError ? answerError(mutation.error, t) : '');
 
   return (
     <form
@@ -147,14 +147,11 @@ export function AnswerForm({
       noValidate
     >
       <header className={composer.head}>
-        <h2>이 질문에 근거 있는 답을 남겨주세요</h2>
-        <p>
-          직접 확인한 범위와 정보의 시점을 분명하게 적으면 여행자가 판단하기
-          쉬워져요.
-        </p>
+        <h2>{t.title}</h2>
+        <p>{t.description}</p>
       </header>
       <fieldset className={composer.choices}>
-        <legend>답변 근거</legend>
+        <legend>{t.sourceLegend}</legend>
         <div className={composer.options}>
           {sourceTypes.map((item) => (
             <label key={item} className={composer.option}>
@@ -164,14 +161,14 @@ export function AnswerForm({
                 checked={sourceType === item}
                 onChange={() => setSourceType(item)}
               />
-              <span>{sourceLabels[item]}</span>
+              <span>{labels.source[item]}</span>
             </label>
           ))}
         </div>
       </fieldset>
       {sourceType === 'OFFICIAL_SOURCE' && (
         <label className={composer.field}>
-          <span className={composer.label}>공식 HTTPS 주소</span>
+          <span className={composer.label}>{t.sourceUrl}</span>
           <input
             type="url"
             value={sourceUrl}
@@ -183,10 +180,10 @@ export function AnswerForm({
       )}
       {['WAITING', 'CROWD'].includes(category) && (
         <fieldset className={composer.observation}>
-          <legend>지금 직접 본 현장 상태</legend>
+          <legend>{t.observationLegend}</legend>
           <div className={composer.observationGrid}>
             <label className={composer.field}>
-              <span className={composer.label}>예상 대기 시간</span>
+              <span className={composer.label}>{t.waitLabel}</span>
               <div className={composer.suffix}>
                 <input
                   type="number"
@@ -198,11 +195,11 @@ export function AnswerForm({
                   onChange={(event) => setWaitMinutes(event.target.value)}
                   placeholder="30"
                 />
-                <small>분</small>
+                <small>{t.minutes}</small>
               </div>
             </label>
             <label className={composer.field}>
-              <span className={composer.label}>혼잡도</span>
+              <span className={composer.label}>{t.crowdLabel}</span>
               <select
                 value={crowdLevel ?? ''}
                 onChange={(event) =>
@@ -213,15 +210,16 @@ export function AnswerForm({
                   )
                 }
               >
-                <option value="">선택</option>
-                <option value="QUIET">여유</option>
-                <option value="MODERATE">보통</option>
-                <option value="BUSY">많음</option>
-                <option value="VERY_BUSY">매우 많음</option>
+                <option value="">{t.select}</option>
+                {crowdLevels.map((item) => (
+                  <option key={item} value={item}>
+                    {labels.crowd[item]}
+                  </option>
+                ))}
               </select>
             </label>
             <label className={composer.field}>
-              <span className={composer.label}>입장 상태</span>
+              <span className={composer.label}>{t.entryLabel}</span>
               <select
                 value={entryStatus ?? ''}
                 onChange={(event) =>
@@ -232,28 +230,28 @@ export function AnswerForm({
                   )
                 }
               >
-                <option value="">선택</option>
-                <option value="OPEN">입장 가능</option>
-                <option value="LIMITED">제한 입장</option>
-                <option value="PAUSED">일시 중단</option>
-                <option value="CLOSED">입장 마감</option>
-                <option value="UNKNOWN">확인 필요</option>
+                <option value="">{t.select}</option>
+                {entryStatuses.map((item) => (
+                  <option key={item} value={item}>
+                    {t.entryOptions[item]}
+                  </option>
+                ))}
               </select>
             </label>
           </div>
-          <p>답변을 보내는 시각이 현장 확인 시각으로 함께 기록돼요.</p>
+          <p>{t.observationNote}</p>
         </fieldset>
       )}
       <label className={composer.field}>
         <span className={composer.label}>
-          답변 내용 <small>{Array.from(content).length}/1000</small>
+          {t.content} <small>{Array.from(content).length}/1000</small>
         </span>
         <textarea
           value={content}
           minLength={10}
           maxLength={1000}
           rows={5}
-          placeholder="지금 확인한 상황과 여행자가 취할 수 있는 선택을 적어 주세요."
+          placeholder={t.contentPlaceholder}
           aria-invalid={message.length > 0}
           onChange={(event) => setContent(event.target.value)}
         />
@@ -264,14 +262,14 @@ export function AnswerForm({
             <AppIcon name="image" />
           </span>
           <div>
-            <strong>현장 사진</strong>
-            <small>선택 · 최대 10MB</small>
+            <strong>{messages.topics.shared.photo}</strong>
+            <small>{t.photoHint}</small>
           </div>
         </div>
         <div className={composer.fileRow}>
           {image && <strong title={image.name}>{image.name}</strong>}
           <label className={composer.pickerButton}>
-            {image ? '다시 선택' : '사진 선택'}
+            {image ? t.reselect : messages.topics.shared.pickPhoto}
             <input
               className="srOnly"
               type="file"
@@ -279,7 +277,7 @@ export function AnswerForm({
               onChange={(event) => {
                 const nextImage = event.target.files?.[0];
                 if (nextImage && nextImage.size > 10 * 1024 * 1024) {
-                  setClientError('사진은 10MB 이하로 선택해 주세요.');
+                  setClientError(messages.topics.shared.photoTooLarge);
                   event.target.value = '';
                   return;
                 }
@@ -296,7 +294,7 @@ export function AnswerForm({
         </p>
       )}
       <Button type="submit" size="lg" block disabled={mutation.isPending}>
-        {mutation.isPending ? '답변 보내는 중' : '답변 보내기'}
+        {mutation.isPending ? t.submitting : t.submit}
       </Button>
     </form>
   );

@@ -1,4 +1,5 @@
 import { Chip, type ChipTone } from '@/components/ui';
+import { useLocale } from '@/i18n/client';
 import {
   participantBadgeLabel,
   type ParticipantBadge,
@@ -24,7 +25,10 @@ export function ParticipantChip({
 }: {
   badge: ParticipantBadge;
 }): React.JSX.Element {
+  const locale = useLocale();
   return (
-    <Chip tone={participantTone(badge)}>{participantBadgeLabel(badge)}</Chip>
+    <Chip tone={participantTone(badge)}>
+      {participantBadgeLabel(badge, locale)}
+    </Chip>
   );
 }

@@ -45,7 +45,8 @@
 }
 
 .navBrand,
-.navMe {
+.navMe,
+.navLocale {
   display: none;
 }
 
@@ -148,6 +149,16 @@
   .navItem[aria-current='page'] :global(.appIcon) {
     color: var(--iris);
     stroke-width: 2;
+  }
+
+  .navLocale {
+    display: inline-flex;
+    align-self: flex-start;
+    margin: auto 0 0.5rem 0.75rem;
+  }
+
+  .navLocale + .navMe {
+    margin-top: 0;
   }
 
   .navMe {

@@ -2,8 +2,10 @@ import { Page, PageHeader } from '@/components/app/page';
 import { RoomExperience } from '@/components/rooms/room-experience';
 import styles from '@/components/rooms/room.module.css';
 import { ButtonLink, Card, IconTile, ListRow, Notice } from '@/components/ui';
+import { getLocale, getMessages } from '@/i18n/server';
 import { getRoom } from '@/lib/api/rooms.server';
 import { requireUser } from '@/lib/auth/session';
+import { destinationName } from '@/lib/rooms/presentation';
 
 interface RoomPageProps {
   params: Promise<{ slug: string }>;
@@ -22,6 +24,9 @@ export default async function RoomPage({
     return <RoomExperience room={room} currentUserId={user.id} />;
   }
 
+  const [messages, locale] = await Promise.all([getMessages(), getLocale()]);
+  const t = messages.rooms;
+  const city = destinationName(room.destination, locale);
   const pending =
     room.access.status === 'TRAVELER_PENDING' ||
     room.access.status === 'LOCAL_PENDING';
@@ -29,27 +34,21 @@ export default async function RoomPage({
   return (
     <Page>
       <PageHeader
-        title={`${room.destination.nameKo} 도움방`}
-        description="인증된 여행자와 현지인만 대화할 수 있어요."
+        title={t.roomName(city)}
+        description={t.locked.description}
         backHref="/app/rooms"
-        backLabel="도움방 목록"
+        backLabel={t.locked.backLabel}
       />
       <div className={styles.lockedStack}>
         <Card className={styles.lockedCard} aria-labelledby="room-lock-title">
           <IconTile icon="lock" tone="plum" />
           <h2 id="room-lock-title">
-            {pending
-              ? '심사가 끝나면 대화방이 열려요'
-              : `인증하면 ${room.destination.nameKo} 도움방이 열려요`}
+            {pending ? t.locked.pendingTitle : t.locked.lockedTitle(city)}
           </h2>
-          <p>
-            {pending
-              ? '심사 결과는 참여 자격 화면에서 확인할 수 있어요.'
-              : '여행자는 여행 일정과 예약 증빙으로, 현지인은 위치와 거주 증빙으로 인증해요.'}
-          </p>
+          <p>{pending ? t.locked.pendingBody : t.locked.lockedBody}</p>
           {pending ? (
             <ButtonLink href="/app/verifications" size="lg" block>
-              심사 현황 보기
+              {t.locked.viewReview}
             </ButtonLink>
           ) : (
             <div className={styles.lockedActions}>
@@ -58,7 +57,7 @@ export default async function RoomPage({
                 size="lg"
                 block
               >
-                여행자로 인증하기
+                {t.locked.verifyTraveler}
               </ButtonLink>
               <ButtonLink
                 href={`/app/verifications/local?city=${encodeURIComponent(room.destination.slug)}`}
@@ -66,30 +65,28 @@ export default async function RoomPage({
                 size="lg"
                 block
               >
-                현지인으로 인증하기
+                {t.locked.verifyLocal}
               </ButtonLink>
             </div>
           )}
         </Card>
 
-        <Card padding="list" aria-label="도움 지역">
+        <Card padding="list" aria-label={t.locked.areaLabel}>
           <ListRow
             icon="pin"
             tone="magenta"
-            title={`${room.destination.nameKo} 전역`}
-            description={`중심에서 반경 ${room.destination.radiusKm}km 안의 지금을 나눠요`}
+            title={t.locked.areaTitle(city)}
+            description={t.locked.areaDescription(room.destination.radiusKm)}
           />
           <ListRow
             icon="shield"
             tone="iris"
-            title="증빙은 공개되지 않아요"
-            description="관리자 심사에만 쓰이고, 정확한 위치도 다른 사람에게 보이지 않아요"
+            title={t.locked.privacyTitle}
+            description={t.locked.privacyDescription}
           />
         </Card>
 
-        <Notice icon="info">
-          인증 없이도 커뮤니티에서 여행 정보를 묻고 나눌 수 있어요.
-        </Notice>
+        <Notice icon="info">{t.locked.communityNotice}</Notice>
       </div>
     </Page>
   );

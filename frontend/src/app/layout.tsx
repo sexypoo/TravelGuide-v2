@@ -1,16 +1,17 @@
 import type { Metadata, Viewport } from 'next';
+import { I18nProvider } from '@/i18n/client';
+import { getLocale, getMessages } from '@/i18n/server';
 import './fonts/pretendard/pretendard.css';
 import './fonts/wanted-sans/wanted-sans.css';
 import '../styles/tokens.css';
 
-export const metadata: Metadata = {
-  title: {
-    default: '여쭈어 (여JJU) — 여행지의 지금을 나누는 커뮤니티',
-    template: '%s | 여쭈어',
-  },
-  description:
-    '여행 정보를 편하게 나누고, 인증된 참여자와 여행지의 지금을 확인하는 커뮤니티',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getMessages();
+  return {
+    title: { default: t.common.metaTitle, template: t.common.metaTemplate },
+    description: t.common.metaDescription,
+  };
+}
 
 export const viewport: Viewport = {
   colorScheme: 'light',
@@ -18,12 +19,15 @@ export const viewport: Viewport = {
   interactiveWidget: 'resizes-content',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>): React.JSX.Element {
+}: Readonly<{ children: React.ReactNode }>): Promise<React.JSX.Element> {
+  const locale = await getLocale();
   return (
-    <html lang="ko" data-scroll-behavior="smooth">
-      <body suppressHydrationWarning>{children}</body>
+    <html lang={locale} data-scroll-behavior="smooth">
+      <body suppressHydrationWarning>
+        <I18nProvider locale={locale}>{children}</I18nProvider>
+      </body>
     </html>
   );
 }

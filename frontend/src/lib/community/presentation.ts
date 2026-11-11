@@ -1,10 +1,14 @@
+import type { Locale } from '@/i18n/config';
+import { messagesFor } from '@/i18n/messages';
 import type { CommunityCategory } from '../api/community';
 
-export const communityCategoryLabels: Record<CommunityCategory, string> = {
-  TRAVEL_TIP: '여행 팁',
-  TRANSPORT: '교통',
-  FOOD: '맛집',
-  PLACE: '장소',
-  QUESTION: '궁금해요',
-  OTHER: '기타',
-};
+/** Category labels in the given language (#80). */
+export function communityCategoryLabelsFor(
+  locale: Locale = 'ko',
+): Record<CommunityCategory, string> {
+  return messagesFor(locale).community.categories;
+}
+
+/** Korean labels, kept for callers that are not locale-aware yet. */
+export const communityCategoryLabels: Record<CommunityCategory, string> =
+  communityCategoryLabelsFor('ko');

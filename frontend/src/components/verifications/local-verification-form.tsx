@@ -3,8 +3,11 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { AppIcon } from '@/components/common';
+import { useLocale, useMessages } from '@/i18n/client';
+import type { Messages } from '@/i18n/messages';
 import type { LocalProofType } from '@/lib/api/verifications';
 import { submitLocalVerification } from '@/lib/api/verifications';
+import { destinationName } from '@/lib/verifications/presentation';
 import { applicationError, proofError } from './verification-form-utils';
 import { Button } from '@/components/ui';
 import {
@@ -24,13 +27,6 @@ interface CapturedLocation {
 }
 
 type LocateState = 'idle' | 'locating' | 'done' | 'error';
-
-const locateTitles: Readonly<Record<LocateState, string>> = {
-  idle: '아직 확인하지 않았어요',
-  locating: '위치를 확인하고 있어요',
-  done: '위치 확인 완료',
-  error: '위치를 확인하지 못했어요',
-};
 
 function distanceKm(
   first: { latitude: number; longitude: number },
@@ -53,12 +49,13 @@ function toCoordinate(degrees: number): number {
   return Number(degrees.toFixed(6));
 }
 
-function locationFailure(error: GeolocationPositionError): string {
-  if (error.code === error.PERMISSION_DENIED)
-    return '위치 권한이 꺼져 있어요. 브라우저 설정에서 위치 접근을 허용해 주세요.';
-  if (error.code === error.TIMEOUT)
-    return '위치 확인 시간이 초과됐어요. 열린 장소에서 다시 시도해 주세요.';
-  return '현재 위치를 확인할 수 없어요. 기기의 위치 서비스를 확인해 주세요.';
+function locationFailure(
+  error: GeolocationPositionError,
+  t: Messages['verifications']['local'],
+): string {
+  if (error.code === error.PERMISSION_DENIED) return t.permissionDenied;
+  if (error.code === error.TIMEOUT) return t.timeout;
+  return t.unavailable;
 }
 
 export function LocalVerificationForm({
@@ -66,12 +63,16 @@ export function LocalVerificationForm({
 }: {
   destination: {
     id: string;
+    slug?: string;
     nameKo: string;
     center: { latitude: number; longitude: number };
     radiusKm: number;
   };
 }): React.JSX.Element {
   const router = useRouter();
+  const messages = useMessages().verifications;
+  const t = messages.local;
+  const city = destinationName(destination, useLocale());
   const [location, setLocation] = useState<CapturedLocation>();
   const [locationMessage, setLocationMessage] = useState<string>();
   const [locating, setLocating] = useState(false);
@@ -86,7 +87,7 @@ export function LocalVerificationForm({
     setLocation(undefined);
     setLocationMessage(undefined);
     if (!('geolocation' in navigator)) {
-      setLocationMessage('이 브라우저에서는 위치 확인을 사용할 수 없어요.');
+      setLocationMessage(t.unsupported);
       return;
     }
     setLocating(true);
@@ -95,7 +96,7 @@ export function LocalVerificationForm({
         setLocating(false);
         if (position.coords.accuracy > 200) {
           setLocationMessage(
-            `정확도가 ${Math.round(position.coords.accuracy)}m예요. 200m 이내가 되도록 열린 장소에서 다시 확인해 주세요.`,
+            t.lowAccuracy(Math.round(position.coords.accuracy)),
           );
           return;
         }
@@ -106,19 +107,15 @@ export function LocalVerificationForm({
           capturedAt: new Date(position.timestamp).toISOString(),
         };
         if (distanceKm(captured, destination.center) > destination.radiusKm) {
-          setLocationMessage(
-            `현재 위치가 ${destination.nameKo} 인증 범위 밖이에요. ${destination.nameKo} 안에서 다시 확인해 주세요.`,
-          );
+          setLocationMessage(t.outside(city));
           return;
         }
         setLocation(captured);
-        setLocationMessage(
-          `${destination.nameKo} 안에서 확인했어요. 정확도 ${Math.round(captured.accuracy)}m`,
-        );
+        setLocationMessage(t.inside(city, Math.round(captured.accuracy)));
       },
       (positionError) => {
         setLocating(false);
-        setLocationMessage(locationFailure(positionError));
+        setLocationMessage(locationFailure(positionError, t));
       },
       { enableHighAccuracy: true, maximumAge: 0, timeout: 10_000 },
     );
@@ -128,18 +125,11 @@ export function LocalVerificationForm({
     event: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     event.preventDefault();
-    const fileError = proofError(proof);
-    if (location === undefined)
-      return setError(
-        `${destination.nameKo} 안에서 현재 위치를 먼저 확인해 주세요.`,
-      );
-    if (note.trim().length < 30)
-      return setError(
-        `${destination.nameKo}와의 관계를 30자 이상 적어 주세요.`,
-      );
+    const fileError = proofError(proof, messages.form);
+    if (location === undefined) return setError(t.locationFirst(city));
+    if (note.trim().length < 30) return setError(t.noteTooShort(city));
     if (fileError !== undefined) return setError(fileError);
-    if (!consent)
-      return setError('증빙 사용 목적과 개인정보 안내에 동의해 주세요.');
+    if (!consent) return setError(messages.form.consentMissing);
     const data = new FormData();
     data.set('destinationId', destination.id);
     data.set('latitude', String(location.latitude));
@@ -156,7 +146,7 @@ export function LocalVerificationForm({
       router.push('/app/verifications?submitted=local');
       router.refresh();
     } catch (caught: unknown) {
-      setError(applicationError(caught));
+      setError(applicationError(caught, messages));
       setPending(false);
     }
   }
@@ -182,19 +172,19 @@ export function LocalVerificationForm({
         items={[
           {
             icon: 'pin',
-            title: '현재 위치 확인',
-            text: `${destination.nameKo} 안에서 버튼 한 번으로 확인해요`,
+            title: t.prepareLocation,
+            text: t.prepareLocationText(city),
           },
           {
             icon: 'notebook',
-            title: '연고 증빙',
-            text: '거주, 근무, 학업을 확인할 수 있는 서류 한 장',
+            title: t.prepareProof,
+            text: t.prepareProofText,
           },
         ]}
       />
       <FormCard
-        title="현재 위치"
-        description={`${destination.nameKo} 중심 반경 ${destination.radiusKm}km 안에 있는지만 확인해요. 좌표는 화면에 표시하지 않아요.`}
+        title={t.locationTitle}
+        description={t.locationDescription(city, destination.radiusKm)}
       >
         <div className={styles.locate} data-state={locateState} role="status">
           <span className={styles.locateIcon} aria-hidden="true">
@@ -209,8 +199,8 @@ export function LocalVerificationForm({
             />
           </span>
           <span className={styles.locateText}>
-            <strong>{locateTitles[locateState]}</strong>
-            <small>{locationMessage ?? '정확도 200m 이내에서 확인돼요'}</small>
+            <strong>{t.locateStates[locateState]}</strong>
+            <small>{locationMessage ?? t.locationHint}</small>
           </span>
         </div>
         <Button
@@ -221,58 +211,50 @@ export function LocalVerificationForm({
           disabled={locating}
         >
           {locating
-            ? '위치 확인 중…'
+            ? t.locating
             : location === undefined
-              ? '현재 위치 확인'
-              : '위치 다시 확인'}
+              ? t.locate
+              : t.relocate}
         </Button>
       </FormCard>
-      <FormCard
-        title="연고 확인"
-        description="관리자가 확인할 수 있도록 구체적으로 알려 주세요."
-      >
+      <FormCard title={t.tiesTitle} description={t.tiesDescription}>
         <label className={styles.field}>
-          <span className={styles.label}>연고 유형</span>
+          <span className={styles.label}>{t.proofType}</span>
           <span className={styles.selectFrame}>
             <select
               value={proofType}
               onChange={(e) => setProofType(e.target.value as LocalProofType)}
             >
-              <option value="RESIDENCE">거주</option>
-              <option value="WORK">근무</option>
-              <option value="STUDY">학업</option>
-              <option value="OTHER">기타</option>
+              <option value="RESIDENCE">{t.proofTypes.RESIDENCE}</option>
+              <option value="WORK">{t.proofTypes.WORK}</option>
+              <option value="STUDY">{t.proofTypes.STUDY}</option>
+              <option value="OTHER">{t.proofTypes.OTHER}</option>
             </select>
             <AppIcon name="chevron-right" className={styles.selectChevron} />
           </span>
         </label>
         <label className={styles.field}>
           <span className={styles.label}>
-            관계 설명 <small>{note.length}/300</small>
+            {t.note} <small>{note.length}/300</small>
           </span>
           <textarea
             maxLength={300}
             rows={5}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder={`${destination.nameKo}에서 생활하거나 공부한 기간, 잘 아는 동네 등을 30자 이상 적어 주세요.`}
+            placeholder={t.notePlaceholder(city)}
           />
         </label>
-        <ProofPicker label="연고 증빙 선택" file={proof} onChange={setProof} />
+        <ProofPicker label={t.proofLabel} file={proof} onChange={setProof} />
       </FormCard>
       <ConsentCard
         checked={consent}
         onChange={setConsent}
-        title="위치·증빙 확인 및 개인정보 이용에 동의합니다."
+        title={t.consentTitle}
       >
-        정확한 위치와 파일은 인증 심사에만 사용되며 일반 사용자에게 공개되지
-        않습니다.
+        {t.consentBody}
       </ConsentCard>
-      <FormFooter
-        error={error}
-        pending={pending}
-        label="현지인 인증 신청하기"
-      />
+      <FormFooter error={error} pending={pending} label={t.submit} />
     </form>
   );
 }

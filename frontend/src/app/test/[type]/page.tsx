@@ -5,10 +5,11 @@ import { Critter } from '@/components/travel-test/critter';
 import { RegionCourse } from '@/components/travel-test/region-course';
 import { ShareActions } from '@/components/travel-test/share-actions';
 import { ButtonLink, Card } from '@/components/ui';
+import { getLocale, getMessages } from '@/i18n/server';
 import {
   isTravelTypeKey,
   TRAVEL_TYPE_KEYS,
-  TRAVEL_TYPES,
+  travelTypesFor,
 } from '@/lib/travel-test/content';
 import { TestShell } from '../test-shell';
 import styles from '../test.module.css';
@@ -28,13 +29,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { type } = await params;
   if (!isTravelTypeKey(type)) return {};
-  const travelType = TRAVEL_TYPES[type];
+  const travelType = travelTypesFor(await getLocale())[type];
+  const t = (await getMessages()).travelTest.meta;
   return {
-    title: `나는 ${travelType.name} · 여행자 유형 테스트`,
-    description: `${travelType.tagline}. 너는 어떤 여행자야? 1분 테스트로 알아봐요.`,
+    title: t.resultTitle(travelType.name),
+    description: t.resultDescription(travelType.tagline),
     openGraph: {
-      title: `나는 ${travelType.name}`,
-      description: `${travelType.tagline}. 너는 어떤 여행자야?`,
+      title: t.resultOgTitle(travelType.name),
+      description: t.resultOgDescription(travelType.tagline),
+      // The OG images stay Korean in both languages.
       images: [`/test/og/${type}.png`],
     },
   };
@@ -47,8 +50,10 @@ export default async function TravelTypeResultPage({
 }): Promise<React.JSX.Element> {
   const { type } = await params;
   if (!isTravelTypeKey(type)) notFound();
-  const travelType = TRAVEL_TYPES[type];
-  const match = TRAVEL_TYPES[travelType.match];
+  const types = travelTypesFor(await getLocale());
+  const { common, travelTest: t } = await getMessages();
+  const travelType = types[type];
+  const match = types[travelType.match];
 
   return (
     <TestShell>
@@ -57,13 +62,13 @@ export default async function TravelTypeResultPage({
           className={styles.resultCard}
           style={{ '--type-color': travelType.color } as React.CSSProperties}
         >
-          <p className={styles.resultYou}>나는</p>
+          <p className={styles.resultYou}>{t.result.you}</p>
           <h1 id="travel-type-name" className={styles.resultName}>
             {travelType.name}
           </h1>
           <Critter type={type} onColor className={styles.resultCritter} />
           <p className={styles.resultTagline}>{travelType.tagline}</p>
-          <ul className={styles.traits} aria-label="이 유형의 특징">
+          <ul className={styles.traits} aria-label={t.result.traitsLabel}>
             {travelType.traits.map((trait) => (
               <li key={trait}>{trait}</li>
             ))}
@@ -79,7 +84,7 @@ export default async function TravelTypeResultPage({
 
         <Card aria-labelledby="travel-type-match">
           <h2 id="travel-type-match" className={styles.sectionTitle}>
-            나랑 잘 맞는 여행자
+            {t.result.matchTitle}
           </h2>
           <Link className={styles.match} href={`/test/${travelType.match}`}>
             <Critter type={travelType.match} className={styles.matchCritter} />
@@ -92,25 +97,22 @@ export default async function TravelTypeResultPage({
 
         <section className={styles.cta} aria-labelledby="travel-type-cta">
           <h2 id="travel-type-cta" className={styles.ctaTitle}>
-            여행 중 막히면, 지금 그곳을 아는 사람에게
+            {t.result.ctaTitle}
           </h2>
-          <p className={styles.ctaText}>
-            도시마다 인증된 현지인과 여행자가 모인 도움방에서 지금 상황을 물어볼
-            수 있어요.
-          </p>
+          <p className={styles.ctaText}>{t.result.ctaText}</p>
           <div className={styles.ctaActions}>
             <ButtonLink href="/auth/register" variant="light" size="lg" block>
-              계정 만들기
+              {common.register}
             </ButtonLink>
             <Link className={styles.ctaAgain} href="/test">
-              나도 테스트 해보기
+              {t.result.ctaAgain}
             </Link>
           </div>
         </section>
 
         <nav className={styles.others} aria-labelledby="travel-type-others">
           <h2 id="travel-type-others" className={styles.sectionTitle}>
-            유형 8가지 구경하기
+            {t.result.othersTitle}
           </h2>
           <ul>
             {TRAVEL_TYPE_KEYS.map((key) => (
@@ -120,7 +122,7 @@ export default async function TravelTypeResultPage({
                   aria-current={key === type ? 'page' : undefined}
                 >
                   <Critter type={key} className={styles.otherCritter} />
-                  {TRAVEL_TYPES[key].name}
+                  {types[key].name}
                 </Link>
               </li>
             ))}

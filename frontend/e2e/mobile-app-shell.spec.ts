@@ -61,6 +61,7 @@ test('mobile and tablet keep a fixed tab bar and readable pages', async ({
 }) => {
   test.setTimeout(180_000);
   const context = await browser.newContext({
+    locale: 'ko-KR',
     baseURL: 'http://127.0.0.1:3100',
   });
   const page = await context.newPage();
@@ -103,6 +104,7 @@ test('desktop keeps the side navigation and content beside it', async ({
 }) => {
   test.setTimeout(120_000);
   const context = await browser.newContext({
+    locale: 'ko-KR',
     baseURL: 'http://127.0.0.1:3100',
   });
   const page = await context.newPage();

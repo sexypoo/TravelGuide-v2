@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useMessages } from '@/i18n/client';
 import { submitTravelerVerification } from '@/lib/api/verifications';
 import {
   applicationError,
@@ -23,6 +24,8 @@ export function TravelerVerificationForm({
   destinationId: string;
 }): React.JSX.Element {
   const router = useRouter();
+  const messages = useMessages().verifications;
+  const t = messages.traveler;
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
   const [note, setNote] = useState('');
@@ -36,14 +39,11 @@ export function TravelerVerificationForm({
     event: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     event.preventDefault();
-    const fileError = proofError(proof);
-    if (startsAt === '' || endsAt === '')
-      return setError('여행 시작일과 종료일을 선택해 주세요.');
-    if (startsAt > endsAt)
-      return setError('여행 시작일은 종료일보다 늦을 수 없어요.');
+    const fileError = proofError(proof, messages.form);
+    if (startsAt === '' || endsAt === '') return setError(t.datesMissing);
+    if (startsAt > endsAt) return setError(t.datesOrder);
     if (fileError !== undefined) return setError(fileError);
-    if (!consent)
-      return setError('증빙 사용 목적과 개인정보 안내에 동의해 주세요.');
+    if (!consent) return setError(messages.form.consentMissing);
 
     const data = new FormData();
     data.set('destinationId', destinationId);
@@ -58,7 +58,7 @@ export function TravelerVerificationForm({
       router.push('/app/verifications?submitted=traveler');
       router.refresh();
     } catch (caught: unknown) {
-      setError(applicationError(caught));
+      setError(applicationError(caught, messages));
       setPending(false);
     }
   }
@@ -75,23 +75,20 @@ export function TravelerVerificationForm({
         items={[
           {
             icon: 'clock',
-            title: '여행 일정',
-            text: '도움방을 이용할 시작일과 종료일',
+            title: t.prepareDates,
+            text: t.prepareDatesText,
           },
           {
             icon: 'notebook',
-            title: '예약 증빙',
-            text: '항공권이나 숙소 예약 내역 한 장',
+            title: t.prepareProof,
+            text: t.prepareProofText,
           },
         ]}
       />
-      <FormCard
-        title="여행 일정"
-        description="도움방을 이용할 날짜를 골라 주세요."
-      >
+      <FormCard title={t.datesTitle} description={t.datesDescription}>
         <div className={styles.dates}>
           <label className={styles.field}>
-            <span className={styles.label}>시작일</span>
+            <span className={styles.label}>{messages.form.startDate}</span>
             <span className={styles.dateFrame} data-date-frame>
               <input
                 type="date"
@@ -102,7 +99,7 @@ export function TravelerVerificationForm({
             </span>
           </label>
           <label className={styles.field}>
-            <span className={styles.label}>종료일</span>
+            <span className={styles.label}>{messages.form.endDate}</span>
             <span className={styles.dateFrame} data-date-frame>
               <input
                 type="date"
@@ -114,37 +111,29 @@ export function TravelerVerificationForm({
           </label>
         </div>
       </FormCard>
-      <FormCard
-        title="여행 증빙"
-        description="항공권이나 숙소 예약 내역을 올려 주세요."
-      >
-        <ProofPicker label="증빙 파일 선택" file={proof} onChange={setProof} />
+      <FormCard title={t.proofTitle} description={t.proofDescription}>
+        <ProofPicker label={t.proofLabel} file={proof} onChange={setProof} />
         <label className={styles.field}>
           <span className={styles.label}>
-            관리자에게 남길 메모 (선택) <small>{note.length}/300</small>
+            {t.note} <small>{note.length}/300</small>
           </span>
           <textarea
             maxLength={300}
             rows={4}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="확인에 도움이 되는 내용을 적어 주세요."
+            placeholder={t.notePlaceholder}
           />
         </label>
       </FormCard>
       <ConsentCard
         checked={consent}
         onChange={setConsent}
-        title="증빙 확인 및 개인정보 이용에 동의합니다."
+        title={t.consentTitle}
       >
-        제출한 파일과 일정은 인증 심사에만 사용되며 일반 사용자에게 공개되지
-        않습니다.
+        {t.consentBody}
       </ConsentCard>
-      <FormFooter
-        error={error}
-        pending={pending}
-        label="여행자 인증 신청하기"
-      />
+      <FormFooter error={error} pending={pending} label={t.submit} />
     </form>
   );
 }

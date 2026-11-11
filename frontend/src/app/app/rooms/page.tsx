@@ -7,10 +7,13 @@ import {
   ListRow,
   SectionHead,
 } from '@/components/ui';
+import type { Locale } from '@/i18n/config';
+import type { Messages } from '@/i18n/messages';
+import { getLocale, getMessages } from '@/i18n/server';
 import type { Room, RoomAccessStatus } from '@/lib/api/rooms';
 import { getRooms } from '@/lib/api/rooms.server';
 import { requireUser } from '@/lib/auth/session';
-import { splitRooms } from '@/lib/rooms/presentation';
+import { destinationName, splitRooms } from '@/lib/rooms/presentation';
 import styles from './rooms.module.css';
 
 const statusTone: Readonly<Record<RoomAccessStatus, ChipTone>> = {
@@ -20,7 +23,15 @@ const statusTone: Readonly<Record<RoomAccessStatus, ChipTone>> = {
   VERIFICATION_REQUIRED: 'neutral',
 };
 
-function RoomRows({ rooms }: { rooms: readonly Room[] }): React.JSX.Element {
+function RoomRows({
+  rooms,
+  t,
+  locale,
+}: {
+  rooms: readonly Room[];
+  t: Messages['rooms'];
+  locale: Locale;
+}): React.JSX.Element {
   return (
     <Card padding="list">
       {rooms.map((room) => (
@@ -29,10 +40,10 @@ function RoomRows({ rooms }: { rooms: readonly Room[] }): React.JSX.Element {
           href={`/app/rooms/${encodeURIComponent(room.slug)}`}
           icon="room"
           tone={room.access.canViewContent ? 'magenta' : 'neutral'}
-          title={`${room.destination.nameKo} 도움방`}
+          title={t.roomName(destinationName(room.destination, locale))}
           trailing={
             <Chip tone={statusTone[room.access.status]}>
-              {room.access.labelKo}
+              {t.access[room.access.status]}
             </Chip>
           }
         />
@@ -43,14 +54,17 @@ function RoomRows({ rooms }: { rooms: readonly Room[] }): React.JSX.Element {
 
 export default async function RoomsPage(): Promise<React.JSX.Element> {
   await requireUser('/app/rooms');
-  const { domestic, temporary } = splitRooms(await getRooms());
+  const [rooms, messages, locale] = await Promise.all([
+    getRooms(),
+    getMessages(),
+    getLocale(),
+  ]);
+  const t = messages.rooms;
+  const { domestic, temporary } = splitRooms(rooms);
 
   return (
     <Page>
-      <PageHeader
-        title="도움방"
-        description="여행지마다 그곳에 사는 사람에게 지금 상황을 물어볼 수 있어요."
-      />
+      <PageHeader title={t.list.title} description={t.list.description} />
 
       <div className={styles.stack}>
         {domestic.length === 0 && temporary.length === 0 ? (
@@ -58,26 +72,23 @@ export default async function RoomsPage(): Promise<React.JSX.Element> {
             <EmptyState
               icon="room"
               tone="iris"
-              title="열려 있는 도움방이 없어요"
-              description="지역이 준비되면 이곳에 표시돼요."
+              title={t.list.emptyTitle}
+              description={t.list.emptyDescription}
             />
           </Card>
         ) : (
           <>
             {domestic.length > 0 && (
               <section aria-labelledby="rooms-domestic">
-                <SectionHead id="rooms-domestic" title="국내 여행지" />
-                <RoomRows rooms={domestic} />
+                <SectionHead id="rooms-domestic" title={t.list.domestic} />
+                <RoomRows rooms={domestic} t={t} locale={locale} />
               </section>
             )}
             {temporary.length > 0 && (
               <section aria-labelledby="rooms-temporary">
-                <SectionHead id="rooms-temporary" title="임시 운영" />
-                <p className={styles.note}>
-                  해외 교환학생이 직접 운영해 보는 방이에요. 언제든 닫힐 수
-                  있어요.
-                </p>
-                <RoomRows rooms={temporary} />
+                <SectionHead id="rooms-temporary" title={t.list.temporary} />
+                <p className={styles.note}>{t.list.temporaryNote}</p>
+                <RoomRows rooms={temporary} t={t} locale={locale} />
               </section>
             )}
           </>

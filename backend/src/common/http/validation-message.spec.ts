@@ -1,5 +1,5 @@
 import { HttpStatus, ValidationPipe } from '@nestjs/common';
-import { Type } from 'class-transformer';
+import { plainToInstance, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
@@ -10,13 +10,18 @@ import {
   Max,
   MaxLength,
   MinLength,
+  validate,
   ValidateNested,
 } from 'class-validator';
 import { ProblemException } from './problem.exception';
 import {
+  englishConstraintMessage,
+  firstValidationIssue,
   firstValidationMessage,
+  issueMessage,
   koreanConstraintMessage,
   uploadTooLargeDetail,
+  type ValidationIssue,
 } from './validation-message';
 
 class PlaceDto {
@@ -147,5 +152,43 @@ describe('uploadTooLargeDetail', () => {
     expect(uploadTooLargeDetail('/api/v1/rooms/jeju/messages/images')).toBe(
       '이미지는 10MB 이하여야 합니다.',
     );
+  });
+});
+
+describe('English validation messages (#80)', () => {
+  async function issueFor(
+    body: Record<string, unknown>,
+  ): Promise<ValidationIssue | undefined> {
+    return firstValidationIssue(
+      await validate(plainToInstance(SampleDto, body), {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
+  }
+
+  it('builds English sentences from the same failed constraint', async () => {
+    expect(issueMessage(await issueFor({ waitMinutes: 2000 }), 'en')).toBe(
+      'Expected wait time must be 1440 or less.',
+    );
+    expect(issueMessage(await issueFor({ nickname: '가' }), 'en')).toBe(
+      'Nickname must be at least 2 characters.',
+    );
+    expect(issueMessage(await issueFor({ role: 'ADMIN' }), 'en')).toBe(
+      'The request contains fields that are not allowed.',
+    );
+    expect(issueMessage(undefined, 'en')).toBe(
+      'Please check what you entered.',
+    );
+  });
+
+  it('translates Korean DTO messages through the English table', () => {
+    expect(
+      englishConstraintMessage(
+        'nickname',
+        'matches',
+        '닉네임을 입력해 주세요.',
+      ),
+    ).toBe('Please enter a nickname.');
   });
 });

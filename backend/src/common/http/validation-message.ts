@@ -1,4 +1,5 @@
 import type { ValidationError } from '@nestjs/common';
+import { ENGLISH_DETAILS } from './english-details';
 
 // Turns class-validator errors into one Korean sentence for the UI (#50).
 // Messages a DTO already wrote in Korean pass through unchanged.
@@ -60,6 +61,63 @@ const fieldLabels: Readonly<Record<string, string>> = {
   type: '종류',
   urgency: '급한 정도',
   waitMinutes: '예상 대기 시간',
+};
+
+const englishLabels: Readonly<Record<string, string>> = {
+  accuracyMeters: 'Location accuracy',
+  address: 'Address',
+  answerId: 'Answer',
+  areaText: 'Area',
+  bio: 'Bio',
+  caption: 'Caption',
+  capturedAt: 'Capture time',
+  category: 'Category',
+  code: 'Code',
+  confirmation: 'Confirmation phrase',
+  content: 'Text',
+  crowdLevel: 'Crowd level',
+  cursor: 'List position',
+  decision: 'Decision',
+  destination: 'Destination',
+  destinationId: 'Destination',
+  detail: 'Details',
+  email: 'Email',
+  endedOn: 'End date',
+  endsAt: 'End time',
+  entryStatus: 'Entry status',
+  googlePlaceId: 'Place',
+  latitude: 'Latitude',
+  localProofType: 'Proof type',
+  longitude: 'Longitude',
+  messageId: 'Message',
+  mode: 'Mode',
+  name: 'Name',
+  next: 'Return address',
+  nickname: 'Nickname',
+  note: 'Note',
+  observedAt: 'Observation time',
+  password: 'Password',
+  placeName: 'Place name',
+  privacyConsent: 'Privacy consent',
+  q: 'Search text',
+  questionId: 'Topic',
+  reason: 'Reason',
+  sourceMessageId: 'Original message',
+  sourceType: 'Answer source',
+  sourceUrl: 'Source URL',
+  startedOn: 'Start date',
+  startsAt: 'Start time',
+  state: 'State',
+  status: 'Status',
+  targetId: 'Report target',
+  targetType: 'Report target type',
+  termsAgreed: 'Terms agreement',
+  title: 'Title',
+  token: 'Token',
+  travelStyles: 'Travel styles',
+  type: 'Type',
+  urgency: 'Urgency',
+  waitMinutes: 'Expected wait time',
 };
 
 const HANGUL = /[가-힣]/u;
@@ -134,21 +192,101 @@ export function koreanConstraintMessage(
   }
 }
 
-export function firstValidationMessage(errors: ValidationError[]): string {
+export function englishConstraintMessage(
+  property: string,
+  constraint: string,
+  message: string,
+): string {
+  if (HANGUL.test(message)) {
+    return ENGLISH_DETAILS[message] ?? 'Please check what you entered.';
+  }
+
+  const label = englishLabels[property] ?? 'This field';
+  const lower = `the ${label.toLowerCase()}`;
+  const [first] = numbersIn(message);
+
+  switch (constraint) {
+    case 'whitelistValidation':
+      return 'The request contains fields that are not allowed.';
+    case 'isNotEmpty':
+    case 'isDefined':
+      return `Please enter ${lower}.`;
+    case 'maxLength':
+      return first === undefined
+        ? `${label} is too long.`
+        : `${label} must be ${first} characters or fewer.`;
+    case 'minLength':
+      return first === undefined
+        ? `Please enter ${lower}.`
+        : `${label} must be at least ${first} characters.`;
+    case 'isLength':
+      if (first !== undefined && message.includes('shorter')) {
+        return `${label} must be ${first} characters or fewer.`;
+      }
+      if (first !== undefined && message.includes('longer')) {
+        return `${label} must be at least ${first} characters.`;
+      }
+      return `Please check ${lower}.`;
+    case 'min':
+      return first === undefined
+        ? `Please check ${lower}.`
+        : `${label} must be at least ${first}.`;
+    case 'max':
+      return first === undefined
+        ? `Please check ${lower}.`
+        : `${label} must be ${first} or less.`;
+    case 'isInt':
+      return `${label} must be a whole number.`;
+    case 'isEmail':
+      return 'Please enter a valid email address.';
+    case 'arrayMaxSize':
+      return first === undefined
+        ? `Please check ${lower}.`
+        : `${label} can have up to ${first} items.`;
+    default:
+      return `Please check ${lower}.`;
+  }
+}
+
+export interface ValidationIssue {
+  property: string;
+  constraint: string;
+  message: string;
+}
+
+/** The first failed constraint, searching nested objects too. */
+export function firstValidationIssue(
+  errors: ValidationError[],
+): ValidationIssue | undefined {
   for (const error of errors) {
     const [entry] = Object.entries(error.constraints ?? {});
     if (entry !== undefined) {
       const [constraint, message] = entry;
-      return koreanConstraintMessage(error.property, constraint, message);
+      return { property: error.property, constraint, message };
     }
-
-    const childMessage = firstValidationMessage(error.children ?? []);
-    if (childMessage !== FALLBACK) {
-      return childMessage;
-    }
+    const child = firstValidationIssue(error.children ?? []);
+    if (child !== undefined) return child;
   }
+  return undefined;
+}
 
-  return FALLBACK;
+export function firstValidationMessage(errors: ValidationError[]): string {
+  const issue = firstValidationIssue(errors);
+  return issue === undefined
+    ? FALLBACK
+    : koreanConstraintMessage(issue.property, issue.constraint, issue.message);
+}
+
+export function issueMessage(
+  issue: ValidationIssue | undefined,
+  locale: 'ko' | 'en',
+): string {
+  if (issue === undefined) {
+    return locale === 'en' ? 'Please check what you entered.' : FALLBACK;
+  }
+  return locale === 'en'
+    ? englishConstraintMessage(issue.property, issue.constraint, issue.message)
+    : koreanConstraintMessage(issue.property, issue.constraint, issue.message);
 }
 
 /** Size-limit message for an upload rejected before it reaches a handler. */

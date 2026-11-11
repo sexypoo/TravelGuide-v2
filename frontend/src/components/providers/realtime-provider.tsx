@@ -32,6 +32,7 @@ import {
   type RealtimeServerEvents,
 } from '@/lib/realtime/protocol';
 import { createRecentIds } from '@/lib/realtime/recent-ids';
+import { useMessages } from '@/i18n/client';
 import {
   incrementFeedAnswerCount,
   markMessagePromoted,
@@ -75,6 +76,12 @@ export function RealtimeProvider({
   const [connectionState, setConnectionState] =
     useState<ConnectionState>('connecting');
   const [announcement, setAnnouncement] = useState('');
+  const realtimeCopy = useMessages().chat.realtime;
+  // Read at event time so a language change doesn't reconnect the socket.
+  const copyRef = useRef(realtimeCopy);
+  useEffect(() => {
+    copyRef.current = realtimeCopy;
+  }, [realtimeCopy]);
 
   useEffect(() => {
     const socket: Socket<RealtimeServerEvents, RealtimeClientEvents> = io({
@@ -135,20 +142,19 @@ export function RealtimeProvider({
         queryKeys.roomMessages(event.roomSlug),
         (current) => mergeMessageIntoTimeline(current, message),
       );
-      setAnnouncement(
-        `${message.author.nickname}님의 새 메시지가 도착했습니다.`,
-      );
+      const copy = copyRef.current;
+      setAnnouncement(copy.messageArrived(message.author.nickname));
       deliverRealtimeNotification({
         authorId: message.author.id,
         currentUserId,
-        title: `${message.author.nickname}님의 새 메시지`,
+        title: copy.messageTitle(message.author.nickname),
         body:
           message.content ||
           (message.type === 'IMAGE'
-            ? '현장 사진을 공유했어요.'
+            ? copy.sharedImage
             : message.type === 'PLACE'
-              ? '장소를 공유했어요.'
-              : '토픽을 공유했어요.'),
+              ? copy.sharedPlace
+              : copy.sharedTopic),
         tag: `room-message:${message.id}`,
         url: `/app/rooms/${event.roomSlug}`,
       });
@@ -186,13 +192,11 @@ export function RealtimeProvider({
           { queryKey: queryKeys.roomQuestionsRoot(event.roomSlug) },
           (current) => incrementFeedAnswerCount(current, answer.questionId),
         );
-        setAnnouncement(
-          `${answer.author.nickname}님의 새 답변이 도착했습니다.`,
-        );
+        setAnnouncement(copyRef.current.answerArrived(answer.author.nickname));
         deliverRealtimeNotification({
           authorId: answer.author.id,
           currentUserId,
-          title: `${answer.author.nickname}님의 새 토픽 답변`,
+          title: copyRef.current.answerTitle(answer.author.nickname),
           body: answer.content,
           tag: `topic-answer:${answer.id}`,
           url: `/app/questions/${answer.questionId}`,
@@ -221,8 +225,8 @@ export function RealtimeProvider({
       });
       setAnnouncement(
         question.status === 'EXPIRED'
-          ? '마감 시간이 지나 토픽이 종료되었습니다.'
-          : '토픽이 해결됨으로 변경되었습니다.',
+          ? copyRef.current.topicExpired
+          : copyRef.current.topicResolved,
       );
     });
     onRoomEvent('room.content.removed', queryKeys.questionRoot, (event) => {
@@ -232,7 +236,7 @@ export function RealtimeProvider({
           queryKeys.roomMessages(event.roomSlug),
           (current) => markMessageRemoved(current, target.targetId),
         );
-        setAnnouncement('운영 정책에 따라 메시지가 숨김 처리되었습니다.');
+        setAnnouncement(copyRef.current.messageRemoved);
         return;
       }
       if (target.questionId === null) throw new Error('Question id missing');
@@ -255,7 +259,7 @@ export function RealtimeProvider({
       void queryClient.invalidateQueries({
         queryKey: queryKeys.question(target.questionId),
       });
-      setAnnouncement('운영 정책에 따라 콘텐츠가 숨김 처리되었습니다.');
+      setAnnouncement(copyRef.current.contentRemoved);
     });
 
     return () => {

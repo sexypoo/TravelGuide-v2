@@ -1,40 +1,47 @@
 import Link from 'next/link';
 import { AppIcon } from '@/components/common';
 import { Wordmark } from '@/components/brand/wordmark';
+import { LocaleSwitch } from '@/components/common/locale-switch';
 import { safeNextPath } from '@/lib/auth/safe-next-path';
 import styles from './auth.module.css';
 
-interface AuthShellProps {
+export interface AuthShellCopy {
   eyebrow: string;
   title: string;
   description: string;
-  alternateHref: '/auth/login' | '/auth/register' | '/auth/forgot-password';
   alternateLabel: string;
   alternatePrompt: string;
+}
+
+interface AuthShellProps {
+  copy: AuthShellCopy;
+  backLabel: string;
+  alternateHref: '/auth/login' | '/auth/register' | '/auth/forgot-password';
   /** Where to go after auth; carried on the alternate link when not `/app`. */
   nextPath?: string;
   children: React.ReactNode;
 }
 
 export function AuthShell({
-  eyebrow,
-  title,
-  description,
+  copy,
+  backLabel,
   alternateHref,
-  alternateLabel,
-  alternatePrompt,
   nextPath,
   children,
 }: AuthShellProps): React.JSX.Element {
+  const { eyebrow, title, description, alternateLabel, alternatePrompt } = copy;
   const href = alternateLinkHref(alternateHref, nextPath);
   return (
     <main className={styles.page}>
       <div className={styles.inner}>
         <header className={styles.top}>
           <Link className={styles.back} href="/">
-            <AppIcon name="arrow-left" /> 처음으로
+            <AppIcon name="arrow-left" /> {backLabel}
           </Link>
-          <Wordmark />
+          <div className={styles.topEnd}>
+            <LocaleSwitch />
+            <Wordmark />
+          </div>
         </header>
 
         <section className={styles.content} aria-labelledby="auth-title">

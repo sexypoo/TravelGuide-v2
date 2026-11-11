@@ -339,6 +339,34 @@ describe('Authentication', () => {
     expect(body.requestId).toBe(response.get('x-request-id'));
   });
 
+  it('answers in English when the web app sends the English locale (#80)', async () => {
+    const validation = await request(server)
+      .post('/api/v1/auth/login')
+      .set('Cookie', 'locale=en')
+      .send({ email: 'a@example.com', password: 'x', role: 'ADMIN' })
+      .expect(400);
+    expect(asRecord(validation.body as unknown).detail).toBe(
+      'The request contains fields that are not allowed.',
+    );
+
+    const credentials = await request(server)
+      .post('/api/v1/auth/login')
+      .set('Cookie', 'locale=en')
+      .send({ email: 'nobody@example.com', password: 'password123' })
+      .expect(401);
+    expect(asRecord(credentials.body as unknown).detail).toBe(
+      'The email or password is incorrect.',
+    );
+
+    const korean = await request(server)
+      .post('/api/v1/auth/login')
+      .send({ email: 'nobody@example.com', password: 'password123' })
+      .expect(401);
+    expect(asRecord(korean.body as unknown).detail).toBe(
+      '이메일 또는 비밀번호가 올바르지 않습니다.',
+    );
+  });
+
   it('denies USER and allows current ADMIN role through AdminGuard', async () => {
     const userAgent = request.agent(server);
     await userAgent

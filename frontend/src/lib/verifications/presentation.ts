@@ -1,3 +1,5 @@
+import type { Locale } from '@/i18n/config';
+import { messagesFor } from '@/i18n/messages';
 import type { Verification, VerificationType } from '@/lib/api/verifications';
 
 export interface QualificationPresentation {
@@ -8,26 +10,41 @@ export interface QualificationPresentation {
   title: string;
 }
 
-const labels: Readonly<Record<VerificationType, string>> = {
-  TRAVELER: '여행자',
-  LOCAL: '현지인',
-};
+// City names are data (nameKo). English uses the known slugs and falls back
+// to the Korean name for any city added later (#80).
+import { destinationName } from '@/lib/rooms/presentation';
+
+export { destinationName };
+
+/** BCP 47 tag for Intl formatters in the profile and verification screens. */
+export function intlLocale(locale: Locale): string {
+  return locale === 'en' ? 'en-US' : 'ko-KR';
+}
 
 export function getQualificationPresentation(
   verifications: readonly Verification[],
   type: VerificationType,
+  locale: Locale = 'ko',
 ): QualificationPresentation {
+  const t = messagesFor(locale).verifications.qualification;
   const approved = verifications.find(
     (verification) =>
       verification.type === type && verification.status === 'APPROVED',
   );
   if (approved !== undefined) {
+    const city = destinationName(approved.destination, locale);
     return {
-      action: '인증 현황 보기',
-      body: `${approved.destination.nameKo} 실시간 도움방에서 ${type === 'TRAVELER' ? '질문하고 현장 답변을 받을' : '현장 정보를 답변할'} 수 있어요.`,
+      action: t.approvedAction,
+      body:
+        type === 'TRAVELER'
+          ? t.approvedBodyTraveler(city)
+          : t.approvedBodyLocal(city),
       className: 'qualificationApproved',
       href: '/app/verifications',
-      title: `${approved.destination.nameKo} ${labels[type]} 인증 완료`,
+      title:
+        type === 'TRAVELER'
+          ? t.approvedTitleTraveler(city)
+          : t.approvedTitleLocal(city),
     };
   }
 
@@ -37,25 +54,25 @@ export function getQualificationPresentation(
   );
   if (pending !== undefined) {
     return {
-      action: '인증 현황에서 확인',
-      body: '같은 유형은 심사가 끝난 뒤 다시 신청할 수 있어요.',
+      action: t.pendingAction,
+      body: t.pendingBody,
       className: 'qualificationPending',
       href: '/app/verifications',
-      title: `${labels[type]} 인증 심사 중`,
+      title: type === 'TRAVELER' ? t.pendingTitleTraveler : t.pendingTitleLocal,
     };
   }
 
   return type === 'TRAVELER'
     ? {
-        action: '여행자 인증 시작',
-        body: '여행 일정과 증빙을 준비해 질문할 수 있어요.',
+        action: t.startTravelerAction,
+        body: t.startTravelerBody,
         href: '/app/verifications/traveler',
-        title: '여행 중인가요?',
+        title: t.startTravelerTitle,
       }
     : {
-        action: '현지인 인증 시작',
-        body: '현재 위치와 거주 증빙을 준비해 답변할 수 있어요.',
+        action: t.startLocalAction,
+        body: t.startLocalBody,
         href: '/app/verifications/local',
-        title: '그 도시에 살거나 공부하고 있나요?',
+        title: t.startLocalTitle,
       };
 }
