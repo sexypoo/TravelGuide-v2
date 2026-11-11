@@ -17,7 +17,10 @@ import { actionableErrorMessage, ApiProblem } from '@/lib/api/problem-details';
 import { queryKeys } from '@/lib/query/keys';
 import { mergeMessageIntoTimeline } from '@/lib/query/realtime-cache';
 import type { GooglePlace } from '@/lib/api/places';
-import { PlacePicker } from '@/components/places/place-picker';
+import {
+  PlacePicker,
+  type PlacePickerCenter,
+} from '@/components/places/place-picker';
 import { AppIcon } from '@/components/common';
 import { useMessages } from '@/i18n/client';
 import type { Messages } from '@/i18n/messages';
@@ -34,9 +37,11 @@ function messageError(error: unknown, t: Messages['chat']['composer']): string {
 
 export function MessageComposer({
   roomSlug,
+  placeCenter,
   onCreateTopic,
 }: {
   roomSlug: string;
+  placeCenter: PlacePickerCenter;
   onCreateTopic?: () => void;
 }): React.JSX.Element {
   const t = useMessages().chat.composer;
@@ -347,6 +352,7 @@ export function MessageComposer({
       </div>
       {placePickerOpen && (
         <PlacePicker
+          center={placeCenter}
           onClose={closePlacePicker}
           onSelect={(place) => {
             setSelectedPlace(place);

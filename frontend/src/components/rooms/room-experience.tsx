@@ -153,6 +153,7 @@ export function RoomExperience({
           {room.access.canChat && (
             <MessageComposer
               roomSlug={room.slug}
+              placeCenter={room.destination.center}
               onCreateTopic={
                 room.access.canCreateTopic ? openDirectTopic : undefined
               }
