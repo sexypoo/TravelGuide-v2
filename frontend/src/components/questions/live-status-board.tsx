@@ -34,7 +34,6 @@ export function LiveStatusBoard({
       <h2 id="live-status-title" className={styles.headline}>
         {headline}
       </h2>
-      <div className={styles.description}>{summary.description}</div>
       <div className={styles.agreement}>
         {t.agreementBefore(summary.responseCount)}
         <strong>{t.agreementCount(summary.agreementCount)}</strong>

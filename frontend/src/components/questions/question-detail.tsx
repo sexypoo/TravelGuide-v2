@@ -182,10 +182,12 @@ export function QuestionDetailView({
             </figcaption>
           </figure>
         )}
+        {/* The API sends safetyNotice in Korean only; it just flags a
+            SAFETY topic, so show the localized copy instead. */}
         {question.safetyNotice !== null && (
           <div className={styles.safety}>
             <strong>{t.safetyTitle}</strong>
-            <p>{question.safetyNotice}</p>
+            <p>{messages.topics.composer.safetyHelp}</p>
           </div>
         )}
         <footer className={styles.footer}>

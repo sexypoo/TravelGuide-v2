@@ -45,7 +45,8 @@ const question: QuestionDetail = {
     lastObservedAt: '2026-08-01T12:08:00.000Z',
     recommendedRecheckAt: '2026-08-01T12:18:00.000Z',
     staleAfter: '2026-08-01T12:38:00.000Z',
-    description: 'Based on on-site answers.',
+    // The API builds this sentence in Korean; the board must not show it.
+    description: '현장 답변 3건을 기준으로 현재 상태를 정리했습니다.',
   },
 };
 
@@ -89,6 +90,9 @@ describe('topics in English', () => {
     expect(screen.getByText('2').closest('div') ?? container).toHaveTextContent(
       '2 of 3 on-site reports agree',
     );
+    expect(
+      screen.queryByText('현장 답변 3건을 기준으로 현재 상태를 정리했습니다.'),
+    ).not.toBeInTheDocument();
     expect(container.textContent).not.toMatch(HANGUL);
   });
 
