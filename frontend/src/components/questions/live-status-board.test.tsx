@@ -59,6 +59,20 @@ describe('LiveStatusBoard', () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
+  it('keeps the headline and agreement line without the server sentence', () => {
+    render(<LiveStatusBoard question={questionWith(liveSummary)} />);
+
+    expect(
+      screen.getByRole('heading', { name: '대기 10~20분' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('region')).toHaveTextContent(
+      '현장 확인 3명 중 2명',
+    );
+    expect(
+      screen.queryByText('현장 답변 기준 현재 대기는 약 10~20분 수준입니다.'),
+    ).not.toBeInTheDocument();
+  });
+
   it('marks stale information and lists the unknown wait', () => {
     render(
       <LiveStatusBoard

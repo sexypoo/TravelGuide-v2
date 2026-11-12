@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { I18nProvider } from '@/i18n/client';
+import type { Locale } from '@/i18n/config';
 import type { Answer, QuestionDetail } from '@/lib/api/questions';
 import type { Room } from '@/lib/api/rooms';
 import { QuestionDetailView } from './question-detail';
@@ -24,6 +26,9 @@ jest.mock('../providers/realtime-provider', () => ({
 }));
 
 const HOUR = 60 * 60 * 1000;
+// What the API sends today for SAFETY topics (Korean only).
+const SERVER_SAFETY_NOTICE =
+  '즉시 위험한 상황이라면 답변을 기다리지 말고 112 또는 119에 먼저 연락하세요.';
 const AUTHOR_ID = 'traveler-1';
 const LOCAL_ID = 'local-1';
 
@@ -98,19 +103,24 @@ function question(overrides: Partial<QuestionDetail> = {}): QuestionDetail {
   };
 }
 
-function renderDetail(currentUserId: string): () => void {
+function renderDetail(
+  currentUserId: string,
+  locale: Locale = 'ko',
+): () => void {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   // A fresh element each time so a rerender re-reads the mocked query state.
   const view = (): React.JSX.Element => (
-    <QueryClientProvider client={queryClient}>
-      <QuestionDetailView
-        questionId="question-1"
-        room={room}
-        currentUserId={currentUserId}
-      />
-    </QueryClientProvider>
+    <I18nProvider locale={locale}>
+      <QueryClientProvider client={queryClient}>
+        <QuestionDetailView
+          questionId="question-1"
+          room={room}
+          currentUserId={currentUserId}
+        />
+      </QueryClientProvider>
+    </I18nProvider>
   );
   const { rerender } = render(view());
   return () => rerender(view());
@@ -280,5 +290,44 @@ describe('QuestionDetailView', () => {
       screen.getByRole('img', { name: '현장 토픽 첨부 사진' }),
     ).toHaveAttribute('src', '/api/v1/media/question-photo');
     expect(screen.getByText('gate.jpg')).toBeInTheDocument();
+  });
+
+  it('shows the Korean emergency info on a safety topic', () => {
+    mockQuestion = question({
+      category: 'SAFETY',
+      safetyNotice: SERVER_SAFETY_NOTICE,
+    });
+    renderDetail(LOCAL_ID);
+
+    expect(screen.getByText('긴급 상황 안내')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        '안전 카테고리의 즉시 위험 상황은 답변보다 112·119에 먼저 연락하세요.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(SERVER_SAFETY_NOTICE)).not.toBeInTheDocument();
+  });
+
+  it('shows the emergency info in English instead of the server sentence', () => {
+    mockQuestion = question({
+      category: 'SAFETY',
+      safetyNotice: SERVER_SAFETY_NOTICE,
+    });
+    renderDetail(LOCAL_ID, 'en');
+
+    expect(screen.getByText('Emergency info')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'If someone is in immediate danger, call 112 (police) or 119 (emergency) before waiting for answers.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(SERVER_SAFETY_NOTICE)).not.toBeInTheDocument();
+  });
+
+  it('shows no emergency info without a safety notice', () => {
+    mockQuestion = question({ safetyNotice: null });
+    renderDetail(LOCAL_ID);
+
+    expect(screen.queryByText('긴급 상황 안내')).not.toBeInTheDocument();
   });
 });

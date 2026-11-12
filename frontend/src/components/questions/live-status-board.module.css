@@ -63,13 +63,6 @@
   letter-spacing: -0.045em;
 }
 
-.description {
-  margin-top: 0.25rem;
-  color: var(--ink-2);
-  font-size: var(--text-md);
-  line-height: 1.5;
-}
-
 .agreement {
   margin-top: 0.5rem;
   color: var(--muted);
