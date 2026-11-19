@@ -222,4 +222,73 @@ describe('RealtimeProvider', () => {
       'Great grilled mackerel.',
     ]);
   });
+
+  // Regression for #88: an open room kept showing a hidden topic's share.
+  it('clears shared topic cards when a topic is removed', () => {
+    const queryClient = new QueryClient();
+    const topicText = '숨김 처리된 토픽 본문입니다.';
+    queryClient.setQueryData(queryKeys.roomMessages('jeju'), {
+      pages: [
+        {
+          items: [
+            {
+              ...message('message-share'),
+              type: 'TOPIC_SHARE',
+              content: topicText,
+              sharedTopic: {
+                id: 'question-1',
+                authorNickname: '제주현지인',
+                category: 'TRANSPORT',
+                urgency: 'URGENT',
+                content: topicText,
+                areaText: null,
+                status: 'OPEN',
+                answerCount: 0,
+              },
+            },
+          ],
+          nextCursor: null,
+        },
+      ],
+      pageParams: [null],
+    });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RealtimeProvider currentUserId="traveler-1">
+          <Probe />
+        </RealtimeProvider>
+      </QueryClientProvider>,
+    );
+
+    act(() =>
+      socketHandlers.get('room.content.removed')?.({
+        eventId: 'event-removed',
+        roomSlug: 'jeju',
+        occurredAt: '2026-08-02T00:00:00.000Z',
+        payload: {
+          targetType: 'QUESTION',
+          targetId: 'question-1',
+          questionId: 'question-1',
+        },
+      }),
+    );
+
+    const cached = queryClient.getQueryData(queryKeys.roomMessages('jeju'));
+    expect(cached).toEqual(
+      expect.objectContaining({
+        pages: [
+          expect.objectContaining({
+            items: [
+              expect.objectContaining({
+                id: 'message-share',
+                content: '',
+                sharedTopic: null,
+              }),
+            ],
+          }),
+        ],
+      }),
+    );
+    expect(JSON.stringify(cached)).not.toContain(topicText);
+  });
 });

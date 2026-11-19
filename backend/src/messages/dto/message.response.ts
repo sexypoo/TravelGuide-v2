@@ -105,13 +105,22 @@ export function toMessageResponse(
 ): MessageResponse {
   const type = message.type ?? 'TEXT';
   const removed = message.removedAt != null;
-  const shared = message.sharedQuestion ?? null;
+  const sharedQuestion = message.sharedQuestion ?? null;
+  // A hidden or deleted topic must not leak through a chat share (ROOM-002).
+  const shared =
+    sharedQuestion === null ||
+    sharedQuestion.removedAt !== null ||
+    sharedQuestion.status === 'REMOVED'
+      ? null
+      : sharedQuestion;
   const sharedStatus: PublicQuestionStatus | null =
     shared === null
       ? null
       : shared.status === 'OPEN' && shared.expiresAt <= now
         ? 'EXPIRED'
         : shared.status;
+  // Topic shares copy the topic text into content, so drop it with the topic.
+  const sharedTopicUnavailable = type === 'TOPIC_SHARE' && shared === null;
   return {
     id: message.id,
     roomId: message.roomId,
@@ -123,7 +132,9 @@ export function toMessageResponse(
     },
     content: removed
       ? '운영 정책에 따라 숨김 처리된 메시지입니다.'
-      : message.content,
+      : sharedTopicUnavailable
+        ? ''
+        : message.content,
     contentFormat: 'PLAIN_TEXT',
     removed,
     topicId: message.topic?.id ?? null,
@@ -154,10 +165,7 @@ export function toMessageResponse(
           }
         : null,
     sharedTopic:
-      removed ||
-      shared === null ||
-      sharedStatus === null ||
-      shared.removedAt !== null
+      removed || shared === null || sharedStatus === null
         ? null
         : {
             id: shared.id,

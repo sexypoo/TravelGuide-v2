@@ -39,6 +39,7 @@ import {
   markMessagePromoted,
   markMessageRemoved,
   markRemovedContent,
+  markSharedTopicRemoved,
   mergeAnswerIntoDetail,
   mergeMessageIntoTimeline,
   mergeQuestionIntoFeed,
@@ -255,6 +256,11 @@ export function RealtimeProvider({
           { queryKey: queryKeys.roomQuestionsRoot(event.roomSlug) },
           (current) =>
             removeQuestionFromFeed(current, questionTarget.questionId),
+        );
+        queryClient.setQueryData<InfiniteData<MessagePage>>(
+          queryKeys.roomMessages(event.roomSlug),
+          (current) =>
+            markSharedTopicRemoved(current, questionTarget.questionId),
         );
       }
       void queryClient.invalidateQueries({
