@@ -109,6 +109,29 @@ describe('MessageCard topic handoff', () => {
     ).toBeInTheDocument();
   });
 
+  // Regression for #88: a hidden shared topic fell back to its copied text.
+  it('shows a notice instead of the text of an unavailable shared topic', () => {
+    const { container } = render(
+      <MessageCard
+        message={{
+          ...message,
+          type: 'TOPIC_SHARE',
+          content: '숨김 처리된 토픽 본문',
+          sharedTopic: null,
+        }}
+        own={false}
+        onPromote={jest.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByText('공유한 토픽은 운영 정책에 따라 더 이상 볼 수 없어요.'),
+    ).toBeInTheDocument();
+    expect(container.querySelector('.removed')).toBeInTheDocument();
+    expect(container).not.toHaveTextContent('숨김 처리된 토픽 본문');
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it('presents shared places as a clear place ticket', () => {
     const { container } = render(
       <MessageCard
@@ -249,6 +272,28 @@ describe('MessageCard in English', () => {
     );
     expect(screen.getByText('Dongbaek Sikdang')).toBeInTheDocument();
     expect(container.textContent).not.toMatch(/공유했습니다/u);
+  });
+
+  it('shows the unavailable shared topic notice in English', () => {
+    const { container } = render(
+      <I18nProvider locale="en">
+        <MessageCard
+          message={{
+            ...message,
+            type: 'TOPIC_SHARE',
+            content: '숨김 처리된 토픽 본문',
+            sharedTopic: null,
+          }}
+          own={false}
+          onPromote={jest.fn()}
+        />
+      </I18nProvider>,
+    );
+
+    expect(
+      screen.getByText('This shared topic is no longer available.'),
+    ).toBeInTheDocument();
+    expect(container).not.toHaveTextContent('숨김 처리된 토픽 본문');
   });
 
   it('shows chat and report copy in English', () => {

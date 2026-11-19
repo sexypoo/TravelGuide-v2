@@ -145,6 +145,10 @@ export function MessageCard({
               <AppIcon name="chevron-right" />
             </span>
           </Link>
+        ) : message.type === 'TOPIC_SHARE' ? (
+          <div className={`${styles.bubble} ${styles.removed}`}>
+            <p>{t.topicUnavailable}</p>
+          </div>
         ) : (
           <div className={styles.bubble}>
             <p>{message.content}</p>
