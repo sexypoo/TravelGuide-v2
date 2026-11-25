@@ -187,7 +187,11 @@ export function QuestionDetailView({
         {question.safetyNotice !== null && (
           <div className={styles.safety}>
             <strong>{t.safetyTitle}</strong>
-            <p>{messages.topics.composer.safetyHelp}</p>
+            <p>
+              {messages.topics.composer.safetyHelp(
+                room.destination.countryCode,
+              )}
+            </p>
           </div>
         )}
         <footer className={styles.footer}>

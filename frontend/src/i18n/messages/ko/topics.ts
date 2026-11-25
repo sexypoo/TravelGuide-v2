@@ -135,8 +135,16 @@ export const topics = {
     photoHint: '상황을 확인할 사진 한 장 · 최대 10MB',
     removePhoto: '제거',
     sourceMessage: '원본 메시지',
-    safetyHelp:
-      '안전 카테고리의 즉시 위험 상황은 답변보다 112·119에 먼저 연락하세요.',
+    safetyHelp: (countryCode: string): string => {
+      switch (countryCode.toUpperCase()) {
+        case 'KR':
+          return '안전 카테고리의 즉시 위험 상황은 답변보다 112·119에 먼저 연락하세요.';
+        case 'DE':
+          return '안전 카테고리의 즉시 위험 상황은 답변보다 110(경찰)·112(구급·소방)에 먼저 연락하세요.';
+        default:
+          return '안전 카테고리의 즉시 위험 상황은 답변보다 현지 긴급 번호에 먼저 연락하세요.';
+      }
+    },
     submitting: '토픽 만드는 중',
     submit: '토픽 만들기',
   },

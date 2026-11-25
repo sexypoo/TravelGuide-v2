@@ -182,6 +182,7 @@ export function RoomExperience({
               <QuestionComposer
                 key={sourceMessage?.id ?? 'direct-topic'}
                 roomSlug={room.slug}
+                countryCode={room.destination.countryCode}
                 sourceMessage={sourceMessage}
                 onCreated={finishTopicCreation}
               />

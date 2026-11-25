@@ -44,10 +44,13 @@ function questionError(
 
 export function QuestionComposer({
   roomSlug,
+  countryCode,
   sourceMessage,
   onCreated,
 }: {
   roomSlug: string;
+  /** The room destination's ISO country code, for local emergency numbers. */
+  countryCode: string;
   sourceMessage?: ChatMessage;
   onCreated?: (result: { autoShared: boolean }) => void;
 }): React.JSX.Element {
@@ -241,7 +244,7 @@ export function QuestionComposer({
         </div>
       )}
       <p id="question-composer-help" className={styles.help}>
-        {t.safetyHelp}
+        {t.safetyHelp(countryCode)}
       </p>
       {message.length > 0 && (
         <p className={styles.error} role="alert">
