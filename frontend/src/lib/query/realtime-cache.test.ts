@@ -11,6 +11,7 @@ import {
   markMessageRemoved,
   markRemovedContent,
   markMessagePromoted,
+  markSharedTopicRemoved,
   mergeAnswerIntoDetail,
   mergeMessageIntoTimeline,
   mergeQuestionIntoFeed,
@@ -140,6 +141,45 @@ describe('realtime cache merge', () => {
       place: null,
       sharedTopic: null,
     });
+  });
+
+  // Regression for #88: a hidden topic stayed visible in chat shares.
+  it('drops the card and copied text from shares of a removed topic', () => {
+    const sharedTopic = {
+      id: question.id,
+      authorNickname: question.author.nickname,
+      category: question.category,
+      urgency: question.urgency,
+      content: question.content,
+      areaText: null,
+      status: 'OPEN' as const,
+      answerCount: 0,
+    };
+    const share: ChatMessage = {
+      ...message,
+      id: 'message-share',
+      type: 'TOPIC_SHARE',
+      content: question.content,
+      sharedTopic,
+    };
+    const otherShare: ChatMessage = {
+      ...share,
+      id: 'message-other-share',
+      sharedTopic: { ...sharedTopic, id: 'question-2' },
+    };
+    const timeline: InfiniteData<MessagePage> = {
+      pages: [{ items: [message, share, otherShare], nextCursor: null }],
+      pageParams: [null],
+    };
+
+    const items = markSharedTopicRemoved(timeline, question.id)?.pages[0]
+      ?.items;
+    expect(items?.[0]).toBe(message);
+    expect(items?.[1]).toMatchObject({ content: '', sharedTopic: null });
+    expect(items?.[2]).toBe(otherShare);
+    expect(JSON.stringify(items?.[1])).not.toContain(question.content);
+    expect(markSharedTopicRemoved(timeline, 'question-unknown')).toBe(timeline);
+    expect(markSharedTopicRemoved(undefined, question.id)).toBeUndefined();
   });
 
   it('moves resolved topics and redacts removed answers in detail', () => {

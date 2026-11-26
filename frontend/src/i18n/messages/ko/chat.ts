@@ -10,6 +10,7 @@ export const chat = {
     answerCount: (count: number): string => `${count}개`,
     urgencyLabel: '요청',
     viewTopic: '답변과 현황 보기',
+    topicUnavailable: '공유한 토픽은 운영 정책에 따라 더 이상 볼 수 없어요.',
     followUpLinked: '토픽으로 이어짐',
     promote: '이 메시지를 토픽으로 만들기',
     reportMessage: '이 메시지',

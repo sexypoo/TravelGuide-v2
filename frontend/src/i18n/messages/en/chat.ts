@@ -12,6 +12,7 @@ export const chat: Messages['chat'] = {
     answerCount: (count: number): string => `${count}`,
     urgencyLabel: 'Need',
     viewTopic: 'See answers and status',
+    topicUnavailable: 'This shared topic is no longer available.',
     followUpLinked: 'Continued as a topic',
     promote: 'Turn this message into a topic',
     reportMessage: 'This message',

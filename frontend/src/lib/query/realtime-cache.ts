@@ -98,6 +98,35 @@ export function markMessageRemoved(
   };
 }
 
+/**
+ * Topic shares carry a copy of the topic text, so a hidden topic must drop
+ * both the card and that copy from every cached share (#88).
+ */
+export function markSharedTopicRemoved(
+  current: InfiniteData<MessagePage> | undefined,
+  questionId: string,
+): InfiniteData<MessagePage> | undefined {
+  if (
+    current === undefined ||
+    !current.pages.some((page) =>
+      page.items.some((message) => message.sharedTopic?.id === questionId),
+    )
+  ) {
+    return current;
+  }
+  return {
+    ...current,
+    pages: current.pages.map((page) => ({
+      ...page,
+      items: page.items.map((message) =>
+        message.sharedTopic?.id === questionId
+          ? { ...message, content: '', sharedTopic: null }
+          : message,
+      ),
+    })),
+  };
+}
+
 export function mergeAnswerIntoDetail(
   current: QuestionDetail | undefined,
   answer: Answer,
