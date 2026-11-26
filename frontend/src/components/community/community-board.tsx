@@ -16,7 +16,7 @@ import {
 } from '@/components/ui';
 import { formatRelativeTime } from '@/lib/questions/presentation';
 import styles from './community.module.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ReportMenu } from '@/components/reports/report-menu';
 import {
   communityCategories,
@@ -41,6 +41,9 @@ export function CommunityBoard({
   const [reloadKey, setReloadKey] = useState(0);
   const [composerOpen, setComposerOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  // Bumped whenever the list restarts (category change or reload) so a
+  // load-more response for the previous list is dropped (#94).
+  const listGeneration = useRef(0);
   const t = useMessages();
   const locale = useLocale();
   const copy = t.community.board;
@@ -48,6 +51,7 @@ export function CommunityBoard({
 
   useEffect(() => {
     let active = true;
+    listGeneration.current += 1;
     async function loadFirstPage(): Promise<void> {
       setLoading(true);
       setError(undefined);
@@ -76,16 +80,20 @@ export function CommunityBoard({
 
   async function loadMore(): Promise<void> {
     if (cursor === null) return;
+    const generation = listGeneration.current;
+    const isCurrent = (): boolean => generation === listGeneration.current;
     setLoading(true);
     setError(undefined);
     try {
       const page = await getCommunityPage(category, cursor);
+      if (!isCurrent()) return;
       setPosts((current) => [...current, ...page.items]);
       setCursor(page.nextCursor);
     } catch (loadError: unknown) {
+      if (!isCurrent()) return;
       setError(actionableErrorMessage(loadError, copy.loadMoreFailed));
     } finally {
-      setLoading(false);
+      if (isCurrent()) setLoading(false);
     }
   }
 
