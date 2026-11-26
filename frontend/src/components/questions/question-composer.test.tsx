@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { shareTopicMessage, type ChatMessage } from '@/lib/api/messages';
+import { I18nProvider } from '@/i18n/client';
+import type { Locale } from '@/i18n/config';
 import { createQuestion, type Question } from '@/lib/api/questions';
 import { QuestionComposer } from './question-composer';
 
@@ -67,21 +69,76 @@ const sharedMessage: ChatMessage = {
 
 function renderComposer(
   onCreated?: (result: { autoShared: boolean }) => void,
+  {
+    countryCode = 'KR',
+    locale = 'ko',
+  }: { countryCode?: string; locale?: Locale } = {},
 ): void {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   render(
-    <QueryClientProvider client={queryClient}>
-      <QuestionComposer roomSlug="jeju" onCreated={onCreated} />
-    </QueryClientProvider>,
+    <I18nProvider locale={locale}>
+      <QueryClientProvider client={queryClient}>
+        <QuestionComposer
+          roomSlug="jeju"
+          countryCode={countryCode}
+          onCreated={onCreated}
+        />
+      </QueryClientProvider>
+    </I18nProvider>,
   );
+}
+
+function safetyHelp(): HTMLElement {
+  const help = document.getElementById('question-composer-help');
+  if (!help) throw new Error('safety help is missing');
+  return help;
 }
 
 describe('QuestionComposer', () => {
   beforeEach(() => {
     jest.mocked(createQuestion).mockReset();
     jest.mocked(shareTopicMessage).mockReset();
+  });
+
+  it('shows the Korean emergency numbers in a KR room', () => {
+    renderComposer();
+    expect(safetyHelp()).toHaveTextContent(
+      '안전 카테고리의 즉시 위험 상황은 답변보다 112·119에 먼저 연락하세요.',
+    );
+  });
+
+  // Regression for #92: Marburg (DE) showed the Korean 112·119.
+  it('shows the German emergency numbers in a DE room', () => {
+    renderComposer(undefined, { countryCode: 'DE' });
+    expect(safetyHelp()).toHaveTextContent(
+      '안전 카테고리의 즉시 위험 상황은 답변보다 110(경찰)·112(구급·소방)에 먼저 연락하세요.',
+    );
+    expect(safetyHelp().textContent).not.toContain('119');
+  });
+
+  it('shows the German emergency numbers in a DE room in English', () => {
+    renderComposer(undefined, { countryCode: 'de', locale: 'en' });
+    expect(safetyHelp()).toHaveTextContent(
+      'If someone is in immediate danger, call 110 (police) or 112 (fire and ambulance) before waiting for answers.',
+    );
+    expect(safetyHelp().textContent).not.toContain('119');
+  });
+
+  it('points to local emergency services in other countries', () => {
+    renderComposer(undefined, { countryCode: 'JP' });
+    expect(safetyHelp()).toHaveTextContent(
+      '안전 카테고리의 즉시 위험 상황은 답변보다 현지 긴급 번호에 먼저 연락하세요.',
+    );
+    expect(safetyHelp().textContent).not.toMatch(/112|119/);
+  });
+
+  it('points to local emergency services in other countries in English', () => {
+    renderComposer(undefined, { countryCode: 'JP', locale: 'en' });
+    expect(safetyHelp()).toHaveTextContent(
+      'If someone is in immediate danger, call local emergency services before waiting for answers.',
+    );
   });
 
   it('rejects short topics before an API request', () => {

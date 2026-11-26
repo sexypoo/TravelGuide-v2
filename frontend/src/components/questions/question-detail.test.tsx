@@ -57,6 +57,22 @@ const room: Room = {
   },
 };
 
+const marburgRoom: Room = {
+  ...room,
+  id: 'room-marburg',
+  slug: 'marburg',
+  title: '마르부르크 도움방',
+  destination: {
+    ...room.destination,
+    id: 'destination-marburg',
+    slug: 'marburg',
+    nameKo: '마르부르크',
+    countryCode: 'DE',
+    timezone: 'Europe/Berlin',
+    center: { latitude: 50.8021, longitude: 8.7667 },
+  },
+};
+
 const localAnswer: Answer = {
   id: 'answer-1',
   questionId: 'question-1',
@@ -106,6 +122,7 @@ function question(overrides: Partial<QuestionDetail> = {}): QuestionDetail {
 function renderDetail(
   currentUserId: string,
   locale: Locale = 'ko',
+  detailRoom: Room = room,
 ): () => void {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -116,7 +133,7 @@ function renderDetail(
       <QueryClientProvider client={queryClient}>
         <QuestionDetailView
           questionId="question-1"
-          room={room}
+          room={detailRoom}
           currentUserId={currentUserId}
         />
       </QueryClientProvider>
@@ -318,10 +335,39 @@ describe('QuestionDetailView', () => {
     expect(screen.getByText('Emergency info')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'If someone is in immediate danger, call 112 (police) or 119 (emergency) before waiting for answers.',
+        'If someone is in immediate danger, call 112 (police) or 119 (fire and ambulance) before waiting for answers.',
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText(SERVER_SAFETY_NOTICE)).not.toBeInTheDocument();
+  });
+
+  // Regression for #92: a German room must not tell people to call 119.
+  it('shows the German emergency numbers in a DE room in Korean', () => {
+    mockQuestion = question({
+      category: 'SAFETY',
+      safetyNotice: SERVER_SAFETY_NOTICE,
+    });
+    renderDetail(LOCAL_ID, 'ko', marburgRoom);
+
+    const help = screen.getByText(
+      '안전 카테고리의 즉시 위험 상황은 답변보다 110(경찰)·112(구급·소방)에 먼저 연락하세요.',
+    );
+    expect(help).toBeInTheDocument();
+    expect(help.textContent).not.toContain('119');
+  });
+
+  it('shows the German emergency numbers in a DE room in English', () => {
+    mockQuestion = question({
+      category: 'SAFETY',
+      safetyNotice: SERVER_SAFETY_NOTICE,
+    });
+    renderDetail(LOCAL_ID, 'en', marburgRoom);
+
+    const help = screen.getByText(
+      'If someone is in immediate danger, call 110 (police) or 112 (fire and ambulance) before waiting for answers.',
+    );
+    expect(help).toBeInTheDocument();
+    expect(help.textContent).not.toContain('119');
   });
 
   it('shows no emergency info without a safety notice', () => {

@@ -107,8 +107,16 @@ export const topics: Messages['topics'] = {
     photoHint: 'One photo that shows the situation · up to 10 MB',
     removePhoto: 'Remove',
     sourceMessage: 'Original message',
-    safetyHelp:
-      'If someone is in immediate danger, call 112 (police) or 119 (emergency) before waiting for answers.',
+    safetyHelp: (countryCode) => {
+      switch (countryCode.toUpperCase()) {
+        case 'KR':
+          return 'If someone is in immediate danger, call 112 (police) or 119 (fire and ambulance) before waiting for answers.';
+        case 'DE':
+          return 'If someone is in immediate danger, call 110 (police) or 112 (fire and ambulance) before waiting for answers.';
+        default:
+          return 'If someone is in immediate danger, call local emergency services before waiting for answers.';
+      }
+    },
     submitting: 'Creating topic',
     submit: 'Create topic',
   },
