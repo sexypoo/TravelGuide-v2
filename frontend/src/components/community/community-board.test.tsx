@@ -1,7 +1,14 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import {
   createCommunityPost,
   getCommunityPage,
+  type CommunityPage,
   type CommunityPost,
 } from '@/lib/api/community';
 import { CommunityBoard } from './community-board';
@@ -24,6 +31,29 @@ const post: CommunityPost = {
   createdAt: '2026-08-01T00:00:00.000Z',
   updatedAt: '2026-08-01T00:00:00.000Z',
 };
+
+const otherCategoryPost: CommunityPost = {
+  ...post,
+  id: 'post-tip',
+  category: 'TRAVEL_TIP',
+  title: '다른 분류의 이전 글',
+};
+
+interface Deferred {
+  promise: Promise<CommunityPage>;
+  resolve: (page: CommunityPage) => void;
+  reject: (error: Error) => void;
+}
+
+function deferredPage(): Deferred {
+  let resolve: (page: CommunityPage) => void = () => undefined;
+  let reject: (error: Error) => void = () => undefined;
+  const promise = new Promise<CommunityPage>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
 
 describe('CommunityBoard', () => {
   beforeEach(() => {
@@ -163,4 +193,91 @@ describe('CommunityBoard', () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
+  it('ignores a load-more response that arrives after the category changed', async () => {
+    const oldMore = deferredPage();
+    const foodFirst = deferredPage();
+    jest
+      .mocked(getCommunityPage)
+      .mockResolvedValueOnce({ items: [post], nextCursor: 'all-2' })
+      .mockReturnValueOnce(oldMore.promise)
+      .mockReturnValueOnce(foodFirst.promise)
+      .mockResolvedValueOnce({ items: [], nextCursor: null });
+
+    render(<CommunityBoard currentUserId="viewer-1" />);
+    expect(await screen.findByText(post.title)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '이전 글 더 보기' }));
+    expect(getCommunityPage).toHaveBeenNthCalledWith(2, undefined, 'all-2');
+
+    fireEvent.click(screen.getByRole('button', { name: '맛집' }));
+    await waitFor(() =>
+      expect(getCommunityPage).toHaveBeenNthCalledWith(3, 'FOOD'),
+    );
+    const foodPost = { ...post, id: 'post-food', title: '맛집 첫 페이지 글' };
+    await act(async () => {
+      foodFirst.resolve({ items: [foodPost], nextCursor: 'food-2' });
+      await foodFirst.promise;
+    });
+    expect(await screen.findByText(foodPost.title)).toBeInTheDocument();
+
+    await act(async () => {
+      oldMore.resolve({ items: [otherCategoryPost], nextCursor: 'all-3' });
+      await oldMore.promise;
+    });
+    expect(screen.queryByText(otherCategoryPost.title)).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '이전 글 더 보기' }));
+    await waitFor(() =>
+      expect(getCommunityPage).toHaveBeenNthCalledWith(4, 'FOOD', 'food-2'),
+    );
+  });
+
+  it.each([
+    [
+      'succeeds',
+      (request: Deferred) =>
+        request.resolve({ items: [otherCategoryPost], nextCursor: 'all-3' }),
+    ],
+    ['fails', (request: Deferred) => request.reject(new Error('network down'))],
+  ])(
+    'keeps the new category loading when an old load-more %s first',
+    async (_outcome, settle) => {
+      const oldMore = deferredPage();
+      const foodFirst = deferredPage();
+      jest
+        .mocked(getCommunityPage)
+        .mockResolvedValueOnce({ items: [post], nextCursor: 'all-2' })
+        .mockReturnValueOnce(oldMore.promise)
+        .mockReturnValueOnce(foodFirst.promise);
+
+      const { container } = render(<CommunityBoard currentUserId="viewer-1" />);
+      expect(await screen.findByText(post.title)).toBeInTheDocument();
+      fireEvent.click(screen.getByRole('button', { name: '이전 글 더 보기' }));
+      fireEvent.click(screen.getByRole('button', { name: '맛집' }));
+      await waitFor(() =>
+        expect(getCommunityPage).toHaveBeenNthCalledWith(3, 'FOOD'),
+      );
+
+      await act(async () => {
+        settle(oldMore);
+        await oldMore.promise.catch(() => undefined);
+      });
+      expect(
+        screen.queryByText('아직 도착한 여행 정보가 없어요'),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(otherCategoryPost.title),
+      ).not.toBeInTheDocument();
+      expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
+
+      const foodPost = { ...post, id: 'post-food', title: '맛집 첫 페이지 글' };
+      await act(async () => {
+        foodFirst.resolve({ items: [foodPost], nextCursor: null });
+        await foodFirst.promise;
+      });
+      expect(await screen.findByText(foodPost.title)).toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    },
+  );
 });
