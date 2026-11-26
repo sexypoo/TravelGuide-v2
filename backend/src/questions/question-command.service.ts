@@ -82,7 +82,9 @@ export class QuestionCommandService {
             select: {
               roomId: true,
               authorId: true,
+              type: true,
               content: true,
+              removedAt: true,
               topic: { select: { id: true } },
             },
           });
@@ -94,6 +96,13 @@ export class QuestionCommandService {
             throw new ProblemException(
               'MESSAGE_NOT_AVAILABLE_FOR_PROMOTION',
               '본인이 이 방에 작성한 메시지만 토픽으로 만들 수 있습니다.',
+              HttpStatus.NOT_FOUND,
+            );
+          }
+          if (message.type !== 'TEXT' || message.removedAt !== null) {
+            throw new ProblemException(
+              'MESSAGE_NOT_AVAILABLE_FOR_PROMOTION',
+              '토픽으로 만들 수 없는 메시지입니다.',
               HttpStatus.NOT_FOUND,
             );
           }

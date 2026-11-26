@@ -290,6 +290,45 @@ describe('T07A room chat and topics', () => {
       'MESSAGE_NOT_AVAILABLE_FOR_PROMOTION',
     );
 
+    const hiddenMessage = await prisma.chatMessage.create({
+      data: {
+        roomId,
+        authorId: traveler.id,
+        authorKind: 'TRAVELER',
+        content: '운영자가 숨긴 메시지는 토픽으로 다시 올라오면 안 됩니다.',
+        removedAt: new Date(),
+      },
+    });
+    const topicShareMessage = await prisma.chatMessage.create({
+      data: {
+        roomId,
+        authorId: traveler.id,
+        authorKind: 'TRAVELER',
+        type: 'TOPIC_SHARE',
+        content: '토픽 공유 메시지는 새 토픽의 원본이 될 수 없습니다.',
+      },
+    });
+    for (const unavailable of [hiddenMessage, topicShareMessage]) {
+      const rejected = await traveler.agent
+        .post('/api/v1/rooms/jeju/questions')
+        .send({
+          category: 'OTHER',
+          urgency: 'NORMAL',
+          sourceMessageId: unavailable.id,
+        })
+        .expect(404);
+      expect(record(rejected.body as unknown).code).toBe(
+        'MESSAGE_NOT_AVAILABLE_FOR_PROMOTION',
+      );
+    }
+    await expect(
+      prisma.question.count({
+        where: {
+          sourceMessageId: { in: [hiddenMessage.id, topicShareMessage.id] },
+        },
+      }),
+    ).resolves.toBe(0);
+
     const promoted = await traveler.agent
       .post('/api/v1/rooms/jeju/questions')
       .send({

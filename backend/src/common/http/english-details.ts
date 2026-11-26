@@ -88,6 +88,8 @@ export const ENGLISH_DETAILS: Readonly<Record<string, string>> = {
   '보낼 이미지를 선택해 주세요.': 'Please choose an image to send.',
   '본인이 이 방에 작성한 메시지만 토픽으로 만들 수 있습니다.':
     'You can only turn your own messages in this room into topics.',
+  '토픽으로 만들 수 없는 메시지입니다.':
+    "This message can't be turned into a topic.",
   '토픽으로 만들 메시지는 20자 이상이어야 합니다.':
     'A message needs at least 20 characters to become a topic.',
   '토픽 작성자만 해결 상태를 결정할 수 있습니다.':
